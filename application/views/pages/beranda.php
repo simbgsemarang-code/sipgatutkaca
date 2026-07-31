@@ -305,7 +305,7 @@
       /* ===== GRID MENU ===== */
       .menu-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 44px 30px;
         max-width: 940px;
         margin: 64px auto 0;
@@ -559,18 +559,6 @@
         <p class="tagline reveal">Mewujudkan Infrastruktur Gedung Andal dan Terencana di Kabupaten Cilacap</p>
 
         <div class="menu-grid reveal">
-          <a class="menu-card" href="<?php echo base_url('konsultasi'); ?>">
-            <span class="menu-icon-box">
-              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-                <rect x="4" y="6" width="32" height="20" rx="8" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" />
-                <path d="M14 26l-3 7 9-7z" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" stroke-linejoin="round" />
-                <circle cx="14" cy="16" r="2.1" fill="#0C2236" />
-                <circle cx="20" cy="16" r="2.1" fill="#0C2236" />
-                <circle cx="26" cy="16" r="2.1" fill="#0C2236" />
-              </svg>
-            </span>
-            <span class="menu-label-box"><span>Konsultasi</span></span>
-          </a>
           <a class="menu-card" href="<?php echo base_url('regulasi'); ?>">
             <span class="menu-icon-box">
               <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
@@ -582,76 +570,59 @@
             </span>
             <span class="menu-label-box"><span>Regulasi</span></span>
           </a>
-          <a class="menu-card" href="<?php echo base_url('itr'); ?>">
+          <a class="menu-card" href="#">
             <span class="menu-icon-box">
               <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-                <path d="M11 7l-4-4M29 7l4-4" stroke="#0C2236" stroke-width="2" stroke-linecap="round" />
-                <circle cx="20" cy="21" r="13" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" />
-                <circle cx="20" cy="21" r="9" fill="none" stroke="#0C2236" stroke-width="1.1" opacity=".45" />
-                <path d="M20 15v6l5 3" stroke="#0C2236" stroke-width="1.8" stroke-linecap="round" fill="none" />
-                <circle cx="20" cy="21" r="1.6" fill="#0C2236" />
+                <rect x="5" y="12" width="18" height="22" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" />
+                <path d="M10 12l4 7-4 4 4 9" stroke="#0C2236" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="27" cy="15" r="6" fill="none" stroke="#B4573B" stroke-width="2.2" />
+                <path d="M31.2 19.2l4.3 4.3" stroke="#B4573B" stroke-width="2.4" stroke-linecap="round" />
               </svg>
             </span>
-            <span class="menu-label-box"><span>ITR</span></span>
-          </a>
-          <a class="menu-card" href="<?php echo base_url('tatacara'); ?>">
-            <span class="menu-icon-box">
-              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-                <rect x="8" y="6" width="24" height="30" rx="3" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" />
-                <rect x="14" y="3" width="12" height="6" rx="2" fill="#0C2236" />
-                <path d="M13 17l2.5 2.5L20 15" stroke="#0C2236" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M23 18h6" stroke="#0C2236" stroke-width="1.6" stroke-linecap="round" />
-                <path d="M13 26l2.5 2.5L20 24" stroke="#0C2236" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M23 27h6" stroke="#0C2236" stroke-width="1.6" stroke-linecap="round" />
-              </svg>
-            </span>
-            <span class="menu-label-box"><span>Tata Cara</span></span>
-          </a>
-          <a class="menu-card" href="<?php echo base_url('spasial'); ?>">
-            <span class="menu-icon-box">
-              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-                <path d="M5 10l8-3 9 3 9-3 4 1.6v21l-4-1.6-9 3-9-3-8 3V10z" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" stroke-linejoin="round" />
-                <path d="M13 7v21M22 10v21" stroke="#0C2236" stroke-width="1.1" opacity=".5" />
-                <path d="M27 13c2.8 0 5 2.2 5 5 0 3.7-5 9-5 9s-5-5.3-5-9c0-2.8 2.2-5 5-5z" fill="#B4573B" stroke="#0C2236" stroke-width="1.3" />
-                <circle cx="27" cy="18" r="1.8" fill="#F8F4EA" />
-              </svg>
-            </span>
-            <span class="menu-label-box"><span>Spasial</span></span>
-          </a>
-          <a class="menu-card" href="<?php echo base_url('login-konsultan'); ?>">
-            <span class="menu-icon-box">
-              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-                <circle cx="20" cy="14" r="7" fill="#E4B589" stroke="#0C2236" stroke-width="1.6" />
-                <path d="M7 33c1.2-8.4 7-12 13-12s11.8 3.6 13 12" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" stroke-linejoin="round" />
-                <path d="M11 13a9 9 0 0118 0" fill="none" stroke="#0C2236" stroke-width="1.8" stroke-linecap="round" />
-                <circle cx="11" cy="15" r="2.1" fill="#0C2236" />
-                <circle cx="29" cy="15" r="2.1" fill="#0C2236" />
-                <path d="M17 17c1.4 1.3 4.6 1.3 6 0" stroke="#0C2236" stroke-width="1.4" fill="none" stroke-linecap="round" />
-              </svg>
-            </span>
-            <span class="menu-label-box"><span>Login Konsultan</span></span>
+            <span class="menu-label-box"><span>Analisa Kerusakan</span></span>
           </a>
           <a class="menu-card" href="#">
             <span class="menu-icon-box">
               <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-                <path d="M8 18c0-1.6 1.3-3 3-3h3l14-7v24l-14-7h-3c-1.7 0-3-1.4-3-3v-4z" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" stroke-linejoin="round" />
-                <rect x="9" y="21" width="4" height="7" rx="2" fill="#0C2236" opacity=".85" />
-                <path d="M30 14a10 10 0 010 12" stroke="#0C2236" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".6" />
-                <path d="M33 10a15 15 0 010 20" stroke="#0C2236" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".35" />
+                <rect x="8" y="4" width="20" height="28" rx="2" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" />
+                <path d="M12 11h12M12 16h12M12 21h8" stroke="#0C2236" stroke-width="1.4" stroke-linecap="round" />
+                <circle cx="28" cy="28" r="7.5" fill="#B4573B" stroke="#0C2236" stroke-width="1.4" />
+                <path d="M24.3 28l2.4 2.4 4.6-5" stroke="#F8F4EA" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </span>
-            <span class="menu-label-box"><span>Pengaduan</span></span>
+            <span class="menu-label-box"><span>PBG</span></span>
           </a>
           <a class="menu-card" href="#">
             <span class="menu-icon-box">
               <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-                <circle cx="20" cy="19" r="15" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" />
-                <path d="M15 15c0-3 2.3-5 5-5s5 2 5 4.4c0 3-4 3.4-4 6.6" stroke="#0C2236" stroke-width="2.2" fill="none" stroke-linecap="round" />
-                <circle cx="20" cy="27" r="1.9" fill="#0C2236" />
-                <circle cx="14" cy="14" r="1.6" fill="#F8F4EA" opacity=".8" />
+                <circle cx="20" cy="14" r="10" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" />
+                <path d="M14 22.5l-3.2 11.5 9.2-5 9.2 5-3.2-11.5" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" stroke-linejoin="round" />
+                <path d="M14.5 14l3.5 3.5 7-7.5" stroke="#0C2236" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </span>
-            <span class="menu-label-box"><span>Bantuan</span></span>
+            <span class="menu-label-box"><span>SLF</span></span>
+          </a>
+          <a class="menu-card" href="#">
+            <span class="menu-icon-box">
+              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+                <path d="M4 14L20 5l16 9H4z" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" stroke-linejoin="round" />
+                <rect x="7" y="16" width="3.5" height="14" fill="#C9A24B" stroke="#0C2236" stroke-width="1.3" />
+                <rect x="14.3" y="16" width="3.5" height="14" fill="#C9A24B" stroke="#0C2236" stroke-width="1.3" />
+                <rect x="22.2" y="16" width="3.5" height="14" fill="#C9A24B" stroke="#0C2236" stroke-width="1.3" />
+                <rect x="29.5" y="16" width="3.5" height="14" fill="#C9A24B" stroke="#0C2236" stroke-width="1.3" />
+                <rect x="4" y="31" width="32" height="4" fill="#B4573B" stroke="#0C2236" stroke-width="1.3" />
+              </svg>
+            </span>
+            <span class="menu-label-box"><span>Cagar Budaya</span></span>
+          </a>
+          <a class="menu-card" href="#">
+            <span class="menu-icon-box">
+              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+                <path d="M5 8a3 3 0 013-3h24a3 3 0 013 3v14a3 3 0 01-3 3H17l-8 7v-7H8a3 3 0 01-3-3V8z" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" stroke-linejoin="round" />
+                <path d="M13.5 18.5l1-4 8.5-8.5 3 3-8.5 8.5-4 1z" fill="#F8F4EA" stroke="#0C2236" stroke-width="1.3" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span class="menu-label-box"><span>Saran dan Masukan</span></span>
           </a>
         </div>
       </div>
