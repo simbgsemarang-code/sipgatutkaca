@@ -23,7 +23,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://localhost/sipgatutkaca/';
+if (isset($_SERVER['HTTP_HOST']))
+{
+	$scheme = (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+		|| (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+		? 'https' : 'http';
+	// Mendeteksi otomatis dari host yang diakses (localhost, IP LAN, atau
+	// domain tunnel seperti ngrok) supaya base_url tetap benar tanpa
+	// perlu diedit manual setiap kali diakses dari alamat berbeda.
+	$config['base_url'] = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/sipgatutkaca/';
+}
+else
+{
+	$config['base_url'] = 'http://localhost/sipgatutkaca/';
+}
 
 /*
 |--------------------------------------------------------------------------
