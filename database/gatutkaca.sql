@@ -53,3 +53,15 @@ CREATE TABLE IF NOT EXISTS `konsultasi` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `saran_masukan` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nama` VARCHAR(150) NOT NULL,
+  `email` VARCHAR(150) DEFAULT NULL,
+  `no_hp` VARCHAR(20) DEFAULT NULL,
+  `topik` VARCHAR(200) DEFAULT NULL,
+  `pesan` TEXT NOT NULL,
+  `status` ENUM('baru','ditinjau','selesai') NOT NULL DEFAULT 'baru',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

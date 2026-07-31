@@ -1014,6 +1014,15 @@
     <section style="padding-top:calc(84px + 100px)">
       <div class="wrap">
         <div class="reveal" style="text-align:center;max-width:760px;margin:0 auto">
+          <?php
+            $layananInfo = array(
+              'pbg' => 'PBG — Persetujuan Bangunan Gedung',
+              'slf' => 'SLF — Sertifikat Laik Fungsi',
+            );
+          ?>
+          <?php if (isset($layananInfo[$layanan])): ?>
+            <span class="tag" style="margin-bottom:18px;display:inline-block">Konsultasi untuk layanan: <?php echo $layananInfo[$layanan]; ?></span>
+          <?php endif; ?>
           <p class="eyebrow">Portal Tim Konsultan</p>
           <h2 style="margin:0 auto">Pilih Kesatuan Tugas Anda</h2>
           <p class="section-lead" style="margin-left:auto;margin-right:auto">Anggota tim penelaah, silakan masuk sesuai kesatuan tugas Anda untuk menindaklanjuti permohonan konsultasi warga.</p>

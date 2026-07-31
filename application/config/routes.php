@@ -52,3 +52,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = TRUE;
+
+/*
+| Meneruskan segmen layanan (mis. konsultasi/pbg, konsultasi/slf) sebagai
+| argumen ke Konsultasi::index() alih-alih ditafsirkan sebagai nama method.
+*/
+$route['konsultasi/(:any)'] = 'konsultasi/index/$1';

@@ -570,7 +570,7 @@
             </span>
             <span class="menu-label-box"><span>Regulasi</span></span>
           </a>
-          <a class="menu-card" href="#">
+          <a class="menu-card" href="<?php echo base_url('analisa-kerusakan'); ?>">
             <span class="menu-icon-box">
               <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
                 <rect x="5" y="12" width="18" height="22" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" />
@@ -581,7 +581,7 @@
             </span>
             <span class="menu-label-box"><span>Analisa Kerusakan</span></span>
           </a>
-          <a class="menu-card" href="#">
+          <a class="menu-card" href="<?php echo base_url('konsultasi/pbg'); ?>">
             <span class="menu-icon-box">
               <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
                 <rect x="8" y="4" width="20" height="28" rx="2" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" />
@@ -592,7 +592,7 @@
             </span>
             <span class="menu-label-box"><span>PBG</span></span>
           </a>
-          <a class="menu-card" href="#">
+          <a class="menu-card" href="<?php echo base_url('konsultasi/slf'); ?>">
             <span class="menu-icon-box">
               <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
                 <circle cx="20" cy="14" r="10" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" />
@@ -602,7 +602,7 @@
             </span>
             <span class="menu-label-box"><span>SLF</span></span>
           </a>
-          <a class="menu-card" href="#">
+          <a class="menu-card" href="<?php echo base_url('cagar-budaya'); ?>">
             <span class="menu-icon-box">
               <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
                 <path d="M4 14L20 5l16 9H4z" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" stroke-linejoin="round" />
@@ -615,7 +615,7 @@
             </span>
             <span class="menu-label-box"><span>Cagar Budaya</span></span>
           </a>
-          <a class="menu-card" href="#">
+          <a class="menu-card" href="<?php echo base_url('saran-masukan'); ?>">
             <span class="menu-icon-box">
               <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
                 <path d="M5 8a3 3 0 013-3h24a3 3 0 013 3v14a3 3 0 01-3 3H17l-8 7v-7H8a3 3 0 01-3-3V8z" fill="#C9A24B" stroke="#0C2236" stroke-width="1.6" stroke-linejoin="round" />
