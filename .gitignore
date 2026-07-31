@@ -1,0 +1,13 @@
+# Claude Code local session/tooling files
+.claude/
+
+# CodeIgniter logs (keep the folder via its index.html placeholder)
+application/logs/*.php
+application/logs/*.log
+
+# Local database credentials
+application/config/database.php
+
+# OS/editor cruft
+Thumbs.db
+.DS_Store
