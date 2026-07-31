@@ -66,7 +66,9 @@
 switch (ENVIRONMENT)
 {
 	case 'development':
-		error_reporting(-1);
+		// E_DEPRECATED disembunyikan karena CodeIgniter 3 memakai dynamic properties
+		// yang di-deprecate PHP 8.2+, walau tidak memengaruhi jalannya aplikasi.
+		error_reporting(E_ALL & ~E_DEPRECATED);
 		ini_set('display_errors', 1);
 	break;
 
