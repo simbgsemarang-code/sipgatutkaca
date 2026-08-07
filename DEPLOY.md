@@ -82,20 +82,35 @@ otomatis konsisten — tidak perlu diubah manual.
 **langsung** di document root yang dicatat di atas (bukan di dalam
 subfolder tambahan seperti `.../sipgatutkaca-main/`).
 
-## 2. Cek DNS — kemungkinan lewat Cloudflare
+## 2. Tambah DNS record di Cloudflare
 
-Domain `sigaru.my.id` terdeteksi memakai IP Cloudflare (bukan IP hosting
-langsung). Artinya nameserver kemungkinan besar diarahkan ke Cloudflare,
-sehingga **membuat subdomain di cPanel saja mungkin belum cukup** —
-DNS-nya juga perlu ditambahkan di dashboard Cloudflare:
+Domain `sigaru.my.id` nameserver-nya diarahkan ke Cloudflare, jadi
+**membuat subdomain di cPanel saja tidak cukup** — DNS publiknya juga
+perlu ditambahkan manual di dashboard Cloudflare, baru situs bisa
+diakses dari luar.
 
-- Login ke Cloudflare → pilih domain `sigaru.my.id` → tab **DNS**.
-- Cek record untuk `cacah` (tipe A atau CNAME, target ke server hosting)
-  → buat record baru serupa untuk `sipgatutkaca` dengan tipe & target
-  yang sama (proxy status/"awan oranye" disamakan dengan punya `cacah`).
-- Kalau ternyata cPanel Anda punya integrasi Cloudflare otomatis (plugin
-  "Cloudflare" muncul di cPanel), langkah ini mungkin sudah otomatis —
-  cek dulu sebelum menambah manual.
+**Catatan:** jangan meniru record `cacah.sigaru.my.id` — record itu
+bertipe **Tunnel** (Cloudflare Tunnel, `cacah-lhr`), tandanya `cacah`
+disajikan dari server/mekanisme lain, bukan dari akun cPanel yang sama.
+Aplikasi ini (CodeIgniter di cPanel) butuh record **A biasa** yang
+menunjuk ke IP server hosting cPanel Anda.
+
+1. Login ke **https://dash.cloudflare.com** → pilih domain `sigaru.my.id`
+   → menu **DNS** → **Records**.
+2. Cek IP server hosting: lihat record `sigaru.my.id` (root, tipe A) dan
+   `ftp.sigaru.my.id` — keduanya menunjuk ke IP yang sama, itulah IP
+   server cPanel Anda (di kasus ini: `103.16.198.177`).
+3. Klik **+ Add record**, isi:
+   - **Type**: `A`
+   - **Name**: `sipgatutkaca`
+   - **IPv4 address**: IP server dari langkah 2 (`103.16.198.177`)
+   - **Proxy status**: **Proxied** (awan oranye)
+   - **TTL**: Auto
+4. **Save**.
+5. Tunggu 1–2 menit, lalu buka lagi `http://sipgatutkaca.sigaru.my.id/`.
+   `ERR_NAME_NOT_RESOLVED`/`DNS_PROBE_FINISHED_NXDOMAIN` seharusnya
+   sudah hilang (boleh masih 403/404/halaman kosong — wajar, file belum
+   diupload, itu Langkah 3).
 
 Kalau dilewati padahal perlu, gejalanya: subdomain sudah dibuat di
 cPanel tapi browser tidak bisa membuka `sipgatutkaca.sigaru.my.id` sama
