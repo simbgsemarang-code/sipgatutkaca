@@ -118,24 +118,61 @@ sekali (DNS_PROBE_FINISHED_NXDOMAIN).
 
 ## 3. Upload kode ke document root subdomain
 
-Pilih salah satu:
+⚠️ **Perbaikan `base_url` dan panduan ini masih di branch
+`claude/clone-ke-dalam-komputerku-zwz9iz`, belum digabung ke `main`.**
+Kalau ambil dari `main`, akan dapat versi lama yang masih bug (asset
+mengarah ke `/sipgatutkaca/` yang 404). Pastikan ambil dari branch
+`claude/clone-ke-dalam-komputerku-zwz9iz` sampai branch ini digabung.
 
-**A. cPanel Git Version Control (paling rapi, cocok karena repo ini di GitHub)**
-- cPanel → **Git Version Control** → Create → Clone URL:
-  `https://github.com/simbgsemarang-code/sipgatutkaca.git`, branch
-  `main`, Repository Path: document root subdomain dari langkah 1.
-- Kalau repo private, perlu buat Personal Access Token GitHub dan
-  pakai sebagai password saat clone.
+Repo ini juga **private**, jadi Download ZIP/clone butuh login/akses
+GitHub yang sesuai.
 
-**B. Upload ZIP lewat File Manager**
-- Download ZIP dari GitHub (branch `main`), upload via **File Manager**
-  ke document root subdomain, klik kanan → **Extract**.
-- Pastikan hasil ekstrak tidak bersarang (isi ZIP langsung ke document
-  root, bukan ke dalam folder `sipgatutkaca-main/`).
+### Cara A (disarankan): Download ZIP + Upload File Manager
 
-**C. FTP/SFTP**
-- Pakai FileZilla/klien FTP dengan kredensial FTP cPanel, upload semua
-  isi repo ke document root subdomain.
+Paling gampang untuk repo private, tidak perlu bikin token apa pun:
+
+1. Buka `https://github.com/simbgsemarang-code/sipgatutkaca` (login
+   dengan akun GitHub yang punya akses).
+2. Klik dropdown branch (tulisan "main", kiri atas daftar file) → pilih
+   **`claude/clone-ke-dalam-komputerku-zwz9iz`**.
+3. Klik tombol hijau **`<> Code`** → **Download ZIP**.
+4. cPanel → **File Manager** → masuk ke folder document root subdomain
+   (`sipgatutkaca.sigaru.my.id`, dari Langkah 1).
+5. Klik **Upload** → pilih file ZIP yang baru diunduh → tunggu selesai
+   (repo ini lumayan besar, ada file data peta ~8MB, jadi upload bisa
+   beberapa menit tergantung koneksi).
+6. Kembali ke folder (Go Back/reload), klik kanan file ZIP-nya →
+   **Extract**.
+7. Hasil extract akan masuk ke dalam satu subfolder (nama polanya
+   `sipgatutkaca-claude-clone-ke-dalam-komputerku-zwz9iz`). **Isi
+   subfolder itu harus dipindah ke document root**, bukan foldernya
+   sendiri: masuk ke subfolder tsb → pilih semua file/folder di
+   dalamnya (Select All) → **Move** → ubah path tujuan jadi document
+   root (hapus nama subfoldernya dari path, sisakan
+   `.../sipgatutkaca.sigaru.my.id/`) → jalankan.
+8. Setelah `index.php`, `application/`, `system/`, `assets/`,
+   `.htaccess` dst sudah langsung di document root, hapus file ZIP dan
+   subfolder kosong sisa extract untuk beres-beres.
+
+### Cara B: cPanel Git Version Control
+
+Lebih rapi untuk update di masa depan (tinggal klik "Pull" tiap ada
+perubahan), tapi karena repo private perlu Personal Access Token
+GitHub dulu (GitHub → Settings → Developer settings → Personal access
+tokens → generate, scope `repo`).
+
+- cPanel → **Git Version Control** → **Create**:
+  - Clone URL: `https://github.com/simbgsemarang-code/sipgatutkaca.git`
+  - Branch: `claude/clone-ke-dalam-komputerku-zwz9iz`
+  - Repository Path: document root subdomain dari Langkah 1
+- Saat diminta autentikasi, username = username GitHub, password =
+  Personal Access Token (bukan password akun GitHub biasa).
+
+### Cara C: FTP/SFTP
+
+Kalau punya klien FTP (FileZilla dll) dan sudah punya salinan kode di
+komputer sendiri (misalnya dari `git clone` branch yang benar), upload
+semua isinya ke document root subdomain via kredensial FTP cPanel.
 
 ## 4. Buat database MySQL
 
