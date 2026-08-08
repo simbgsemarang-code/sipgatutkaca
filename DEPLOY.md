@@ -238,3 +238,59 @@ juga terenkripsi, bukan cuma browser↔Cloudflare.
   PHP tampil apa adanya) — setelah situs stabil, sebaiknya diamankan ke
   `production` dengan menambahkan `SetEnv CI_ENV production` di
   `.htaccess` root subdomain, supaya detail error tidak tampil ke publik.
+
+## 9. Deploy otomatis (GitHub Actions) — sekali setup, seterusnya otomatis
+
+Setelah setup awal di atas selesai, langkah upload manual (Langkah 3)
+tidak perlu diulang tiap ada perubahan. Repo ini sudah punya workflow
+`.github/workflows/deploy.yml` yang otomatis meng-upload seluruh isi
+repo ke document root subdomain lewat FTPS setiap kali ada push/merge
+ke branch `main` (atau dipicu manual lewat tab **Actions** di GitHub →
+pilih workflow-nya → **Run workflow**).
+
+Dua hal ini perlu disiapkan sekali saja supaya workflow-nya jalan:
+
+### 9a. Buat akun FTP khusus di cPanel (dibatasi ke folder subdomain saja)
+
+cPanel → **FTP Accounts** → **Create FTP Account**:
+- **Login**: bebas, mis. `deploy` (hasil akhirnya biasanya jadi
+  `deploy@sipgatutkaca.sigaru.my.id` atau `namacpanel_deploy`,
+  tergantung tema cPanel).
+- **Password**: klik **Generate/Password Generator** lalu **simpan**
+  password-nya (dipakai di langkah 9b, tidak ditampilkan lagi setelah
+  ini).
+- **Directory**: arahkan **persis** ke folder document root subdomain
+  (`sipgatutkaca.sigaru.my.id`) — bukan `public_html` atau root akun.
+  Ini penting supaya akun FTP ini cuma bisa akses folder itu saja, tidak
+  bisa menyentuh `cacah` atau file lain di hosting (aman dipakai
+  otomatis oleh GitHub).
+- **Quota**: Unlimited (atau secukupnya).
+- Klik **Create FTP Account**.
+- Catat **FTP server/host**-nya juga — biasanya sama dengan domain utama
+  (`sigaru.my.id`) atau ditampilkan di halaman yang sama/menu
+  **FTP Accounts** bagian "Special FTP Accounts"/"Configure FTP Client".
+
+### 9b. Simpan kredensial FTP sebagai GitHub Secrets
+
+⚠️ Jangan kirim username/password FTP lewat chat ke siapa pun (termasuk
+ke Claude) — masukkan langsung di form GitHub berikut:
+
+1. Buka repo di github.com → **Settings** → **Secrets and variables** →
+   **Actions**.
+2. Klik **New repository secret**, buat 3 secret ini satu per satu:
+   - `FTP_SERVER` → alamat server FTP dari Langkah 9a
+   - `FTP_USERNAME` → username FTP lengkap dari Langkah 9a
+   - `FTP_PASSWORD` → password FTP dari Langkah 9a
+
+### Cara kerjanya setelah ini
+
+- PR di-merge ke `main`, atau ada commit baru masuk ke `main` → tab
+  **Actions** di GitHub otomatis menjalankan job "Deploy ke cPanel" →
+  semua file (kecuali `.git`, `.github`, `application/config/database.php`,
+  `application/logs/`, `application/cache/`, `_legacy_html_backup/` yang
+  memang dikecualikan) ter-upload ke folder subdomain via FTPS.
+- Progress & hasilnya (sukses/gagal) bisa dipantau di tab **Actions**
+  pada commit terkait.
+- File `database.php` di server **tidak akan pernah tertimpa/terhapus**
+  oleh proses ini (memang dikecualikan), jadi kredensial database di
+  server aman meski deploy berjalan berkali-kali.

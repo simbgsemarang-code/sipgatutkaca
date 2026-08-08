@@ -1,0 +1,40 @@
+name: Deploy ke cPanel (sipgatutkaca.sigaru.my.id)
+
+# Jalan otomatis tiap kali ada push/merge ke "main" (mis. setelah PR
+# di-merge), atau bisa dipicu manual lewat tab Actions di GitHub
+# ("Run workflow").
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Upload file ke document root subdomain via FTP
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kode
+        uses: actions/checkout@v4
+
+      - name: Deploy via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./
+          server-dir: ./
+          # Jangan hapus file di server yang tidak ada di repo -- supaya
+          # database.php, folder logs, dan cache milik server tidak
+          # ikut kehapus tiap deploy.
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            application/config/database.php
+            application/logs/**
+            application/cache/**
+            _legacy_html_backup/**
