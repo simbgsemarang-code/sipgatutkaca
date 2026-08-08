@@ -17,13 +17,17 @@ jobs:
       - name: Checkout kode
         uses: actions/checkout@v4
 
-      - name: Deploy via FTPS
+      - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
+          # FTPS gagal: firewall server tidak bisa membuka data-connection
+          # untuk channel yang terenkripsi (timeout saat upload file
+          # pertama). FTP polos memungkinkan firewall "mengintip" negosiasi
+          # PASV dan otomatis membuka portnya.
+          protocol: ftp
           local-dir: ./
           server-dir: ./
           # Jangan hapus file di server yang tidak ada di repo -- supaya
