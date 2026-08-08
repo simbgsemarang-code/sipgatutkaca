@@ -28,14 +28,16 @@ if (isset($_SERVER['HTTP_HOST']))
 	$scheme = (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
 		|| (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
 		? 'https' : 'http';
-	// Mendeteksi otomatis dari host yang diakses (localhost, IP LAN, atau
-	// domain tunnel seperti ngrok) supaya base_url tetap benar tanpa
-	// perlu diedit manual setiap kali diakses dari alamat berbeda.
-	$config['base_url'] = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/sipgatutkaca/';
+	// Mendeteksi otomatis dari host yang diakses (localhost, IP LAN, domain
+	// tunnel seperti ngrok, subfolder seperti /sipgatutkaca/, maupun
+	// subdomain root seperti sipgatutkaca.sigaru.my.id) supaya base_url
+	// tetap benar tanpa perlu diedit manual di tiap environment/deploy.
+	$scriptDir = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
+	$config['base_url'] = $scheme . '://' . $_SERVER['HTTP_HOST'] . $scriptDir;
 }
 else
 {
-	$config['base_url'] = 'http://localhost/sipgatutkaca/';
+	$config['base_url'] = 'http://localhost/';
 }
 
 /*
