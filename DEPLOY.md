@@ -206,6 +206,15 @@ Lewat File Manager (atau Terminal cPanel kalau tersedia):
    (`database.php` sengaja di-`.gitignore`, jadi aman berisi kredensial
    asli dan tidak akan ikut ter-commit ke GitHub.)
 
+⚠️ **Kalau lewat editor File Manager, jangan edit sebagian baris saja
+kalau ragu** — lebih aman **Select All → Delete → paste ulang** seluruh
+isi file dengan template lengkap, lalu ganti `hostname`/`username`/
+`password`/`database`-nya saja. Pernah kejadian `hostname` ikut
+terhapus/rusak pas edit, hasilnya warning
+`Trying to access array offset on value of type null` di
+`mysqli_driver.php` (baris `if ($this->hostname[0] === '/')`) —
+karena `hostname` jadi NULL alih-alih `'localhost'`.
+
 `base_url` **tidak perlu diedit manual** — sudah dibuat auto-detect dari
 host yang diakses (lihat `application/config/config.php`), jadi otomatis
 benar begitu diakses lewat `https://sipgatutkaca.sigaru.my.id/`.
@@ -239,12 +248,49 @@ juga terenkripsi, bukan cuma browser↔Cloudflare.
   `production` dengan menambahkan `SetEnv CI_ENV production` di
   `.htaccess` root subdomain, supaya detail error tidak tampil ke publik.
 
-## 9. Deploy otomatis (GitHub Actions) — sekali setup, seterusnya otomatis
+## 9. Deploy otomatis (GitHub Actions) — ⚠️ saat ini NONAKTIF, belum jalan
 
-Setelah setup awal di atas selesai, langkah upload manual (Langkah 3)
-tidak perlu diulang tiap ada perubahan. Repo ini sudah punya workflow
-`.github/workflows/deploy.yml` yang otomatis meng-upload seluruh isi
-repo ke document root subdomain lewat FTPS setiap kali ada push/merge
+**Status: sudah dicoba, gagal, dan trigger otomatisnya sengaja
+dimatikan sementara** (lihat `.github/workflows/deploy.yml`, trigger
+`push` di-comment). Baik FTPS maupun FTP polos gagal dengan error yang
+sama:
+
+```
+Error: None of the available transfer strategies work.
+Last error response was 'Error: Timeout when trying to open data connection to ***:xxxxx'.
+```
+
+Diagnosis: koneksi kontrol FTP (port 21) berhasil, tapi koneksi
+**data** (dipakai untuk transfer file sungguhan, di port acak/passive
+mode) di-timeout — ini gejala **firewall server memblokir port data
+FTP** dari IP GitHub Actions. Sudah dicoba dengan protokol terenkripsi
+(FTPS) maupun polos (FTP), keduanya gagal sama persis, jadi bukan soal
+enkripsi.
+
+Opsi untuk membereskan ini (belum dieksekusi, pilih salah satu lalu
+aktifkan lagi trigger `push` di file workflow):
+1. **Hubungi support hosting** — minta mereka membuka rentang port data
+   FTP passive-mode untuk koneksi dari luar (paling "benar" secara
+   arsitektur, tapi tergantung respons support).
+2. **Pakai SFTP** (kalau hosting mendukung) — ganti `protocol: ftp` jadi
+   `protocol: sftp` di workflow, dan `FTP_SERVER`/`FTP_USERNAME`/
+   `FTP_PASSWORD` diisi kredensial SFTP (biasanya port 22, kadang pakai
+   akun cPanel utama karena akun FTP sub-account jarang punya akses
+   SFTP). SFTP tidak punya masalah port data seperti FTP karena cuma
+   pakai satu koneksi terenkripsi.
+3. **Ganti mekanisme ke pull-based**: pakai fitur **Git Version
+   Control** cPanel (clone repo langsung di server), lalu trigger
+   `git pull`-nya lewat cPanel API (UAPI) dari GitHub Actions — ini
+   cuma butuh koneksi HTTPS keluar dari GitHub Actions ke port cPanel
+   (yang sudah pasti terbuka, karena itu jalur Anda login ke cPanel),
+   jadi tidak kena masalah firewall FTP sama sekali.
+
+Sampai salah satu di atas dikerjakan, **update kode ke situs live masih
+manual** — ulangi Langkah 3 (Cara A: Download ZIP + File Manager) tiap
+ada perubahan. Setelah setup awal di bagian ini beres, langkah upload
+manual itu tidak perlu diulang lagi — repo ini sudah punya workflow
+`.github/workflows/deploy.yml` yang (nantinya) otomatis meng-upload
+seluruh isi repo ke document root subdomain setiap kali ada push/merge
 ke branch `main` (atau dipicu manual lewat tab **Actions** di GitHub →
 pilih workflow-nya → **Run workflow**).
 

@@ -1,12 +1,16 @@
 name: Deploy ke cPanel (sipgatutkaca.sigaru.my.id)
 
-# Jalan otomatis tiap kali ada push/merge ke "main" (mis. setelah PR
-# di-merge), atau bisa dipicu manual lewat tab Actions di GitHub
-# ("Run workflow").
+# STATUS: NONAKTIF SEMENTARA (lihat DEPLOY.md bagian 9). Baik FTPS
+# maupun FTP polos gagal dengan "Timeout when trying to open data
+# connection" -- firewall server memblokir port data passive-mode FTP
+# dari IP GitHub Actions. Trigger otomatis di "push" sengaja dikomat-in
+# dulu supaya tiap commit ke main tidak menghasilkan run yang pasti
+# gagal. "workflow_dispatch" tetap aktif untuk re-test manual kalau
+# sudah ada perbaikan (mis. buka port di firewall, atau ganti ke SFTP).
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
