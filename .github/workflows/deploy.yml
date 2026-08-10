@@ -23,6 +23,7 @@ jobs:
 
       - name: Setup SSH key
         run: |
+          set +e
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
@@ -32,12 +33,20 @@ jobs:
           PORT="${{ secrets.SSH_PORT }}"
           echo "Panjang SSH_HOST: ${#HOST} karakter, panjang SSH_PORT: ${#PORT} karakter"
 
-          # Tidak dibuang ke /dev/null lagi -- biar pesan error asli (kalau
-          # ada, mis. "Name or service not known" / "Connection refused")
-          # kelihatan di log untuk diagnosis.
-          ssh-keyscan -T 15 -p "$PORT" "$HOST" >> ~/.ssh/known_hosts
+          echo "--- Tes koneksi TCP mentah ke host:port (timeout 15s) ---"
+          timeout 15 bash -c "echo > /dev/tcp/$HOST/$PORT"
+          echo "Hasil tes TCP mentah: exit code $?"
+
+          echo "--- ssh-keyscan (verbose, stderr digabung) ---"
+          ssh-keyscan -T 15 -p "$PORT" "$HOST" > /tmp/keyscan.log 2>&1
+          echo "Hasil ssh-keyscan: exit code $?"
+          echo "Isi /tmp/keyscan.log:"
+          cat /tmp/keyscan.log
+          grep -v '^#' /tmp/keyscan.log >> ~/.ssh/known_hosts 2>/dev/null
+
+          set -e
           if [ ! -s ~/.ssh/known_hosts ]; then
-            echo "::error::known_hosts kosong -- ssh-keyscan gagal mengambil host key. Cek SSH_HOST/SSH_PORT."
+            echo "::error::known_hosts kosong -- SSH tidak terjangkau. Lihat hasil tes TCP & ssh-keyscan di atas."
             exit 1
           fi
           echo "known_hosts terisi ($(wc -l < ~/.ssh/known_hosts) baris)."
