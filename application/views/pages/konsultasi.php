@@ -1030,19 +1030,23 @@
         </div>
         <div class="tim-grid reveal">
           <a class="tim-btn" href="login-konsultan.html?tim=TPA">
-            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-              <path d="M8 36V22l14-10 14 10v14" stroke="currentColor" stroke-width="1.5" />
-              <path d="M17 36v-9h10v9M8 36h28" stroke="currentColor" stroke-width="1.5" />
-            </svg>
+            <span class="tim-icon-box">
+              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                <path d="M8 36V22l14-10 14 10v14" stroke="#F8F4EA" stroke-width="2" />
+                <path d="M17 36v-9h10v9M8 36h28" stroke="#F8F4EA" stroke-width="2" />
+              </svg>
+            </span>
             <b>TPA</b>
             <span>Tim Penilai Assesment</span>
             <em>Masuk sebagai penelaah bangunan gedung →</em>
           </a>
           <a class="tim-btn" href="login-konsultan.html?tim=PU">
-            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-              <path d="M10 34l10-10m4-4l10-10M24 20l-4 4" stroke="currentColor" stroke-width="1.5" />
-              <path d="M30 6l8 8-5 5-8-8zM6 33l5-5 5 5-5 5z" stroke="currentColor" stroke-width="1.5" />
-            </svg>
+            <span class="tim-icon-box">
+              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                <path d="M10 34l10-10m4-4l10-10M24 20l-4 4" stroke="#F8F4EA" stroke-width="2" />
+                <path d="M30 6l8 8-5 5-8-8zM6 33l5-5 5 5-5 5z" stroke="#F8F4EA" stroke-width="2" />
+              </svg>
+            </span>
             <b>PU</b>
             <span>Pekerjaan Umum</span>
             <em>Masuk sebagai penelaah teknis tata bangunan →</em>
@@ -1071,6 +1075,28 @@
         color: var(--gold-300);
         transition: .3s;
         position: relative
+      }
+
+      .tim-icon-box {
+        width: 84px;
+        height: 84px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(160deg, #1E86A3, #145E75);
+        border: 4px solid #F8F4EA;
+        margin-bottom: 6px;
+        box-shadow: 0 10px 20px var(--shadow);
+        transition: transform .3s, box-shadow .3s
+      }
+
+      .tim-icon-box svg {
+        width: 46px;
+        height: 46px
+      }
+
+      .tim-btn:hover .tim-icon-box {
+        transform: translateY(-4px) scale(1.04);
+        box-shadow: 0 14px 26px var(--shadow)
       }
 
       .tim-btn::after {
