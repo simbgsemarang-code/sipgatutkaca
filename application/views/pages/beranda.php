@@ -307,8 +307,8 @@
       .menu-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 52px 36px;
-        max-width: 1100px;
+        gap: 44px 30px;
+        max-width: 940px;
         margin: 64px auto 0;
         justify-items: center
       }
@@ -318,16 +318,16 @@
         flex-direction: column;
         align-items: center;
         width: 100%;
-        max-width: 240px
+        max-width: 190px
       }
 
       .menu-icon-box {
-        width: 136px;
-        height: 136px;
+        width: 100px;
+        height: 100px;
         display: grid;
         place-items: center;
         background: linear-gradient(160deg, #1E86A3, #145E75);
-        border: 5px solid #F8F4EA;
+        border: 4px solid #F8F4EA;
         position: relative;
         z-index: 2;
         box-shadow: 0 10px 20px var(--shadow);
@@ -335,8 +335,8 @@
       }
 
       .menu-icon-box svg {
-        width: 56px;
-        height: 56px
+        width: 74px;
+        height: 74px
       }
 
       .menu-card:hover .menu-icon-box {
@@ -349,13 +349,13 @@
         margin-top: -16px;
         background: #E9EEF1;
         border: 1px solid #C7D2D8;
-        padding: 26px 12px 12px;
+        padding: 22px 10px 10px;
         text-align: center
       }
 
       .menu-label-box span {
         font-family: var(--display);
-        font-size: .98rem;
+        font-size: .88rem;
         font-weight: 600;
         letter-spacing: .04em;
         color: #223842
@@ -523,7 +523,7 @@
       @media(max-width:460px) {
         .menu-grid {
           grid-template-columns: 1fr;
-          max-width: 240px
+          max-width: 220px
         }
 
         .auth-actions .btn {
