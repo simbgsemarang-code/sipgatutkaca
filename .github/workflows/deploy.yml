@@ -27,7 +27,20 @@ jobs:
           chmod 700 ~/.ssh
           printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+          HOST="${{ secrets.SSH_HOST }}"
+          PORT="${{ secrets.SSH_PORT }}"
+          echo "Panjang SSH_HOST: ${#HOST} karakter, panjang SSH_PORT: ${#PORT} karakter"
+
+          # Tidak dibuang ke /dev/null lagi -- biar pesan error asli (kalau
+          # ada, mis. "Name or service not known" / "Connection refused")
+          # kelihatan di log untuk diagnosis.
+          ssh-keyscan -T 15 -p "$PORT" "$HOST" >> ~/.ssh/known_hosts
+          if [ ! -s ~/.ssh/known_hosts ]; then
+            echo "::error::known_hosts kosong -- ssh-keyscan gagal mengambil host key. Cek SSH_HOST/SSH_PORT."
+            exit 1
+          fi
+          echo "known_hosts terisi ($(wc -l < ~/.ssh/known_hosts) baris)."
 
       - name: Deploy via rsync
         run: |
