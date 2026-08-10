@@ -599,7 +599,7 @@
             </span>
             <span class="menu-label-box"><span>PBG</span></span>
           </a>
-          <a class="menu-card" href="<?php echo base_url('konsultasi/slf'); ?>">
+          <a class="menu-card" href="<?php echo base_url('slf'); ?>">
             <span class="menu-icon-box">
               <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
                 <circle cx="20" cy="14" r="10" fill="#F0A048" stroke="#123249" stroke-width="1.6" />

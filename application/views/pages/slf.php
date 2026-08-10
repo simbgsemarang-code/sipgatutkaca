@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Persyaratan PBG — SIP Gatutkaca · Kabupaten Cilacap</title>
+<title>Persyaratan SLF — SIP Gatutkaca · Kabupaten Cilacap</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -94,7 +94,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6re
 .reg-num{font-family:var(--display);color:var(--gold-300);font-size:1rem;min-width:32px;flex:0 0 auto}
 .reg-text{color:var(--text);font-size:.95rem;line-height:1.6}
 
-/* ===== KATEGORI PERSYARATAN PBG ===== */
+/* ===== KATEGORI PERSYARATAN SLF ===== */
 .pbg-cat{margin-top:44px}
 .pbg-cat h3{display:inline-block;font-family:var(--display);font-weight:400;font-size:1.05rem;letter-spacing:.05em;padding:11px 24px;margin-bottom:2px}
 .pbg-cat-a h3{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826}
@@ -205,8 +205,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="wrap">
     <div class="reveal">
       <p class="eyebrow">Persyaratan Layanan</p>
-      <h2>Persyaratan PBG (Persetujuan Bangunan Gedung)</h2>
-      <p class="section-lead">Siapkan kelengkapan data umum dan data teknis berikut sebelum mengajukan Persetujuan Bangunan Gedung (PBG), mengikuti Peraturan Bupati Cilacap Nomor 52 Tahun 2023 tentang Tata Cara Penyelenggaraan Persetujuan Bangunan Gedung dan Sertifikat Laik Fungsi.</p>
+      <h2>Persyaratan SLF (Sertifikat Laik Fungsi)</h2>
+      <p class="section-lead">Siapkan kelengkapan data umum dan data teknis berikut sebelum mengajukan Sertifikat Laik Fungsi (SLF), mengikuti Peraturan Bupati Cilacap Nomor 52 Tahun 2023 tentang Tata Cara Penyelenggaraan Persetujuan Bangunan Gedung dan Sertifikat Laik Fungsi.</p>
     </div>
 
     <div class="reveal" style="margin-top:56px">
@@ -246,9 +246,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div>
           <h3>Data Teknis Arsitektur</h3>
           <ol class="pbg-sub">
-            <li><span class="pbg-letter">a.</span><span>Gambar Teknis perencanaan Arsitektur</span></li>
+            <li><span class="pbg-letter">a.</span><span>Gambar As Build Drawing Arsitektur</span></li>
             <li><span class="pbg-letter">b.</span><span>Spesifikasi Teknis Arsitektur Bangunan</span></li>
-            <li><span class="pbg-letter">c.</span><span>Rencana Anggaran Biaya (RAB)</span></li>
           </ol>
         </div>
       </div>
@@ -257,10 +256,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div>
           <h3>Data Teknis Struktur</h3>
           <ol class="pbg-sub">
-            <li><span class="pbg-letter">a.</span><span>Gambar Teknis perencanaan Struktur</span></li>
+            <li><span class="pbg-letter">a.</span><span>Gambar As Build Drawing Struktur</span></li>
             <li><span class="pbg-letter">b.</span><span>Spesifikasi Teknis Struktur Bangunan</span></li>
             <li><span class="pbg-letter">c.</span><span>Perhitungan Teknis Struktur</span></li>
-            <li><span class="pbg-letter">d.</span><span>Rencana Anggaran Biaya (RAB)</span></li>
           </ol>
         </div>
       </div>
@@ -269,17 +267,25 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div>
           <h3>Data Teknis MEP</h3>
           <ol class="pbg-sub">
-            <li><span class="pbg-letter">a.</span><span>Gambar Teknis perencanaan Mekanikal, Elektrikal, dan Plambing</span></li>
+            <li><span class="pbg-letter">a.</span><span>Gambar As Build Drawing Mekanikal, Elektrikal, dan Plambing</span></li>
             <li><span class="pbg-letter">b.</span><span>Spesifikasi Teknis Mekanikal, Elektrikal, dan Plambing</span></li>
-            <li><span class="pbg-letter">c.</span><span>Perhitungan Teknis Mekanikal, Elektrikal, dan Plambing</span></li>
-            <li><span class="pbg-letter">d.</span><span>Rencana Anggaran Biaya (RAB)</span></li>
+          </ol>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <h3>Dokumen Bangunan Eksisting</h3>
+          <ol class="pbg-sub">
+            <li><span class="pbg-letter">a.</span><span>Laporan Pemeriksaan Kelaikan Fungsi Bangunan</span></li>
+            <li><span class="pbg-letter">b.</span><span>Surat Pernyataan Kelaikan Fungsi</span></li>
           </ol>
         </div>
       </div>
     </div>
 
     <div class="reveal" style="margin-top:56px;text-align:center;display:flex;gap:18px;justify-content:center;flex-wrap:wrap">
-      <a class="btn btn-gold" href="<?php echo base_url('login'); ?>">Ajukan PBG →</a>
+      <a class="btn btn-gold" href="<?php echo base_url('login'); ?>">Ajukan SLF →</a>
       <a class="btn btn-ghost" href="<?php echo base_url(); ?>">← Beranda</a>
     </div>
   </div>
