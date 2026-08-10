@@ -1,6 +1,10 @@
-<IfModule mod_rewrite.c>
-	RewriteEngine On
-	RewriteCond %{REQUEST_FILENAME} !-f
-	RewriteCond %{REQUEST_FILENAME} !-d
-	RewriteRule ^(.*)$ index.php/$1 [L]
-</IfModule>
+# Tanpa <IfModule mod_rewrite.c> -- di LiteSpeed Web Server (banyak
+# dipakai cPanel modern), modul rewrite-nya kadang tidak terdeteksi
+# dengan nama persis "mod_rewrite.c", sehingga seluruh blok di dalam
+# IfModule ikut dilewati dan URL selain root (mis. /konsultasi/pbg)
+# 404 duluan sebelum sempat masuk ke index.php. LiteSpeed maupun
+# Apache sama-sama memahami directive di bawah ini langsung.
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L]
