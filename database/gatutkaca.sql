@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `nama` VARCHAR(150) NOT NULL,
   `email` VARCHAR(150) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
-  `role` ENUM('pemohon','admin') NOT NULL DEFAULT 'pemohon',
+  `role` ENUM('admin','pu','tpa','pemohon') NOT NULL DEFAULT 'pemohon',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
