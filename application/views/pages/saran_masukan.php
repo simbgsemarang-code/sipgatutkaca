@@ -206,7 +206,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <ul>
           <li><a href="<?php echo base_url('regulasi'); ?>">Regulasi</a></li>
           <li><a href="<?php echo base_url('analisa-kerusakan'); ?>">Analisa Kerusakan</a></li>
-          <li><a href="<?php echo base_url('konsultasi/pbg'); ?>">PBG</a></li>
+          <li><a href="<?php echo base_url('pbg'); ?>">PBG</a></li>
           <li><a href="<?php echo base_url('konsultasi/slf'); ?>">SLF</a></li>
           <li><a href="<?php echo base_url('cagar-budaya'); ?>">Cagar Budaya</a></li>
           <li><a href="<?php echo base_url('saran-masukan'); ?>">Saran dan Masukan</a></li>

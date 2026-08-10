@@ -588,7 +588,7 @@
             </span>
             <span class="menu-label-box"><span>Analisa Kerusakan</span></span>
           </a>
-          <a class="menu-card" href="<?php echo base_url('konsultasi/pbg'); ?>">
+          <a class="menu-card" href="<?php echo base_url('pbg'); ?>">
             <span class="menu-icon-box">
               <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
                 <rect x="8" y="4" width="20" height="28" rx="2" fill="#F8F4EA" stroke="#123249" stroke-width="1.6" />
