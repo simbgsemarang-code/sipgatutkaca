@@ -1,0 +1,13 @@
+---
+# Dipakai oleh fitur "Git Version Control" cPanel. Repo di-clone ke
+# path privat (di luar document root, mis. ~/repositories/sipgatutkaca)
+# supaya folder .git tidak pernah ter-expose lewat web. Tombol
+# "Deploy HEAD Commit" di cPanel menjalankan tasks di bawah ini, yang
+# menyalin isi repo (tanpa .git/.github/database.php/logs/cache) ke
+# document root subdomain yang sebenarnya.
+#
+# Ganti DEPLOYPATH kalau document root Anda beda dari default ini.
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/xmfbccbr/sipgatutkaca.sigaru.my.id/
+    - /usr/bin/rsync -a --exclude='.git' --exclude='.github' --exclude='.cpanel.yml' --exclude='application/config/database.php' --exclude='application/logs/' --exclude='application/cache/' ./ $DEPLOYPATH
