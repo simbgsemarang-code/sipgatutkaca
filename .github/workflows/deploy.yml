@@ -1,48 +1,48 @@
 name: Deploy ke cPanel (sipgatutkaca.sigaru.my.id)
 
-# STATUS: NONAKTIF SEMENTARA (lihat DEPLOY.md bagian 9). Baik FTPS
-# maupun FTP polos gagal dengan "Timeout when trying to open data
-# connection" -- firewall server memblokir port data passive-mode FTP
-# dari IP GitHub Actions. Trigger otomatis di "push" sengaja dikomat-in
-# dulu supaya tiap commit ke main tidak menghasilkan run yang pasti
-# gagal. "workflow_dispatch" tetap aktif untuk re-test manual kalau
-# sudah ada perbaikan (mis. buka port di firewall, atau ganti ke SFTP).
+# Jalan otomatis tiap kali ada push/merge ke "main", atau bisa dipicu
+# manual lewat tab Actions di GitHub ("Run workflow").
+#
+# Pakai rsync lewat SSH -- bukan FTP. FTP (baik FTPS maupun polos)
+# gagal karena firewall server memblokir koneksi data passive-mode-nya
+# (lihat riwayat commit). SSH cuma butuh satu koneksi jadi tidak kena
+# masalah itu.
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   deploy:
-    name: Upload file ke document root subdomain via FTP
+    name: Sync file ke document root subdomain via SSH/rsync
     runs-on: ubuntu-latest
     steps:
       - name: Checkout kode
         uses: actions/checkout@v4
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          # FTPS gagal: firewall server tidak bisa membuka data-connection
-          # untuk channel yang terenkripsi (timeout saat upload file
-          # pertama). FTP polos memungkinkan firewall "mengintip" negosiasi
-          # PASV dan otomatis membuka portnya.
-          protocol: ftp
-          local-dir: ./
-          server-dir: ./
-          # Jangan hapus file di server yang tidak ada di repo -- supaya
-          # database.php, folder logs, dan cache milik server tidak
-          # ikut kehapus tiap deploy.
-          dangerous-clean-slate: false
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/.github/**
-            application/config/database.php
-            application/logs/**
-            application/cache/**
-            _legacy_html_backup/**
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy via rsync
+        run: |
+          rsync -avz \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=yes" \
+            --exclude='.git' \
+            --exclude='.git/**' \
+            --exclude='.github' \
+            --exclude='.github/**' \
+            --exclude='application/config/database.php' \
+            --exclude='application/logs/' \
+            --exclude='application/cache/' \
+            --exclude='_legacy_html_backup/' \
+            ./ "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/xmfbccbr/sipgatutkaca.sigaru.my.id/"
+
+      - name: Bersihkan key sementara
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

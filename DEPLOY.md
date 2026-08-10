@@ -248,95 +248,65 @@ juga terenkripsi, bukan cuma browser↔Cloudflare.
   `production` dengan menambahkan `SetEnv CI_ENV production` di
   `.htaccess` root subdomain, supaya detail error tidak tampil ke publik.
 
-## 9. Deploy otomatis (GitHub Actions) — ⚠️ saat ini NONAKTIF, belum jalan
+## 9. Deploy otomatis (GitHub Actions via SSH/rsync)
 
-**Status: sudah dicoba, gagal, dan trigger otomatisnya sengaja
-dimatikan sementara** (lihat `.github/workflows/deploy.yml`, trigger
-`push` di-comment). Baik FTPS maupun FTP polos gagal dengan error yang
-sama:
+**Riwayat singkat:** percobaan pertama pakai FTP (FTPS maupun polos)
+ke akun FTP terbatas — keduanya gagal dengan
+`Timeout when trying to open data connection`, gejala firewall server
+memblokir port data passive-mode FTP dari IP GitHub Actions. Percobaan
+kedua pakai cPanel Git Version Control — gagal juga (clone kosong,
+kemungkinan soal autentikasi repo private yang tidak didukung form
+cPanel di sini). Solusi yang akhirnya dipakai: **rsync lewat SSH**,
+karena cuma butuh satu koneksi (tidak ada masalah "koneksi data kedua"
+seperti FTP) dan akun ini ternyata punya akses SSH.
 
+Dua hal perlu disiapkan sekali saja:
+
+### 9a. Buat SSH key khusus untuk deploy (dibatasi login-only, no passphrase)
+
+Lewat **cPanel → Terminal** (atau SSH client kalau login manual):
+
+```bash
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+ssh-keygen -t ed25519 -f ~/.ssh/github-deploy -N ""
+cat ~/.ssh/github-deploy.pub >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+cat ~/.ssh/github-deploy
 ```
-Error: None of the available transfer strategies work.
-Last error response was 'Error: Timeout when trying to open data connection to ***:xxxxx'.
-```
 
-Diagnosis: koneksi kontrol FTP (port 21) berhasil, tapi koneksi
-**data** (dipakai untuk transfer file sungguhan, di port acak/passive
-mode) di-timeout — ini gejala **firewall server memblokir port data
-FTP** dari IP GitHub Actions. Sudah dicoba dengan protokol terenkripsi
-(FTPS) maupun polos (FTP), keduanya gagal sama persis, jadi bukan soal
-enkripsi.
+Baris terakhir menampilkan **private key** — copy semuanya (dari
+`-----BEGIN OPENSSH PRIVATE KEY-----` sampai `-----END...-----`) untuk
+dipakai di langkah 9b. Jangan kirim isinya ke siapa pun termasuk lewat
+chat ke Claude.
 
-Opsi untuk membereskan ini (belum dieksekusi, pilih salah satu lalu
-aktifkan lagi trigger `push` di file workflow):
-1. **Hubungi support hosting** — minta mereka membuka rentang port data
-   FTP passive-mode untuk koneksi dari luar (paling "benar" secara
-   arsitektur, tapi tergantung respons support).
-2. **Pakai SFTP** (kalau hosting mendukung) — ganti `protocol: ftp` jadi
-   `protocol: sftp` di workflow, dan `FTP_SERVER`/`FTP_USERNAME`/
-   `FTP_PASSWORD` diisi kredensial SFTP (biasanya port 22, kadang pakai
-   akun cPanel utama karena akun FTP sub-account jarang punya akses
-   SFTP). SFTP tidak punya masalah port data seperti FTP karena cuma
-   pakai satu koneksi terenkripsi.
-3. **Ganti mekanisme ke pull-based**: pakai fitur **Git Version
-   Control** cPanel (clone repo langsung di server), lalu trigger
-   `git pull`-nya lewat cPanel API (UAPI) dari GitHub Actions — ini
-   cuma butuh koneksi HTTPS keluar dari GitHub Actions ke port cPanel
-   (yang sudah pasti terbuka, karena itu jalur Anda login ke cPanel),
-   jadi tidak kena masalah firewall FTP sama sekali.
+Catatan: fingerprint hasil `ssh-keygen` biasanya menunjukkan hostname
+server (format `user@hostname`) — ini bisa dipakai sebagai `SSH_HOST`
+kalau IP server tidak ingin dipakai langsung.
 
-Sampai salah satu di atas dikerjakan, **update kode ke situs live masih
-manual** — ulangi Langkah 3 (Cara A: Download ZIP + File Manager) tiap
-ada perubahan. Setelah setup awal di bagian ini beres, langkah upload
-manual itu tidak perlu diulang lagi — repo ini sudah punya workflow
-`.github/workflows/deploy.yml` yang (nantinya) otomatis meng-upload
-seluruh isi repo ke document root subdomain setiap kali ada push/merge
-ke branch `main` (atau dipicu manual lewat tab **Actions** di GitHub →
-pilih workflow-nya → **Run workflow**).
+### 9b. Simpan sebagai GitHub Secrets
 
-Dua hal ini perlu disiapkan sekali saja supaya workflow-nya jalan:
-
-### 9a. Buat akun FTP khusus di cPanel (dibatasi ke folder subdomain saja)
-
-cPanel → **FTP Accounts** → **Create FTP Account**:
-- **Login**: bebas, mis. `deploy` (hasil akhirnya biasanya jadi
-  `deploy@sipgatutkaca.sigaru.my.id` atau `namacpanel_deploy`,
-  tergantung tema cPanel).
-- **Password**: klik **Generate/Password Generator** lalu **simpan**
-  password-nya (dipakai di langkah 9b, tidak ditampilkan lagi setelah
-  ini).
-- **Directory**: arahkan **persis** ke folder document root subdomain
-  (`sipgatutkaca.sigaru.my.id`) — bukan `public_html` atau root akun.
-  Ini penting supaya akun FTP ini cuma bisa akses folder itu saja, tidak
-  bisa menyentuh `cacah` atau file lain di hosting (aman dipakai
-  otomatis oleh GitHub).
-- **Quota**: Unlimited (atau secukupnya).
-- Klik **Create FTP Account**.
-- Catat **FTP server/host**-nya juga — biasanya sama dengan domain utama
-  (`sigaru.my.id`) atau ditampilkan di halaman yang sama/menu
-  **FTP Accounts** bagian "Special FTP Accounts"/"Configure FTP Client".
-
-### 9b. Simpan kredensial FTP sebagai GitHub Secrets
-
-⚠️ Jangan kirim username/password FTP lewat chat ke siapa pun (termasuk
-ke Claude) — masukkan langsung di form GitHub berikut:
-
-1. Buka repo di github.com → **Settings** → **Secrets and variables** →
-   **Actions**.
-2. Klik **New repository secret**, buat 3 secret ini satu per satu:
-   - `FTP_SERVER` → alamat server FTP dari Langkah 9a
-   - `FTP_USERNAME` → username FTP lengkap dari Langkah 9a
-   - `FTP_PASSWORD` → password FTP dari Langkah 9a
+Repo di github.com → **Settings** → **Secrets and variables** →
+**Actions** → **New repository secret**, buat 4 secret:
+- `SSH_HOST` → hostname/IP server
+- `SSH_PORT` → port SSH (cek dengan
+  `grep -i "^Port" /etc/ssh/sshd_config` di Terminal kalau ragu,
+  default 22)
+- `SSH_USERNAME` → username cPanel Anda
+- `SSH_PRIVATE_KEY` → seluruh isi private key dari langkah 9a
 
 ### Cara kerjanya setelah ini
 
 - PR di-merge ke `main`, atau ada commit baru masuk ke `main` → tab
   **Actions** di GitHub otomatis menjalankan job "Deploy ke cPanel" →
-  semua file (kecuali `.git`, `.github`, `application/config/database.php`,
-  `application/logs/`, `application/cache/`, `_legacy_html_backup/` yang
-  memang dikecualikan) ter-upload ke folder subdomain via FTPS.
-- Progress & hasilnya (sukses/gagal) bisa dipantau di tab **Actions**
-  pada commit terkait.
-- File `database.php` di server **tidak akan pernah tertimpa/terhapus**
-  oleh proses ini (memang dikecualikan), jadi kredensial database di
-  server aman meski deploy berjalan berkali-kali.
+  `rsync` menyinkronkan seluruh isi repo (kecuali `.git`, `.github`,
+  `application/config/database.php`, `application/logs/`,
+  `application/cache/`, `_legacy_html_backup/`) ke document root
+  subdomain lewat koneksi SSH.
+- Progress & hasilnya bisa dipantau di tab **Actions**.
+- File `database.php`, folder `logs`/`cache` di server **tidak pernah
+  tertimpa/terhapus** (dikecualikan dari rsync, dan workflow ini
+  sengaja tidak pakai flag `--delete`).
+- Bisa juga dipicu manual: tab **Actions** → pilih workflow → **Run
+  workflow** (butuh branch dengan file workflow ini sudah pernah ada di
+  `main` minimal sekali, baru muncul di daftar).
