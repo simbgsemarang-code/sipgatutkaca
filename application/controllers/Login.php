@@ -25,25 +25,24 @@ class Login extends CI_Controller {
 
 	public function proses()
 	{
-		$user_input = trim((string) $this->input->post('user'));
-		$password   = (string) $this->input->post('password');
+		$email    = trim((string) $this->input->post('email'));
+		$password = (string) $this->input->post('password');
 
-		if ($user_input === '' || $password === '')
+		if ($email === '' || $password === '')
 		{
-			$this->session->set_flashdata('error', 'NIK/surel dan kata sandi wajib diisi.');
-			$this->session->set_flashdata('old', array('user' => $user_input));
+			$this->session->set_flashdata('error', 'Email dan kata sandi wajib diisi.');
+			$this->session->set_flashdata('old', array('email' => $email));
 			redirect('login');
 			return;
 		}
 
-		$this->db->where('email', $user_input);
-		$this->db->or_where('nik', $user_input);
+		$this->db->where('email', $email);
 		$row = $this->db->get('users')->row_array();
 
 		if ($row === NULL || ! password_verify($password, $row['password']))
 		{
-			$this->session->set_flashdata('error', 'NIK/surel atau kata sandi salah.');
-			$this->session->set_flashdata('old', array('user' => $user_input));
+			$this->session->set_flashdata('error', 'Email atau kata sandi salah.');
+			$this->session->set_flashdata('old', array('email' => $email));
 			redirect('login');
 			return;
 		}

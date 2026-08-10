@@ -238,7 +238,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <?php if (!empty($error)): ?>
         <div class="alert alert-err"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
       <?php endif; ?>
-      <div class="field"><label for="l-user">NIK / Surel</label><input id="l-user" name="user" type="text" required placeholder="Nomor Induk Kependudukan atau surel" value="<?php echo isset($old['user']) ? htmlspecialchars($old['user'], ENT_QUOTES, 'UTF-8') : ''; ?>"></div>
+      <div class="field"><label for="l-email">Email</label><input id="l-email" name="email" type="email" required placeholder="email@contoh.com" value="<?php echo isset($old['email']) ? htmlspecialchars($old['email'], ENT_QUOTES, 'UTF-8') : ''; ?>"></div>
       <div class="field"><label for="l-pass">Kata Sandi</label><input id="l-pass" name="password" type="password" required placeholder="••••••••"></div>
       <button class="btn btn-gold" type="submit" style="width:100%">Masuk</button>
       <p class="note" style="text-align:center">Belum memiliki akun? Hubungi admin untuk dibuatkan akun · <a href="#" style="color:var(--gold-300);text-decoration:underline">Lupa kata sandi</a></p>
