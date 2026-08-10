@@ -1037,8 +1037,6 @@
               </svg>
             </span>
             <span class="tim-label-box"><b>TPA</b></span>
-            <span>Tim Penilai Assesment</span>
-            <em>Masuk sebagai penelaah bangunan gedung →</em>
           </a>
           <a class="tim-btn" href="login-konsultan.html?tim=PU">
             <span class="tim-icon-box">
@@ -1048,8 +1046,6 @@
               </svg>
             </span>
             <span class="tim-label-box"><b>PU</b></span>
-            <span>Pekerjaan Umum</span>
-            <em>Masuk sebagai penelaah teknis tata bangunan →</em>
           </a>
         </div>
       </div>
@@ -1058,32 +1054,27 @@
     <style>
       .tim-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 340px));
-        gap: 26px;
+        grid-template-columns: repeat(2, minmax(0, 220px));
+        gap: 40px;
         justify-content: center;
         margin-top: 54px
       }
 
       .tim-btn {
-        border: 1px solid var(--line);
-        background: var(--surface);
-        padding: 40px 34px;
-        display: grid;
-        gap: 8px;
-        justify-items: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         text-align: center;
-        color: var(--gold-300);
-        transition: .3s;
-        position: relative
+        transition: .3s
       }
 
       .tim-icon-box {
-        width: 84px;
-        height: 84px;
+        width: 150px;
+        height: 150px;
         display: grid;
         place-items: center;
         background: linear-gradient(160deg, #1E86A3, #145E75);
-        border: 4px solid #F8F4EA;
+        border: 5px solid #F8F4EA;
         position: relative;
         z-index: 2;
         box-shadow: 0 10px 20px var(--shadow);
@@ -1091,8 +1082,8 @@
       }
 
       .tim-icon-box svg {
-        width: 46px;
-        height: 46px
+        width: 112px;
+        height: 112px
       }
 
       .tim-btn:hover .tim-icon-box {
@@ -1105,66 +1096,26 @@
         margin-top: -16px;
         background: #E9EEF1;
         border: 1px solid #C7D2D8;
-        padding: 20px 14px 8px;
-        width: 100%;
-        max-width: 150px;
+        padding: 26px 14px 10px;
+        width: 88%;
+        max-width: 190px;
         text-align: center
       }
 
       .tim-btn .tim-label-box b {
         font-family: var(--display);
         font-weight: 400;
-        font-size: 1.5rem;
+        font-size: 1.9rem;
         letter-spacing: .22em;
         color: #223842;
         display: block;
         margin: 0
       }
 
-      .tim-btn::after {
-        content: "";
-        position: absolute;
-        inset: 8px;
-        border: 1px solid transparent;
-        transition: .3s;
-        pointer-events: none
-      }
-
-      .tim-btn:hover {
-        background: var(--surface-hi);
-        transform: translateY(-4px);
-        box-shadow: 0 14px 34px var(--shadow)
-      }
-
-      .tim-btn:hover::after {
-        border-color: var(--line)
-      }
-
-      .tim-btn b {
-        font-family: var(--display);
-        font-weight: 400;
-        font-size: 2rem;
-        letter-spacing: .3em;
-        margin-top: 8px
-      }
-
-      .tim-btn span {
-        font-size: .76rem;
-        letter-spacing: .24em;
-        text-transform: uppercase;
-        color: var(--text)
-      }
-
-      .tim-btn em {
-        font-style: normal;
-        font-size: .78rem;
-        color: var(--muted);
-        margin-top: 10px
-      }
-
       @media(max-width:640px) {
         .tim-grid {
-          grid-template-columns: 1fr
+          grid-template-columns: 1fr;
+          justify-items: center
         }
       }
     </style>
