@@ -248,19 +248,47 @@ juga terenkripsi, bukan cuma browser↔Cloudflare.
   `production` dengan menambahkan `SetEnv CI_ENV production` di
   `.htaccess` root subdomain, supaya detail error tidak tampil ke publik.
 
-## 9. Deploy otomatis (GitHub Actions via SSH/rsync)
+## 9. Deploy otomatis (GitHub Actions) — ⚠️ saat ini NONAKTIF, 3 percobaan gagal
 
-**Riwayat singkat:** percobaan pertama pakai FTP (FTPS maupun polos)
-ke akun FTP terbatas — keduanya gagal dengan
-`Timeout when trying to open data connection`, gejala firewall server
-memblokir port data passive-mode FTP dari IP GitHub Actions. Percobaan
-kedua pakai cPanel Git Version Control — gagal juga (clone kosong,
-kemungkinan soal autentikasi repo private yang tidak didukung form
-cPanel di sini). Solusi yang akhirnya dipakai: **rsync lewat SSH**,
-karena cuma butuh satu koneksi (tidak ada masalah "koneksi data kedua"
-seperti FTP) dan akun ini ternyata punya akses SSH.
+**Status: belum ada satu pun mekanisme push-based yang berhasil.**
+Tiga percobaan berbeda, tiga gejala berbeda, tapi mengarah ke satu
+kesimpulan yang sama:
 
-Dua hal perlu disiapkan sekali saja:
+1. **FTP (FTPS & polos)** → `Timeout when trying to open data connection`.
+   Koneksi kontrol (port 21) sukses, koneksi data (port acak passive
+   mode) diam/timeout. Gejala: firewall men-drop paket ke port data
+   dari IP luar.
+2. **cPanel Git Version Control** → clone berhasil "katanya" tapi hasil
+   folder-nya kosong. Kemungkinan soal autentikasi repo private yang
+   tidak didukung form Create di cPanel host ini (form tidak punya
+   kolom kredensial, dan menempel token di URL clone ditolak eksplisit
+   oleh cPanel: "clone URL cannot include a password").
+3. **SSH/rsync** → `Connection refused`, cepat (~0.3 detik). **Beda**
+   dari FTP (yang diam/timeout) — ini penolakan aktif. Gejala: akses
+   SSH dibatasi hanya untuk IP tertentu (allowlist), IP GitHub Actions
+   (dinamis, dari rentang besar) tidak termasuk.
+
+**Kesimpulan:** hosting ini kemungkinan besar sengaja membatasi semua
+akses non-web (FTP, SSH) hanya dari IP yang dikenal/di-allowlist,
+sementara port web (80/443) dibuka untuk umum — konsisten dengan situs
+yang bisa diakses publik tapi tiap jalur deploy otomatis dari GitHub
+Actions (IP-nya selalu berubah) mentok. Kalau ini benar, **tidak ada
+protokol push-based yang akan berhasil** sampai admin hosting membuka
+akses tsb — gantiprotokol tidak akan membantu.
+
+**Langkah yang masuk akal berikutnya** (belum dieksekusi, pilih salah satu):
+1. **Hubungi support hosting** — tanyakan eksplisit apakah SSH/FTP
+   dibatasi ke IP tertentu, dan minta dibuka untuk IP dinamis GitHub
+   Actions (daftar rentang IP resminya di
+   `https://api.github.com/meta`, key `actions`) — atau alternatif:
+   apakah ada cara lain (webhook, API) yang tidak kena batasan ini.
+2. **Terima saja deploy manual** (Cara A, Langkah 3) sebagai cara
+   tetap — situs sudah live dan berfungsi normal, cuma update kode ke
+   depan perlu diulang manual tiap ada perubahan. Ini pilihan yang
+   sepenuhnya wajar kalau frekuensi update tidak sering.
+
+Detail setup SSH key (kalau nanti mau dicoba lagi setelah dikonfirmasi
+IP-nya dibuka) tetap didokumentasikan di bawah ini:
 
 ### 9a. Buat SSH key khusus untuk deploy (dibatasi login-only, no passphrase)
 

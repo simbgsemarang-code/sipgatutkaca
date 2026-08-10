@@ -1,16 +1,15 @@
 name: Deploy ke cPanel (sipgatutkaca.sigaru.my.id)
 
-# Jalan otomatis tiap kali ada push/merge ke "main", atau bisa dipicu
-# manual lewat tab Actions di GitHub ("Run workflow").
-#
-# Pakai rsync lewat SSH -- bukan FTP. FTP (baik FTPS maupun polos)
-# gagal karena firewall server memblokir koneksi data passive-mode-nya
-# (lihat riwayat commit). SSH cuma butuh satu koneksi jadi tidak kena
-# masalah itu.
+# STATUS: NONAKTIF SEMENTARA (lihat DEPLOY.md #9). Percobaan SSH/rsync
+# ini gagal dengan "Connection refused" -- beda dari FTP (yang timeout
+# tanpa respons), koneksi SSH DITOLAK AKTIF dan cepat. Ini gejala akses
+# SSH dibatasi hanya untuk IP tertentu (allowlist), dan IP GitHub
+# Actions tidak termasuk. Trigger "push" di-comment dulu supaya commit
+# ke main tidak menghasilkan run yang pasti gagal terus.
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
