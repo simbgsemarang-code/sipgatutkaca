@@ -1036,7 +1036,7 @@
                 <path d="M17 36v-9h10v9M8 36h28" stroke="#F8F4EA" stroke-width="2" />
               </svg>
             </span>
-            <b>TPA</b>
+            <span class="tim-label-box"><b>TPA</b></span>
             <span>Tim Penilai Assesment</span>
             <em>Masuk sebagai penelaah bangunan gedung →</em>
           </a>
@@ -1047,7 +1047,7 @@
                 <path d="M30 6l8 8-5 5-8-8zM6 33l5-5 5 5-5 5z" stroke="#F8F4EA" stroke-width="2" />
               </svg>
             </span>
-            <b>PU</b>
+            <span class="tim-label-box"><b>PU</b></span>
             <span>Pekerjaan Umum</span>
             <em>Masuk sebagai penelaah teknis tata bangunan →</em>
           </a>
@@ -1084,7 +1084,8 @@
         place-items: center;
         background: linear-gradient(160deg, #1E86A3, #145E75);
         border: 4px solid #F8F4EA;
-        margin-bottom: 6px;
+        position: relative;
+        z-index: 2;
         box-shadow: 0 10px 20px var(--shadow);
         transition: transform .3s, box-shadow .3s
       }
@@ -1097,6 +1098,27 @@
       .tim-btn:hover .tim-icon-box {
         transform: translateY(-4px) scale(1.04);
         box-shadow: 0 14px 26px var(--shadow)
+      }
+
+      .tim-label-box {
+        display: block;
+        margin-top: -16px;
+        background: #E9EEF1;
+        border: 1px solid #C7D2D8;
+        padding: 20px 14px 8px;
+        width: 100%;
+        max-width: 150px;
+        text-align: center
+      }
+
+      .tim-btn .tim-label-box b {
+        font-family: var(--display);
+        font-weight: 400;
+        font-size: 1.5rem;
+        letter-spacing: .22em;
+        color: #223842;
+        display: block;
+        margin: 0
       }
 
       .tim-btn::after {
