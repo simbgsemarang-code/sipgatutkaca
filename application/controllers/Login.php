@@ -3,6 +3,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Login extends CI_Controller {
 
+	/** Sapaan kartu login disesuaikan dengan halaman/tombol asal. */
+	private $peta_sapaan = array(
+		'pbg'   => 'Selamat Datang PBG',
+		'slf'   => 'Selamat Datang SLF',
+		'tpa'   => 'Selamat Datang TPA',
+		'admin' => 'Selamat Datang Admin',
+	);
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -18,8 +26,11 @@ class Login extends CI_Controller {
 			return;
 		}
 
-		$data['error'] = $this->session->flashdata('error');
-		$data['old']   = $this->session->flashdata('old');
+		$from = (string) $this->input->get('from');
+
+		$data['error']  = $this->session->flashdata('error');
+		$data['old']    = $this->session->flashdata('old');
+		$data['sapaan'] = isset($this->peta_sapaan[$from]) ? $this->peta_sapaan[$from] : 'Selamat Datang';
 		$this->load->view('pages/login', $data);
 	}
 

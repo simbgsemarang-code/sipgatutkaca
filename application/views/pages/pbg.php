@@ -195,7 +195,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </span>
     </a>
     <div class="auth-actions">
-          <a class="btn btn-ghost btn-sm" href="<?php echo base_url('login'); ?>">Masuk</a>
+          <a class="btn btn-ghost btn-sm" href="<?php echo base_url('login?from=admin'); ?>">Masuk</a>
           <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
         </div>
   </div>
@@ -279,7 +279,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </div>
 
     <div class="reveal" style="margin-top:56px;text-align:center;display:flex;gap:18px;justify-content:center;flex-wrap:wrap">
-      <a class="btn btn-gold" href="<?php echo base_url('login'); ?>">Ajukan PBG →</a>
+      <a class="btn btn-gold" href="<?php echo base_url('login?from=pbg'); ?>">Ajukan PBG →</a>
       <a class="btn btn-ghost" href="<?php echo base_url(); ?>">← Beranda</a>
     </div>
   </div>

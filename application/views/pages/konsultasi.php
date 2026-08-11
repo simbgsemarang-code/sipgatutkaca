@@ -1006,7 +1006,7 @@
           </span>
         </a>
         <div class="auth-actions">
-          <a class="btn btn-ghost btn-sm" href="<?php echo base_url('login'); ?>">Masuk</a>
+          <a class="btn btn-ghost btn-sm" href="<?php echo base_url('login?from=admin'); ?>">Masuk</a>
           <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
         </div>
       </div>
@@ -1029,7 +1029,7 @@
           <p class="section-lead" style="margin-left:auto;margin-right:auto">Anggota tim penelaah, silakan masuk sesuai kesatuan tugas Anda untuk menindaklanjuti permohonan konsultasi warga.</p>
         </div>
         <div class="tim-grid reveal">
-          <a class="tim-btn" href="login-konsultan.html?tim=TPA">
+          <a class="tim-btn" href="<?php echo base_url('login?from=tpa'); ?>">
             <span class="tim-icon-box">
               <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
                 <path d="M8 36V22l14-10 14 10v14" stroke="#F8F4EA" stroke-width="2" />
