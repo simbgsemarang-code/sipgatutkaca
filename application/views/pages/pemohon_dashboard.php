@@ -46,11 +46,21 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .brand-name{font-family:var(--display);font-size:1.2rem;letter-spacing:.13em;color:var(--gold-300)}
 .brand-sub{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
 .auth-actions{display:flex;align-items:center;gap:14px}
-.hello{font-size:.78rem;letter-spacing:.08em;color:var(--gold-300);font-weight:600}
+
+/* ===== MENU PENGGUNA (dropdown navbar) ===== */
+.user-menu{position:relative}
+.user-menu-btn{display:flex;align-items:center;gap:8px;background:none;border:none;font-family:var(--body);font-size:.78rem;letter-spacing:.08em;color:var(--gold-300);font-weight:600;cursor:pointer;padding:8px 2px}
+.user-menu-btn svg{transition:transform .25s}
+.user-menu-btn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.user-menu-panel{position:absolute;top:calc(100% + 12px);right:0;min-width:190px;background:var(--surface);border:1px solid var(--line);box-shadow:0 16px 42px var(--shadow);padding:8px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.25s;z-index:70}
+.user-menu-panel.open{opacity:1;transform:none;pointer-events:auto}
+.user-menu-panel a{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.76rem;letter-spacing:.04em;color:var(--text)}
+.user-menu-panel a:hover{background:var(--surface-hi);color:var(--gold-300)}
+.user-menu-panel a.logout:hover{color:#E0526B;background:rgba(224,82,107,.08)}
 
 /* ===== TATA LETAK DASHBOARD (sidebar) ===== */
 .dash-layout{display:flex;padding-top:84px}
-.dash-sidebar{width:240px;flex:0 0 240px;min-height:calc(100vh - 84px);background:var(--surface);border-right:1px solid var(--line);padding:40px 0}
+.dash-sidebar{width:240px;flex:0 0 240px;height:calc(100vh - 84px);position:sticky;top:84px;background:var(--surface);border-right:1px solid var(--line);padding:40px 0;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto}
 .dash-sidebar nav{display:flex;flex-direction:column;gap:4px}
 .dash-sidebar a{display:flex;align-items:center;gap:12px;padding:14px 28px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-left:3px solid transparent;transition:.25s}
 .dash-sidebar a:hover{color:var(--text);background:var(--surface-hi)}
@@ -60,7 +70,7 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .dash-wrap{max-width:1400px;margin:0;padding:0 44px}
 @media(max-width:860px){
   .dash-layout{flex-direction:column}
-  .dash-sidebar{width:100%;flex:0 0 auto;min-height:0;border-right:none;border-bottom:1px solid var(--line);padding:0}
+  .dash-sidebar{width:100%;flex:0 0 auto;height:auto;min-height:0;flex-direction:row;justify-content:space-between;align-items:center;border-right:none;border-bottom:1px solid var(--line);padding:0}
   .dash-sidebar nav{flex-direction:row;justify-content:center}
   .dash-sidebar a{padding:14px 20px;border-left:none;border-bottom:3px solid transparent}
   .dash-sidebar a.active{border-left-color:transparent;border-bottom-color:var(--gold-500)}
@@ -148,7 +158,22 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </a>
     <div class="auth-actions">
       <a class="btn btn-ghost btn-sm" href="<?php echo base_url(); ?>">Beranda</a>
-      <span class="hello"><?php echo htmlspecialchars($nama_pengguna, ENT_QUOTES, 'UTF-8'); ?></span>
+      <div class="user-menu">
+        <button class="user-menu-btn" id="userMenuBtn" type="button" aria-expanded="false" aria-controls="userMenuPanel">
+          <?php echo htmlspecialchars($nama_pengguna, ENT_QUOTES, 'UTF-8'); ?>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="user-menu-panel" id="userMenuPanel" role="menu">
+          <a href="<?php echo base_url('pengaturan'); ?>" role="menuitem">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="2.3" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5v1.6M8 12.9v1.6M14.5 8h-1.6M3.1 8H1.5M12.4 3.6l-1.1 1.1M4.7 11.3l-1.1 1.1M12.4 12.4l-1.1-1.1M4.7 4.7L3.6 3.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Pengaturan
+          </a>
+          <a href="<?php echo base_url('login/keluar'); ?>" role="menuitem" class="logout">
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 12.5L15 9l-4-3.5M15 9H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Logout
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </header>
@@ -160,6 +185,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
+    </nav>
+    <nav>
       <a href="<?php echo base_url('login/keluar'); ?>" class="logout">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 12.5L15 9l-4-3.5M15 9H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Logout
@@ -304,6 +331,14 @@ document.querySelectorAll('.swatch').forEach(function(s){
 });
 document.addEventListener('click',function(e){
   if(!panel.contains(e.target)&&e.target!==fab&&!fab.contains(e.target))panel.classList.remove('open');
+});
+var userBtn=document.getElementById('userMenuBtn'),userPanel=document.getElementById('userMenuPanel');
+userBtn.addEventListener('click',function(){
+  var open=userPanel.classList.toggle('open');
+  userBtn.setAttribute('aria-expanded',open);
+});
+document.addEventListener('click',function(e){
+  if(!userPanel.contains(e.target)&&e.target!==userBtn&&!userBtn.contains(e.target))userPanel.classList.remove('open');
 });
 var bar=document.getElementById('topbar');
 addEventListener('scroll',function(){bar.classList.toggle('scrolled',scrollY>40)},{passive:true});

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal TPA — SIP Gatutkaca · Kabupaten Cilacap</title>
+<title>Pengaturan — SIP Gatutkaca · Kabupaten Cilacap</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -90,22 +90,19 @@ section{padding:60px 0 100px}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:32ch}
 .section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
 
-/* ===== TABEL ===== */
-table{width:100%;border-collapse:collapse;margin-top:44px;font-size:.9rem}
-th{font-family:var(--display);font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:.74rem;color:var(--gold-300);text-align:left;padding:16px 14px;border-bottom:1px solid var(--gold-500)}
-td{padding:16px 14px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:top}
-td:first-child{color:var(--text);font-weight:500}
-.tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-300)}
-.tag-baru{color:#F0A048;border-color:#B4573B}
-.tag-ditinjau{color:#5FC2E0;border-color:#1E86A3}
-.tag-selesai{color:#6FCF97;border-color:#2EA84F}
+/* ===== KARTU INFO AKUN ===== */
+.info-card{background:var(--surface);border:1px solid var(--line);padding:34px 38px;margin-top:44px;max-width:560px}
+.info-row{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid var(--line)}
+.info-row:last-child{border-bottom:none}
+.info-row span:first-child{color:var(--muted);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase}
+.info-row span:last-child{color:var(--text);font-weight:500}
 
-.status-form{display:flex;gap:8px;align-items:center}
-.status-form select{background:var(--input);border:1px solid var(--line);color:var(--text);padding:8px 10px;font-family:var(--body);font-size:.8rem}
-.status-form select:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
-.status-form button{background:none;border:1px solid var(--gold-500);color:var(--gold-300);padding:8px 14px;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;font-family:var(--body)}
-.status-form button:hover{background:var(--gold-500);color:var(--bg)}
-
+/* ===== FORM ===== */
+.form-card{background:var(--surface);border:1px solid var(--line);padding:46px;max-width:520px;margin-top:44px}
+.field{margin-bottom:22px}
+label{display:block;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+input{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:13px 15px;font-family:var(--body);font-size:.92rem}
+input:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
 .alert{padding:16px 20px;margin-bottom:26px;font-size:.88rem;border:1px solid}
 .alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
 .alert-err{background:rgba(224,82,107,.12);border-color:#E0526B;color:#F3AEB9}
@@ -145,7 +142,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 /* ===== RESPONSIF ===== */
 @media(max-width:980px){
   .foot-grid{grid-template-columns:1fr}
-  table{display:block;overflow-x:auto}
 }
 </style>
 </head>
@@ -164,7 +160,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <a class="btn btn-ghost btn-sm" href="<?php echo base_url(); ?>">Beranda</a>
       <div class="user-menu">
         <button class="user-menu-btn" id="userMenuBtn" type="button" aria-expanded="false" aria-controls="userMenuPanel">
-          <?php echo htmlspecialchars($nama_pengguna, ENT_QUOTES, 'UTF-8'); ?>
+          <?php echo htmlspecialchars($nama, ENT_QUOTES, 'UTF-8'); ?>
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <div class="user-menu-panel" id="userMenuPanel" role="menu">
@@ -185,7 +181,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <div class="dash-layout">
   <aside class="dash-sidebar">
     <nav>
-      <a href="<?php echo base_url('tpa'); ?>" class="active">
+      <a href="<?php echo base_url($dashboard_url); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
@@ -201,61 +197,42 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <section style="padding-top:100px">
   <div class="dash-wrap">
     <div class="reveal">
-      <p class="eyebrow">Portal TPA — Tim Penilai Assesment</p>
-      <h2>Tinjau Saran &amp; Masukan Warga</h2>
-      <p class="section-lead">Sebagai Tim Penilai Assesment, Anda membantu menindaklanjuti saran dan masukan yang masuk dari warga terkait penilaian kelayakan bangunan gedung. Perbarui status tiap masukan setelah ditinjau atau selesai ditangani.</p>
+      <p class="eyebrow">Pengaturan Akun</p>
+      <h2>Pengaturan</h2>
+      <p class="section-lead">Lihat informasi akun Anda dan perbarui kata sandi kapan pun diperlukan.</p>
     </div>
 
     <?php if (!empty($sukses)): ?>
-      <div class="alert alert-ok reveal" style="margin-top:36px"><?php echo htmlspecialchars($sukses, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-ok reveal" style="margin-top:36px;max-width:520px"><?php echo htmlspecialchars($sukses, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
     <?php if (!empty($error)): ?>
-      <div class="alert alert-err reveal" style="margin-top:36px"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-err reveal" style="margin-top:36px;max-width:520px"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
-    <div class="reveal">
-      <p class="eyebrow" style="margin-bottom:8px">Kotak Masuk</p>
-      <h2 style="font-size:1.3rem">Total: <?php echo count($daftar_masukan); ?> masukan</h2>
-      <table>
-        <thead><tr><th>Nama</th><th>Topik</th><th>Pesan</th><th>Status</th><th>Tanggal</th><th>Perbarui Status</th></tr></thead>
-        <tbody>
-          <?php if (empty($daftar_masukan)): ?>
-            <tr><td colspan="6">Belum ada saran atau masukan yang masuk.</td></tr>
-          <?php else: ?>
-            <?php foreach ($daftar_masukan as $m): ?>
-              <tr>
-                <td>
-                  <?php echo htmlspecialchars($m['nama'], ENT_QUOTES, 'UTF-8'); ?>
-                  <?php if (!empty($m['email']) || !empty($m['no_hp'])): ?>
-                    <br><span style="font-size:.82rem">
-                      <?php echo htmlspecialchars((string) $m['email'], ENT_QUOTES, 'UTF-8'); ?>
-                      <?php echo !empty($m['no_hp']) ? ' · ' . htmlspecialchars($m['no_hp'], ENT_QUOTES, 'UTF-8') : ''; ?>
-                    </span>
-                  <?php endif; ?>
-                </td>
-                <td><?php echo !empty($m['topik']) ? htmlspecialchars($m['topik'], ENT_QUOTES, 'UTF-8') : '—'; ?></td>
-                <td style="max-width:280px"><?php echo nl2br(htmlspecialchars($m['pesan'], ENT_QUOTES, 'UTF-8')); ?></td>
-                <td>
-                  <?php $kelas_status = array('baru' => 'tag tag-baru', 'ditinjau' => 'tag tag-ditinjau', 'selesai' => 'tag tag-selesai'); ?>
-                  <span class="<?php echo isset($kelas_status[$m['status']]) ? $kelas_status[$m['status']] : 'tag'; ?>"><?php echo htmlspecialchars(strtoupper($m['status']), ENT_QUOTES, 'UTF-8'); ?></span>
-                </td>
-                <td><?php echo htmlspecialchars(date('d M Y', strtotime($m['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
-                <td>
-                  <form class="status-form" action="<?php echo base_url('tpa/tandai-status/' . (int) $m['id']); ?>" method="post">
-                    <select name="status">
-                      <option value="baru" <?php echo $m['status'] === 'baru' ? 'selected' : ''; ?>>Baru</option>
-                      <option value="ditinjau" <?php echo $m['status'] === 'ditinjau' ? 'selected' : ''; ?>>Ditinjau</option>
-                      <option value="selesai" <?php echo $m['status'] === 'selesai' ? 'selected' : ''; ?>>Selesai</option>
-                    </select>
-                    <button type="submit">Simpan</button>
-                  </form>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
+    <div class="info-card reveal">
+      <p class="eyebrow" style="margin-bottom:8px">Informasi Akun</p>
+      <div class="info-row"><span>Nama</span><span><?php echo htmlspecialchars($nama, ENT_QUOTES, 'UTF-8'); ?></span></div>
+      <div class="info-row"><span>Email</span><span><?php echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?></span></div>
+      <div class="info-row"><span>Peran</span><span><?php echo htmlspecialchars(strtoupper($role), ENT_QUOTES, 'UTF-8'); ?></span></div>
     </div>
+
+    <form class="form-card reveal" action="<?php echo base_url('pengaturan/ubah-password'); ?>" method="post">
+      <p class="eyebrow" style="margin-bottom:8px">Ubah Kata Sandi</p>
+      <h2 style="font-size:1.3rem;margin-bottom:24px">Ganti Kata Sandi Anda</h2>
+      <div class="field">
+        <label for="p-lama">Kata Sandi Lama</label>
+        <input id="p-lama" name="password_lama" type="password" required placeholder="Kata sandi Anda saat ini">
+      </div>
+      <div class="field">
+        <label for="p-baru">Kata Sandi Baru</label>
+        <input id="p-baru" name="password_baru" type="password" required minlength="8" placeholder="Minimal 8 karakter">
+      </div>
+      <div class="field">
+        <label for="p-ulang">Ulangi Kata Sandi Baru</label>
+        <input id="p-ulang" name="ulang_password_baru" type="password" required minlength="8" placeholder="Ketik ulang kata sandi baru">
+      </div>
+      <button class="btn btn-gold" type="submit" style="width:100%">Simpan Kata Sandi Baru</button>
+    </form>
   </div>
 </section>
   </div>
