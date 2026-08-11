@@ -42,10 +42,11 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .brand img{height:50px;width:auto;filter:drop-shadow(0 2px 6px var(--shadow))}
 .brand-name{font-family:var(--display);font-size:1.2rem;letter-spacing:.13em;color:var(--gold-300)}
 .brand-sub{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
-.auth-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-.auth-actions-row{display:flex;align-items:center;gap:14px}
-.back-home-link{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-300);text-decoration:underline}
-.back-home-link:hover{color:var(--gold-100)}
+.auth-actions{display:flex;align-items:center;gap:14px}
+.hero-breadcrumb{margin-bottom:20px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(248,244,234,.7)}
+.hero-breadcrumb a{color:#E4C87B}
+.hero-breadcrumb a:hover{text-decoration:underline}
+.hero-breadcrumb .sep{margin:0 8px;color:rgba(248,244,234,.35)}
 
 .hero{position:relative;display:flex;align-items:center;overflow:hidden}
 .hero.page{min-height:56vh}
@@ -161,11 +162,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </span>
     </a>
     <div class="auth-actions">
-      <div class="auth-actions-row">
-        <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
-        <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
-      </div>
-      <a class="back-home-link" href="<?php echo base_url(); ?>">← Kembali ke Beranda</a>
+      <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
+      <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
     </div>
   </div>
 </header>
@@ -173,6 +171,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <section class="hero page">
   <div class="hero-bg" style="background-image:url('hero-kantor-dpupr.jpg')" role="img" aria-label="Gedung Kantor DPUPR Kabupaten Cilacap"></div>
   <div class="wrap">
+    <div class="hero-breadcrumb">
+      <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>Cagar Budaya
+    </div>
     <p class="hero-eyebrow">Pelestarian Warisan</p>
     <h1>Menjaga <em>Cagar Budaya</em> Kabupaten Cilacap</h1>
     <p class="hero-lead">Bangunan dan struktur bersejarah adalah bagian dari identitas ruang kabupaten. Setiap rencana pembangunan di sekitarnya wajib memperhatikan status pelindungan cagar budaya sebelum persetujuan diterbitkan.</p>

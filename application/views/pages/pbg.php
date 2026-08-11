@@ -179,10 +179,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   .step{grid-template-columns:56px 1fr;gap:18px}
   .step-num{font-size:1.7rem}
 }
-.auth-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-.auth-actions-row{display:flex;align-items:center;gap:14px}
-.back-home-link{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-300);text-decoration:underline}
-.back-home-link:hover{color:var(--gold-100)}
+.auth-actions{display:flex;align-items:center;gap:14px}
+.page-breadcrumb{margin-bottom:22px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.page-breadcrumb a{color:var(--gold-300)}
+.page-breadcrumb a:hover{text-decoration:underline}
+.page-breadcrumb .sep{margin:0 8px;color:var(--line)}
 .btn-sm{padding:11px 26px;font-size:.72rem;letter-spacing:.2em}
 </style>
 </head>
@@ -198,17 +199,17 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </span>
     </a>
     <div class="auth-actions">
-      <div class="auth-actions-row">
-        <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
-        <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
-      </div>
-      <a class="back-home-link" href="<?php echo base_url(); ?>">← Kembali ke Beranda</a>
+      <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
+      <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
     </div>
   </div>
 </header>
 
 <section style="padding-top:calc(84px + 100px)">
   <div class="wrap">
+    <div class="page-breadcrumb reveal">
+      <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>PBG
+    </div>
     <div class="reveal">
       <p class="eyebrow">Persyaratan Layanan</p>
       <h2>Persyaratan PBG (Persetujuan Bangunan Gedung)</h2>

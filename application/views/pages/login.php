@@ -208,11 +208,12 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   .step{grid-template-columns:56px 1fr;gap:18px}
   .step-num{font-size:1.7rem}
 }
-.auth-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-.auth-actions-row{display:flex;align-items:center;gap:14px}
-.back-home-link{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-300);text-decoration:underline}
-.back-home-link:hover{color:var(--gold-100)}
+.auth-actions{display:flex;align-items:center;gap:14px}
 .btn-sm{padding:11px 26px;font-size:.72rem;letter-spacing:.2em}
+.page-breadcrumb{margin-bottom:22px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.page-breadcrumb a{color:var(--gold-300)}
+.page-breadcrumb a:hover{text-decoration:underline}
+.page-breadcrumb .sep{margin:0 8px;color:var(--line)}
 </style>
 </head>
 <body>
@@ -227,17 +228,17 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </span>
     </a>
     <div class="auth-actions">
-      <div class="auth-actions-row">
-        <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
-        <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
-      </div>
-      <a class="back-home-link" href="<?php echo base_url(); ?>">← Kembali ke Beranda</a>
+      <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
+      <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
     </div>
   </div>
 </header>
 
 <section style="padding-top:calc(84px + 100px)">
   <div class="wrap">
+    <div class="page-breadcrumb reveal" style="max-width:520px;margin-left:auto;margin-right:auto">
+      <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>Masuk
+    </div>
     <form class="form-card center reveal" action="<?php echo base_url('login/proses'); ?>" method="post">
       <p class="eyebrow" style="margin-bottom:8px">Masuk Akun</p>
       <h2 style="font-size:1.6rem;margin-bottom:28px"><?php echo isset($sapaan) ? htmlspecialchars($sapaan, ENT_QUOTES, 'UTF-8') : 'Selamat Datang'; ?></h2>
