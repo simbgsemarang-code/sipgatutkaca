@@ -42,7 +42,10 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .brand img{height:50px;width:auto;filter:drop-shadow(0 2px 6px var(--shadow))}
 .brand-name{font-family:var(--display);font-size:1.2rem;letter-spacing:.13em;color:var(--gold-300)}
 .brand-sub{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
-.auth-actions{display:flex;align-items:center;gap:14px}
+.auth-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.auth-actions-row{display:flex;align-items:center;gap:14px}
+.back-home-link{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-300);text-decoration:underline}
+.back-home-link:hover{color:var(--gold-100)}
 
 .hero{position:relative;display:flex;align-items:center;overflow:hidden}
 .hero.page{min-height:56vh}
@@ -158,8 +161,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </span>
     </a>
     <div class="auth-actions">
-      <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
-      <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
+      <div class="auth-actions-row">
+        <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
+        <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
+      </div>
+      <a class="back-home-link" href="<?php echo base_url(); ?>">← Kembali ke Beranda</a>
     </div>
   </div>
 </header>

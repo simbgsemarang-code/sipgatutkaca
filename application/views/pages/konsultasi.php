@@ -989,7 +989,10 @@
           font-size: 1.7rem
         }
       }
-.auth-actions{display:flex;align-items:center;gap:14px}
+.auth-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.auth-actions-row{display:flex;align-items:center;gap:14px}
+.back-home-link{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-300);text-decoration:underline}
+.back-home-link:hover{color:var(--gold-100)}
 .btn-sm{padding:11px 26px;font-size:.72rem;letter-spacing:.2em}
 </style>
   </head>
@@ -1006,8 +1009,11 @@
           </span>
         </a>
         <div class="auth-actions">
-          <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
-          <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
+          <div class="auth-actions-row">
+            <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
+            <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
+          </div>
+          <a class="back-home-link" href="<?php echo base_url(); ?>">← Kembali ke Beranda</a>
         </div>
       </div>
     </header>
