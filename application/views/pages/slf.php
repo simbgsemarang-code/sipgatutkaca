@@ -180,6 +180,15 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   .step-num{font-size:1.7rem}
 }
 .auth-actions{display:flex;align-items:center;gap:14px}
+.user-menu{position:relative}
+.user-menu-btn{display:flex;align-items:center;gap:8px;background:none;border:none;font-family:var(--body);font-size:.78rem;letter-spacing:.08em;color:var(--gold-300);font-weight:600;cursor:pointer;padding:8px 2px}
+.user-menu-btn svg{transition:transform .25s}
+.user-menu-btn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.user-menu-panel{position:absolute;top:calc(100% + 12px);right:0;min-width:190px;background:var(--surface);border:1px solid var(--line);box-shadow:0 16px 42px var(--shadow);padding:8px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.25s;z-index:70}
+.user-menu-panel.open{opacity:1;transform:none;pointer-events:auto}
+.user-menu-panel a{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.76rem;letter-spacing:.04em;color:var(--text)}
+.user-menu-panel a:hover{background:var(--surface-hi);color:var(--gold-300)}
+.user-menu-panel a.logout:hover{color:#E0526B;background:rgba(224,82,107,.08)}
 .page-breadcrumb{margin-bottom:22px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .page-breadcrumb a{color:var(--gold-300)}
 .page-breadcrumb a:hover{text-decoration:underline}
@@ -201,7 +210,23 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <?php $sesi_nav = info_sesi_navbar(); ?>
     <div class="auth-actions">
       <?php if ($sesi_nav['masuk']): ?>
-        <a class="btn btn-gold btn-sm" href="<?php echo base_url($sesi_nav['tujuan_dashboard']); ?>"><?php echo htmlspecialchars($sesi_nav['nama'], ENT_QUOTES, 'UTF-8'); ?></a>
+        <a class="btn btn-ghost btn-sm" href="<?php echo base_url($sesi_nav['tujuan_dashboard']); ?>">Dashboard</a>
+        <div class="user-menu">
+          <button class="user-menu-btn" id="userMenuBtn" type="button" aria-expanded="false" aria-controls="userMenuPanel">
+            <?php echo htmlspecialchars($sesi_nav['nama'], ENT_QUOTES, 'UTF-8'); ?>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="user-menu-panel" id="userMenuPanel" role="menu">
+            <a href="<?php echo base_url('pengaturan'); ?>" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="2.3" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5v1.6M8 12.9v1.6M14.5 8h-1.6M3.1 8H1.5M12.4 3.6l-1.1 1.1M4.7 11.3l-1.1 1.1M12.4 12.4l-1.1-1.1M4.7 4.7L3.6 3.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              Pengaturan
+            </a>
+            <a href="<?php echo base_url('login/keluar'); ?>" role="menuitem" class="logout">
+              <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 12.5L15 9l-4-3.5M15 9H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Logout
+            </a>
+          </div>
+        </div>
       <?php else: ?>
         <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
         <a class="btn btn-gold btn-sm" href="<?php echo base_url('daftar'); ?>">Daftar</a>
@@ -389,6 +414,16 @@ document.querySelectorAll('.swatch').forEach(function(s){
 document.addEventListener('click',function(e){
   if(!panel.contains(e.target)&&e.target!==fab&&!fab.contains(e.target))panel.classList.remove('open');
 });
+var userBtn=document.getElementById('userMenuBtn'),userPanel=document.getElementById('userMenuPanel');
+if(userBtn){
+userBtn.addEventListener('click',function(){
+  var open=userPanel.classList.toggle('open');
+  userBtn.setAttribute('aria-expanded',open);
+});
+document.addEventListener('click',function(e){
+  if(!userPanel.contains(e.target)&&e.target!==userBtn&&!userBtn.contains(e.target))userPanel.classList.remove('open');
+});
+}
 
 // ===== Navbar & menu ponsel =====
 var bar=document.getElementById('topbar');
