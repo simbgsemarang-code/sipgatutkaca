@@ -1054,7 +1054,7 @@
                 <path d="M16 22l4.5 4.5L29 17" stroke="#F8F4EA" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </span>
-            <span class="tim-label-box"><b style="font-size:.86rem;letter-spacing:.04em">ADMINISTRATOR</b></span>
+            <span class="tim-label-box"><b>ADMINISTRATOR</b></span>
           </a>
         </div>
       </div>
@@ -1101,11 +1101,14 @@
       }
 
       .tim-label-box {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 88px;
         margin-top: -16px;
         background: #E9EEF1;
         border: 1px solid #C7D2D8;
-        padding: 26px 14px 10px;
+        padding: 16px 10px;
         width: 88%;
         max-width: 190px;
         text-align: center
@@ -1114,8 +1117,8 @@
       .tim-btn .tim-label-box b {
         font-family: var(--display);
         font-weight: 400;
-        font-size: 1.9rem;
-        letter-spacing: .22em;
+        font-size: 1.15rem;
+        letter-spacing: .06em;
         color: #223842;
         display: block;
         margin: 0
