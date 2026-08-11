@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Pemohon — SIP Gatutkaca · Kabupaten Cilacap</title>
+<title><?php echo $mode === 'edit' ? 'Ubah Pengajuan' : 'Tambah Pengajuan'; ?> — SIP Gatutkaca · Kabupaten Cilacap</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -90,19 +90,24 @@ section{padding:60px 0 100px}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:32ch}
 .section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
 
-/* ===== GRID MENU (senada beranda) ===== */
-.menu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:36px 26px;margin-top:56px}
-.menu-card{display:flex;flex-direction:column;align-items:center;text-align:center}
-.menu-icon-box{width:88px;height:88px;display:grid;place-items:center;background:linear-gradient(160deg,#1E86A3,#145E75);border:4px solid #F8F4EA;box-shadow:0 10px 20px var(--shadow);transition:transform .3s,box-shadow .3s}
-.menu-icon-box svg{width:44px;height:44px}
-.menu-card:hover .menu-icon-box{transform:translateY(-4px) scale(1.04);box-shadow:0 14px 26px var(--shadow)}
-.menu-label-box{width:92%;margin-top:-14px;background:#E9EEF1;border:1px solid #C7D2D8;padding:18px 8px 8px;text-align:center}
-.menu-label-box span{font-family:var(--display);font-size:.8rem;font-weight:600;letter-spacing:.02em;color:#223842}
-
-/* ===== INFO CARD ===== */
-.info-card{background:var(--surface);border:1px solid var(--line);padding:34px 38px;margin-top:56px}
-.info-card p{color:var(--muted);font-size:.92rem}
-.info-card p+p{margin-top:12px}
+/* ===== FORM ===== */
+.form-card{background:var(--surface);border:1px solid var(--line);padding:46px;max-width:760px;margin-top:44px}
+.form-group{margin-bottom:36px}
+.form-group:last-of-type{margin-bottom:0}
+.form-group h3{font-family:var(--display);font-weight:400;font-size:1.02rem;letter-spacing:.04em;color:var(--gold-300);margin-bottom:20px;padding-bottom:10px;border-bottom:1px dashed var(--line)}
+.field{margin-bottom:22px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+label{display:block;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+label .opsional{text-transform:none;letter-spacing:0;color:var(--muted);opacity:.7}
+input,select,textarea{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:13px 15px;font-family:var(--body);font-size:.92rem}
+input:focus,select:focus,textarea:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+textarea{resize:vertical;min-height:90px}
+.form-actions{display:flex;gap:14px;margin-top:8px}
+.form-actions .btn{flex:0 0 auto}
+.alert{padding:16px 20px;margin-bottom:26px;font-size:.88rem;border:1px solid}
+.alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
+.alert-err{background:rgba(224,82,107,.12);border-color:#E0526B;color:#F3AEB9}
 
 /* ===== PANEL WARNA ===== */
 .theme-fab{position:fixed;right:26px;bottom:26px;z-index:80;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold-500);background:var(--surface);color:var(--gold-300);cursor:pointer;display:grid;place-items:center;box-shadow:0 8px 26px var(--shadow);transition:transform .3s}
@@ -137,11 +142,12 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 }
 
 /* ===== RESPONSIF ===== */
-@media(max-width:860px){
-  .menu-grid{grid-template-columns:repeat(2,1fr)}
-}
 @media(max-width:980px){
   .foot-grid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .field-row,.field-row-3{grid-template-columns:1fr}
+  .form-card{padding:30px 22px}
 }
 </style>
 </head>
@@ -181,11 +187,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <div class="dash-layout">
   <aside class="dash-sidebar">
     <nav>
-      <a href="<?php echo base_url('pemohon'); ?>" class="active">
+      <a href="<?php echo base_url('pemohon'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
-      <a href="<?php echo base_url('pengajuan'); ?>">
+      <a href="<?php echo base_url('pengajuan'); ?>" class="active">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M5 2h5l3 3v11H5V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 9.5h4M7 12.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Pengajuan
       </a>
@@ -201,62 +207,117 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <section style="padding-top:100px">
   <div class="dash-wrap">
     <div class="reveal">
-      <p class="eyebrow"><?php echo isset($label_portal) ? htmlspecialchars($label_portal, ENT_QUOTES, 'UTF-8') : 'Portal Pemohon'; ?></p>
-      <h2>Selamat Datang, <?php echo htmlspecialchars($nama_pengguna, ENT_QUOTES, 'UTF-8'); ?></h2>
-      <p class="section-lead">Dari sini Anda dapat menuju langsung ke layanan yang tersedia. Pilih layanan di bawah untuk melihat persyaratan dan cara pengajuannya.</p>
+      <p class="eyebrow"><a href="<?php echo base_url('pengajuan'); ?>" style="color:var(--gold-500)">Pengajuan Saya</a></p>
+      <h2><?php echo $mode === 'edit' ? 'Ubah Pengajuan' : 'Tambah Pengajuan Baru'; ?></h2>
+      <p class="section-lead">Lengkapi data umum sesuai persyaratan PBG/SLF (Peraturan Bupati Cilacap Nomor 52 Tahun 2023). Kolom bertanda opsional boleh dikosongkan kalau belum tersedia.</p>
     </div>
 
-    <div class="menu-grid reveal">
-      <a class="menu-card" href="<?php echo base_url('pbg'); ?>">
-        <span class="menu-icon-box">
-          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-            <rect x="8" y="4" width="20" height="28" rx="2" fill="#F8F4EA" stroke="#123249" stroke-width="1.6" />
-            <path d="M12 11h12M12 16h12M12 21h8" stroke="#123249" stroke-width="1.4" stroke-linecap="round" />
-            <circle cx="28" cy="28" r="7.5" fill="#E0673B" stroke="#123249" stroke-width="1.4" />
-            <path d="M24.3 28l2.4 2.4 4.6-5" stroke="#F8F4EA" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </span>
-        <span class="menu-label-box"><span>PBG</span></span>
-      </a>
-      <a class="menu-card" href="<?php echo base_url('slf'); ?>">
-        <span class="menu-icon-box">
-          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-            <circle cx="20" cy="14" r="10" fill="#F0A048" stroke="#123249" stroke-width="1.6" />
-            <path d="M14 22.5l-3.2 11.5 9.2-5 9.2 5-3.2-11.5" fill="#F8F4EA" stroke="#123249" stroke-width="1.6" stroke-linejoin="round" />
-            <path d="M14.5 14l3.5 3.5 7-7.5" stroke="#F8F4EA" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </span>
-        <span class="menu-label-box"><span>SLF</span></span>
-      </a>
-      <a class="menu-card" href="<?php echo base_url('analisa-kerusakan'); ?>">
-        <span class="menu-icon-box">
-          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-            <rect x="5" y="12" width="18" height="22" fill="#F8F4EA" stroke="#123249" stroke-width="1.6"/>
-            <path d="M10 12l4 7-4 4 4 9" stroke="#123249" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-            <circle cx="27" cy="15" r="6" fill="none" stroke="#F0A048" stroke-width="2.4" />
-            <path d="M31.2 19.2l4.3 4.3" stroke="#F0A048" stroke-width="2.6" stroke-linecap="round" />
-          </svg>
-        </span>
-        <span class="menu-label-box"><span>Analisa Kerusakan</span></span>
-      </a>
-      <a class="menu-card" href="<?php echo base_url('regulasi'); ?>">
-        <span class="menu-icon-box">
-          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-            <path d="M6 8c3-1.6 7-1.6 10 0v22c-3-1.6-7-1.6-10 0V8z" fill="#F8F4EA" stroke="#123249" stroke-width="1.6" stroke-linejoin="round" />
-            <path d="M34 8c-3-1.6-7-1.6-10 0v22c3-1.6 7-1.6 10 0V8z" fill="#F8F4EA" stroke="#123249" stroke-width="1.6" stroke-linejoin="round" />
-            <path d="M20 8v22" stroke="#123249" stroke-width="1.4" />
-            <rect x="25" y="6" width="5" height="11" fill="#E0673B" />
-          </svg>
-        </span>
-        <span class="menu-label-box"><span>Regulasi</span></span>
-      </a>
-    </div>
+    <?php if (!empty($error)): ?>
+      <div class="alert alert-err reveal" style="margin-top:36px;max-width:760px"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+    <?php endif; ?>
 
-    <div class="info-card reveal">
-      <p class="eyebrow" style="margin-bottom:8px">Riwayat Pengajuan</p>
-      <p>Kelola pengajuan PBG/SLF Anda — tambah pengajuan baru, atau lihat dan ubah status pengajuan yang sudah pernah dibuat.</p>
-      <p style="margin-top:18px"><a class="btn btn-gold btn-sm" href="<?php echo base_url('pengajuan'); ?>">Lihat Pengajuan Saya</a></p>
-    </div>
+    <?php
+      $aksi = $mode === 'edit' ? base_url('pengajuan/perbarui/' . (int) $baris['id']) : base_url('pengajuan/simpan');
+      $v = function ($nama) use ($baris) {
+        return isset($baris[$nama]) ? htmlspecialchars($baris[$nama], ENT_QUOTES, 'UTF-8') : '';
+      };
+    ?>
+    <form class="form-card reveal" action="<?php echo $aksi; ?>" method="post">
+
+      <div class="form-group">
+        <h3>Jenis Pengajuan</h3>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-layanan">Layanan</label>
+            <select id="f-layanan" name="jenis_layanan" required>
+              <option value="" disabled <?php echo $v('jenis_layanan') === '' ? 'selected' : ''; ?>>— Pilih layanan —</option>
+              <option value="pbg" <?php echo $v('jenis_layanan') === 'pbg' ? 'selected' : ''; ?>>PBG — Persetujuan Bangunan Gedung</option>
+              <option value="slf" <?php echo $v('jenis_layanan') === 'slf' ? 'selected' : ''; ?>>SLF — Sertifikat Laik Fungsi</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-jenis-bangunan">Jenis Bangunan</label>
+            <select id="f-jenis-bangunan" name="jenis_bangunan" required>
+              <option value="hunian" <?php echo $v('jenis_bangunan') === 'hunian' || $v('jenis_bangunan') === '' ? 'selected' : ''; ?>>Bangunan Hunian / Rumah Tinggal</option>
+              <option value="non_hunian" <?php echo $v('jenis_bangunan') === 'non_hunian' ? 'selected' : ''; ?>>Bangunan Umum Non Hunian &amp; Campuran</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <h3>Data Identitas Pemilik Bangunan</h3>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-nama">Nama Pemohon</label>
+            <input id="f-nama" name="nama_pemohon" type="text" required value="<?php echo $v('nama_pemohon'); ?>">
+          </div>
+          <div class="field">
+            <label for="f-nik">NIK / KTP / KITAS</label>
+            <input id="f-nik" name="nik_ktp" type="text" required value="<?php echo $v('nik_ktp'); ?>">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-nib">NIB <span class="opsional">(wajib untuk bangunan non hunian &amp; campuran)</span></label>
+          <input id="f-nib" name="nib" type="text" value="<?php echo $v('nib'); ?>">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <h3>Data Bangunan</h3>
+        <div class="field">
+          <label for="f-alamat">Alamat / Lokasi Bangunan</label>
+          <textarea id="f-alamat" name="alamat_bangunan" required><?php echo $v('alamat_bangunan'); ?></textarea>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-luas">Luas Bangunan (m²) <span class="opsional">(opsional)</span></label>
+            <input id="f-luas" name="luas_bangunan" type="text" inputmode="decimal" value="<?php echo $v('luas_bangunan'); ?>">
+          </div>
+          <div class="field">
+            <label for="f-lantai">Jumlah Lantai <span class="opsional">(opsional)</span></label>
+            <input id="f-lantai" name="jumlah_lantai" type="text" inputmode="numeric" value="<?php echo $v('jumlah_lantai'); ?>">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <h3>Data Intensitas Bangunan &amp; Kepemilikan Tanah <span class="opsional" style="text-transform:none;letter-spacing:0">(opsional)</span></h3>
+        <div class="field">
+          <label for="f-kkpr">No. KKPR/KRK atau Informasi Tata Ruang (ITR)</label>
+          <input id="f-kkpr" name="no_kkpr_krk" type="text" value="<?php echo $v('no_kkpr_krk'); ?>">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-tanah">Bukti Kepemilikan Tanah</label>
+            <input id="f-tanah" name="bukti_tanah" type="text" placeholder="Sertifikat Tanah / Girik / Letter C" value="<?php echo $v('bukti_tanah'); ?>">
+          </div>
+          <div class="field">
+            <label for="f-sppt">No. SPPT / Keterangan NOP</label>
+            <input id="f-sppt" name="no_sppt_nop" type="text" value="<?php echo $v('no_sppt_nop'); ?>">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <h3>Data Penyedia Jasa Perencana <span class="opsional" style="text-transform:none;letter-spacing:0">(opsional)</span></h3>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-perencana">Nama Perencana Konstruksi / Arsitek</label>
+            <input id="f-perencana" name="nama_perencana" type="text" value="<?php echo $v('nama_perencana'); ?>">
+          </div>
+          <div class="field">
+            <label for="f-lisensi">No. Lisensi (SKK/STRA/STRI)</label>
+            <input id="f-lisensi" name="no_lisensi_perencana" type="text" value="<?php echo $v('no_lisensi_perencana'); ?>">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-gold" type="submit"><?php echo $mode === 'edit' ? 'Simpan Perubahan' : 'Simpan Pengajuan'; ?></button>
+        <a class="btn btn-ghost" href="<?php echo base_url('pengajuan'); ?>">Batal</a>
+      </div>
+    </form>
   </div>
 </section>
   </div>

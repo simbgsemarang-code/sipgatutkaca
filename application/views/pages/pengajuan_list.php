@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Pemohon — SIP Gatutkaca · Kabupaten Cilacap</title>
+<title>Pengajuan Saya — SIP Gatutkaca · Kabupaten Cilacap</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -90,19 +90,27 @@ section{padding:60px 0 100px}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:32ch}
 .section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
 
-/* ===== GRID MENU (senada beranda) ===== */
-.menu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:36px 26px;margin-top:56px}
-.menu-card{display:flex;flex-direction:column;align-items:center;text-align:center}
-.menu-icon-box{width:88px;height:88px;display:grid;place-items:center;background:linear-gradient(160deg,#1E86A3,#145E75);border:4px solid #F8F4EA;box-shadow:0 10px 20px var(--shadow);transition:transform .3s,box-shadow .3s}
-.menu-icon-box svg{width:44px;height:44px}
-.menu-card:hover .menu-icon-box{transform:translateY(-4px) scale(1.04);box-shadow:0 14px 26px var(--shadow)}
-.menu-label-box{width:92%;margin-top:-14px;background:#E9EEF1;border:1px solid #C7D2D8;padding:18px 8px 8px;text-align:center}
-.menu-label-box span{font-family:var(--display);font-size:.8rem;font-weight:600;letter-spacing:.02em;color:#223842}
+/* ===== TABEL ===== */
+.table-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:44px}
+table{width:100%;border-collapse:collapse;margin-top:24px;font-size:.9rem}
+th{font-family:var(--display);font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:.74rem;color:var(--gold-300);text-align:left;padding:16px 14px;border-bottom:1px solid var(--gold-500)}
+td{padding:16px 14px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:top}
+td:first-child{color:var(--text);font-weight:500}
+.tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-300)}
+.tag-diajukan{color:#F0A048;border-color:#B4573B}
+.tag-diverifikasi{color:#5FC2E0;border-color:#1E86A3}
+.tag-revisi{color:#F0A048;border-color:#B4573B}
+.tag-disetujui{color:#6FCF97;border-color:#2EA84F}
+.tag-ditolak{color:#E0526B;border-color:#B4573B}
+.dl{color:var(--gold-300);letter-spacing:.12em;font-size:.78rem;text-transform:uppercase;white-space:nowrap}
+.dl:hover{text-decoration:underline}
+.hapus-link{color:#E0526B;letter-spacing:.12em;font-size:.78rem;text-transform:uppercase;white-space:nowrap;background:none;border:none;cursor:pointer;font-family:var(--body)}
+.hapus-link:hover{text-decoration:underline}
+.aksi-cell{display:flex;gap:16px;align-items:center}
 
-/* ===== INFO CARD ===== */
-.info-card{background:var(--surface);border:1px solid var(--line);padding:34px 38px;margin-top:56px}
-.info-card p{color:var(--muted);font-size:.92rem}
-.info-card p+p{margin-top:12px}
+.alert{padding:16px 20px;margin-bottom:26px;font-size:.88rem;border:1px solid}
+.alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
+.alert-err{background:rgba(224,82,107,.12);border-color:#E0526B;color:#F3AEB9}
 
 /* ===== PANEL WARNA ===== */
 .theme-fab{position:fixed;right:26px;bottom:26px;z-index:80;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold-500);background:var(--surface);color:var(--gold-300);cursor:pointer;display:grid;place-items:center;box-shadow:0 8px 26px var(--shadow);transition:transform .3s}
@@ -137,11 +145,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 }
 
 /* ===== RESPONSIF ===== */
-@media(max-width:860px){
-  .menu-grid{grid-template-columns:repeat(2,1fr)}
-}
 @media(max-width:980px){
   .foot-grid{grid-template-columns:1fr}
+  table{display:block;overflow-x:auto}
 }
 </style>
 </head>
@@ -181,11 +187,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <div class="dash-layout">
   <aside class="dash-sidebar">
     <nav>
-      <a href="<?php echo base_url('pemohon'); ?>" class="active">
+      <a href="<?php echo base_url('pemohon'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
-      <a href="<?php echo base_url('pengajuan'); ?>">
+      <a href="<?php echo base_url('pengajuan'); ?>" class="active">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M5 2h5l3 3v11H5V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 9.5h4M7 12.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         Pengajuan
       </a>
@@ -201,61 +207,70 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <section style="padding-top:100px">
   <div class="dash-wrap">
     <div class="reveal">
-      <p class="eyebrow"><?php echo isset($label_portal) ? htmlspecialchars($label_portal, ENT_QUOTES, 'UTF-8') : 'Portal Pemohon'; ?></p>
-      <h2>Selamat Datang, <?php echo htmlspecialchars($nama_pengguna, ENT_QUOTES, 'UTF-8'); ?></h2>
-      <p class="section-lead">Dari sini Anda dapat menuju langsung ke layanan yang tersedia. Pilih layanan di bawah untuk melihat persyaratan dan cara pengajuannya.</p>
+      <p class="eyebrow">Pengajuan Saya</p>
+      <h2>Pengajuan PBG &amp; SLF</h2>
+      <p class="section-lead">Daftar pengajuan yang pernah Anda buat. Tambahkan pengajuan baru, atau ubah/hapus pengajuan yang belum diproses.</p>
     </div>
 
-    <div class="menu-grid reveal">
-      <a class="menu-card" href="<?php echo base_url('pbg'); ?>">
-        <span class="menu-icon-box">
-          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-            <rect x="8" y="4" width="20" height="28" rx="2" fill="#F8F4EA" stroke="#123249" stroke-width="1.6" />
-            <path d="M12 11h12M12 16h12M12 21h8" stroke="#123249" stroke-width="1.4" stroke-linecap="round" />
-            <circle cx="28" cy="28" r="7.5" fill="#E0673B" stroke="#123249" stroke-width="1.4" />
-            <path d="M24.3 28l2.4 2.4 4.6-5" stroke="#F8F4EA" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </span>
-        <span class="menu-label-box"><span>PBG</span></span>
-      </a>
-      <a class="menu-card" href="<?php echo base_url('slf'); ?>">
-        <span class="menu-icon-box">
-          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-            <circle cx="20" cy="14" r="10" fill="#F0A048" stroke="#123249" stroke-width="1.6" />
-            <path d="M14 22.5l-3.2 11.5 9.2-5 9.2 5-3.2-11.5" fill="#F8F4EA" stroke="#123249" stroke-width="1.6" stroke-linejoin="round" />
-            <path d="M14.5 14l3.5 3.5 7-7.5" stroke="#F8F4EA" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </span>
-        <span class="menu-label-box"><span>SLF</span></span>
-      </a>
-      <a class="menu-card" href="<?php echo base_url('analisa-kerusakan'); ?>">
-        <span class="menu-icon-box">
-          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-            <rect x="5" y="12" width="18" height="22" fill="#F8F4EA" stroke="#123249" stroke-width="1.6"/>
-            <path d="M10 12l4 7-4 4 4 9" stroke="#123249" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-            <circle cx="27" cy="15" r="6" fill="none" stroke="#F0A048" stroke-width="2.4" />
-            <path d="M31.2 19.2l4.3 4.3" stroke="#F0A048" stroke-width="2.6" stroke-linecap="round" />
-          </svg>
-        </span>
-        <span class="menu-label-box"><span>Analisa Kerusakan</span></span>
-      </a>
-      <a class="menu-card" href="<?php echo base_url('regulasi'); ?>">
-        <span class="menu-icon-box">
-          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-            <path d="M6 8c3-1.6 7-1.6 10 0v22c-3-1.6-7-1.6-10 0V8z" fill="#F8F4EA" stroke="#123249" stroke-width="1.6" stroke-linejoin="round" />
-            <path d="M34 8c-3-1.6-7-1.6-10 0v22c3-1.6 7-1.6 10 0V8z" fill="#F8F4EA" stroke="#123249" stroke-width="1.6" stroke-linejoin="round" />
-            <path d="M20 8v22" stroke="#123249" stroke-width="1.4" />
-            <rect x="25" y="6" width="5" height="11" fill="#E0673B" />
-          </svg>
-        </span>
-        <span class="menu-label-box"><span>Regulasi</span></span>
-      </a>
+    <?php if (!empty($sukses)): ?>
+      <div class="alert alert-ok reveal" style="margin-top:36px"><?php echo htmlspecialchars($sukses, ENT_QUOTES, 'UTF-8'); ?></div>
+    <?php endif; ?>
+    <?php if (!empty($error)): ?>
+      <div class="alert alert-err reveal" style="margin-top:36px"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+    <?php endif; ?>
+
+    <div class="table-head reveal">
+      <h2 style="font-size:1.3rem">Total: <?php echo count($daftar_pengajuan); ?> pengajuan</h2>
+      <a class="btn btn-gold btn-sm" href="<?php echo base_url('pengajuan/tambah'); ?>">+ Tambah Pengajuan</a>
     </div>
 
-    <div class="info-card reveal">
-      <p class="eyebrow" style="margin-bottom:8px">Riwayat Pengajuan</p>
-      <p>Kelola pengajuan PBG/SLF Anda — tambah pengajuan baru, atau lihat dan ubah status pengajuan yang sudah pernah dibuat.</p>
-      <p style="margin-top:18px"><a class="btn btn-gold btn-sm" href="<?php echo base_url('pengajuan'); ?>">Lihat Pengajuan Saya</a></p>
+    <div class="reveal">
+      <table>
+        <thead>
+          <tr>
+            <th>Nama Pemohon</th>
+            <th>Layanan</th>
+            <th>Alamat Bangunan</th>
+            <th>Status</th>
+            <th>Tanggal</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($daftar_pengajuan)): ?>
+            <tr><td colspan="6">Anda belum punya pengajuan. Klik "Tambah Pengajuan" untuk membuat yang pertama.</td></tr>
+          <?php else: ?>
+            <?php foreach ($daftar_pengajuan as $p): ?>
+              <tr>
+                <td><?php echo htmlspecialchars($p['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td><?php echo strtoupper(htmlspecialchars($p['jenis_layanan'], ENT_QUOTES, 'UTF-8')); ?></td>
+                <td><?php echo htmlspecialchars($p['alamat_bangunan'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td>
+                  <?php
+                    $kelas_status = array(
+                      'diajukan'     => 'tag tag-diajukan',
+                      'diverifikasi' => 'tag tag-diverifikasi',
+                      'revisi'       => 'tag tag-revisi',
+                      'disetujui'    => 'tag tag-disetujui',
+                      'ditolak'      => 'tag tag-ditolak',
+                    );
+                  ?>
+                  <span class="<?php echo isset($kelas_status[$p['status']]) ? $kelas_status[$p['status']] : 'tag'; ?>"><?php echo htmlspecialchars(str_replace('_', ' ', $p['status']), ENT_QUOTES, 'UTF-8'); ?></span>
+                </td>
+                <td><?php echo htmlspecialchars(date('d M Y', strtotime($p['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
+                <td>
+                  <div class="aksi-cell">
+                    <a class="dl" href="<?php echo base_url('pengajuan/edit/' . (int) $p['id']); ?>">Edit</a>
+                    <form action="<?php echo base_url('pengajuan/hapus/' . (int) $p['id']); ?>" method="post" onsubmit="return confirm('Hapus pengajuan ini? Tindakan ini tidak bisa dibatalkan.');" style="margin:0">
+                      <button type="submit" class="hapus-link">Hapus</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
