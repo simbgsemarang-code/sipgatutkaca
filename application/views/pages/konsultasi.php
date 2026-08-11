@@ -1047,6 +1047,15 @@
             </span>
             <span class="tim-label-box"><b>PU</b></span>
           </a>
+          <a class="tim-btn" href="<?php echo base_url('login?from=admin'); ?>">
+            <span class="tim-icon-box">
+              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                <path d="M22 5l14 5v10c0 10-6 16-14 19-8-3-14-9-14-19V10l14-5z" stroke="#F8F4EA" stroke-width="2" stroke-linejoin="round" />
+                <path d="M16 22l4.5 4.5L29 17" stroke="#F8F4EA" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span class="tim-label-box"><b style="font-size:.86rem;letter-spacing:.04em">ADMINISTRATOR</b></span>
+          </a>
         </div>
       </div>
     </section>
@@ -1054,7 +1063,7 @@
     <style>
       .tim-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 220px));
+        grid-template-columns: repeat(3, minmax(0, 220px));
         gap: 40px;
         justify-content: center;
         margin-top: 54px
@@ -1112,7 +1121,13 @@
         margin: 0
       }
 
-      @media(max-width:640px) {
+      @media(max-width:760px) {
+        .tim-grid {
+          grid-template-columns: repeat(2, minmax(0, 220px))
+        }
+      }
+
+      @media(max-width:480px) {
         .tim-grid {
           grid-template-columns: 1fr;
           justify-items: center
