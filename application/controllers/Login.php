@@ -12,6 +12,21 @@ class Login extends CI_Controller {
 		'admin' => 'Selamat Datang Admin',
 	);
 
+	/**
+	 * Akun uji coba untuk tombol "masuk cepat" - HANYA ditampilkan kalau
+	 * ENVIRONMENT development (lihat index()). Ini bukan celah lewat
+	 * jalur login: tombolnya cuma submit form biasa ke proses(), yang
+	 * tetap memverifikasi password lewat password_verify() seperti
+	 * login manual - jadi kalau password di DB pernah diganti, tombol
+	 * ini otomatis berhenti berfungsi (bukan diam-diam tetap tembus).
+	 */
+	private $akun_uji = array(
+		array('label' => 'Admin',   'email' => 'admin@sipgatutkaca.local',      'password' => 'f0250dc5621e'),
+		array('label' => 'PU',      'email' => 'pu.uji@sipgatutkaca.local',      'password' => '1965ad22f258'),
+		array('label' => 'TPA',     'email' => 'tpa.uji@sipgatutkaca.local',     'password' => '309997a80684'),
+		array('label' => 'Pemohon', 'email' => 'pemohon.uji@sipgatutkaca.local', 'password' => '092d2a5cd461'),
+	);
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -29,9 +44,10 @@ class Login extends CI_Controller {
 
 		$from = (string) $this->input->get('from');
 
-		$data['error']  = $this->session->flashdata('error');
-		$data['old']    = $this->session->flashdata('old');
-		$data['sapaan'] = isset($this->peta_sapaan[$from]) ? $this->peta_sapaan[$from] : 'Selamat Datang';
+		$data['error']   = $this->session->flashdata('error');
+		$data['old']     = $this->session->flashdata('old');
+		$data['sapaan']  = isset($this->peta_sapaan[$from]) ? $this->peta_sapaan[$from] : 'Selamat Datang';
+		$data['akun_uji'] = (ENVIRONMENT === 'development') ? $this->akun_uji : array();
 		$this->load->view('pages/login', $data);
 	}
 
