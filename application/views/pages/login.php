@@ -229,7 +229,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </a>
     <div class="auth-actions">
       <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
-      <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
+      <a class="btn btn-gold btn-sm" href="<?php echo base_url('daftar'); ?>">Daftar</a>
     </div>
   </div>
 </header>
@@ -248,7 +248,14 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="field"><label for="l-email">Email</label><input id="l-email" name="email" type="email" required placeholder="email@contoh.com" value="<?php echo isset($old['email']) ? htmlspecialchars($old['email'], ENT_QUOTES, 'UTF-8') : ''; ?>"></div>
       <div class="field"><label for="l-pass">Kata Sandi</label><input id="l-pass" name="password" type="password" required placeholder="••••••••"></div>
       <button class="btn btn-gold" type="submit" style="width:100%">Masuk</button>
-      <p class="note" style="text-align:center">Belum memiliki akun? Hubungi admin untuk dibuatkan akun · <a href="<?php echo base_url('login/lupa-password'); ?>" style="color:var(--gold-300);text-decoration:underline">Lupa kata sandi</a></p>
+      <p class="note" style="text-align:center">
+        <?php if (!empty($tampilkan_daftar)): ?>
+          Belum memiliki akun? <a href="<?php echo base_url('daftar'); ?>" style="color:var(--gold-300);text-decoration:underline">Daftar di sini</a>
+        <?php else: ?>
+          Belum memiliki akun? Hubungi admin untuk dibuatkan akun
+        <?php endif; ?>
+        · <a href="<?php echo base_url('login/lupa-password'); ?>" style="color:var(--gold-300);text-decoration:underline">Lupa kata sandi</a>
+      </p>
     </form>
 
     <?php if (!empty($akun_uji)): ?>

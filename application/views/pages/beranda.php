@@ -547,7 +547,7 @@
         </a>
         <div class="auth-actions">
           <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
-          <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
+          <a class="btn btn-gold btn-sm" href="<?php echo base_url('daftar'); ?>">Daftar</a>
         </div>
       </div>
     </header>

@@ -45,6 +45,7 @@ class Login extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->library('session');
+		$this->load->library('token_akun');
 	}
 
 	public function index()
@@ -62,6 +63,9 @@ class Login extends CI_Controller {
 		$data['old']      = $this->session->flashdata('old');
 		$data['sapaan']   = isset($this->peta_sapaan[$from]) ? $this->peta_sapaan[$from] : 'Selamat Datang';
 		$data['akun_uji'] = $this->_akun_uji_untuk($from);
+		// Cuma pemohon (lewat halaman PBG/SLF) yang bisa daftar sendiri -
+		// akun PU/TPA/Admin tetap dibuatkan admin lewat /admin/pengguna.
+		$data['tampilkan_daftar'] = in_array($from, array('pbg', 'slf'), TRUE);
 		$this->load->view('pages/login', $data);
 	}
 
@@ -140,7 +144,7 @@ class Login extends CI_Controller {
 
 		if ($user !== NULL)
 		{
-			$this->_kirim_tautan_reset($user);
+			$this->token_akun->kirim_tautan($user, 'reset');
 		}
 
 		// Pesan sukses SELALU sama, baik email-nya terdaftar atau tidak -
@@ -158,7 +162,7 @@ class Login extends CI_Controller {
 	public function atur_ulang($token = null)
 	{
 		$data['token'] = (string) $token;
-		$data['valid'] = $this->_token_valid((string) $token) !== NULL;
+		$data['valid'] = $this->token_akun->token_valid((string) $token) !== NULL;
 		$data['error'] = $this->session->flashdata('error');
 		$this->load->view('pages/atur_ulang_password', $data);
 	}
@@ -169,7 +173,7 @@ class Login extends CI_Controller {
 		$password = (string) $this->input->post('password');
 		$ulang    = (string) $this->input->post('ulang_password');
 
-		$baris = $this->_token_valid($token);
+		$baris = $this->token_akun->token_valid($token);
 
 		if ($baris === NULL)
 		{
@@ -244,83 +248,5 @@ class Login extends CI_Controller {
 			'pemohon' => 'pemohon',
 		);
 		return isset($peta_tujuan[$role]) ? $peta_tujuan[$role] : '';
-	}
-
-	/**
-	 * Buat token reset baru untuk $user dan kirim tautannya lewat email.
-	 * Yang disimpan ke DB cuma HASH token (SHA-256) - token mentahnya
-	 * cuma pernah ada di email yang dikirim, tidak pernah disimpan.
-	 * Token lama milik user ini yang belum dipakai dibuang dulu supaya
-	 * cuma satu tautan yang berlaku setiap saat.
-	 */
-	private function _kirim_tautan_reset($user)
-	{
-		// Jangan kirim ulang kalau baru saja ada permintaan untuk akun
-		// yang sama (cegah kotak masuk orang lain dibanjiri kalau
-		// formulir ini di-submit berkali-kali).
-		$this->db->where('user_id', (int) $user['id']);
-		$this->db->where('created_at >=', date('Y-m-d H:i:s', time() - 120));
-		if ((int) $this->db->count_all_results('reset_password') > 0)
-		{
-			return;
-		}
-
-		$token      = bin2hex(random_bytes(32));
-		$token_hash = hash('sha256', $token);
-
-		$this->db->where('user_id', (int) $user['id']);
-		$this->db->where('dipakai_pada', NULL);
-		$this->db->delete('reset_password');
-
-		$this->db->insert('reset_password', array(
-			'user_id'     => (int) $user['id'],
-			'token_hash'  => $token_hash,
-			'kedaluwarsa' => date('Y-m-d H:i:s', time() + 3600),
-		));
-
-		$tautan = base_url('login/atur-ulang/' . $token);
-		$domain = parse_url(base_url(), PHP_URL_HOST);
-
-		// Preferensi (protocol, smtp_*, dst) diambil otomatis dari
-		// application/config/email.php - JANGAN initialize() manual di
-		// sini, supaya kalau admin ganti config itu ke SMTP, perubahannya
-		// benar-benar kepakai (bukan ketimpa balik ke 'mail').
-		$this->load->library('email');
-		$this->email->from('no-reply@' . $domain, 'SIP Gatutkaca');
-		$this->email->reply_to('siptaru@cilacapkab.go.id', 'DPUPR Kabupaten Cilacap');
-		$this->email->to($user['email']);
-		$this->email->subject('Atur Ulang Kata Sandi - SIP Gatutkaca');
-		$this->email->message(
-			"Halo " . $user['nama'] . ",\n\n" .
-			"Kami menerima permintaan atur ulang kata sandi untuk akun SIP Gatutkaca Anda.\n\n" .
-			"Klik tautan berikut untuk membuat kata sandi baru (berlaku 1 jam sejak email ini dikirim):\n" . $tautan . "\n\n" .
-			"Kalau Anda tidak merasa meminta ini, abaikan saja email ini - kata sandi Anda tidak akan berubah.\n\n" .
-			"Salam,\nSIP Gatutkaca - DPUPR Kabupaten Cilacap"
-		);
-
-		// @ di sini sengaja: kalau server tidak bisa kirim email (mis.
-		// sendmail belum terkonfigurasi), pengguna tetap melihat pesan
-		// sukses yang sama (lihat proses_lupa()) supaya tidak bocor info
-		// akun mana yang terdaftar. Kegagalan kirim sebaiknya dipantau
-		// lewat log server, bukan lewat respons ke pengguna.
-		@$this->email->send();
-	}
-
-	/**
-	 * Cari baris reset_password yang cocok dengan $token, dan masih
-	 * berlaku (belum kedaluwarsa, belum dipakai). Token mentah di-hash
-	 * dulu sebelum dicocokkan karena yang tersimpan di DB cuma hash-nya.
-	 */
-	private function _token_valid($token)
-	{
-		if ($token === '')
-		{
-			return NULL;
-		}
-
-		$this->db->where('token_hash', hash('sha256', $token));
-		$this->db->where('dipakai_pada', NULL);
-		$this->db->where('kedaluwarsa >=', date('Y-m-d H:i:s'));
-		return $this->db->get('reset_password')->row_array();
 	}
 }
