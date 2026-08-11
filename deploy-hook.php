@@ -26,9 +26,16 @@
  * 3. Pastikan folder ini adalah git working copy hasil clone (lewat
  *    cPanel Git Version Control), pada branch yang benar.
  *
- * Sebelum langkah 2, cek dulu apakah exec() jalan di hosting ini
- * lewat mode diagnostik (GET, tidak memicu deploy apa pun):
+ * Sebelum langkah 2, cek dulu apakah server ini bisa menjalankan
+ * perintah shell lewat mode diagnostik (GET, tidak memicu deploy):
  *   https://domain-anda/deploy-hook.php?diag=SECRET_ANDA
+ *
+ * CATATAN KOMPATIBILITAS: banyak shared hosting mematikan exec() demi
+ * keamanan. Script ini coba beberapa fungsi alternatif secara
+ * berurutan (exec, shell_exec, system, passthru, proc_open) lewat
+ * deploy_hook_shell() -- kalau semuanya dimatikan, deploy otomatis
+ * lewat file ini memang tidak bisa jalan di hosting tsb, perlu jalur
+ * lain (lihat DEPLOY.md #10h).
  */
 
 // --- 0. Muat konfigurasi rahasia (tidak ikut ter-commit) -------------------
@@ -60,6 +67,74 @@ if (! preg_match('/^[A-Za-z0-9._\/-]+$/', $branch))
 	exit('Nama branch pada konfigurasi mengandung karakter yang tidak diizinkan.');
 }
 
+/**
+ * Coba jalankan perintah shell lewat fungsi apa pun yang tersedia dan
+ * tidak diblokir disable_functions, dicoba berurutan sesuai preferensi.
+ *
+ * @return array{0: string|null, 1: string, 2: int|null} [nama fungsi
+ *         yang dipakai (NULL kalau tidak ada satu pun tersedia),
+ *         gabungan stdout+stderr, exit code (NULL kalau fungsinya
+ *         tidak bisa melaporkan exit code, mis. shell_exec)]
+ */
+function deploy_hook_shell($cmd)
+{
+	static $disabled = null;
+	if ($disabled === null)
+	{
+		$disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
+	}
+	$available = function ($fn) use ($disabled) {
+		return function_exists($fn) && ! in_array($fn, $disabled, true);
+	};
+
+	if ($available('exec'))
+	{
+		$out = array();
+		$code = null;
+		exec($cmd, $out, $code);
+		return array('exec', implode("\n", $out), $code);
+	}
+
+	if ($available('shell_exec'))
+	{
+		$out = shell_exec($cmd);
+		return array('shell_exec', $out === null ? '(shell_exec mengembalikan NULL)' : $out, null);
+	}
+
+	if ($available('system'))
+	{
+		ob_start();
+		$last_line = system($cmd, $code);
+		$captured = ob_get_clean();
+		return array('system', $captured !== '' ? $captured : (string) $last_line, $code);
+	}
+
+	if ($available('passthru'))
+	{
+		ob_start();
+		passthru($cmd, $code);
+		$captured = ob_get_clean();
+		return array('passthru', $captured, $code);
+	}
+
+	if ($available('proc_open'))
+	{
+		$descriptors = array(1 => array('pipe', 'w'), 2 => array('pipe', 'w'));
+		$proc = @proc_open($cmd, $descriptors, $pipes);
+		if (is_resource($proc))
+		{
+			$stdout = stream_get_contents($pipes[1]);
+			$stderr = stream_get_contents($pipes[2]);
+			fclose($pipes[1]);
+			fclose($pipes[2]);
+			$code = proc_close($proc);
+			return array('proc_open', $stdout . $stderr, $code);
+		}
+	}
+
+	return array(null, '', null);
+}
+
 // --- 1. Mode diagnostik (GET) -- cek kesiapan server tanpa deploy ---------
 if ($_SERVER['REQUEST_METHOD'] === 'GET')
 {
@@ -72,38 +147,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
 
 	header('Content-Type: text/plain; charset=UTF-8');
 	echo "=== Diagnostik deploy-hook.php ===\n\n";
-	echo 'PHP version    : ' . PHP_VERSION . "\n";
+	echo 'PHP version    : ' . PHP_VERSION . "\n\n";
 
-	$disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
-	$has_exec = function_exists('exec') && ! in_array('exec', $disabled, true);
-	echo 'exec() tersedia: ' . ($has_exec ? 'YA' : 'TIDAK (dinonaktifkan lewat disable_functions)') . "\n";
-
-	if ($has_exec)
+	echo "Fungsi shell yang tersedia (tidak diblokir disable_functions):\n";
+	foreach (array('exec', 'shell_exec', 'system', 'passthru', 'proc_open', 'popen') as $fn)
 	{
-		$out = array();
-		$code = null;
-		exec('git --version 2>&1', $out, $code);
-		echo 'git binary     : ' . ($code === 0 ? trim(implode(' ', $out)) : 'TIDAK DITEMUKAN (exit ' . $code . ')') . "\n";
+		$disabled_list = array_map('trim', explode(',', (string) ini_get('disable_functions')));
+		$ok = function_exists($fn) && ! in_array($fn, $disabled_list, true);
+		echo '  - ' . str_pad($fn, 12) . ': ' . ($ok ? 'YA' : 'tidak') . "\n";
+	}
 
-		$out2 = array();
-		$code2 = null;
-		exec('cd ' . escapeshellarg(__DIR__) . ' && git rev-parse --is-inside-work-tree 2>&1', $out2, $code2);
-		echo 'folder ini git working copy: ' . ($code2 === 0 && trim(implode('', $out2)) === 'true' ? 'YA' : 'TIDAK (exit ' . $code2 . ', output: ' . implode(' ', $out2) . ')') . "\n";
+	list($used_fn, , ) = deploy_hook_shell('echo ok');
+	echo "\nFungsi yang akan dipakai untuk deploy: " . ($used_fn !== null ? $used_fn : 'TIDAK ADA SATU PUN TERSEDIA') . "\n";
 
-		if ($code2 === 0)
+	if ($used_fn === null)
+	{
+		echo "\n=> Semua fungsi eksekusi shell dimatikan di hosting ini. Deploy\n";
+		echo "   otomatis lewat file PHP ini TIDAK BISA jalan di server ini.\n";
+		echo "   Lihat DEPLOY.md bagian 10h untuk rencana cadangan.\n";
+	}
+	else
+	{
+		list(, $out, $code) = deploy_hook_shell('git --version 2>&1');
+		echo 'git binary     : ' . (trim($out) !== '' ? trim($out) : '(kosong)') . ($code !== null ? " (exit {$code})" : '') . "\n";
+
+		list(, $out2, $code2) = deploy_hook_shell('cd ' . escapeshellarg(__DIR__) . ' && git rev-parse --is-inside-work-tree 2>&1');
+		$is_repo = trim($out2) === 'true';
+		echo 'folder ini git working copy: ' . ($is_repo ? 'YA' : 'TIDAK (output: ' . trim($out2) . ')') . "\n";
+
+		if ($is_repo)
 		{
-			$out3 = array();
-			exec('cd ' . escapeshellarg(__DIR__) . ' && git branch --show-current 2>&1', $out3);
-			echo 'branch saat ini: ' . trim(implode(' ', $out3)) . " (target deploy: {$branch})\n";
+			list(, $out3, ) = deploy_hook_shell('cd ' . escapeshellarg(__DIR__) . ' && git branch --show-current 2>&1');
+			echo 'branch saat ini: ' . trim($out3) . " (target deploy: {$branch})\n";
 
-			$out4 = array();
-			exec('cd ' . escapeshellarg(__DIR__) . ' && git log -1 --oneline 2>&1', $out4);
-			echo 'commit terakhir: ' . trim(implode(' ', $out4)) . "\n";
+			list(, $out4, ) = deploy_hook_shell('cd ' . escapeshellarg(__DIR__) . ' && git log -1 --oneline 2>&1');
+			echo 'commit terakhir: ' . trim($out4) . "\n";
 
-			$out5 = array();
-			exec('cd ' . escapeshellarg(__DIR__) . ' && git fetch origin ' . escapeshellarg($branch) . ' 2>&1', $out5, $code5);
-			echo 'tes fetch dari origin: ' . ($code5 === 0 ? 'BERHASIL' : 'GAGAL (exit ' . $code5 . ')') . "\n";
-			echo "  " . implode("\n  ", $out5) . "\n";
+			list(, $out5, $code5) = deploy_hook_shell('cd ' . escapeshellarg(__DIR__) . ' && git fetch origin ' . escapeshellarg($branch) . ' 2>&1');
+			echo 'tes fetch dari origin: ' . ($code5 === 0 ? 'BERHASIL' : ($code5 === null ? 'TIDAK DIKETAHUI (fungsi ini tidak melaporkan exit code)' : 'GAGAL (exit ' . $code5 . ')')) . "\n";
+			echo "  " . str_replace("\n", "\n  ", trim($out5)) . "\n";
 		}
 	}
 
@@ -170,20 +252,7 @@ if ($lock === FALSE || ! flock($lock, LOCK_EX | LOCK_NB))
 	exit('Deploy lain sedang berjalan, coba lagi sebentar.');
 }
 
-// --- 8. Pastikan exec() bisa dipakai di hosting ini ------------------------
-$disabled_fns = array_map('trim', explode(',', (string) ini_get('disable_functions')));
-$has_exec     = function_exists('exec') && ! in_array('exec', $disabled_fns, true);
-
-if (! $has_exec)
-{
-	flock($lock, LOCK_UN);
-	fclose($lock);
-	http_response_code(500);
-	deploy_hook_log('GAGAL: fungsi exec() dinonaktifkan di server ini (disable_functions).');
-	exit('exec() dinonaktifkan di hosting ini - lihat DEPLOY.md #10 rencana cadangan.');
-}
-
-// --- 9. Jalankan git fetch + reset --hard (BUKAN git pull) ----------------
+// --- 8. Jalankan git fetch + reset --hard (BUKAN git pull) ----------------
 // git reset --hard menimpa file yang DILACAK git supaya selalu sama persis
 // dengan commit terbaru di GitHub -- tapi tidak menyentuh file yang
 // sengaja tidak dilacak (application/config/database.php,
@@ -191,18 +260,27 @@ if (! $has_exec)
 $dir_esc = escapeshellarg(__DIR__);
 $cmd = "cd {$dir_esc} && git fetch origin {$branch} 2>&1 && git reset --hard origin/{$branch} 2>&1";
 
-$output    = array();
-$exit_code = null;
-exec($cmd, $output, $exit_code);
+list($used_fn, $output_text, $exit_code) = deploy_hook_shell($cmd);
 
 flock($lock, LOCK_UN);
 fclose($lock);
 
-$output_text = implode("\n", $output);
-deploy_hook_log(($exit_code === 0 ? 'SUKSES' : 'GAGAL (exit ' . $exit_code . ')') . ":\n" . $output_text);
+if ($used_fn === null)
+{
+	http_response_code(500);
+	deploy_hook_log('GAGAL: tidak ada fungsi eksekusi shell yang tersedia di server ini (semua diblokir disable_functions).');
+	exit('Tidak ada fungsi eksekusi shell yang tersedia di hosting ini - lihat DEPLOY.md #10h rencana cadangan.');
+}
 
-http_response_code($exit_code === 0 ? 200 : 500);
-echo $exit_code === 0 ? 'Deploy sukses.' : 'Deploy gagal, cek deploy-hook.log di server.';
+// exit code NULL berarti fungsi yang dipakai (mis. shell_exec) tidak
+// melaporkan exit code -- anggap sukses selama tidak ada indikasi lain,
+// tapi catat di log supaya tetap bisa diperiksa manual.
+$success = ($exit_code === 0 || $exit_code === null);
+
+deploy_hook_log(($success ? 'SUKSES' : 'GAGAL (exit ' . $exit_code . ')') . " [via {$used_fn}]:\n" . $output_text);
+
+http_response_code($success ? 200 : 500);
+echo $success ? 'Deploy sukses.' : 'Deploy gagal, cek deploy-hook.log di server.';
 
 // --- Fungsi bantu: catat log lokal (output git TIDAK dikirim balik ke
 // pemanggil webhook, supaya tidak bocor lewat response HTTP) ---------------
