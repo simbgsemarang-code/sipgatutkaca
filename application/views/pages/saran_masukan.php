@@ -129,7 +129,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </span>
     </a>
     <div class="auth-actions">
-      <a class="btn btn-ghost btn-sm" href="<?php echo base_url('login?from=admin'); ?>">Masuk</a>
+      <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
       <a class="btn btn-gold btn-sm" href="<?php echo base_url('login'); ?>">Daftar</a>
     </div>
   </div>
