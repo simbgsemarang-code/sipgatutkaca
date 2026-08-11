@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login — SIP Gatutkaca · Kabupaten Cilacap</title>
+<title>Atur Ulang Kata Sandi — SIP Gatutkaca · Kabupaten Cilacap</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,114 +45,30 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .brand img{height:50px;width:auto;filter:drop-shadow(0 2px 6px var(--shadow))}
 .brand-name{font-family:var(--display);font-size:1.2rem;letter-spacing:.13em;color:var(--gold-300)}
 .brand-sub{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
-nav ul{display:flex;align-items:center;gap:30px;list-style:none}
-nav a{font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text);position:relative;padding:6px 0;white-space:nowrap}
-nav a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:0;background:var(--gold-500);transition:width .35s}
-nav a:hover::after,nav a:focus-visible::after,nav a.active::after{width:100%}
-nav a.active{color:var(--gold-300)}
-nav a:focus-visible{outline:1px solid var(--gold-500);outline-offset:4px}
-.nav-cta{border:1px solid var(--gold-500);color:var(--gold-300)!important;padding:10px 24px!important;letter-spacing:.24em;font-weight:600}
-.nav-cta:hover{background:var(--gold-500);color:var(--bg)!important}
-.nav-cta::after{display:none}
 .burger{display:none;background:none;border:1px solid var(--line);color:var(--gold-300);font-size:1rem;padding:8px 14px;cursor:pointer}
-
-/* ===== HERO / BANNER ===== */
-.hero{position:relative;display:flex;align-items:center;overflow:hidden}
-.hero.full{min-height:100vh}
-.hero.page{min-height:56vh}
-.hero-bg{position:absolute;inset:0;background-position:center 60%;background-size:cover;transform:scale(1.06);animation:slowzoom 26s ease-out forwards}
-@keyframes slowzoom{to{transform:scale(1)}}
-.hero::after{content:"";position:absolute;inset:0;background:
-  linear-gradient(105deg,var(--hero-1) 0%,var(--hero-2) 42%,var(--hero-3) 78%),
-  linear-gradient(0deg,var(--bg) 0%,transparent 30%)}
-.hero .wrap{position:relative;z-index:2;padding-top:120px;padding-bottom:80px;color:#F8F4EA}
-.hero-eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:#E4C87B;margin-bottom:24px}
-.hero-eyebrow::before{content:"";width:44px;height:1px;background:#C9A24B}
-h1{font-family:var(--display);font-weight:400;font-size:clamp(2.4rem,5.6vw,4.4rem);line-height:1.08;max-width:16ch;color:#F8F4EA}
-h1 em{font-style:normal;color:#E4C87B}
-.hero-lead{max-width:54ch;margin:26px 0 38px;color:#CBD6DF;font-size:1rem}
-.hero-motto{margin-top:56px;font-family:var(--display);letter-spacing:.3em;font-size:.8rem;color:rgba(228,200,123,.8);text-transform:uppercase}
 
 .btn{display:inline-block;padding:15px 34px;font-size:.78rem;letter-spacing:.26em;text-transform:uppercase;transition:.3s;cursor:pointer;border:none;font-family:var(--body)}
 .btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
 .btn-gold:hover{filter:brightness(1.08);transform:translateY(-2px)}
 .btn-ghost{border:1px solid rgba(248,244,234,.45);color:#F8F4EA;background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
-.hero-actions{display:flex;gap:18px;flex-wrap:wrap}
 
 /* ===== SECTION ===== */
 section{padding:100px 0}
-section.alt{background:var(--bg-alt)}
 .eyebrow{font-size:.7rem;letter-spacing:.38em;text-transform:uppercase;color:var(--gold-500);margin-bottom:14px}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:24ch}
-.section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
 
-/* ===== CARDS ===== */
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin-top:60px;border:1px solid var(--line)}
-.card{background:var(--surface);padding:42px 28px 38px;transition:background .35s;display:block}
-.card:hover{background:var(--surface-hi)}
-.card svg{margin-bottom:22px}
-.card h3{font-family:var(--display);font-weight:400;font-size:1.24rem;letter-spacing:.06em;margin-bottom:12px;color:var(--gold-300)}
-.card p{font-size:.9rem;color:var(--muted)}
-.card .go{display:inline-flex;align-items:center;gap:8px;margin-top:20px;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-300)}
-.card .go span{transition:transform .3s}
-.card:hover .go span{transform:translateX(6px)}
-
-/* ===== SPLIT ===== */
-.split{display:grid;grid-template-columns:1.05fr .95fr;gap:70px;align-items:center}
-.split.rev{grid-template-columns:.95fr 1.05fr}
-.photo-frame{position:relative}
-.photo-frame img{width:100%;height:500px;object-fit:cover;filter:saturate(.92) contrast(1.04)}
-.photo-frame::before{content:"";position:absolute;inset:18px -18px -18px 18px;border:1px solid var(--line);z-index:0;pointer-events:none}
-.photo-frame img{position:relative;z-index:1}
-.photo-cap{margin-top:14px;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-
-.list{margin-top:30px}
-.list-item{display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--line)}
-.list-item:first-child{border-top:1px solid var(--line)}
-.list-key{font-family:var(--display);color:var(--gold-300);letter-spacing:.06em;min-width:160px;font-size:.95rem;flex:0 0 auto}
-.list-val{color:var(--muted);font-size:.92rem}
-
-/* ===== STATISTIK ===== */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;margin-top:60px;text-align:center}
-.stat b{display:block;font-family:var(--display);font-weight:400;font-size:2.5rem;color:var(--gold-300)}
-.stat span{font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
-
-/* ===== GALERI ===== */
-.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:52px}
-.g-item{position:relative;overflow:hidden;height:360px}
-.g-item img{width:100%;height:100%;object-fit:cover;transition:transform .8s ease;filter:saturate(.9)}
-.g-item:hover img{transform:scale(1.06)}
-.g-item figcaption{position:absolute;inset:auto 0 0 0;padding:40px 22px 18px;background:linear-gradient(0deg,rgba(8,24,38,.92),transparent);font-family:var(--display);letter-spacing:.12em;color:#F3E3B8}
-
-/* ===== TABEL & FORM ===== */
-table{width:100%;border-collapse:collapse;margin-top:44px;font-size:.9rem}
-th{font-family:var(--display);font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:.74rem;color:var(--gold-300);text-align:left;padding:16px 14px;border-bottom:1px solid var(--gold-500)}
-td{padding:16px 14px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:top}
-td:first-child{color:var(--text);font-weight:500}
-.tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-300)}
-.dl{color:var(--gold-300);letter-spacing:.12em;font-size:.78rem;text-transform:uppercase;white-space:nowrap}
-.dl:hover{text-decoration:underline}
-
+/* ===== FORM ===== */
 .form-card{background:var(--surface);border:1px solid var(--line);padding:46px;max-width:520px}
 .form-card.center{margin:0 auto}
 .field{margin-bottom:22px}
 label{display:block;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
-input,select,textarea{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:13px 15px;font-family:var(--body);font-size:.92rem}
-input:focus,select:focus,textarea:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+input{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:13px 15px;font-family:var(--body);font-size:.92rem}
+input:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
 .note{font-size:.78rem;color:var(--muted);margin-top:16px}
 .alert{padding:16px 20px;margin-bottom:26px;font-size:.88rem;border:1px solid}
 .alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
 .alert-err{background:rgba(224,82,107,.12);border-color:#E0526B;color:#F3AEB9}
-
-/* ===== TIMELINE TATA CARA ===== */
-.steps{margin-top:60px;display:grid;gap:0}
-.step{display:grid;grid-template-columns:90px 1fr;gap:30px;padding:34px 0;border-bottom:1px solid var(--line);align-items:start}
-.step:first-child{border-top:1px solid var(--line)}
-.step-num{font-family:var(--display);font-size:2.4rem;color:var(--gold-300);line-height:1}
-.step h3{font-family:var(--display);font-weight:400;font-size:1.25rem;color:var(--text);margin-bottom:8px;letter-spacing:.04em}
-.step p{color:var(--muted);font-size:.93rem;max-width:70ch}
-.step .tag{margin-top:12px}
 
 /* ===== PANEL WARNA ===== */
 .theme-fab{position:fixed;right:26px;bottom:26px;z-index:80;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold-500);background:var(--surface);color:var(--gold-300);cursor:pointer;display:grid;place-items:center;box-shadow:0 8px 26px var(--shadow);transition:transform .3s}
@@ -183,30 +99,15 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .reveal.in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){
   .reveal{opacity:1;transform:none;transition:none}
-  .hero-bg{animation:none;transform:none}
   html{scroll-behavior:auto}
 }
 
 /* ===== RESPONSIF ===== */
-@media(max-width:1060px){nav ul{gap:20px}}
 @media(max-width:980px){
-  .cards{grid-template-columns:repeat(2,1fr)}
-  .split,.split.rev{grid-template-columns:1fr;gap:44px}
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .gallery{grid-template-columns:1fr}
   .foot-grid{grid-template-columns:1fr}
-  nav ul{position:fixed;inset:84px 0 auto 0;background:var(--head-bg);backdrop-filter:blur(12px);flex-direction:column;gap:0;padding:10px 28px 26px;display:none;border-bottom:1px solid var(--line);align-items:flex-start}
-  nav ul.open{display:flex}
-  nav li{width:100%}
-  nav a{display:block;padding:15px 0}
-  .burger{display:block}
 }
 @media(max-width:560px){
-  .cards{grid-template-columns:1fr}
-  .photo-frame img{height:340px}
   section{padding:76px 0}
-  .step{grid-template-columns:56px 1fr;gap:18px}
-  .step-num{font-size:1.7rem}
 }
 .auth-actions{display:flex;align-items:center;gap:14px}
 .btn-sm{padding:11px 26px;font-size:.72rem;letter-spacing:.2em}
@@ -237,32 +138,27 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <section style="padding-top:calc(84px + 100px)">
   <div class="wrap">
     <div class="page-breadcrumb reveal" style="max-width:520px;margin-left:auto;margin-right:auto">
-      <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>Masuk
+      <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span><a href="<?php echo base_url('login'); ?>">Masuk</a><span class="sep">/</span>Atur Ulang Kata Sandi
     </div>
-    <form class="form-card center reveal" action="<?php echo base_url('login/proses'); ?>" method="post">
-      <p class="eyebrow" style="margin-bottom:8px">Masuk Akun</p>
-      <h2 style="font-size:1.6rem;margin-bottom:28px"><?php echo isset($sapaan) ? htmlspecialchars($sapaan, ENT_QUOTES, 'UTF-8') : 'Selamat Datang'; ?></h2>
-      <?php if (!empty($error)): ?>
-        <div class="alert alert-err"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
-      <?php endif; ?>
-      <div class="field"><label for="l-email">Email</label><input id="l-email" name="email" type="email" required placeholder="email@contoh.com" value="<?php echo isset($old['email']) ? htmlspecialchars($old['email'], ENT_QUOTES, 'UTF-8') : ''; ?>"></div>
-      <div class="field"><label for="l-pass">Kata Sandi</label><input id="l-pass" name="password" type="password" required placeholder="••••••••"></div>
-      <button class="btn btn-gold" type="submit" style="width:100%">Masuk</button>
-      <p class="note" style="text-align:center">Belum memiliki akun? Hubungi admin untuk dibuatkan akun · <a href="<?php echo base_url('login/lupa-password'); ?>" style="color:var(--gold-300);text-decoration:underline">Lupa kata sandi</a></p>
-    </form>
 
-    <?php if (!empty($akun_uji)): ?>
-      <div class="reveal" style="max-width:520px;margin:24px auto 0;padding-top:20px;border-top:1px dashed var(--line)">
-        <p class="note" style="text-align:center;margin-top:0;margin-bottom:14px">Mode pengembangan — masuk cepat akun uji coba:</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
-          <?php foreach ($akun_uji as $a): ?>
-            <form action="<?php echo base_url('login/proses'); ?>" method="post" style="margin:0">
-              <input type="hidden" name="email" value="<?php echo htmlspecialchars($a['email'], ENT_QUOTES, 'UTF-8'); ?>">
-              <input type="hidden" name="password" value="<?php echo htmlspecialchars($a['password'], ENT_QUOTES, 'UTF-8'); ?>">
-              <button type="submit" class="btn btn-ghost btn-sm" style="cursor:pointer"><?php echo htmlspecialchars($a['label'], ENT_QUOTES, 'UTF-8'); ?></button>
-            </form>
-          <?php endforeach; ?>
-        </div>
+    <?php if (!empty($valid)): ?>
+      <form class="form-card center reveal" action="<?php echo base_url('login/proses-atur-ulang'); ?>" method="post">
+        <p class="eyebrow" style="margin-bottom:8px">Atur Ulang Kata Sandi</p>
+        <h2 style="font-size:1.6rem;margin-bottom:24px">Buat Kata Sandi Baru</h2>
+        <?php if (!empty($error)): ?>
+          <div class="alert alert-err"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+        <?php endif; ?>
+        <input type="hidden" name="token" value="<?php echo htmlspecialchars($token, ENT_QUOTES, 'UTF-8'); ?>">
+        <div class="field"><label for="ru-pass">Kata Sandi Baru</label><input id="ru-pass" name="password" type="password" required minlength="8" placeholder="Minimal 8 karakter"></div>
+        <div class="field"><label for="ru-pass2">Ulangi Kata Sandi Baru</label><input id="ru-pass2" name="ulang_password" type="password" required minlength="8" placeholder="Ketik ulang kata sandi baru"></div>
+        <button class="btn btn-gold" type="submit" style="width:100%">Simpan Kata Sandi Baru</button>
+      </form>
+    <?php else: ?>
+      <div class="form-card center reveal">
+        <p class="eyebrow" style="margin-bottom:8px">Atur Ulang Kata Sandi</p>
+        <h2 style="font-size:1.6rem;margin-bottom:24px">Tautan Tidak Berlaku</h2>
+        <div class="alert alert-err">Tautan atur ulang kata sandi ini sudah kedaluwarsa, sudah pernah dipakai, atau tidak valid. Tautan hanya berlaku 1 jam sejak diminta.</div>
+        <a class="btn btn-gold" href="<?php echo base_url('login/lupa-password'); ?>" style="width:100%;text-align:center">Minta Tautan Baru</a>
       </div>
     <?php endif; ?>
   </div>
@@ -331,7 +227,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     document.querySelectorAll('.swatch').forEach(function(s){
       s.classList.toggle('sel',s.dataset.theme===theme);
     });
-    // sisipkan tema ke seluruh tautan internal agar pilihan terbawa antar halaman
     document.querySelectorAll('a[href]').forEach(function(a){
       var h=a.getAttribute('href');
       if(!h||/^(https?:|mailto:|#)/.test(h))return;
@@ -355,7 +250,7 @@ document.addEventListener('click',function(e){
   if(!panel.contains(e.target)&&e.target!==fab&&!fab.contains(e.target))panel.classList.remove('open');
 });
 
-// ===== Navbar & menu ponsel =====
+// ===== Navbar =====
 var bar=document.getElementById('topbar');
 addEventListener('scroll',function(){bar.classList.toggle('scrolled',scrollY>40)},{passive:true});
 
