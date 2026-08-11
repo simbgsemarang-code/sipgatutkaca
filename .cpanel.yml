@@ -1,0 +1,4 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=$HOME/sipgatutkaca.sigaru.my.id/ && RSYNC=$(command -v rsync || echo /usr/bin/rsync) && $RSYNC -a --exclude='.git' --exclude='.github' --exclude='application/config/database.php' --exclude='deploy-hook.config.php' --exclude='deploy-hook.log' --exclude='deploy-hook.lock' ./ $DEPLOYPATH
