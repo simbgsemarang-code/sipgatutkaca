@@ -1,3 +1,10 @@
+# Pastikan permintaan ke folder (termasuk root "/") otomatis diarahkan
+# ke index.php, dan direktori TIDAK PERNAH ditampilkan sebagai daftar
+# file mentah -- dinyatakan eksplisit, tidak bergantung pada default
+# server yang bisa berbeda-beda antar hosting/konfigurasi LiteSpeed.
+DirectoryIndex index.php
+Options -Indexes
+
 # Tanpa <IfModule mod_rewrite.c> -- di LiteSpeed Web Server (banyak
 # dipakai cPanel modern), modul rewrite-nya kadang tidak terdeteksi
 # dengan nama persis "mod_rewrite.c", sehingga seluruh blok di dalam
