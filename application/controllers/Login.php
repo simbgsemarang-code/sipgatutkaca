@@ -21,10 +21,24 @@ class Login extends CI_Controller {
 	 * ini otomatis berhenti berfungsi (bukan diam-diam tetap tembus).
 	 */
 	private $akun_uji = array(
-		array('label' => 'Admin',   'email' => 'admin@sipgatutkaca.local',      'password' => 'f0250dc5621e'),
-		array('label' => 'PU',      'email' => 'pu.uji@sipgatutkaca.local',      'password' => '1965ad22f258'),
-		array('label' => 'TPA',     'email' => 'tpa.uji@sipgatutkaca.local',     'password' => '309997a80684'),
-		array('label' => 'Pemohon', 'email' => 'pemohon.uji@sipgatutkaca.local', 'password' => '092d2a5cd461'),
+		'admin'   => array('label' => 'Admin',   'email' => 'admin@sipgatutkaca.local',      'password' => 'f0250dc5621e'),
+		'pu'      => array('label' => 'PU',      'email' => 'pu.uji@sipgatutkaca.local',      'password' => '1965ad22f258'),
+		'tpa'     => array('label' => 'TPA',     'email' => 'tpa.uji@sipgatutkaca.local',     'password' => '309997a80684'),
+		'pemohon' => array('label' => 'Pemohon', 'email' => 'pemohon.uji@sipgatutkaca.local', 'password' => '092d2a5cd461'),
+	);
+
+	/**
+	 * Tombol "masuk cepat" mana yang relevan untuk tiap nilai ?from=.
+	 * PBG dan SLF sama-sama memakai akun 'pemohon' (satu-satunya peran
+	 * warga/pemohon di sistem ini) tapi labelnya disesuaikan supaya
+	 * terasa nyambung dengan halaman asalnya.
+	 */
+	private $peta_tombol_uji = array(
+		'admin' => array('akun' => 'admin',   'label' => 'Admin'),
+		'pu'    => array('akun' => 'pu',      'label' => 'PU'),
+		'tpa'   => array('akun' => 'tpa',     'label' => 'TPA'),
+		'pbg'   => array('akun' => 'pemohon', 'label' => 'PBG'),
+		'slf'   => array('akun' => 'pemohon', 'label' => 'SLF'),
 	);
 
 	public function __construct()
@@ -44,10 +58,10 @@ class Login extends CI_Controller {
 
 		$from = (string) $this->input->get('from');
 
-		$data['error']   = $this->session->flashdata('error');
-		$data['old']     = $this->session->flashdata('old');
-		$data['sapaan']  = isset($this->peta_sapaan[$from]) ? $this->peta_sapaan[$from] : 'Selamat Datang';
-		$data['akun_uji'] = (ENVIRONMENT === 'development') ? $this->akun_uji : array();
+		$data['error']    = $this->session->flashdata('error');
+		$data['old']      = $this->session->flashdata('old');
+		$data['sapaan']   = isset($this->peta_sapaan[$from]) ? $this->peta_sapaan[$from] : 'Selamat Datang';
+		$data['akun_uji'] = $this->_akun_uji_untuk($from);
 		$this->load->view('pages/login', $data);
 	}
 
@@ -93,6 +107,31 @@ class Login extends CI_Controller {
 	{
 		$this->session->sess_destroy();
 		redirect('login');
+	}
+
+	/**
+	 * Daftar tombol "masuk cepat" yang ditampilkan, disaring sesuai
+	 * halaman/tombol asal ($from). Kalau $from cocok dengan salah satu
+	 * peta_tombol_uji, cuma SATU tombol yang relevan yang ditampilkan.
+	 * Kalau tidak ada $from spesifik (kunjungan langsung ke /login),
+	 * tampilkan semua akun sebagai jaga-jaga supaya tetap bisa diuji.
+	 * Selalu kosong di luar ENVIRONMENT development.
+	 */
+	private function _akun_uji_untuk($from)
+	{
+		if (ENVIRONMENT !== 'development')
+		{
+			return array();
+		}
+
+		if (isset($this->peta_tombol_uji[$from]))
+		{
+			$t    = $this->peta_tombol_uji[$from];
+			$akun = $this->akun_uji[$t['akun']];
+			return array(array('label' => $t['label'], 'email' => $akun['email'], 'password' => $akun['password']));
+		}
+
+		return array_values($this->akun_uji);
 	}
 
 	/**
