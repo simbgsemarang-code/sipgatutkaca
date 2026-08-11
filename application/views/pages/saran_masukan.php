@@ -132,9 +132,14 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <span class="brand-sub">Kabupaten Cilacap</span>
       </span>
     </a>
+    <?php $sesi_nav = info_sesi_navbar(); ?>
     <div class="auth-actions">
-      <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
-      <a class="btn btn-gold btn-sm" href="<?php echo base_url('daftar'); ?>">Daftar</a>
+      <?php if ($sesi_nav['masuk']): ?>
+        <a class="btn btn-gold btn-sm" href="<?php echo base_url($sesi_nav['tujuan_dashboard']); ?>"><?php echo htmlspecialchars($sesi_nav['nama'], ENT_QUOTES, 'UTF-8'); ?></a>
+      <?php else: ?>
+        <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
+        <a class="btn btn-gold btn-sm" href="<?php echo base_url('daftar'); ?>">Daftar</a>
+      <?php endif; ?>
     </div>
   </div>
 </header>

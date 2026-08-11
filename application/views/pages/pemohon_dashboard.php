@@ -46,8 +46,26 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .brand-name{font-family:var(--display);font-size:1.2rem;letter-spacing:.13em;color:var(--gold-300)}
 .brand-sub{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
 .auth-actions{display:flex;align-items:center;gap:14px}
-.hello{font-size:.78rem;letter-spacing:.1em;color:var(--muted)}
-.hello b{color:var(--gold-300);font-weight:600}
+.hello{font-size:.78rem;letter-spacing:.08em;color:var(--gold-300);font-weight:600}
+
+/* ===== TATA LETAK DASHBOARD (sidebar) ===== */
+.dash-layout{display:flex;padding-top:84px}
+.dash-sidebar{width:240px;flex:0 0 240px;min-height:calc(100vh - 84px);background:var(--surface);border-right:1px solid var(--line);padding:40px 0}
+.dash-sidebar nav{display:flex;flex-direction:column;gap:4px}
+.dash-sidebar a{display:flex;align-items:center;gap:12px;padding:14px 28px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-left:3px solid transparent;transition:.25s}
+.dash-sidebar a:hover{color:var(--text);background:var(--surface-hi)}
+.dash-sidebar a.active{color:var(--gold-300);border-left-color:var(--gold-500);background:var(--surface-hi)}
+.dash-sidebar a.logout:hover{color:#E0526B;background:rgba(224,82,107,.08)}
+.dash-main{flex:1;min-width:0}
+.dash-wrap{max-width:1400px;margin:0;padding:0 44px}
+@media(max-width:860px){
+  .dash-layout{flex-direction:column}
+  .dash-sidebar{width:100%;flex:0 0 auto;min-height:0;border-right:none;border-bottom:1px solid var(--line);padding:0}
+  .dash-sidebar nav{flex-direction:row;justify-content:center}
+  .dash-sidebar a{padding:14px 20px;border-left:none;border-bottom:3px solid transparent}
+  .dash-sidebar a.active{border-left-color:transparent;border-bottom-color:var(--gold-500)}
+  .dash-wrap{padding:0 24px}
+}
 
 .btn{display:inline-block;padding:15px 34px;font-size:.78rem;letter-spacing:.26em;text-transform:uppercase;transition:.3s;cursor:pointer;border:none;font-family:var(--body)}
 .btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
@@ -129,14 +147,28 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </span>
     </a>
     <div class="auth-actions">
-      <span class="hello">Masuk sebagai <b><?php echo htmlspecialchars($nama_pengguna, ENT_QUOTES, 'UTF-8'); ?></b></span>
-      <a class="btn btn-ghost btn-sm" href="<?php echo base_url('login/keluar'); ?>">Keluar</a>
+      <a class="btn btn-ghost btn-sm" href="<?php echo base_url(); ?>">Beranda</a>
+      <span class="hello"><?php echo htmlspecialchars($nama_pengguna, ENT_QUOTES, 'UTF-8'); ?></span>
     </div>
   </div>
 </header>
 
-<section style="padding-top:calc(84px + 100px)">
-  <div class="wrap">
+<div class="dash-layout">
+  <aside class="dash-sidebar">
+    <nav>
+      <a href="<?php echo base_url('pemohon'); ?>" class="active">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+        Dashboard
+      </a>
+      <a href="<?php echo base_url('login/keluar'); ?>" class="logout">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 12.5L15 9l-4-3.5M15 9H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Logout
+      </a>
+    </nav>
+  </aside>
+  <div class="dash-main">
+<section style="padding-top:100px">
+  <div class="dash-wrap">
     <div class="reveal">
       <p class="eyebrow">Portal Pemohon</p>
       <h2>Selamat Datang, <?php echo htmlspecialchars($nama_pengguna, ENT_QUOTES, 'UTF-8'); ?></h2>
@@ -196,6 +228,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </div>
   </div>
 </section>
+  </div>
+</div>
 
 <footer>
   <div class="wrap">
