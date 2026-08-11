@@ -3,6 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Pemohon extends CI_Controller {
 
+	/** Label portal di dashboard, mengikuti tombol asal saat login (lihat Login::proses()). */
+	private $peta_label_portal = array(
+		'pbg' => 'Portal Pemohon PBG',
+		'slf' => 'Portal Pemohon SLF',
+	);
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -25,8 +31,11 @@ class Pemohon extends CI_Controller {
 
 	public function index()
 	{
+		$asal = $this->session->userdata('asal_layanan');
+
 		$data['nama_pengguna']  = $this->session->userdata('nama');
 		$data['email_pengguna'] = $this->session->userdata('email');
+		$data['label_portal']   = isset($this->peta_label_portal[$asal]) ? $this->peta_label_portal[$asal] : 'Portal Pemohon';
 		$this->load->view('pages/pemohon_dashboard', $data);
 	}
 }

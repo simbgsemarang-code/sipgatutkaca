@@ -197,7 +197,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <section style="padding-top:100px">
   <div class="dash-wrap">
     <div class="reveal">
-      <p class="eyebrow">Portal Pemohon</p>
+      <p class="eyebrow"><?php echo isset($label_portal) ? htmlspecialchars($label_portal, ENT_QUOTES, 'UTF-8') : 'Portal Pemohon'; ?></p>
       <h2>Selamat Datang, <?php echo htmlspecialchars($nama_pengguna, ENT_QUOTES, 'UTF-8'); ?></h2>
       <p class="section-lead">Dari sini Anda dapat menuju langsung ke layanan yang tersedia. Pilih layanan di bawah untuk melihat persyaratan dan cara pengajuannya.</p>
     </div>

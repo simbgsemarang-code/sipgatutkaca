@@ -245,6 +245,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <?php if (!empty($error)): ?>
         <div class="alert alert-err"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
       <?php endif; ?>
+      <input type="hidden" name="from" value="<?php echo isset($from) ? htmlspecialchars($from, ENT_QUOTES, 'UTF-8') : ''; ?>">
       <div class="field"><label for="l-email">Email</label><input id="l-email" name="email" type="email" required placeholder="email@contoh.com" value="<?php echo isset($old['email']) ? htmlspecialchars($old['email'], ENT_QUOTES, 'UTF-8') : ''; ?>"></div>
       <div class="field"><label for="l-pass">Kata Sandi</label><input id="l-pass" name="password" type="password" required placeholder="••••••••"></div>
       <button class="btn btn-gold" type="submit" style="width:100%">Masuk</button>
@@ -266,6 +267,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
             <form action="<?php echo base_url('login/proses'); ?>" method="post" style="margin:0">
               <input type="hidden" name="email" value="<?php echo htmlspecialchars($a['email'], ENT_QUOTES, 'UTF-8'); ?>">
               <input type="hidden" name="password" value="<?php echo htmlspecialchars($a['password'], ENT_QUOTES, 'UTF-8'); ?>">
+              <input type="hidden" name="from" value="<?php echo isset($from) ? htmlspecialchars($from, ENT_QUOTES, 'UTF-8') : ''; ?>">
               <button type="submit" class="btn btn-ghost btn-sm" style="cursor:pointer"><?php echo htmlspecialchars($a['label'], ENT_QUOTES, 'UTF-8'); ?></button>
             </form>
           <?php endforeach; ?>

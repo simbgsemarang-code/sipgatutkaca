@@ -59,6 +59,7 @@ class Login extends CI_Controller {
 
 		$from = (string) $this->input->get('from');
 
+		$data['from']     = $from;
 		$data['error']    = $this->session->flashdata('error');
 		$data['old']      = $this->session->flashdata('old');
 		$data['sapaan']   = isset($this->peta_sapaan[$from]) ? $this->peta_sapaan[$from] : 'Selamat Datang';
@@ -73,12 +74,17 @@ class Login extends CI_Controller {
 	{
 		$email    = trim((string) $this->input->post('email'));
 		$password = (string) $this->input->post('password');
+		// Dibawa dari input tersembunyi di form login, supaya kalau login
+		// gagal/diulang, halaman login tetap tahu berasal dari tombol PBG
+		// atau SLF mana (sapaan & tombol uji coba tetap sesuai konteks).
+		$from     = (string) $this->input->post('from');
+		$tujuan_ulang = 'login' . ($from !== '' ? '?from=' . rawurlencode($from) : '');
 
 		if ($email === '' || $password === '')
 		{
 			$this->session->set_flashdata('error', 'Email dan kata sandi wajib diisi.');
 			$this->session->set_flashdata('old', array('email' => $email));
-			redirect('login');
+			redirect($tujuan_ulang);
 			return;
 		}
 
@@ -89,7 +95,7 @@ class Login extends CI_Controller {
 		{
 			$this->session->set_flashdata('error', 'Email atau kata sandi salah.');
 			$this->session->set_flashdata('old', array('email' => $email));
-			redirect('login');
+			redirect($tujuan_ulang);
 			return;
 		}
 
@@ -97,11 +103,16 @@ class Login extends CI_Controller {
 		$this->session->sess_regenerate(TRUE);
 
 		$this->session->set_userdata(array(
-			'logged_in' => TRUE,
-			'user_id'   => (int) $row['id'],
-			'nama'      => $row['nama'],
-			'email'     => $row['email'],
-			'role'      => $row['role'],
+			'logged_in'    => TRUE,
+			'user_id'      => (int) $row['id'],
+			'nama'         => $row['nama'],
+			'email'        => $row['email'],
+			'role'         => $row['role'],
+			// Dipakai dashboard pemohon buat menampilkan "Portal Pemohon
+			// PBG"/"Portal Pemohon SLF" sesuai tombol yang dipakai buat
+			// masuk. Kosong kalau bukan lewat salah satu dari keduanya
+			// (mis. login langsung, atau peran selain pemohon).
+			'asal_layanan' => in_array($from, array('pbg', 'slf'), TRUE) ? $from : '',
 		));
 
 		redirect($this->_tujuan_setelah_login($row['role']));
