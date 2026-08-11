@@ -339,163 +339,141 @@ Repo di github.com → **Settings** → **Secrets and variables** →
   workflow** (butuh branch dengan file workflow ini sudah pernah ada di
   `main` minimal sekali, baru muncul di daftar).
 
-## 10. Auto-deploy via webhook GitHub (jalur baru, tidak butuh SSH/FTP)
+## 10. Deploy semi-otomatis: cPanel Git Version Control + .cpanel.yml
 
-**Kenapa ini punya peluang berhasil padahal §9 gagal:** FTP dan SSH
-diblokir karena firewall hosting ini kemungkinan besar cuma mengizinkan
-koneksi *masuk* ke port web (80/443) dari IP mana pun, sementara port
-non-web (21, 22) dibatasi ke IP tertentu saja. Webhook memakai arah
-yang berbeda — **GitHub yang memanggil server** (bukan sebaliknya)
-lewat HTTPS biasa (port 443), port yang sama persis dengan yang dipakai
-pengunjung mengakses situs ini. Jadi jalur ini tidak menabrak
-pembatasan yang sama dengan FTP/SSH.
+**Status akhir (sudah diuji nyata, bukan teori):**
+`exec()` dan seluruh keluarga fungsi shell PHP (`shell_exec`, `system`,
+`passthru`, `proc_open`, `popen`) **dikonfirmasi mati total** di
+hosting ini lewat `disable_functions`. Artinya webhook GitHub yang
+otomatis ter-trigger tiap push (`deploy-hook.php` menjalankan `git`
+lewat PHP) **tidak mungkin dipakai** di server ini — bukan soal
+konfigurasi yang kurang tepat, tapi keterbatasan hosting yang tidak
+bisa diakali dari sisi PHP.
 
-**Prasyarat: repo GitHub harus publik**, supaya cPanel Git Version
-Control bisa clone tanpa Personal Access Token (lihat pembahasan
-sebelumnya soal ini). Sudah dicek: `application/config/database.php`
-di-`.gitignore` dan tidak pernah ter-commit, jadi aman dijadikan
-publik. Satu pengecualian — kalau akun admin seed
-(`admin@sipgatutkaca.local` / password `f0250dc5621e` dari
-`database/tambah_role_dan_admin.sql`) masih aktif, ganti dulu
-password-nya sebelum/segera setelah repo dipublikkan, karena string
-itu akan ikut terlihat di riwayat repo publik.
+**Yang TERBUKTI berhasil sebagai gantinya:** fitur native cPanel Git
+Version Control + file `.cpanel.yml` di root repo. Prosesnya bukan
+"push ke GitHub → situs otomatis update dalam beberapa detik" seperti
+webhook sungguhan, tapi **"push ke GitHub → klik satu tombol di cPanel
+(atau satu baris perintah di Terminal) → situs ter-update"** — jauh
+lebih cepat dan aman dibanding copy-paste isi file manual satu-satu
+yang dipakai sebelumnya.
 
 ### 10a. Jadikan repo publik
 
-GitHub repo → **Settings** → scroll ke **Danger Zone** → **Change
-visibility** → **Change to public** → konfirmasi dengan mengetik nama
-repo.
+Prasyarat supaya cPanel Git Version Control bisa clone tanpa Personal
+Access Token. GitHub repo → **Settings** → **Danger Zone** → **Change
+visibility** → **Change to public**. Sudah dicek aman:
+`application/config/database.php` di-`.gitignore`, tidak pernah
+ter-commit. (Kalau akun admin seed `admin@sipgatutkaca.local` /
+password `f0250dc5621e` dari `database/tambah_role_dan_admin.sql`
+masih aktif, ganti passwordnya karena string itu ikut terlihat di
+riwayat repo publik.)
 
 ### 10b. Setup cPanel Git Version Control
 
-Sama seperti **Cara B** di Langkah 3, tapi sekarang tanpa Personal
-Access Token karena repo sudah publik:
+⚠️ cPanel **menolak** meng-clone langsung ke document root yang sudah
+berisi file (pesan error "...already contains files"), jadi cloning
+harus ke folder terpisah dulu:
 
-- cPanel → **Git Version Control** → **Create**:
+- cPanel → **Git™ Version Control** → **Create**:
   - Clone URL: `https://github.com/simbgsemarang-code/sipgatutkaca.git`
-  - Branch: `claude/clone-ke-dalam-komputerku-zwz9iz`
-  - Repository Path: document root subdomain (folder yang sama dengan
-    `index.php`, `.htaccess`, dst)
-- Kalau document root sudah berisi file dari deploy manual sebelumnya
-  (Cara A), kosongkan dulu foldernya sebelum clone supaya tidak
-  bentrok, ATAU clone ke folder sementara lalu pindahkan isinya
-  menimpa document root (mirip Langkah 7 di Cara A) — yang penting
-  hasil akhirnya folder itu jadi git working copy yang valid (ada
-  subfolder `.git` di dalamnya).
+  - Repository Path: folder baru yang belum ada, mis. `repositories/sipgatutkaca`
+    (cPanel biasanya otomatis menaruhnya di bawah `~/repositories/`
+    apa pun nama yang diketik)
+  - Branch: `claude/clone-ke-dalam-komputerku-zwz9iz` (kalau tidak ada
+    kolomnya saat Create, atur lewat **Manage** setelahnya)
+- Pastikan branch yang ter-checkout benar — cek keberadaan file yang
+  cuma ada di branch ini, mis. `application/views/pages/pbg.php`,
+  sebagai penanda cepat.
+- **Sekali saja**, pindahkan isi folder clone itu ke document root
+  yang sebenarnya (mis. `~/sipgatutkaca.sigaru.my.id/`, dicek dulu
+  path persisnya lewat cPanel → **Domains**, kolom **Document Root**):
+  backup `application/config/database.php` yang sudah ada di document
+  root (kredensial database asli, tidak ada di git) → kosongkan
+  document root → pindahkan (File Manager: aktifkan **Show Hidden
+  Files** dulu supaya folder `.git` ikut terbawa) seluruh isi folder
+  clone ke document root → kembalikan `database.php` yang tadi
+  dibackup. Setelah ini, folder document root **jadi git working copy
+  permanen** — proses pindah manual ini cukup sekali saja, deploy
+  berikutnya cukup lewat 10c.
 
-### 10c. Salin & isi konfigurasi webhook
+### 10c. Deploy (dipakai berulang, tiap ada update)
 
-File `deploy-hook.php` dan `deploy-hook.config.php.example` sudah ikut
-ter-clone bersama kode lainnya. Lewat File Manager, di document root:
+**Cara 1 — tombol di cPanel** (paling praktis): cPanel → **Git™
+Version Control** → **Manage** repo → tab **Pull or Deploy** →
+**Deploy HEAD Commit**. Ini menjalankan task di `.cpanel.yml` lewat
+proses cPanel sendiri (bukan `exec()` PHP), jadi tidak kena
+`disable_functions`.
 
-1. Duplikat/copy `deploy-hook.config.php.example` → beri nama baru
-   `deploy-hook.config.php` (persis, tanpa `.example`).
-2. Edit isinya, ganti `'secret' => 'GANTI_DENGAN_STRING_ACAK_PANJANG'`
-   dengan string acak panjang (40+ karakter). Kalau ada akses
-   **Terminal** di cPanel, bisa generate cepat:
-   ```bash
-   php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"
-   ```
-   Tanpa Terminal, pakai generator password online mana pun, ambil
-   yang panjang dan acak. **Simpan string ini** — dipakai lagi di
-   langkah 10e.
-3. Pastikan `'branch'` di file itu sama dengan branch yang di-clone di
-   langkah 10b (`claude/clone-ke-dalam-komputerku-zwz9iz`).
+**Cara 2 — Terminal** (kalau tombol di atas macet/tidak responsif —
+pernah terjadi, UI cPanel-nya kadang tidak jujur soal progress):
+```bash
+cd ~/repositories/sipgatutkaca
+git pull
+export DEPLOYPATH=$HOME/sipgatutkaca.sigaru.my.id/
+tar --exclude='.git' --exclude='.github' --exclude='application/config/database.php' --exclude='deploy-hook.config.php' --exclude='deploy-hook.log' --exclude='deploy-hook.lock' -cf - . | (mkdir -p "$DEPLOYPATH" && cd "$DEPLOYPATH" && tar xf -)
+chmod 755 "$DEPLOYPATH"
+```
+(Perintah ini persis isi task di `.cpanel.yml` — kalau tombol cPanel
+bermasalah, jalankan manual lewat sini selalu berhasil.)
 
-File `deploy-hook.config.php` ini **sengaja di-`.gitignore`** — tidak
-akan pernah ter-commit ke repo publik, isinya aman berisi secret asli.
+Kedua cara sama-sama aman untuk `application/config/database.php` dan
+file rahasia lain (`deploy-hook.config.php` dst) — dikecualikan
+eksplisit dari proses copy, dan karena proses ini cuma **menambah/
+menimpa** (bukan mirror dengan hapus), file yang tidak ada di repo
+tidak pernah tersentuh.
 
-### 10d. Cek kesiapan server SEBELUM setting webhook di GitHub
+### 10d. ⚠️ Jebakan izin folder (sudah ditemukan & diperbaiki, dicatat untuk jaga-jaga)
 
-Buka lewat browser (ganti `SECRET_ANDA` dengan secret dari langkah
-10c):
+Pernah kejadian: situs tiba-tiba menampilkan "Index of /" bawaan
+LiteSpeed atau 500 Internal Server Error, padahal semua kode & isi
+`.htaccess` benar. Setelah ditelusuri lewat Terminal (`ls -la` di
+document root), penyebabnya folder document root **tiba-tiba berubah
+izinnya jadi `700` dengan grup `nobody`** — akibatnya LiteSpeed sama
+sekali tidak bisa membaca isi folder untuk melayani permintaan web
+(PHP lewat CLI/Terminal tetap normal karena berjalan sebagai pemilik
+folder, jadi tidak kena batasan ini — inilah kenapa `php index.php`
+langsung di Terminal selalu terlihat "baik-baik saja" walau situsnya
+rusak).
 
+**Akar masalahnya:** `tar xf -` ikut menyalin izin folder SUMBER
+(`~/repositories/sipgatutkaca`, yang dibuat cPanel Git Version Control
+dengan izin `700`/`nobody`) ke folder TUJUAN setiap kali dijalankan —
+jadi setiap deploy diam-diam merusak lagi izin document root.
+
+**Sudah diperbaiki permanen**: task di `.cpanel.yml` sekarang diakhiri
+`chmod 755 "$DEPLOYPATH"`, jadi izin document root otomatis
+dibetulkan lagi setiap kali deploy, apa pun izin folder sumbernya.
+Kalau suatu saat situs menunjukkan gejala serupa lagi (halaman kosong/
+"Index of /"/500 padahal kode sudah benar), cek dulu izin foldernya:
+```bash
+ls -la ~/sipgatutkaca.sigaru.my.id/ | head -1
+```
+Harus `drwxr-xr-x ... xmfbccbr xmfbccbr` (755, grup sama dengan
+pemilik) — kalau balik jadi `700`/`nobody`, jalankan
+`chmod 755 ~/sipgatutkaca.sigaru.my.id` lagi.
+
+### 10e. Soal `deploy-hook.php` dan webhook GitHub
+
+File `deploy-hook.php` + `deploy-hook.config.php.example` masih ada di
+repo (siapa tahu suatu saat pindah hosting yang tidak mematikan
+`exec()`, tinggal pakai) tapi **tidak dipasang sebagai webhook aktif**
+di hosting ini karena percuma — sudah dikonfirmasi `exec()` mati total.
+Mode diagnostiknya (`?diag=secret`) tetap berguna untuk mengecek
+kondisi server kalau nanti dicoba lagi di hosting lain:
 ```
 https://sipgatutkaca.sigaru.my.id/deploy-hook.php?diag=SECRET_ANDA
 ```
+(Ganti `SECRET_ANDA` sesuai isi `deploy-hook.config.php` di server —
+kalau belum pernah diisi, endpoint ini balas 404 kosong untuk semua
+permintaan, itu sengaja.)
 
-Harus muncul teks diagnostik yang menyebutkan:
-- `exec() tersedia: YA`
-- `git binary` terdeteksi dengan nomor versi
-- `folder ini git working copy: YA`
-- `tes fetch dari origin: BERHASIL`
+### 10f. Kebiasaan baru: berhenti edit manual di File Manager
 
-**Kalau ada yang gagal**, lihat bagian Troubleshooting (10g) di bawah
-sebelum lanjut ke langkah berikutnya — jangan setting webhook GitHub
-dulu kalau diagnostik ini belum semuanya beres, supaya tidak
-bolak-balik menebak dari sisi GitHub.
-
-### 10e. Tambah webhook di GitHub
-
-Repo → **Settings** → **Webhooks** → **Add webhook**:
-- **Payload URL**: `https://sipgatutkaca.sigaru.my.id/deploy-hook.php`
-- **Content type**: `application/json`
-- **Secret**: string yang sama persis dari langkah 10c
-- **Which events**: pilih **"Just the push event"**
-- **Active**: dicentang
-- **Add webhook**
-
-GitHub langsung mengirim satu event percobaan (`ping`) begitu webhook
-dibuat. Cek di halaman webhook tsb → tab **Recent Deliveries** →
-respons harus **200** dengan body `pong`.
-
-### 10f. Tes end-to-end
-
-Push commit apa pun ke branch `claude/clone-ke-dalam-komputerku-zwz9iz`
-(atau di GitHub, buka delivery `ping` tadi → **Redeliver** kalau mau
-tes ulang tanpa push baru — tapi redeliver `ping` cuma tes
-konektivitas, bukan tes deploy sungguhan karena event-nya bukan
-`push`). Setelah push asli:
-- Tab **Recent Deliveries** di webhook harus menunjukkan event `push`
-  dengan respons **200** dan body `Deploy sukses.`
-- Buka situsnya, konfirmasi perubahan sudah tampil tanpa perlu upload
-  manual sama sekali.
-
-### 10g. ⚠️ PENTING: hentikan kebiasaan edit manual di File Manager
-
-Begitu webhook ini aktif, **setiap push ke branch yang di-deploy akan
-menjalankan `git reset --hard`**, yang menimpa ulang seluruh file yang
-dilacak git supaya sama persis dengan GitHub — termasuk menghapus
-perubahan apa pun yang dibuat langsung lewat File Manager dan belum
-sempat di-commit ke repo. File yang **tidak** dilacak git (seperti
-`application/config/database.php` dan `deploy-hook.config.php` sendiri,
-karena ada di `.gitignore`) aman, tidak akan tersentuh.
-
-Praktis: setelah ini jalan, alur kerjanya berubah total — **tidak perlu
-lagi** instruksi "buka link Raw → copy → paste ke File Manager" yang
-dipakai selama ini. Cukup commit + push ke branch yang di-deploy, dan
-situsnya update sendiri dalam beberapa detik.
-
-### 10h. Troubleshooting
-
-- **`exec() tersedia: TIDAK`** — hosting ini menonaktifkan fungsi shell
-  PHP lewat `disable_functions` (umum di shared hosting demi keamanan).
-  Kalau begini, pendekatan `deploy-hook.php` ini tidak bisa dipakai
-  sama sekali, tidak ada cara memaksanya dari sisi PHP. Alternatif:
-  cek apakah cPanel punya endpoint API (UAPI/WHM API) untuk memicu
-  "Pull or Deploy" pada Git Version Control secara remote — perlu
-  API token cPanel (**Security → Manage API Tokens**); ini rute
-  cadangan yang belum dieksplorasi, kabari kalau exec() ternyata mati
-  supaya bisa dirancang lebih lanjut.
-- **`git binary: TIDAK DITEMUKAN`** — jarang terjadi kalau cPanel Git
-  Version Control sendiri berfungsi (fitur itu juga butuh binary git),
-  tapi PATH untuk proses PHP bisa beda dengan proses cPanel. Kabari
-  kalau ini terjadi.
-- **`folder ini git working copy: TIDAK`** — Repository Path di
-  langkah 10b belum benar, atau clone belum selesai/gagal. Cek lagi
-  cPanel → Git Version Control.
-- **`tes fetch dari origin: GAGAL`** — kemungkinan lain dari
-  pembatasan firewall yang sama seperti kasus SSH/FTP di §9, tapi kali
-  ini untuk koneksi keluar (egress) dari server ke GitHub, bukan
-  masuk. Kalau terjadi, kemungkinan besar memang perlu bantuan hosting
-  support juga.
-- **Delivery di GitHub menunjukkan status selain 200** — klik
-  delivery tsb untuk lihat response body-nya, biasanya pesannya sudah
-  cukup jelas (mis. "Signature tidak valid" berarti secret di
-  `deploy-hook.config.php` beda dengan yang diisi di form webhook
-  GitHub).
-- Semua percobaan (berhasil maupun gagal) tercatat di
-  `deploy-hook.log` di document root — bisa dibuka lewat File Manager
-  kalau butuh detail lebih lanjut (file ini diblokir dari akses
-  browser langsung lewat `.htaccess`, jadi harus dibuka dari File
-  Manager).
+Begitu document root jadi git working copy (10b selesai), **jangan
+lagi edit file langsung di File Manager** — proses deploy di 10c
+menimpa ulang file yang dilacak git, jadi perubahan manual yang belum
+sempat masuk ke repo akan hilang di deploy berikutnya. Alur kerja
+barunya: ubah kode → commit → push ke GitHub → klik **Deploy HEAD
+Commit** (10c) → selesai. Instruksi lama "buka link Raw → copy → paste
+ke File Manager" sudah tidak diperlukan lagi untuk perubahan kode.
