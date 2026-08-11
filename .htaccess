@@ -8,3 +8,11 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php/$1 [L]
+
+# deploy-hook.php sendiri TETAP bisa diakses (perlu, supaya GitHub bisa
+# memanggilnya) - yang diblokir cuma file pendukungnya: log, lock, dan
+# config (config.php aman diakses langsung karena isinya cuma
+# "return array(...)" tanpa echo, tapi tetap ditutup untuk jaga-jaga).
+<FilesMatch "^deploy-hook\.(log|lock|config\.php)$">
+	Require all denied
+</FilesMatch>

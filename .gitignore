@@ -8,6 +8,13 @@ application/logs/*.log
 # Local database credentials
 application/config/database.php
 
+# Konfigurasi rahasia webhook auto-deploy (berisi secret asli - lihat
+# deploy-hook.config.php.example untuk templatenya) + file runtime
+# yang dibuat otomatis oleh deploy-hook.php
+deploy-hook.config.php
+deploy-hook.log
+deploy-hook.lock
+
 # OS/editor cruft
 Thumbs.db
 .DS_Store

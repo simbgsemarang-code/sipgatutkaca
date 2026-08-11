@@ -1,0 +1,26 @@
+<?php
+/**
+ * Konfigurasi deploy-hook.php -- SALIN file ini menjadi
+ * "deploy-hook.config.php" (tanpa ".example") lalu isi nilainya.
+ *
+ * File hasil salinan ("deploy-hook.config.php") SUDAH di-.gitignore,
+ * jadi aman berisi secret asli dan TIDAK akan ikut ter-commit ke
+ * GitHub -- penting karena repo ini publik.
+ */
+return array(
+
+	// String acak panjang (disarankan 40+ karakter), HARUS SAMA PERSIS
+	// dengan "Secret" yang diisi di GitHub -> repo -> Settings ->
+	// Webhooks -> Add webhook.
+	//
+	// Cara bikin cepat lewat Terminal cPanel (kalau ada):
+	//   php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"
+	// Atau lewat situs generator password acak mana pun, ambil yang
+	// panjang (40-64 karakter campuran huruf/angka).
+	'secret' => 'GANTI_DENGAN_STRING_ACAK_PANJANG',
+
+	// Branch yang di-deploy -- harus sama dengan branch yang di-checkout
+	// di cPanel Git Version Control pada folder ini.
+	'branch' => 'claude/clone-ke-dalam-komputerku-zwz9iz',
+
+);
