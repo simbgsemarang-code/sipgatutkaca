@@ -234,7 +234,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="wrap">
     <form class="form-card center reveal" action="<?php echo base_url('login/proses'); ?>" method="post">
       <p class="eyebrow" style="margin-bottom:8px">Masuk Akun</p>
-      <h2 style="font-size:1.6rem;margin-bottom:28px">Selamat Datang Kembali</h2>
+      <h2 style="font-size:1.6rem;margin-bottom:28px">Selamat Datang</h2>
       <?php if (!empty($error)): ?>
         <div class="alert alert-err"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
       <?php endif; ?>
