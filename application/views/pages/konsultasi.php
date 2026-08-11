@@ -1038,7 +1038,7 @@
             </span>
             <span class="tim-label-box"><b>TPA</b></span>
           </a>
-          <a class="tim-btn" href="login-konsultan.html?tim=PU">
+          <a class="tim-btn" href="<?php echo base_url('login?from=pu'); ?>">
             <span class="tim-icon-box">
               <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
                 <path d="M10 34l10-10m4-4l10-10M24 20l-4 4" stroke="#F8F4EA" stroke-width="2" />

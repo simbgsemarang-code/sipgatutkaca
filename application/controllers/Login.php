@@ -8,6 +8,7 @@ class Login extends CI_Controller {
 		'pbg'   => 'Selamat Datang PBG',
 		'slf'   => 'Selamat Datang SLF',
 		'tpa'   => 'Selamat Datang TPA',
+		'pu'    => 'Selamat Datang PU',
 		'admin' => 'Selamat Datang Admin',
 	);
 
