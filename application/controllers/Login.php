@@ -80,16 +80,19 @@ class Login extends CI_Controller {
 	}
 
 	/**
-	 * Tentukan halaman tujuan setelah login berhasil, sesuai peran.
-	 * Saat ini baru peran 'admin' yang punya halaman khusus (kelola
-	 * pengguna); peran lain diarahkan ke beranda.
+	 * Tentukan halaman tujuan (dashboard) setelah login berhasil,
+	 * sesuai peran. Peran di luar peta ini (seharusnya tidak pernah
+	 * terjadi karena kolom role sudah dibatasi ENUM) diarahkan ke
+	 * beranda sebagai jaga-jaga.
 	 */
 	private function _tujuan_setelah_login($role)
 	{
-		if ($role === 'admin')
-		{
-			return 'admin/pengguna';
-		}
-		return '';
+		$peta_tujuan = array(
+			'admin'   => 'admin/pengguna',
+			'pu'      => 'pu',
+			'tpa'     => 'tpa',
+			'pemohon' => 'pemohon',
+		);
+		return isset($peta_tujuan[$role]) ? $peta_tujuan[$role] : '';
 	}
 }
