@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id" data-theme="light">
 
   <head>
     <meta charset="UTF-8">
@@ -39,15 +39,15 @@
 
       /* ====== TEMA TERANG ====== */
       html[data-theme="light"] {
-        --bg: #F8F4EA;
-        --bg-alt: #EFE7D6;
-        --surface: #FFFDF6;
-        --surface-hi: #F5EDDA;
+        --bg: #FDFBF5;
+        --bg-alt: #F6F1E3;
+        --surface: #FFFFFF;
+        --surface-hi: #FAF5E8;
         --text: #152A3B;
         --muted: #4E6070;
         --line: rgba(160, 124, 45, .35);
-        --head-bg: rgba(248, 244, 234, .94);
-        --head-grad: rgba(248, 244, 234, .85);
+        --head-bg: rgba(253, 251, 245, .94);
+        --head-grad: rgba(253, 251, 245, .85);
         --hero-1: rgba(13, 29, 44, .88);
         --hero-2: rgba(13, 29, 44, .66);
         --hero-3: rgba(13, 29, 44, .22);
@@ -334,8 +334,8 @@
       }
 
       .btn-ghost {
-        border: 1px solid rgba(248, 244, 234, .45);
-        color: #F8F4EA;
+        border: 1px solid var(--line);
+        color: var(--text);
         background: transparent
       }
 
@@ -1225,8 +1225,8 @@
     <div class="theme-panel" id="themePanel" role="dialog" aria-label="Pilih warna latar">
       <h5>Warna Latar</h5>
       <div class="swatches">
-        <button class="swatch" data-theme="light"><i class="sw-light"></i><span>Terang</span></button>
-        <button class="swatch sel" data-theme="dark"><i class="sw-dark"></i><span>Gelap</span></button>
+        <button class="swatch sel" data-theme="light"><i class="sw-light"></i><span>Terang</span></button>
+        <button class="swatch" data-theme="dark"><i class="sw-dark"></i><span>Gelap</span></button>
       </div>
     </div>
 
@@ -1234,7 +1234,7 @@
       // ===== TEMA (tanpa penyimpanan browser: dibawa lewat parameter URL antar halaman) =====
       (function () {
         var p = new URLSearchParams(location.search);
-        var t = p.get('theme') === 'light' ? 'light' : 'dark';
+        var t = p.get('theme') === 'dark' ? 'dark' : 'light';
         applyTheme(t, false);
 
         function applyTheme(theme, rewrite) {

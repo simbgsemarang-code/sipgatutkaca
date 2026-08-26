@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,9 +23,9 @@ html[data-theme="dark"]{
 }
 /* ====== TEMA TERANG ====== */
 html[data-theme="light"]{
-  --bg:#F8F4EA;--bg-alt:#EFE7D6;--surface:#FFFDF6;--surface-hi:#F5EDDA;
+  --bg:#FDFBF5;--bg-alt:#F6F1E3;--surface:#FFFFFF;--surface-hi:#FAF5E8;
   --text:#152A3B;--muted:#4E6070;--line:rgba(160,124,45,.35);
-  --head-bg:rgba(248,244,234,.94);--head-grad:rgba(248,244,234,.85);
+  --head-bg:rgba(253,251,245,.94);--head-grad:rgba(253,251,245,.85);
   --hero-1:rgba(13,29,44,.88);--hero-2:rgba(13,29,44,.66);--hero-3:rgba(13,29,44,.22);
   --foot:#122536;--input:#FFFFFF;--shadow:rgba(21,42,59,.18);
   --gold-500:#A57E2C;--gold-300:#8F6C1F;--gold-100:#6E5314;
@@ -50,7 +50,7 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .btn{display:inline-block;padding:15px 34px;font-size:.78rem;letter-spacing:.26em;text-transform:uppercase;transition:.3s;cursor:pointer;border:none;font-family:var(--body)}
 .btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
 .btn-gold:hover{filter:brightness(1.08);transform:translateY(-2px)}
-.btn-ghost{border:1px solid rgba(248,244,234,.45);color:#F8F4EA;background:transparent}
+.btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
 
 /* ===== SECTION ===== */
@@ -224,8 +224,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <div class="theme-panel" id="themePanel" role="dialog" aria-label="Pilih warna latar">
   <h5>Warna Latar</h5>
   <div class="swatches">
-    <button class="swatch" data-theme="light"><i class="sw-light"></i><span>Terang</span></button>
-    <button class="swatch sel" data-theme="dark"><i class="sw-dark"></i><span>Gelap</span></button>
+    <button class="swatch sel" data-theme="light"><i class="sw-light"></i><span>Terang</span></button>
+    <button class="swatch" data-theme="dark"><i class="sw-dark"></i><span>Gelap</span></button>
   </div>
 </div>
 
@@ -233,7 +233,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 // ===== TEMA (tanpa penyimpanan browser: dibawa lewat parameter URL antar halaman) =====
 (function(){
   var p=new URLSearchParams(location.search);
-  var t=p.get('theme')==='light'?'light':'dark';
+  var t=p.get('theme')==='dark'?'dark':'light';
   applyTheme(t,false);
 
   function applyTheme(theme,rewrite){
