@@ -225,14 +225,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <p class="section-lead">Sebaran dan kondisi bangunan gedung milik Pemerintah Kabupaten Cilacap berdasarkan hasil pendataan — dapat disaring per kecamatan dan tingkat kerusakan, lengkap dengan titik koordinat pada peta.</p>
     </div>
 
-    <div class="stats reveal" id="statBox">
-      <div class="stat"><b id="stBaik">0</b><span>Kondisi Baik</span></div>
-      <div class="stat"><b id="stRingan">0</b><span>Rusak Ringan</span></div>
-      <div class="stat"><b id="stSedang">0</b><span>Rusak Sedang</span></div>
-      <div class="stat"><b id="stBerat">0</b><span>Rusak Berat</span></div>
-    </div>
-
-    <div class="map-filter reveal" style="margin-top:56px">
+    <div class="map-filter reveal" style="margin-top:52px">
       <div class="field">
         <label for="f-cari">Cari Bangunan (Nama / Alamat / OPD)</label>
         <input id="f-cari" type="text" placeholder="Ketik nama, OPD, atau alamat" autocomplete="off">
@@ -258,6 +251,13 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div id="map" role="application" aria-label="Peta kondisi bangunan Kabupaten Cilacap"></div>
     </div>
     <p class="map-count reveal">Menampilkan <b id="countShown">0</b> dari <b id="countAll">0</b> bangunan</p>
+
+    <div class="stats reveal" id="statBox" style="margin-top:56px">
+      <div class="stat"><b id="stBaik">0</b><span>Kondisi Baik</span></div>
+      <div class="stat"><b id="stRingan">0</b><span>Rusak Ringan</span></div>
+      <div class="stat"><b id="stSedang">0</b><span>Rusak Sedang</span></div>
+      <div class="stat"><b id="stBerat">0</b><span>Rusak Berat</span></div>
+    </div>
   </div>
 </section>
 
