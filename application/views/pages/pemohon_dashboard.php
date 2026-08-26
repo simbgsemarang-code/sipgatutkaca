@@ -185,10 +185,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
-      <a href="<?php echo base_url('pengajuan'); ?>">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M5 2h5l3 3v11H5V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 2v3h3" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 9.5h4M7 12.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        Pengajuan
-      </a>
     </nav>
     <nav>
       <a href="<?php echo base_url('login/keluar'); ?>" class="logout">
@@ -254,8 +250,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
     <div class="info-card reveal">
       <p class="eyebrow" style="margin-bottom:8px">Riwayat Pengajuan</p>
-      <p>Kelola pengajuan PBG/SLF Anda — tambah pengajuan baru, atau lihat dan ubah status pengajuan yang sudah pernah dibuat.</p>
-      <p style="margin-top:18px"><a class="btn btn-gold btn-sm" href="<?php echo base_url('pengajuan'); ?>">Lihat Pengajuan Saya</a></p>
+      <p>Fitur pelacakan status pengajuan online untuk akun pemohon belum tersedia pada versi ini — daftar riwayat pengajuan Anda akan tampil di sini pada pembaruan berikutnya.</p>
+      <p>Untuk saat ini, silakan hubungi admin/petugas terkait secara langsung untuk menanyakan status pengajuan PBG atau SLF Anda.</p>
     </div>
   </div>
 </section>
