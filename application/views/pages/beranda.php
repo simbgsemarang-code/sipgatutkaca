@@ -328,7 +328,19 @@
         height: 190px;
         background: linear-gradient(135deg, #E2993C 0%, var(--gold-500) 55%, #E2993C 100%);
         clip-path: polygon(4% 50%, 26% 8%, 74% 8%, 96% 50%, 74% 92%, 26% 92%);
-        filter: drop-shadow(0 18px 34px var(--shadow))
+        filter: drop-shadow(0 18px 34px var(--shadow));
+        animation: diamondPulse 3.8s ease-in-out infinite
+      }
+
+      @keyframes diamondPulse {
+        0%, 100% {
+          transform: scale(1) rotate(0deg);
+          filter: drop-shadow(0 18px 34px var(--shadow)) brightness(1)
+        }
+        50% {
+          transform: scale(1.02) rotate(1deg);
+          filter: drop-shadow(0 22px 40px var(--shadow)) brightness(1.07)
+        }
       }
 
       .emblem-mascot {
@@ -338,7 +350,17 @@
         transform: translateX(-50%);
         width: 76%;
         z-index: 3;
-        filter: drop-shadow(0 12px 20px var(--shadow))
+        filter: drop-shadow(0 12px 20px var(--shadow));
+        animation: mascotFloat 4.5s ease-in-out infinite
+      }
+
+      @keyframes mascotFloat {
+        0%, 100% {
+          transform: translateX(-50%) translateY(0) rotate(0deg)
+        }
+        50% {
+          transform: translateX(-50%) translateY(-11px) rotate(-1.5deg)
+        }
       }
 
       .emblem-sub {
@@ -567,6 +589,11 @@
         .hero-bg {
           animation: none;
           transform: none
+        }
+
+        .emblem-diamond,
+        .emblem-mascot {
+          animation: none
         }
 
         html {
