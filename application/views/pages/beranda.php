@@ -351,7 +351,7 @@
         width: 76%;
         z-index: 3;
         filter: drop-shadow(0 12px 20px var(--shadow));
-        animation: mascotFloat 4.5s ease-in-out infinite
+        animation: mascotFloat 4.5s ease-in-out infinite, mascotColorPlay 7s ease-in-out infinite
       }
 
       @keyframes mascotFloat {
@@ -360,6 +360,20 @@
         }
         50% {
           transform: translateX(-50%) translateY(-11px) rotate(-1.5deg)
+        }
+      }
+
+      /* Warna maskot ikut "bermain" - saturasi & kehangatan warna
+         berdenyut lembut lalu kembali ke warna asli, seperti disorot
+         cahaya keemasan. Pakai sepia+saturate (bukan hue-rotate) supaya
+         warna kulitnya tidak bergeser jadi kehijauan/pucat - tetap
+         terlihat seperti maskot yang sama, cuma lebih berkilau. */
+      @keyframes mascotColorPlay {
+        0%, 100% {
+          filter: drop-shadow(0 12px 20px var(--shadow)) sepia(0) saturate(1) brightness(1)
+        }
+        50% {
+          filter: drop-shadow(0 12px 20px var(--shadow)) sepia(.35) saturate(1.45) brightness(1.08)
         }
       }
 
