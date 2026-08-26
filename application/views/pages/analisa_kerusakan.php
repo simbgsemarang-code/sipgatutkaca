@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -79,14 +79,18 @@ input,select,textarea{width:100%;background:var(--input);border:1px solid var(--
 input:focus,select:focus,textarea:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
 .note{font-size:.78rem;color:var(--muted);margin-top:16px}
 
-/* ===== STATISTIK KONDISI ===== */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin-top:52px;border:1px solid var(--line)}
-.stat{background:var(--surface);padding:30px 22px;text-align:center}
-.stat b{display:block;font-family:var(--display);font-weight:400;font-size:2.2rem;margin-bottom:6px}
+/* ===== STATISTIK KONDISI (kartu ala dashboard) ===== */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:52px}
+.stat{background:var(--surface);padding:26px 24px;text-align:left;border-radius:14px;box-shadow:0 4px 18px var(--shadow);border-left:4px solid var(--gold-500)}
+.stat:nth-child(1){border-left-color:#2EA84F}
+.stat:nth-child(2){border-left-color:#F2C230}
+.stat:nth-child(3){border-left-color:#D9822B}
+.stat:nth-child(4){border-left-color:#C0392B}
+.stat b{display:block;font-family:var(--display);font-weight:400;font-size:2.2rem;margin-bottom:6px;color:var(--gold-500)}
 .stat span{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 
 /* ===== PETA ===== */
-.map-filter{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:20px;align-items:end;margin-bottom:22px;width:94vw;margin-left:calc(50% - 47vw);margin-right:calc(50% - 47vw)}
+.map-filter{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:20px;align-items:end;margin-bottom:22px;width:94vw;margin-left:calc(50% - 47vw);margin-right:calc(50% - 47vw);background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 26px;box-shadow:0 4px 18px var(--shadow)}
 .map-filter label{color:var(--gold-300)}
 #btnReset{padding:13px 30px}
 .map-shell{position:relative;width:94vw;margin-left:calc(50% - 47vw);margin-right:calc(50% - 47vw);border:1px solid var(--line);box-shadow:0 18px 50px var(--shadow);border-radius:22px;overflow:hidden}
@@ -106,7 +110,7 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
 
 /* ===== GALERI KONDISI ===== */
 .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:52px}
-.g-card{border:1px solid var(--line);background:var(--surface);transition:.3s}
+.g-card{border:1px solid var(--line);background:var(--surface);transition:.3s;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px var(--shadow)}
 .g-card:hover{background:var(--surface-hi);transform:translateY(-3px);box-shadow:0 14px 30px var(--shadow)}
 .g-photo{height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden}
 .g-photo img{width:100%;height:100%;object-fit:cover}
@@ -222,10 +226,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </div>
 
     <div class="stats reveal" id="statBox">
-      <div class="stat"><b id="stBaik" style="color:#2EA84F">0</b><span>Kondisi Baik</span></div>
-      <div class="stat"><b id="stRingan" style="color:#F2C230">0</b><span>Rusak Ringan</span></div>
-      <div class="stat"><b id="stSedang" style="color:#D9822B">0</b><span>Rusak Sedang</span></div>
-      <div class="stat"><b id="stBerat" style="color:#C0392B">0</b><span>Rusak Berat</span></div>
+      <div class="stat"><b id="stBaik">0</b><span>Kondisi Baik</span></div>
+      <div class="stat"><b id="stRingan">0</b><span>Rusak Ringan</span></div>
+      <div class="stat"><b id="stSedang">0</b><span>Rusak Sedang</span></div>
+      <div class="stat"><b id="stBerat">0</b><span>Rusak Berat</span></div>
     </div>
 
     <div class="map-filter reveal" style="margin-top:56px">
@@ -502,8 +506,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <div class="theme-panel" id="themePanel" role="dialog" aria-label="Pilih warna latar">
   <h5>Warna Latar</h5>
   <div class="swatches">
-    <button class="swatch" data-theme="light"><i class="sw-light"></i><span>Terang</span></button>
-    <button class="swatch sel" data-theme="dark"><i class="sw-dark"></i><span>Gelap</span></button>
+    <button class="swatch sel" data-theme="light"><i class="sw-light"></i><span>Terang</span></button>
+    <button class="swatch" data-theme="dark"><i class="sw-dark"></i><span>Gelap</span></button>
   </div>
 </div>
 
@@ -511,7 +515,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 // ===== TEMA (tanpa penyimpanan browser: dibawa lewat parameter URL antar halaman) =====
 (function(){
   var p=new URLSearchParams(location.search);
-  var t=p.get('theme')==='light'?'light':'dark';
+  var t=p.get('theme')==='dark'?'dark':'light';
   applyTheme(t,false);
 
   function applyTheme(theme,rewrite){
