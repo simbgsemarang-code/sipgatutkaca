@@ -1046,7 +1046,7 @@
       </div>
     </header>
 
-    <section style="padding-top:calc(84px + 100px)">
+    <section style="padding-top:calc(84px + 30px)">
       <div class="wrap">
         <div class="page-breadcrumb reveal">
           <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>Konsultasi

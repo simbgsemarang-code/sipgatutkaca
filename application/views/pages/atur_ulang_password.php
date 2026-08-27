@@ -135,7 +135,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   </div>
 </header>
 
-<section style="padding-top:calc(84px + 100px)">
+<section style="padding-top:calc(84px + 30px)">
   <div class="wrap">
     <div class="page-breadcrumb reveal" style="max-width:520px;margin-left:auto;margin-right:auto">
       <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span><a href="<?php echo base_url('login'); ?>">Masuk</a><span class="sep">/</span>Atur Ulang Kata Sandi

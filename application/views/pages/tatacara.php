@@ -1042,7 +1042,7 @@
       </div>
     </header>
 
-    <section style="padding-top:calc(84px + 100px)">
+    <section style="padding-top:calc(84px + 30px)">
       <div class="wrap">
         <div class="reveal">
           <p class="eyebrow">Tata Cara Layanan</p>

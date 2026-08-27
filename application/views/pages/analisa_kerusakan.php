@@ -214,7 +214,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 
-<section style="padding-top:calc(84px + 100px)">
+<section style="padding-top:calc(84px + 30px)">
   <div class="wrap">
     <div class="page-breadcrumb reveal">
       <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>Analisa Kerusakan

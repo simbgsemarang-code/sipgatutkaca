@@ -257,7 +257,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   </div>
 </header>
 
-<section class="alt" style="padding-top:calc(84px + 100px)">
+<section class="alt" style="padding-top:calc(84px + 30px)">
   <div class="wrap">
     <div class="reveal">
       <p class="eyebrow">Pengajuan ITR</p>

@@ -298,7 +298,7 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
 @media(max-width:560px){.map-filter{grid-template-columns:1fr}#map{height:480px}}
 </style>
 
-<section style="padding-top:calc(84px + 100px)">
+<section style="padding-top:calc(84px + 30px)">
   <div class="wrap">
     <div class="reveal" style="margin-bottom:40px;text-align:center">
       <p class="eyebrow">Peta Interaktif</p>
