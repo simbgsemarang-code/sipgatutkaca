@@ -507,9 +507,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div class="wiz-step" data-step="8">
           <h3>Unggah Dokumen Teknis</h3>
           <p class="wiz-desc">Lengkapi data dengan mengunggah dokumen berikut (jpg/png/pdf, maks 5MB per berkas).</p>
-          <?php foreach ($peta_dokumen as $judul_grup => $daftar): ?>
+          <?php foreach ($peta_dokumen as $judul_grup => $grup): ?>
             <p class="doc-group-title"><?php echo htmlspecialchars($judul_grup, ENT_QUOTES, 'UTF-8'); ?></p>
-            <?php foreach ($daftar as $slug => $label): ?>
+            <?php foreach ($grup['dokumen'] as $slug => $label): ?>
               <div class="file-row">
                 <span class="fr-label"><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></span>
                 <?php if (isset($dokumen_terunggah[$label])): ?>

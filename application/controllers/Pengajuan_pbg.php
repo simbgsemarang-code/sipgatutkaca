@@ -82,22 +82,57 @@ class Pengajuan_pbg extends CI_Controller {
 		),
 	);
 
-	/** Checklist dokumen teknis, dikelompokkan sesuai tampilan SIMBG. */
+	/**
+	 * Checklist dokumen teknis, dikelompokkan per bidang peninjau -
+	 * dipakai TPA (lewat Tpa_pengajuan_pbg) untuk menyaring dokumen
+	 * mana yang perlu ditinjau staf bidang apa. 'tpa_bidang' berisi
+	 * daftar $peran TPA yang berwenang meninjau grup itu, atau NULL
+	 * kalau grup itu bukan wewenang TPA sama sekali (data administrasi
+	 * dasar - di alur aslinya diverifikasi Operator Sekretariat/Dinas
+	 * Teknis sebelum diteruskan ke TPA, tapi peran itu belum ada di
+	 * sistem ini) atau bukan spesifik ke satu bidang (dokumen tambahan
+	 * bebas).
+	 */
 	private $peta_dokumen = array(
 		'Data Umum' => array(
-			'ktp'           => 'Data Identitas Pemilik Bangunan (KTP/KITAS)',
-			'kkpr'          => 'Data Intensitas Bangunan (KKPR/KRK)',
-			'penyedia_jasa' => 'Data Penyedia Jasa Perencana',
+			'tpa_bidang' => null,
+			'dokumen'    => array(
+				'ktp'           => 'Data Identitas Pemilik Bangunan (KTP/KITAS)',
+				'penyedia_jasa' => 'Data Penyedia Jasa Perencana',
+			),
 		),
-		'Data Teknis Arsitektur' => array(
-			'situasi'  => 'Gambar Situasi',
-			'tapak'    => 'Gambar Rencana Tapak Bangunan',
-			'denah'    => 'Gambar Rencana Denah Bangunan',
-			'potongan' => 'Gambar Rencana Potongan Bangunan',
-			'tampak'   => 'Gambar Rencana Tampak Bangunan',
+		'Bidang Arsitektur & Tata Kota' => array(
+			'tpa_bidang' => array('tpa_arsitek'),
+			'dokumen'    => array(
+				'kkpr'       => 'Dokumen KKPR / KRK',
+				'situasi'    => 'Gambar Situasi',
+				'tapak'      => 'Gambar Rencana Tapak Bangunan',
+				'denah'      => 'Gambar Rencana Denah Bangunan',
+				'potongan'   => 'Gambar Rencana Potongan Bangunan',
+				'tampak'     => 'Gambar Rencana Tampak Bangunan',
+				'lingkungan' => 'Dokumen Lingkungan (SPPL/UKL-UPL/AMDAL)',
+			),
+		),
+		'Bidang Struktur & Sipil' => array(
+			'tpa_bidang' => array('tpa_struktur'),
+			'dokumen'    => array(
+				'struktur' => 'Gambar & Perhitungan Struktur',
+				'gempa'    => 'Analisis Beban & Ketahanan Gempa',
+			),
+		),
+		'Bidang Mekanikal, Elektrikal & Perpipaan (MEP)' => array(
+			'tpa_bidang' => array('tpa_mep'),
+			'dokumen'    => array(
+				'elektrikal'         => 'Gambar Instalasi Elektrikal',
+				'plumbing'           => 'Gambar Instalasi Perpipaan (Plumbing)',
+				'proteksi_kebakaran' => 'Sistem Proteksi Kebakaran',
+			),
 		),
 		'Dokumen Tambahan' => array(
-			'tambahan' => 'Dokumen pendukung lain (opsional)',
+			'tpa_bidang' => null,
+			'dokumen'    => array(
+				'tambahan' => 'Dokumen pendukung lain (opsional)',
+			),
 		),
 	);
 
@@ -650,7 +685,7 @@ class Pengajuan_pbg extends CI_Controller {
 		$daftar_jenis = array();
 		foreach ($this->peta_dokumen as $grup)
 		{
-			foreach ($grup as $slug => $label)
+			foreach ($grup['dokumen'] as $slug => $label)
 			{
 				$daftar_jenis[$slug] = $label;
 			}

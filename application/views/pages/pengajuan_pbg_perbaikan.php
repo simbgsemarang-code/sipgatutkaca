@@ -12,7 +12,7 @@ $opt = function ($kunci, $nilai) use ($row) {
 // Pengajuan_pbg::_proses_unggah_dokumen().
 $slug_dari_label = array();
 foreach ($peta_dokumen as $grup) {
-	foreach ($grup as $slug => $label) { $slug_dari_label[$label] = $slug; }
+	foreach ($grup['dokumen'] as $slug => $label) { $slug_dari_label[$label] = $slug; }
 }
 
 $dokumen_ditolak = array();

@@ -282,40 +282,63 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
     <div class="card">
       <h4>Dokumen Teknis Terunggah</h4>
-      <?php if (empty($dokumen)): ?>
-        <p class="doc-empty">Belum ada dokumen teknis yang diunggah.</p>
+      <p style="color:var(--muted);font-size:.82rem;margin-top:-12px;margin-bottom:10px">Dikelompokkan sesuai bidang peninjauan Anda.</p>
+      <?php if (empty($dokumen_kelompok)): ?>
+        <p class="doc-empty">Tidak ada dokumen di bidang Anda untuk permohonan ini.</p>
       <?php else: ?>
-        <?php foreach ($dokumen as $d): ?>
-          <div class="doc-review-item">
-            <div class="doc-review-main">
-              <span class="doc-name"><?php echo htmlspecialchars($d['jenis_dokumen'], ENT_QUOTES, 'UTF-8'); ?> — <?php echo htmlspecialchars($d['nama_file_asli'], ENT_QUOTES, 'UTF-8'); ?></span>
-              <div class="doc-right">
-                <span class="tag tag-<?php echo htmlspecialchars($d['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo $d['status'] === 'ditolak' ? 'Ditolak' : 'Terunggah'; ?></span>
-                <a href="<?php echo base_url('tpa-pengajuan-pbg/berkas/dokumen/' . (int) $d['id']); ?>" target="_blank" rel="noopener noreferrer">Lihat</a>
+        <?php foreach ($dokumen_kelompok as $judul_grup => $grup): ?>
+          <?php if (empty($grup['berkas']) && $judul_grup !== 'Bidang Struktur & Sipil'): ?>
+            <?php continue; ?>
+          <?php endif; ?>
+          <p class="doc-group-title"><?php echo htmlspecialchars($judul_grup, ENT_QUOTES, 'UTF-8'); ?></p>
+
+          <?php if ($judul_grup === 'Bidang Struktur & Sipil' && !empty($row['tanah_lampiran'])): ?>
+            <div class="doc-review-item">
+              <div class="doc-review-main">
+                <span class="doc-name">Sertifikat Kepemilikan Tanah</span>
+                <div class="doc-right">
+                  <a href="<?php echo base_url('tpa-pengajuan-pbg/berkas/tanah_lampiran/' . (int) $row['id']); ?>" target="_blank" rel="noopener noreferrer">Lihat</a>
+                </div>
               </div>
             </div>
+          <?php endif; ?>
 
-            <?php if ($d['status'] === 'ditolak'): ?>
-              <p class="catatan-tolak"><strong>Catatan:</strong> <?php echo $t($d['catatan_penolakan']); ?></p>
-              <?php if (!empty($bisa_ditandai)): ?>
-                <form action="<?php echo base_url('tpa-pengajuan-pbg/tandai-dokumen/' . (int) $d['id']); ?>" method="post" style="margin-top:8px">
-                  <input type="hidden" name="aksi" value="batal">
-                  <button type="submit" class="btn btn-ghost btn-xs" style="cursor:pointer">Batalkan Tanda</button>
-                </form>
+          <?php if (empty($grup['berkas'])): ?>
+            <p class="doc-empty" style="margin-bottom:14px">Belum ada dokumen diunggah untuk bidang ini.</p>
+          <?php endif; ?>
+
+          <?php foreach ($grup['berkas'] as $d): ?>
+            <div class="doc-review-item">
+              <div class="doc-review-main">
+                <span class="doc-name"><?php echo htmlspecialchars($d['jenis_dokumen'], ENT_QUOTES, 'UTF-8'); ?> — <?php echo htmlspecialchars($d['nama_file_asli'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <div class="doc-right">
+                  <span class="tag tag-<?php echo htmlspecialchars($d['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo $d['status'] === 'ditolak' ? 'Ditolak' : 'Terunggah'; ?></span>
+                  <a href="<?php echo base_url('tpa-pengajuan-pbg/berkas/dokumen/' . (int) $d['id']); ?>" target="_blank" rel="noopener noreferrer">Lihat</a>
+                </div>
+              </div>
+
+              <?php if ($d['status'] === 'ditolak'): ?>
+                <p class="catatan-tolak"><strong>Catatan:</strong> <?php echo $t($d['catatan_penolakan']); ?></p>
+                <?php if (!empty($bisa_ditandai)): ?>
+                  <form action="<?php echo base_url('tpa-pengajuan-pbg/tandai-dokumen/' . (int) $d['id']); ?>" method="post" style="margin-top:8px">
+                    <input type="hidden" name="aksi" value="batal">
+                    <button type="submit" class="btn btn-ghost btn-xs" style="cursor:pointer">Batalkan Tanda</button>
+                  </form>
+                <?php endif; ?>
+              <?php elseif (!empty($bisa_ditandai)): ?>
+                <details class="tandai-form">
+                  <summary>Tandai Tidak Sesuai</summary>
+                  <form action="<?php echo base_url('tpa-pengajuan-pbg/tandai-dokumen/' . (int) $d['id']); ?>" method="post">
+                    <input type="hidden" name="aksi" value="tolak">
+                    <div class="isi">
+                      <textarea name="catatan" required placeholder="Alasan / apa yang perlu diperbaiki pada dokumen ini"></textarea>
+                      <button type="submit" class="btn btn-ghost btn-xs" style="cursor:pointer;align-self:flex-start">Kirim Tanda</button>
+                    </div>
+                  </form>
+                </details>
               <?php endif; ?>
-            <?php elseif (!empty($bisa_ditandai)): ?>
-              <details class="tandai-form">
-                <summary>Tandai Tidak Sesuai</summary>
-                <form action="<?php echo base_url('tpa-pengajuan-pbg/tandai-dokumen/' . (int) $d['id']); ?>" method="post">
-                  <input type="hidden" name="aksi" value="tolak">
-                  <div class="isi">
-                    <textarea name="catatan" required placeholder="Alasan / apa yang perlu diperbaiki pada dokumen ini"></textarea>
-                    <button type="submit" class="btn btn-ghost btn-xs" style="cursor:pointer;align-self:flex-start">Kirim Tanda</button>
-                  </div>
-                </form>
-              </details>
-            <?php endif; ?>
-          </div>
+            </div>
+          <?php endforeach; ?>
         <?php endforeach; ?>
       <?php endif; ?>
     </div>

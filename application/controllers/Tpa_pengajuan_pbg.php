@@ -41,6 +41,50 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 		'perpanjangan_slf' => 'Sudah Ada (Perpanjangan SLF)',
 	);
 
+	/** Sama persis dengan Pengajuan_pbg::$peta_dokumen - disalin, bukan dibagi lewat library. Dipakai di sini untuk menyaring dokumen sesuai bidang TPA yang login (lihat _grup_dokumen_untuk_peran()). */
+	private $peta_dokumen = array(
+		'Data Umum' => array(
+			'tpa_bidang' => null,
+			'dokumen'    => array(
+				'ktp'           => 'Data Identitas Pemilik Bangunan (KTP/KITAS)',
+				'penyedia_jasa' => 'Data Penyedia Jasa Perencana',
+			),
+		),
+		'Bidang Arsitektur & Tata Kota' => array(
+			'tpa_bidang' => array('tpa_arsitek'),
+			'dokumen'    => array(
+				'kkpr'       => 'Dokumen KKPR / KRK',
+				'situasi'    => 'Gambar Situasi',
+				'tapak'      => 'Gambar Rencana Tapak Bangunan',
+				'denah'      => 'Gambar Rencana Denah Bangunan',
+				'potongan'   => 'Gambar Rencana Potongan Bangunan',
+				'tampak'     => 'Gambar Rencana Tampak Bangunan',
+				'lingkungan' => 'Dokumen Lingkungan (SPPL/UKL-UPL/AMDAL)',
+			),
+		),
+		'Bidang Struktur & Sipil' => array(
+			'tpa_bidang' => array('tpa_struktur'),
+			'dokumen'    => array(
+				'struktur' => 'Gambar & Perhitungan Struktur',
+				'gempa'    => 'Analisis Beban & Ketahanan Gempa',
+			),
+		),
+		'Bidang Mekanikal, Elektrikal & Perpipaan (MEP)' => array(
+			'tpa_bidang' => array('tpa_mep'),
+			'dokumen'    => array(
+				'elektrikal'         => 'Gambar Instalasi Elektrikal',
+				'plumbing'           => 'Gambar Instalasi Perpipaan (Plumbing)',
+				'proteksi_kebakaran' => 'Sistem Proteksi Kebakaran',
+			),
+		),
+		'Dokumen Tambahan' => array(
+			'tpa_bidang' => null,
+			'dokumen'    => array(
+				'tambahan' => 'Dokumen pendukung lain (opsional)',
+			),
+		),
+	);
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -89,8 +133,11 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 			return;
 		}
 
+		$dokumen_terunggah = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
+		$peran             = (string) $this->session->userdata('role');
+
 		$data['row']              = $row;
-		$data['dokumen']          = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
+		$data['dokumen_kelompok'] = $this->_kelompokkan_dokumen($dokumen_terunggah, $peran);
 		$data['bisa_ditandai']    = ($row['status'] === $this->status_bisa_ditandai);
 		$data['opsi_kepemilikan'] = $this->opsi_kepemilikan;
 		$data['opsi_kondisi']     = $this->opsi_kondisi;
@@ -99,6 +146,69 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 		$data['old']              = $this->session->flashdata('old');
 		$data['nama_pengguna']    = $this->session->userdata('nama');
 		$this->load->view('pages/tpa_pengajuan_pbg_detail', $data);
+	}
+
+	/**
+	 * Kelompokkan dokumen yang sudah diunggah ke dalam grup bidang
+	 * sesuai $peta_dokumen, DISARING supaya cuma grup yang relevan
+	 * dengan $peran yang dikembalikan - grup ber-tpa_bidang NULL
+	 * (dokumen umum, bukan wewenang satu bidang tertentu) selalu ikut
+	 * ditampilkan ke bidang manapun. Akun 'tpa' generik (peran lama)
+	 * melihat SEMUA grup, karena tidak terikat satu spesialisasi.
+	 * Dokumen yang jenisnya sudah tidak dikenali $peta_dokumen (mis.
+	 * data lama sebelum checklist ini ada) tetap dikembalikan lewat
+	 * grup "Lainnya" supaya tidak diam-diam hilang dari tampilan.
+	 */
+	private function _kelompokkan_dokumen($dokumen_terunggah, $peran)
+	{
+		$per_label = array();
+		foreach ($dokumen_terunggah as $d)
+		{
+			$per_label[$d['jenis_dokumen']][] = $d;
+		}
+
+		$hasil = array();
+		foreach ($this->peta_dokumen as $judul_grup => $grup)
+		{
+			$relevan = ($grup['tpa_bidang'] === null) || ($peran === 'tpa') || in_array($peran, $grup['tpa_bidang'], TRUE);
+
+			$berkas = array();
+			foreach ($grup['dokumen'] as $label)
+			{
+				if (isset($per_label[$label]))
+				{
+					foreach ($per_label[$label] as $d)
+					{
+						$berkas[] = $d;
+					}
+					// Label grup ini SELALU dikonsumsi dari $per_label,
+					// baik relevan atau tidak - supaya dokumen milik
+					// bidang lain tidak keliru nyasar ke "Lainnya" di
+					// bawah, cukup disembunyikan (tidak masuk $hasil).
+					unset($per_label[$label]);
+				}
+			}
+
+			if ($relevan)
+			{
+				$hasil[$judul_grup] = array('tpa_bidang' => $grup['tpa_bidang'], 'berkas' => $berkas);
+			}
+		}
+
+		$sisa = array();
+		foreach ($per_label as $daftar)
+		{
+			foreach ($daftar as $d)
+			{
+				$sisa[] = $d;
+			}
+		}
+		if (! empty($sisa))
+		{
+			$hasil['Lainnya'] = array('tpa_bidang' => null, 'berkas' => $sisa);
+		}
+
+		return $hasil;
 	}
 
 	/** Tandai satu dokumen "tidak sesuai" (dengan catatan alasan) atau batalkan tandanya. */
