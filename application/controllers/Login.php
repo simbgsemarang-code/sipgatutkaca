@@ -13,32 +13,40 @@ class Login extends CI_Controller {
 	);
 
 	/**
-	 * Akun uji coba untuk tombol "masuk cepat" - HANYA ditampilkan kalau
+	 * Kredensial akun uji coba - ditampilkan LENGKAP (email + kata
+	 * sandi, bukan cuma tombol berlabel) di halaman login, HANYA kalau
 	 * ENVIRONMENT development (lihat index()). Ini bukan celah lewat
-	 * jalur login: tombolnya cuma submit form biasa ke proses(), yang
-	 * tetap memverifikasi password lewat password_verify() seperti
-	 * login manual - jadi kalau password di DB pernah diganti, tombol
-	 * ini otomatis berhenti berfungsi (bukan diam-diam tetap tembus).
+	 * jalur login: tombol "Masuk" di sebelahnya cuma submit form biasa
+	 * ke proses(), yang tetap memverifikasi password lewat
+	 * password_verify() seperti login manual - jadi kalau password di
+	 * DB pernah diganti, baik tampilan maupun tombolnya otomatis tidak
+	 * sinkron lagi (bukan diam-diam tetap tembus).
+	 *
+	 * 'grup' dipakai _akun_uji_untuk() untuk menyaring sesuai ?from=.
+	 * Semua akun anggota grup yang sama ditampilkan sekaligus (mis.
+	 * grup 'pu' menampilkan Ahmad Wijaya DAN Siti Rahmawati).
 	 */
 	private $akun_uji = array(
-		'admin'   => array('label' => 'Admin',   'email' => 'admin@sipgatutkaca.local',      'password' => 'f0250dc5621e'),
-		'pu'      => array('label' => 'PU',      'email' => 'ahmad.wijaya@sipgatutkaca.local', 'password' => 'b596c84a9d7a'),
-		'tpa'     => array('label' => 'TPA',     'email' => 'rudi.hartono@sipgatutkaca.local', 'password' => '191b9dc53b2d'),
-		'pemohon' => array('label' => 'Pemohon', 'email' => 'pemohon.uji@sipgatutkaca.local', 'password' => '092d2a5cd461'),
+		array('grup' => 'admin',   'label' => 'Admin',        'nama' => 'Administrator',     'email' => 'admin@sipgatutkaca.local',             'password' => 'f0250dc5621e'),
+		array('grup' => 'pu',      'label' => 'PU',            'nama' => 'Ahmad Wijaya',      'email' => 'ahmad.wijaya@sipgatutkaca.local',      'password' => 'b596c84a9d7a'),
+		array('grup' => 'pu',      'label' => 'PU',            'nama' => 'Siti Rahmawati',    'email' => 'siti.rahmawati@sipgatutkaca.local',    'password' => 'e2160c77feb5'),
+		array('grup' => 'tpa',     'label' => 'TPA Arsitek',   'nama' => 'Rudi Hartono',      'email' => 'rudi.hartono@sipgatutkaca.local',      'password' => '191b9dc53b2d'),
+		array('grup' => 'tpa',     'label' => 'TPA Struktur',  'nama' => 'Yulia Permatasari', 'email' => 'yulia.permatasari@sipgatutkaca.local', 'password' => 'b59981e87fad'),
+		array('grup' => 'tpa',     'label' => 'TPA MEP',       'nama' => 'Hendra Kusnadi',    'email' => 'hendra.kusnadi@sipgatutkaca.local',    'password' => '6f21a582f9ec'),
+		array('grup' => 'pemohon', 'label' => 'Pemohon',       'nama' => 'Uji Coba Pemohon',  'email' => 'pemohon.uji@sipgatutkaca.local',       'password' => '092d2a5cd461'),
 	);
 
 	/**
-	 * Tombol "masuk cepat" mana yang relevan untuk tiap nilai ?from=.
-	 * PBG dan SLF sama-sama memakai akun 'pemohon' (satu-satunya peran
-	 * warga/pemohon di sistem ini) tapi labelnya disesuaikan supaya
-	 * terasa nyambung dengan halaman asalnya.
+	 * Grup akun uji coba mana yang relevan untuk tiap nilai ?from=.
+	 * PBG dan SLF sama-sama memakai grup 'pemohon' (satu-satunya peran
+	 * warga/pemohon di sistem ini).
 	 */
 	private $peta_tombol_uji = array(
-		'admin' => array('akun' => 'admin',   'label' => 'Admin'),
-		'pu'    => array('akun' => 'pu',      'label' => 'PU'),
-		'tpa'   => array('akun' => 'tpa',     'label' => 'TPA'),
-		'pbg'   => array('akun' => 'pemohon', 'label' => 'PBG'),
-		'slf'   => array('akun' => 'pemohon', 'label' => 'SLF'),
+		'admin' => 'admin',
+		'pu'    => 'pu',
+		'tpa'   => 'tpa',
+		'pbg'   => 'pemohon',
+		'slf'   => 'pemohon',
 	);
 
 	public function __construct()
@@ -220,12 +228,14 @@ class Login extends CI_Controller {
 	}
 
 	/**
-	 * Daftar tombol "masuk cepat" yang ditampilkan, disaring sesuai
+	 * Daftar kredensial uji coba yang ditampilkan, disaring sesuai
 	 * halaman/tombol asal ($from). Kalau $from cocok dengan salah satu
-	 * peta_tombol_uji, cuma SATU tombol yang relevan yang ditampilkan.
-	 * Kalau tidak ada $from spesifik (kunjungan langsung ke /login),
-	 * tampilkan semua akun sebagai jaga-jaga supaya tetap bisa diuji.
-	 * Selalu kosong di luar ENVIRONMENT development.
+	 * peta_tombol_uji, HANYA akun-akun segrup yang relevan yang
+	 * ditampilkan (semuanya, bukan cuma satu - mis. grup 'tpa'
+	 * menampilkan ketiga spesialisasi sekaligus). Kalau tidak ada
+	 * $from spesifik (kunjungan langsung ke /login), tampilkan semua
+	 * akun dari semua grup. Selalu kosong di luar ENVIRONMENT
+	 * development.
 	 */
 	private function _akun_uji_untuk($from)
 	{
@@ -236,12 +246,13 @@ class Login extends CI_Controller {
 
 		if (isset($this->peta_tombol_uji[$from]))
 		{
-			$t    = $this->peta_tombol_uji[$from];
-			$akun = $this->akun_uji[$t['akun']];
-			return array(array('label' => $t['label'], 'email' => $akun['email'], 'password' => $akun['password']));
+			$grup = $this->peta_tombol_uji[$from];
+			return array_values(array_filter($this->akun_uji, function ($a) use ($grup) {
+				return $a['grup'] === $grup;
+			}));
 		}
 
-		return array_values($this->akun_uji);
+		return $this->akun_uji;
 	}
 
 	/**

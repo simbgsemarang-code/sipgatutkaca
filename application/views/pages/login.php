@@ -259,16 +259,22 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </form>
 
     <?php if (!empty($akun_uji)): ?>
-      <div class="reveal" style="max-width:520px;margin:24px auto 0;padding-top:20px;border-top:1px dashed var(--line)">
-        <p class="note" style="text-align:center;margin-top:0;margin-bottom:14px">Mode pengembangan — masuk cepat akun uji coba:</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <div class="reveal" style="max-width:560px;margin:24px auto 0;padding-top:20px;border-top:1px dashed var(--line)">
+        <p class="note" style="text-align:center;margin-top:0;margin-bottom:14px">Mode pengembangan — kredensial akun uji coba:</p>
+        <div style="display:grid;gap:10px">
           <?php foreach ($akun_uji as $a): ?>
-            <form action="<?php echo base_url('login/proses'); ?>" method="post" style="margin:0">
-              <input type="hidden" name="email" value="<?php echo htmlspecialchars($a['email'], ENT_QUOTES, 'UTF-8'); ?>">
-              <input type="hidden" name="password" value="<?php echo htmlspecialchars($a['password'], ENT_QUOTES, 'UTF-8'); ?>">
-              <input type="hidden" name="from" value="<?php echo isset($from) ? htmlspecialchars($from, ENT_QUOTES, 'UTF-8') : ''; ?>">
-              <button type="submit" class="btn btn-ghost btn-sm" style="cursor:pointer"><?php echo htmlspecialchars($a['label'], ENT_QUOTES, 'UTF-8'); ?></button>
-            </form>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 18px;border:1px solid var(--line);background:var(--surface);flex-wrap:wrap">
+              <div style="font-size:.82rem;line-height:1.6">
+                <div style="color:var(--gold-300);font-weight:600;letter-spacing:.03em"><?php echo htmlspecialchars($a['label'], ENT_QUOTES, 'UTF-8'); ?> — <?php echo htmlspecialchars($a['nama'], ENT_QUOTES, 'UTF-8'); ?></div>
+                <div style="color:var(--muted);user-select:all"><?php echo htmlspecialchars($a['email'], ENT_QUOTES, 'UTF-8'); ?> / <?php echo htmlspecialchars($a['password'], ENT_QUOTES, 'UTF-8'); ?></div>
+              </div>
+              <form action="<?php echo base_url('login/proses'); ?>" method="post" style="margin:0;flex:0 0 auto">
+                <input type="hidden" name="email" value="<?php echo htmlspecialchars($a['email'], ENT_QUOTES, 'UTF-8'); ?>">
+                <input type="hidden" name="password" value="<?php echo htmlspecialchars($a['password'], ENT_QUOTES, 'UTF-8'); ?>">
+                <input type="hidden" name="from" value="<?php echo isset($from) ? htmlspecialchars($from, ENT_QUOTES, 'UTF-8') : ''; ?>">
+                <button type="submit" class="btn btn-ghost btn-sm" style="cursor:pointer">Masuk</button>
+              </form>
+            </div>
           <?php endforeach; ?>
         </div>
       </div>
