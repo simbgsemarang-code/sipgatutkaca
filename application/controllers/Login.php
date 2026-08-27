@@ -253,10 +253,13 @@ class Login extends CI_Controller {
 	private function _tujuan_setelah_login($role)
 	{
 		$peta_tujuan = array(
-			'admin'   => 'admin/pengguna',
-			'pu'      => 'pu',
-			'tpa'     => 'tpa',
-			'pemohon' => 'pemohon',
+			'admin'        => 'admin/pengguna',
+			'pu'           => 'pu',
+			'tpa'          => 'tpa',
+			'tpa_arsitek'  => 'tpa',
+			'tpa_struktur' => 'tpa',
+			'tpa_mep'      => 'tpa',
+			'pemohon'      => 'pemohon',
 		);
 		return isset($peta_tujuan[$role]) ? $peta_tujuan[$role] : '';
 	}

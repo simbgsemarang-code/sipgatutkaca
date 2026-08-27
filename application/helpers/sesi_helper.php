@@ -16,10 +16,13 @@ function info_sesi_navbar()
 	$ci->load->library('session');
 
 	$peta_dashboard = array(
-		'admin'   => 'admin/pengguna',
-		'pu'      => 'pu',
-		'tpa'     => 'tpa',
-		'pemohon' => 'pemohon',
+		'admin'        => 'admin/pengguna',
+		'pu'           => 'pu',
+		'tpa'          => 'tpa',
+		'tpa_arsitek'  => 'tpa',
+		'tpa_struktur' => 'tpa',
+		'tpa_mep'      => 'tpa',
+		'pemohon'      => 'pemohon',
 	);
 
 	$role = $ci->session->userdata('role');

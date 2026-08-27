@@ -211,7 +211,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <div class="reveal">
       <p class="eyebrow">Panel Admin</p>
       <h2>Kelola Pengguna</h2>
-      <p class="section-lead">Tambahkan akun untuk staf Tim Penilai Assesment (TPA), Pekerjaan Umum (PU), admin lain, atau pemohon — dan lihat seluruh pengguna yang sudah terdaftar.</p>
+      <p class="section-lead">Tambahkan akun untuk staf Tim Penilai Assesment (Arsitek, Struktur, atau MEP), Pekerjaan Umum (PU), atau admin lain — dan lihat seluruh pengguna yang sudah terdaftar. Akun pemohon hanya bisa dibuat lewat pendaftaran mandiri di halaman <?php echo base_url('daftar'); ?>.</p>
     </div>
 
     <?php if (!empty($sukses)): ?>
@@ -248,8 +248,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
             <option value="" disabled <?php echo $peran_terpilih === '' ? 'selected' : ''; ?>>— Pilih jenis pengguna —</option>
             <option value="admin" <?php echo $peran_terpilih === 'admin' ? 'selected' : ''; ?>>Admin</option>
             <option value="pu" <?php echo $peran_terpilih === 'pu' ? 'selected' : ''; ?>>PU — Pekerjaan Umum</option>
-            <option value="tpa" <?php echo $peran_terpilih === 'tpa' ? 'selected' : ''; ?>>TPA — Tim Penilai Assesment</option>
-            <option value="pemohon" <?php echo $peran_terpilih === 'pemohon' ? 'selected' : ''; ?>>Pemohon</option>
+            <option value="tpa_arsitek" <?php echo $peran_terpilih === 'tpa_arsitek' ? 'selected' : ''; ?>>TPA Arsitek — Tim Penilai Assesment Arsitektur</option>
+            <option value="tpa_struktur" <?php echo $peran_terpilih === 'tpa_struktur' ? 'selected' : ''; ?>>TPA Struktur — Tim Penilai Assesment Struktur</option>
+            <option value="tpa_mep" <?php echo $peran_terpilih === 'tpa_mep' ? 'selected' : ''; ?>>TPA MEP — Tim Penilai Assesment Mekanikal, Elektrikal, Plambing</option>
           </select>
         </div>
         <button class="btn btn-gold" type="submit" style="width:100%">Tambah Pengguna</button>
@@ -274,10 +275,16 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
                   </td>
                   <td>
                     <?php
-                      $kelas_tag = array('admin' => 'tag', 'pu' => 'tag tag-pu', 'tpa' => 'tag tag-tpa', 'pemohon' => 'tag tag-pemohon');
+                      // 'tpa'/'pemohon' generik dipertahankan di sini (bukan cuma
+                      // 3 spesialisasi baru) karena akun lama bertipe itu masih
+                      // bisa ada di tabel dan tetap harus tampil dengan tag yang
+                      // benar, walau sudah tidak bisa dipilih lagi saat membuat
+                      // pengguna baru.
+                      $kelas_tag = array('admin' => 'tag', 'pu' => 'tag tag-pu', 'tpa' => 'tag tag-tpa', 'tpa_arsitek' => 'tag tag-tpa', 'tpa_struktur' => 'tag tag-tpa', 'tpa_mep' => 'tag tag-tpa', 'pemohon' => 'tag tag-pemohon');
                       $kelas = isset($kelas_tag[$u['role']]) ? $kelas_tag[$u['role']] : 'tag';
+                      $label_peran = strtoupper(str_replace('_', ' ', $u['role']));
                     ?>
-                    <span class="<?php echo $kelas; ?>"><?php echo htmlspecialchars(strtoupper($u['role']), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <span class="<?php echo $kelas; ?>"><?php echo htmlspecialchars($label_peran, ENT_QUOTES, 'UTF-8'); ?></span>
                   </td>
                   <td><?php echo htmlspecialchars(date('d M Y', strtotime($u['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
                   <td>

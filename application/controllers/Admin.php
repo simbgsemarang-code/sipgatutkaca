@@ -3,8 +3,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Admin extends CI_Controller {
 
-	/** Peran yang sah untuk dipilih saat menambahkan pengguna. */
-	private $peran_valid = array('admin', 'pu', 'tpa', 'pemohon');
+	/**
+	 * Peran yang sah untuk dipilih saat menambahkan pengguna lewat
+	 * halaman ini. 'tpa' generik dan 'pemohon' sengaja tidak ada di
+	 * sini (meski keduanya masih nilai ENUM yang sah di database,
+	 * untuk akun lama) - TPA sekarang harus salah satu dari 3
+	 * spesialisasi, dan pemohon cuma bisa daftar sendiri lewat /daftar.
+	 */
+	private $peran_valid = array('admin', 'pu', 'tpa_arsitek', 'tpa_struktur', 'tpa_mep');
 
 	public function __construct()
 	{

@@ -12,10 +12,13 @@ class Pengaturan extends CI_Controller {
 
 	/** Halaman dashboard tujuan tiap peran - dipakai buat link "Dashboard" di sidebar. */
 	private $peta_dashboard = array(
-		'admin'   => 'admin/pengguna',
-		'pu'      => 'pu',
-		'tpa'     => 'tpa',
-		'pemohon' => 'pemohon',
+		'admin'        => 'admin/pengguna',
+		'pu'           => 'pu',
+		'tpa'          => 'tpa',
+		'tpa_arsitek'  => 'tpa',
+		'tpa_struktur' => 'tpa',
+		'tpa_mep'      => 'tpa',
+		'pemohon'      => 'pemohon',
 	);
 
 	public function __construct()

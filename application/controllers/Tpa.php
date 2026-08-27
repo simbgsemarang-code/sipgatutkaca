@@ -13,6 +13,9 @@ class Tpa extends CI_Controller {
 		$this->_wajib_tpa();
 	}
 
+	/** 'tpa' generik dipertahankan di sini untuk akun lama; anggota baru memakai salah satu spesialisasi. */
+	private $peran_tpa = array('tpa', 'tpa_arsitek', 'tpa_struktur', 'tpa_mep');
+
 	private function _wajib_tpa()
 	{
 		if (! $this->session->userdata('logged_in'))
@@ -20,7 +23,7 @@ class Tpa extends CI_Controller {
 			redirect('login');
 			exit;
 		}
-		if ($this->session->userdata('role') !== 'tpa')
+		if (! in_array($this->session->userdata('role'), $this->peran_tpa, TRUE))
 		{
 			show_error('Halaman ini khusus untuk TPA.', 403, 'Akses Ditolak');
 		}
