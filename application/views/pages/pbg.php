@@ -96,19 +96,6 @@ section.alt{background:var(--bg-alt)}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:24ch}
 .section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
 
-/* ===== DAFTAR / LIST BERNOMOR ===== */
-.reg-list{margin-top:44px;list-style:none}
-.reg-list li{display:flex;gap:22px;padding:20px 0;border-bottom:1px solid var(--line);align-items:baseline}
-.reg-list li:first-child{border-top:1px solid var(--line)}
-.reg-num{font-family:var(--display);color:var(--gold-300);font-size:1rem;min-width:32px;flex:0 0 auto}
-.reg-text{color:var(--text);font-size:.95rem;line-height:1.6}
-
-/* ===== KATEGORI PERSYARATAN PBG ===== */
-.pbg-cat{margin-top:44px}
-.pbg-cat h3{display:inline-block;font-family:var(--display);font-weight:400;font-size:1.05rem;letter-spacing:.05em;padding:11px 24px;margin-bottom:2px}
-.pbg-cat-a h3{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826}
-.pbg-cat-b h3{background:linear-gradient(160deg,#1E86A3,#3BAFC9);color:#F8F4EA}
-.pbg-cat .reg-list{margin-top:16px}
 
 /* ===== TIMELINE TATA CARA / DATA TEKNIS ===== */
 .steps{margin-top:46px;display:grid;gap:0}
@@ -278,32 +265,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </div>
 
     <div class="reveal" style="margin-top:64px">
-      <p class="eyebrow" style="margin-bottom:0">Data Umum</p>
-    </div>
-
-    <div class="pbg-cat pbg-cat-a reveal">
-      <h3>Bangunan Hunian / Rumah Tinggal</h3>
-      <ol class="reg-list">
-        <li><span class="reg-num">01</span><span class="reg-text">Data Identitas Pemilik Bangunan (KTP/KITAS)</span></li>
-        <li><span class="reg-num">02</span><span class="reg-text">Data Intensitas Bangunan (KKPR/KRK)/Informasi Tata Ruang (ITR)</span></li>
-        <li><span class="reg-num">03</span><span class="reg-text">Bukti Kepemilikan Tanah (Sertifikat Tanah/Girik/Latter C) dan SPPT / Keterangan NOP</span></li>
-        <li><span class="reg-num">04</span><span class="reg-text">Data Penyedia Jasa Perencana Konstruksi atau Arsitek berlisensi (SKK/STRA/STRI)</span></li>
-      </ol>
-    </div>
-
-    <div class="pbg-cat pbg-cat-b reveal">
-      <h3>Bangunan Umum Non Hunian &amp; Campuran</h3>
-      <ol class="reg-list">
-        <li><span class="reg-num">01</span><span class="reg-text">Data Identitas Pemilik Bangunan (KTP/KITAS) dan NIB</span></li>
-        <li><span class="reg-num">02</span><span class="reg-text">Data Intensitas Bangunan (KKPR/KRK)/Informasi Tata Ruang (ITR)</span></li>
-        <li><span class="reg-num">03</span><span class="reg-text">Dokumen lingkungan sesuai peraturan perundangan (AMDAL, UKL/UPL, SPPL) sesuai dengan penapisan amdalnet</span></li>
-        <li><span class="reg-num">04</span><span class="reg-text">Bukti Kepemilikan Tanah (Sertifikat Tanah/Girik/Latter C) dan SPPT / Keterangan NOP</span></li>
-        <li><span class="reg-num">05</span><span class="reg-text">Data Penyedia Jasa Perencana Konstruksi atau Arsitek berlisensi (SKK/STRA/STRI)</span></li>
-        <li><span class="reg-num">06</span><span class="reg-text">Surat Kerukunan Umat Beragama (SKUB) — khusus bangunan agama</span></li>
-      </ol>
-    </div>
-
-    <div class="reveal" style="margin-top:70px">
       <p class="eyebrow" style="margin-bottom:0">Data Teknis</p>
       <h2 style="font-size:clamp(1.5rem,2.6vw,2rem);margin-top:14px">Kelengkapan Dokumen Rencana Teknis</h2>
     </div>
