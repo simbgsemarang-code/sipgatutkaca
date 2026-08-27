@@ -255,9 +255,12 @@ class Pengajuan_pbg extends CI_Controller {
 			$persetujuan[$p['bidang']] = $p;
 		}
 
+		$dokumen = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
+
 		$data['row']              = $row;
-		$data['dokumen']          = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
+		$data['dokumen']          = $dokumen;
 		$data['persetujuan']      = $persetujuan;
+		$data['checklist']        = $this->_hitung_checklist($row, $dokumen);
 		$data['opsi_kepemilikan'] = $this->opsi_kepemilikan;
 		$data['opsi_kondisi']     = $this->opsi_kondisi;
 		$data['sukses']           = $this->session->flashdata('sukses');
@@ -418,6 +421,76 @@ class Pengajuan_pbg extends CI_Controller {
 			return 'disetujui_tpa';
 		}
 		return 'verifikasi_dokumen';
+	}
+
+	/**
+	 * "Smart checklist" kelengkapan persyaratan - dihitung ULANG tiap
+	 * kali halaman detail dibuka (bukan status tersimpan), langsung
+	 * dari data & dokumen yang ada. Sengaja mengecek lebih banyak
+	 * field daripada $wajib_kirim di simpan() (yang cuma syarat
+	 * minimum supaya BISA dikirim) - field seperti NIK pemohon atau
+	 * data tanah tidak pernah divalidasi wajib saat kirim, jadi kalau
+	 * kosong tidak akan pernah ketahuan tanpa checklist ini. Sama
+	 * persis dengan Tpa_pengajuan_pbg::_hitung_checklist() - disalin,
+	 * bukan dibagi lewat library.
+	 */
+	private function _hitung_checklist($row, $dokumen_terunggah)
+	{
+		$data_wajib = array(
+			'nama_pemohon'           => 'Nama Pemohon',
+			'nik_pemohon'            => 'NIK Pemohon',
+			'kontak_pemohon'         => 'Kontak Pemohon',
+			'lokasi_alamat'          => 'Alamat Lokasi Bangunan',
+			'kepemilikan_bangunan'   => 'Kepemilikan Bangunan',
+			'kondisi_bangunan'       => 'Kondisi Bangunan',
+			'fungsi_bangunan'        => 'Fungsi Bangunan',
+			'bangunan_nama'          => 'Nama Bangunan',
+			'bangunan_luas_per_unit' => 'Luas Per Unit Bangunan',
+			'punya_basemen'          => 'Keterangan Basemen',
+			'tanah_jenis_dokumen'    => 'Jenis Dokumen Kepemilikan Tanah',
+			'tanah_nomor_dokumen'    => 'Nomor Dokumen Tanah',
+			'tanah_nama_pemilik'     => 'Nama Pemilik Hak Tanah',
+			'tanah_alamat'           => 'Alamat Lokasi Tanah',
+		);
+		$data_status = array();
+		foreach ($data_wajib as $kolom => $label)
+		{
+			$data_status[$label] = ! empty($row[$kolom]);
+		}
+
+		$dok_by_label = array();
+		foreach ($dokumen_terunggah as $d)
+		{
+			$dok_by_label[$d['jenis_dokumen']] = $d;
+		}
+
+		// Semua slug checklist WAJIB kecuali 'tambahan' (dokumen
+		// pendukung lain - opsional per $peta_dokumen).
+		$dok_status = array();
+		foreach ($this->peta_dokumen as $grup)
+		{
+			foreach ($grup['dokumen'] as $slug => $label)
+			{
+				if ($slug === 'tambahan')
+				{
+					continue;
+				}
+				if (! isset($dok_by_label[$label]))
+				{
+					$dok_status[$label] = 'belum';
+				}
+				elseif ($dok_by_label[$label]['status'] === 'ditolak')
+				{
+					$dok_status[$label] = 'ditolak';
+				}
+				else
+				{
+					$dok_status[$label] = 'lengkap';
+				}
+			}
+		}
+
+		return array('data' => $data_status, 'dokumen' => $dok_status);
 	}
 
 	/**

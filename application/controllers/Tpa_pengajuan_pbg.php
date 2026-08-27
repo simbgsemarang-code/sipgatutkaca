@@ -180,6 +180,7 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 
 		$data['row']              = $row;
 		$data['dokumen_kelompok'] = $this->_kelompokkan_dokumen($dokumen_terunggah, $peran);
+		$data['checklist']        = $this->_hitung_checklist($row, $dokumen_terunggah);
 		$data['bisa_ditandai']    = in_array($row['status'], $this->status_tpa_aktif, TRUE);
 		$data['persetujuan']      = $persetujuan;
 		$data['bidang_saya']      = $bidang_saya;
@@ -291,6 +292,73 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 			return 'disetujui_tpa';
 		}
 		return 'verifikasi_dokumen';
+	}
+
+	/**
+	 * "Smart checklist" kelengkapan persyaratan - dihitung ULANG tiap
+	 * kali halaman detail dibuka (bukan status tersimpan), langsung
+	 * dari data & dokumen yang ada. Ditampilkan UTUH (tidak disaring
+	 * per bidang seperti dokumen_kelompok) - checklist ini soal
+	 * kelengkapan permohonan secara keseluruhan, bukan aksi tinjau
+	 * dokumen per bidang. Sama persis dengan
+	 * Pengajuan_pbg::_hitung_checklist() - disalin, bukan dibagi lewat
+	 * library.
+	 */
+	private function _hitung_checklist($row, $dokumen_terunggah)
+	{
+		$data_wajib = array(
+			'nama_pemohon'           => 'Nama Pemohon',
+			'nik_pemohon'            => 'NIK Pemohon',
+			'kontak_pemohon'         => 'Kontak Pemohon',
+			'lokasi_alamat'          => 'Alamat Lokasi Bangunan',
+			'kepemilikan_bangunan'   => 'Kepemilikan Bangunan',
+			'kondisi_bangunan'       => 'Kondisi Bangunan',
+			'fungsi_bangunan'        => 'Fungsi Bangunan',
+			'bangunan_nama'          => 'Nama Bangunan',
+			'bangunan_luas_per_unit' => 'Luas Per Unit Bangunan',
+			'punya_basemen'          => 'Keterangan Basemen',
+			'tanah_jenis_dokumen'    => 'Jenis Dokumen Kepemilikan Tanah',
+			'tanah_nomor_dokumen'    => 'Nomor Dokumen Tanah',
+			'tanah_nama_pemilik'     => 'Nama Pemilik Hak Tanah',
+			'tanah_alamat'           => 'Alamat Lokasi Tanah',
+		);
+		$data_status = array();
+		foreach ($data_wajib as $kolom => $label)
+		{
+			$data_status[$label] = ! empty($row[$kolom]);
+		}
+
+		$dok_by_label = array();
+		foreach ($dokumen_terunggah as $d)
+		{
+			$dok_by_label[$d['jenis_dokumen']] = $d;
+		}
+
+		$dok_status = array();
+		foreach ($this->peta_dokumen as $grup)
+		{
+			foreach ($grup['dokumen'] as $slug => $label)
+			{
+				if ($slug === 'tambahan')
+				{
+					continue;
+				}
+				if (! isset($dok_by_label[$label]))
+				{
+					$dok_status[$label] = 'belum';
+				}
+				elseif ($dok_by_label[$label]['status'] === 'ditolak')
+				{
+					$dok_status[$label] = 'ditolak';
+				}
+				else
+				{
+					$dok_status[$label] = 'lengkap';
+				}
+			}
+		}
+
+		return array('data' => $data_status, 'dokumen' => $dok_status);
 	}
 
 	/**
