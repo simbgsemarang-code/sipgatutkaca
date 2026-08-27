@@ -153,6 +153,9 @@ class Pengajuan_pbg extends CI_Controller {
 	private $upload_tipe_izin = 'jpg|jpeg|png|pdf';
 	private $upload_maks_kb   = 5120;
 
+	/** Sama persis dengan Tpa_pengajuan_pbg::$peran_bidang - disalin, bukan dibagi lewat library. Dipakai _hitung_status_keseluruhan() di bawah. */
+	private $peran_bidang = array('tpa_arsitek', 'tpa_struktur', 'tpa_mep');
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -231,8 +234,18 @@ class Pengajuan_pbg extends CI_Controller {
 			return;
 		}
 
+		$persetujuan = array();
+		foreach ($this->db->select('pengajuan_pbg_persetujuan_tpa.*, peninjau.nama AS nama_peninjau')
+			->from('pengajuan_pbg_persetujuan_tpa')
+			->join('users AS peninjau', 'peninjau.id = pengajuan_pbg_persetujuan_tpa.ditinjau_oleh', 'left')
+			->where('id_pengajuan', $id)->get()->result_array() as $p)
+		{
+			$persetujuan[$p['bidang']] = $p;
+		}
+
 		$data['row']              = $row;
 		$data['dokumen']          = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
+		$data['persetujuan']      = $persetujuan;
 		$data['opsi_kepemilikan'] = $this->opsi_kepemilikan;
 		$data['opsi_kondisi']     = $this->opsi_kondisi;
 		$data['nama_pengguna']    = $this->session->userdata('nama');
@@ -310,15 +323,62 @@ class Pengajuan_pbg extends CI_Controller {
 		$this->_proses_unggah_dokumen($id);
 
 		// Status berikutnya tergantung status SAAT INI (sebelum
-		// diperbarui) - perbaikan dokumen biasa kembali ke antrean
-		// verifikasi, perbaikan dokumen konsultasi lanjut ke menunggu
-		// jadwal konsultasi.
-		$status_lanjut = ($row['status'] === 'perbaikan_dokumen_konsultasi') ? 'menunggu_jadwal_konsultasi' : 'verifikasi_dokumen';
+		// diperbarui). "...konsultasi" tetap jadi jalan keluar SATU
+		// ARAH ke Menunggu Jadwal Konsultasi begitu diperbaiki - baris
+		// persetujuan bidang manapun yang masih menggantung
+		// (perbaikan_dokumen ATAU ...konsultasi) ikut dibersihkan,
+		// karena konsultasi menggantikan sisa proses tinjau-ulang
+		// dokumen. Perbaikan dokumen BIASA cuma menghapus baris bidang
+		// yang tadi minta perbaikan itu (supaya ditinjau ulang) - bidang
+		// lain yang sudah lebih dulu menyetujui TIDAK ikut direset,
+		// lalu status keseluruhan dihitung ulang lewat
+		// _hitung_status_keseluruhan() (sama seperti dipakai
+		// Tpa_pengajuan_pbg::kirim_catatan() - disalin, bukan dibagi
+		// lewat library).
+		if ($row['status'] === 'perbaikan_dokumen_konsultasi')
+		{
+			$this->db->where('id_pengajuan', $id)->where_in('status', array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'))->delete('pengajuan_pbg_persetujuan_tpa');
+			$status_lanjut = 'menunggu_jadwal_konsultasi';
+		}
+		else
+		{
+			$this->db->where('id_pengajuan', $id)->where('status', 'perbaikan_dokumen')->delete('pengajuan_pbg_persetujuan_tpa');
+			$status_lanjut = $this->_hitung_status_keseluruhan($id);
+		}
 		$this->db->where('id', $id)->update('pengajuan_pbg', array('status' => $status_lanjut));
 
-		$label_lanjut = ($status_lanjut === 'menunggu_jadwal_konsultasi') ? 'Menunggu Jadwal Konsultasi' : 'Verifikasi Kelengkapan Dokumen';
+		$label_status = array(
+			'verifikasi_dokumen'         => 'Verifikasi Kelengkapan Dokumen',
+			'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi',
+			'disetujui_tpa'              => 'Disetujui TPA',
+		);
+		$label_lanjut = isset($label_status[$status_lanjut]) ? $label_status[$status_lanjut] : $status_lanjut;
 		$this->session->set_flashdata('sukses', 'Perbaikan berhasil dikirim. Status permohonan sekarang: ' . $label_lanjut . '.');
 		redirect('pengajuan-pbg/lihat/' . $id);
+	}
+
+	/** Sama persis dengan Tpa_pengajuan_pbg::_hitung_status_keseluruhan() - disalin, bukan dibagi lewat library. Lihat catatan lengkap di sana. */
+	private function _hitung_status_keseluruhan($id)
+	{
+		$status_per_bidang = array();
+		foreach ($this->db->select('bidang, status')->where('id_pengajuan', $id)->get('pengajuan_pbg_persetujuan_tpa')->result_array() as $b)
+		{
+			$status_per_bidang[$b['bidang']] = $b['status'];
+		}
+
+		if (in_array('perbaikan_dokumen_konsultasi', $status_per_bidang, TRUE))
+		{
+			return 'perbaikan_dokumen_konsultasi';
+		}
+		if (in_array('perbaikan_dokumen', $status_per_bidang, TRUE))
+		{
+			return 'perbaikan_dokumen';
+		}
+		if (count($status_per_bidang) === count($this->peran_bidang))
+		{
+			return 'disetujui_tpa';
+		}
+		return 'verifikasi_dokumen';
 	}
 
 	/**

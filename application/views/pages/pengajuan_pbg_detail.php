@@ -5,6 +5,9 @@ $t = function ($v) {
 $tgl = function ($v) {
 	return ($v === null || $v === '') ? '—' : htmlspecialchars(date('d M Y', strtotime($v)), ENT_QUOTES, 'UTF-8');
 };
+$tgl_jam = function ($v) {
+	return ($v === null || $v === '') ? '—' : htmlspecialchars(date('d M Y H:i', strtotime($v)), ENT_QUOTES, 'UTF-8');
+};
 $label_status = array(
 	'draf'                         => 'Draf',
 	'verifikasi_dokumen'           => 'Verifikasi Kelengkapan Dokumen',
@@ -14,6 +17,16 @@ $label_status = array(
 	'disetujui_tpa'                => 'Disetujui TPA',
 );
 $perlu_perbaikan = in_array($row['status'], array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'), TRUE);
+$label_bidang = array(
+	'tpa_arsitek'  => 'Bidang Arsitektur & Tata Kota',
+	'tpa_struktur' => 'Bidang Struktur & Sipil',
+	'tpa_mep'      => 'Bidang Mekanikal, Elektrikal & Perpipaan (MEP)',
+);
+$label_status_bidang = array(
+	'disetujui'                    => 'Disetujui',
+	'perbaikan_dokumen'            => 'Perbaikan Dokumen',
+	'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi',
+);
 ?>
 <!DOCTYPE html>
 <html lang="id" data-theme="light">
@@ -199,22 +212,28 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Perbaiki Permohonan</a>
     <?php endif; ?>
 
-    <?php if ($perlu_perbaikan && !empty($row['catatan_tpa'])): ?>
-      <div class="card" style="border-color:#B4573B;background:rgba(240,160,72,.06)">
-        <h4>Catatan Peninjauan TPA</h4>
-        <p style="white-space:pre-line"><?php echo $t($row['catatan_tpa']); ?></p>
-        <p style="color:var(--muted);font-size:.8rem;margin-top:12px">Oleh <?php echo $t($row['nama_peninjau']); ?> — <?php echo !empty($row['ditinjau_pada']) ? htmlspecialchars(date('d M Y H:i', strtotime($row['ditinjau_pada'])), ENT_QUOTES, 'UTF-8') : '—'; ?></p>
-      </div>
-    <?php endif; ?>
-
-    <?php if ($row['status'] === 'disetujui_tpa'): ?>
-      <div class="card" style="border-color:#2EA84F;background:rgba(46,168,79,.06)">
-        <h4>Catatan Peninjauan TPA</h4>
-        <p>Semua dokumen dinyatakan sesuai - tidak ada perbaikan yang diperlukan.</p>
-        <?php if (!empty($row['catatan_tpa'])): ?>
-          <p style="white-space:pre-line;margin-top:10px"><?php echo $t($row['catatan_tpa']); ?></p>
-        <?php endif; ?>
-        <p style="color:var(--muted);font-size:.8rem;margin-top:12px">Oleh <?php echo $t($row['nama_peninjau']); ?> — <?php echo !empty($row['ditinjau_pada']) ? htmlspecialchars(date('d M Y H:i', strtotime($row['ditinjau_pada'])), ENT_QUOTES, 'UTF-8') : '—'; ?></p>
+    <?php if (!empty($persetujuan) || $perlu_perbaikan || $row['status'] === 'disetujui_tpa'): ?>
+      <div class="card" style="border-color:<?php echo ($row['status'] === 'disetujui_tpa') ? '#2EA84F' : '#B4573B'; ?>;background:<?php echo ($row['status'] === 'disetujui_tpa') ? 'rgba(46,168,79,.06)' : 'rgba(240,160,72,.06)'; ?>">
+        <h4>Status Persetujuan TPA per Bidang</h4>
+        <p style="color:var(--muted);font-size:.82rem;margin-top:-12px;margin-bottom:16px">Permohonan berstatus Disetujui TPA kalau ketiga bidang di bawah sudah menyetujui.</p>
+        <div class="kv-grid">
+          <?php foreach ($label_bidang as $kode_bidang => $nama_bidang): ?>
+            <div class="kv full">
+              <span><?php echo htmlspecialchars($nama_bidang, ENT_QUOTES, 'UTF-8'); ?></span>
+              <?php if (isset($persetujuan[$kode_bidang])): $p = $persetujuan[$kode_bidang]; ?>
+                <b>
+                  <span class="tag tag-<?php echo ($p['status'] === 'disetujui') ? 'disetujui_tpa' : htmlspecialchars($p['status'], ENT_QUOTES, 'UTF-8'); ?>" style="margin-top:4px"><?php echo htmlspecialchars(isset($label_status_bidang[$p['status']]) ? $label_status_bidang[$p['status']] : $p['status'], ENT_QUOTES, 'UTF-8'); ?></span>
+                  <span style="display:block;color:var(--muted);font-size:.78rem;margin-top:6px">Oleh <?php echo $t($p['nama_peninjau']); ?> — <?php echo $tgl_jam($p['ditinjau_pada']); ?></span>
+                  <?php if (!empty($p['catatan'])): ?>
+                    <span style="display:block;white-space:pre-line;margin-top:6px;font-weight:400"><?php echo $t($p['catatan']); ?></span>
+                  <?php endif; ?>
+                </b>
+              <?php else: ?>
+                <b style="color:var(--muted);font-weight:400">Menunggu ditinjau</b>
+              <?php endif; ?>
+            </div>
+          <?php endforeach; ?>
+        </div>
       </div>
     <?php endif; ?>
 

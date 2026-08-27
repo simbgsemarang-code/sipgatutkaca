@@ -233,12 +233,40 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="alert alert-err"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
-    <?php if (!empty($row['catatan_tpa'])): ?>
-      <div class="catatan-box">
-        <p><strong>Catatan peninjauan TPA:</strong><br><?php echo nl2br($t($row['catatan_tpa'])); ?></p>
-        <p class="meta">Oleh <?php echo $t($row['nama_peninjau']); ?> — <?php echo $tgl_jam($row['ditinjau_pada']); ?></p>
+    <?php
+    $label_bidang = array(
+      'tpa_arsitek'  => 'Bidang Arsitektur & Tata Kota',
+      'tpa_struktur' => 'Bidang Struktur & Sipil',
+      'tpa_mep'      => 'Bidang Mekanikal, Elektrikal & Perpipaan (MEP)',
+    );
+    $label_status_bidang = array(
+      'disetujui'                    => 'Disetujui',
+      'perbaikan_dokumen'            => 'Perbaikan Dokumen',
+      'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi',
+    );
+    ?>
+    <div class="card">
+      <h4>Status Persetujuan 3 Bidang TPA</h4>
+      <p style="color:var(--muted);font-size:.82rem;margin-top:-12px;margin-bottom:16px">Permohonan baru berstatus Disetujui TPA kalau ketiga bidang di bawah sudah menyetujui.</p>
+      <div class="kv-grid">
+        <?php foreach ($label_bidang as $kode_bidang => $nama_bidang): ?>
+          <div class="kv full">
+            <span><?php echo htmlspecialchars($nama_bidang, ENT_QUOTES, 'UTF-8'); ?></span>
+            <?php if (isset($persetujuan[$kode_bidang])): $p = $persetujuan[$kode_bidang]; ?>
+              <b>
+                <span class="tag tag-<?php echo ($p['status'] === 'disetujui') ? 'disetujui_tpa' : htmlspecialchars($p['status'], ENT_QUOTES, 'UTF-8'); ?>" style="margin-top:4px"><?php echo htmlspecialchars(isset($label_status_bidang[$p['status']]) ? $label_status_bidang[$p['status']] : $p['status'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <span style="display:block;color:var(--muted);font-size:.78rem;margin-top:6px;text-transform:none;letter-spacing:normal">Oleh <?php echo $t($p['nama_peninjau']); ?> — <?php echo $tgl_jam($p['ditinjau_pada']); ?></span>
+                <?php if (!empty($p['catatan'])): ?>
+                  <span style="display:block;white-space:pre-line;margin-top:6px;font-weight:400;text-transform:none;letter-spacing:normal"><?php echo $t($p['catatan']); ?></span>
+                <?php endif; ?>
+              </b>
+            <?php else: ?>
+              <b style="color:var(--muted);font-weight:400">Menunggu ditinjau</b>
+            <?php endif; ?>
+          </div>
+        <?php endforeach; ?>
       </div>
-    <?php endif; ?>
+    </div>
 
     <div class="card">
       <h4>Data Pemohon &amp; Registrasi</h4>
@@ -344,29 +372,34 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <?php endforeach; ?>
     <?php endif; ?>
 
-    <?php if (!empty($bisa_ditandai)): ?>
+    <?php if (!empty($bidang_boleh_menilai)): ?>
       <div class="card">
-        <h4>Kirim Keputusan Peninjauan</h4>
-        <p style="color:var(--muted);font-size:.88rem">Tandai dulu dokumen yang tidak sesuai di atas (kalau ada), lalu pilih keputusan dan tulis catatan untuk pemohon/PU di bawah ini (catatan wajib diisi untuk 2 jenis perbaikan, opsional untuk "Semua Dokumen Sesuai").</p>
+        <h4>Kirim Keputusan Peninjauan — Bidang Anda</h4>
+        <p style="color:var(--muted);font-size:.88rem">Tandai dulu dokumen yang tidak sesuai di atas (kalau ada), lalu pilih keputusan BIDANG ANDA dan tulis catatan untuk pemohon/PU di bawah ini (catatan wajib diisi untuk 2 jenis perbaikan, opsional untuk "Dokumen Sesuai"). Bidang TPA lain meninjau &amp; memutuskan secara terpisah - permohonan baru berstatus Disetujui TPA kalau ketiga bidang sudah menyetujui (lihat kartu status di atas).</p>
         <form class="keputusan-form" action="<?php echo base_url('tpa-pengajuan-pbg/kirim-catatan/' . (int) $row['id']); ?>" method="post">
           <div class="opt-list">
             <label>
-              <span class="opt-title"><input type="radio" name="status_baru" value="disetujui_tpa" <?php echo (isset($old['status_baru']) && $old['status_baru'] === 'disetujui_tpa') ? 'checked' : ''; ?>> Semua Dokumen Sesuai</span>
-              <span class="opt-hint">Tidak ada dokumen yang perlu diperbaiki. Permohonan ditandai selesai ditinjau TPA (status Disetujui TPA).</span>
+              <span class="opt-title"><input type="radio" name="status_baru" value="disetujui" <?php echo (isset($old['status_baru']) && $old['status_baru'] === 'disetujui') ? 'checked' : ''; ?>> Dokumen Sesuai</span>
+              <span class="opt-hint">Dokumen di bidang Anda sudah sesuai, tidak perlu perbaikan.</span>
             </label>
             <label>
               <span class="opt-title"><input type="radio" name="status_baru" value="perbaikan_dokumen" <?php echo (isset($old['status_baru']) && $old['status_baru'] === 'perbaikan_dokumen') ? 'checked' : ''; ?>> Perbaikan Dokumen</span>
-              <span class="opt-hint">Ada dokumen yang perlu diunggah ulang / data yang perlu diperbaiki. Setelah diperbaiki, permohonan kembali ke status Verifikasi Kelengkapan Dokumen.</span>
+              <span class="opt-hint">Ada dokumen yang perlu diunggah ulang / data yang perlu diperbaiki. Setelah diperbaiki, bidang Anda meninjau ulang (bidang lain yang sudah menyetujui tidak perlu meninjau ulang).</span>
             </label>
             <label>
               <span class="opt-title"><input type="radio" name="status_baru" value="perbaikan_dokumen_konsultasi" <?php echo (isset($old['status_baru']) && $old['status_baru'] === 'perbaikan_dokumen_konsultasi') ? 'checked' : ''; ?>> Perbaikan Dokumen Konsultasi</span>
-              <span class="opt-hint">Perlu perbaikan terkait hasil konsultasi. Setelah diperbaiki, permohonan lanjut ke status Menunggu Jadwal Konsultasi.</span>
+              <span class="opt-hint">Perlu perbaikan terkait hasil konsultasi. Setelah diperbaiki, permohonan lanjut ke status Menunggu Jadwal Konsultasi (menggantikan sisa proses tinjau-ulang per bidang).</span>
             </label>
           </div>
-          <label for="f-catatan-tpa" style="display:block;margin-top:20px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Catatan untuk Pemohon/PU (opsional untuk "Semua Dokumen Sesuai")</label>
-          <textarea id="f-catatan-tpa" name="catatan_tpa" placeholder="Jelaskan apa yang perlu diperbaiki secara keseluruhan - atau kosongkan kalau semua dokumen sudah sesuai"><?php echo isset($old['catatan_tpa']) ? htmlspecialchars($old['catatan_tpa'], ENT_QUOTES, 'UTF-8') : ''; ?></textarea>
+          <label for="f-catatan-tpa" style="display:block;margin-top:20px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Catatan untuk Pemohon/PU (opsional untuk "Dokumen Sesuai")</label>
+          <textarea id="f-catatan-tpa" name="catatan_tpa" placeholder="Jelaskan apa yang perlu diperbaiki di bidang Anda - atau kosongkan kalau dokumen di bidang Anda sudah sesuai"><?php echo isset($old['catatan_tpa']) ? htmlspecialchars($old['catatan_tpa'], ENT_QUOTES, 'UTF-8') : ''; ?></textarea>
           <button type="submit" class="btn btn-gold btn-sm" style="margin-top:18px">Kirim Keputusan</button>
         </form>
+      </div>
+    <?php elseif ($bidang_saya === null && !empty($bisa_ditandai)): ?>
+      <div class="card">
+        <h4>Kirim Keputusan Peninjauan</h4>
+        <p style="color:var(--muted);font-size:.88rem">Akun peran TPA generik tidak berpartisipasi dalam persetujuan per bidang - gunakan salah satu akun spesialis (Arsitek/Struktur/MEP) untuk mengirim keputusan bidang. Anda tetap bisa menandai dokumen tidak sesuai per item di atas.</p>
       </div>
     <?php endif; ?>
   </div>

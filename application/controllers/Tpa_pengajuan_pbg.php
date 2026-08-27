@@ -10,21 +10,50 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Panduan sumbernya sendiri cuma dari sisi pemohon (tidak
  * menunjukkan halaman peninjau) - controller ini yang mengisi sisi
- * itu, mengikuti pola transisi status yang tersirat: TPA menandai
- * permohonan berstatus "Verifikasi Kelengkapan Dokumen" sebagai
- * perlu "Perbaikan Dokumen" atau "Perbaikan Dokumen Konsultasi";
- * begitu pemohon/PU merespons (lihat Pengajuan_pbg::kirim_perbaikan()),
- * status kembali ke "Verifikasi Kelengkapan Dokumen" atau maju ke
- * "Menunggu Jadwal Konsultasi". Langkah setelah itu (pelaksanaan
- * konsultasi, penerbitan SK PBG) belum tercakup di sini.
+ * itu, mengikuti pola transisi status yang tersirat.
+ *
+ * PERSETUJUAN PER BIDANG: ketiga spesialisasi TPA (Arsitektur & Tata
+ * Kota, Struktur & Sipil, MEP) meninjau & memutuskan SECARA
+ * INDEPENDEN lewat tabel pengajuan_pbg_persetujuan_tpa - satu baris
+ * per bidang per permohonan (tanpa baris = bidang itu belum
+ * meninjau). Kolom pengajuan_pbg.status DITURUNKAN dari isi tabel
+ * itu lewat _hitung_status_keseluruhan(), bukan ditulis langsung
+ * oleh satu keputusan: permohonan baru berstatus "Disetujui TPA"
+ * kalau KETIGA bidang sudah menyetujui. Kalau satu bidang menandai
+ * "Perbaikan Dokumen" dan PU sudah memperbaikinya, cuma baris bidang
+ * itu yang dihapus (perlu ditinjau ulang) - bidang lain yang sudah
+ * lebih dulu menyetujui TIDAK ikut direset (lihat
+ * Pengajuan_pbg::kirim_perbaikan()). "Perbaikan Dokumen Konsultasi"
+ * tetap jadi jalan keluar satu arah ke "Menunggu Jadwal Konsultasi"
+ * begitu diperbaiki, apapun keputusan bidang lain yang masih
+ * menggantung - lihat _hitung_status_keseluruhan(). Akun 'tpa'
+ * generik lama TIDAK berpartisipasi dalam persetujuan per bidang ini
+ * (lihat kirim_catatan()) - cuma bisa melihat & menandai dokumen
+ * per-item seperti biasa. Langkah setelah SEMUA bidang menyetujui
+ * (penerbitan SK PBG, dst.) belum tercakup di sini.
  */
 class Tpa_pengajuan_pbg extends CI_Controller {
 
 	/** 'tpa' generik dipertahankan untuk akun lama; anggota baru memakai salah satu spesialisasi. */
 	private $peran_tpa = array('tpa', 'tpa_arsitek', 'tpa_struktur', 'tpa_mep');
 
-	/** Cuma permohonan di status ini yang bisa ditandai TPA - lihat catatan class di atas. */
-	private $status_bisa_ditandai = 'verifikasi_dokumen';
+	/** 3 spesialisasi yang SUNGGUHAN berpartisipasi dalam persetujuan per bidang - tidak termasuk 'tpa' generik. */
+	private $peran_bidang = array('tpa_arsitek', 'tpa_struktur', 'tpa_mep');
+
+	/**
+	 * Status permohonan yang TPA-nya masih "aktif" - bidang yang belum
+	 * mengirim keputusan masih boleh menandai dokumen & mengirim
+	 * keputusan, TERLEPAS dari bidang lain sudah memutuskan apa (per
+	 * bidang independen - lihat catatan class di atas). 'verifikasi_dokumen'
+	 * = belum ada satupun bidang minta perbaikan; 'perbaikan_dokumen'
+	 * = ADA bidang lain yang minta perbaikan tapi bidang Anda sendiri
+	 * belum memutuskan apa-apa, tetap boleh menilai independen.
+	 * SENGAJA tidak termasuk 'perbaikan_dokumen_konsultasi' - begitu
+	 * SATU bidang memilih itu, seluruh proses keluar ke jalur
+	 * konsultasi (lihat Pengajuan_pbg::kirim_perbaikan()), menutup
+	 * peninjauan per bidang lebih lanjut.
+	 */
+	private $status_tpa_aktif = array('verifikasi_dokumen', 'perbaikan_dokumen');
 
 	/** Sama persis dengan Pengajuan_pbg - disalin, bukan dibagi lewat library, mengikuti pola guard peran di codebase ini. */
 	private $opsi_kepemilikan = array(
@@ -136,9 +165,25 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 		$dokumen_terunggah = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
 		$peran             = (string) $this->session->userdata('role');
 
+		$persetujuan = array();
+		foreach ($this->db->select('pengajuan_pbg_persetujuan_tpa.*, peninjau.nama AS nama_peninjau')
+			->from('pengajuan_pbg_persetujuan_tpa')
+			->join('users AS peninjau', 'peninjau.id = pengajuan_pbg_persetujuan_tpa.ditinjau_oleh', 'left')
+			->where('id_pengajuan', $id)->get()->result_array() as $p)
+		{
+			$persetujuan[$p['bidang']] = $p;
+		}
+
+		// Bidang akun yang login (NULL kalau peran 'tpa' generik - tidak
+		// ikut sistem persetujuan per bidang, lihat kirim_catatan()).
+		$bidang_saya = in_array($peran, $this->peran_bidang, TRUE) ? $peran : null;
+
 		$data['row']              = $row;
 		$data['dokumen_kelompok'] = $this->_kelompokkan_dokumen($dokumen_terunggah, $peran);
-		$data['bisa_ditandai']    = ($row['status'] === $this->status_bisa_ditandai);
+		$data['bisa_ditandai']    = in_array($row['status'], $this->status_tpa_aktif, TRUE);
+		$data['persetujuan']      = $persetujuan;
+		$data['bidang_saya']      = $bidang_saya;
+		$data['bidang_boleh_menilai'] = ($bidang_saya !== null) && in_array($row['status'], $this->status_tpa_aktif, TRUE) && ! isset($persetujuan[$bidang_saya]);
 		$data['opsi_kepemilikan'] = $this->opsi_kepemilikan;
 		$data['opsi_kondisi']     = $this->opsi_kondisi;
 		$data['error']            = $this->session->flashdata('error');
@@ -211,6 +256,66 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 		return $hasil;
 	}
 
+	/**
+	 * Status pengajuan_pbg.status DITURUNKAN dari isi
+	 * pengajuan_pbg_persetujuan_tpa, bukan ditulis langsung oleh satu
+	 * keputusan - dipanggil ulang tiap ada keputusan baru dari TPA
+	 * (kirim_catatan()) atau perbaikan dikirim PU
+	 * (Pengajuan_pbg::kirim_perbaikan(), yang menyalin fungsi ini).
+	 * Prioritas: ada bidang minta konsultasi -> itu duluan (jalan
+	 * keluar satu arah, mengalahkan segalanya); ada bidang minta
+	 * perbaikan dokumen biasa -> itu; ketiga bidang sudah py baris
+	 * keputusan (berarti pasti semuanya 'disetujui', karena 2
+	 * kemungkinan lain sudah ditangani duluan) -> Disetujui TPA;
+	 * selain itu masih menunggu sebagian bidang -> tetap Verifikasi
+	 * Kelengkapan Dokumen.
+	 */
+	private function _hitung_status_keseluruhan($id)
+	{
+		$status_per_bidang = array();
+		foreach ($this->db->select('bidang, status')->where('id_pengajuan', $id)->get('pengajuan_pbg_persetujuan_tpa')->result_array() as $b)
+		{
+			$status_per_bidang[$b['bidang']] = $b['status'];
+		}
+
+		if (in_array('perbaikan_dokumen_konsultasi', $status_per_bidang, TRUE))
+		{
+			return 'perbaikan_dokumen_konsultasi';
+		}
+		if (in_array('perbaikan_dokumen', $status_per_bidang, TRUE))
+		{
+			return 'perbaikan_dokumen';
+		}
+		if (count($status_per_bidang) === count($this->peran_bidang))
+		{
+			return 'disetujui_tpa';
+		}
+		return 'verifikasi_dokumen';
+	}
+
+	/**
+	 * Ada dokumen berstatus "ditolak" di antara dokumen yang KELIHATAN
+	 * oleh $peran (bidangnya sendiri + grup umum Data Umum/Dokumen
+	 * Tambahan)? Dipakai buat menjaga supaya 1 bidang tidak bisa
+	 * menyetujui selama masih ada tanda "tidak sesuai" yang belum
+	 * dibatalkan pada dokumen yang mereka lihat sendiri.
+	 */
+	private function _ada_dokumen_ditolak_untuk($id, $peran)
+	{
+		$dokumen_terunggah = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
+		foreach ($this->_kelompokkan_dokumen($dokumen_terunggah, $peran) as $grup)
+		{
+			foreach ($grup['berkas'] as $d)
+			{
+				if ($d['status'] === 'ditolak')
+				{
+					return TRUE;
+				}
+			}
+		}
+		return FALSE;
+	}
+
 	/** Tandai satu dokumen "tidak sesuai" (dengan catatan alasan) atau batalkan tandanya. */
 	public function tandai_dokumen($id_dokumen = null)
 	{
@@ -251,11 +356,18 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 		redirect($tujuan_ulang);
 	}
 
-	/** Kirim keputusan peninjauan: permohonan perlu Perbaikan Dokumen atau Perbaikan Dokumen Konsultasi. */
+	/**
+	 * Kirim keputusan peninjauan UNTUK BIDANG AKUN YANG LOGIN SAJA
+	 * (disetujui / perbaikan_dokumen / perbaikan_dokumen_konsultasi) -
+	 * disimpan sebagai 1 baris di pengajuan_pbg_persetujuan_tpa, lalu
+	 * pengajuan_pbg.status dihitung ulang dari SEMUA baris lewat
+	 * _hitung_status_keseluruhan(). Akun 'tpa' generik tidak
+	 * berpartisipasi - lihat catatan class di atas.
+	 */
 	public function kirim_catatan($id = null)
 	{
 		$id  = (int) $id;
-		$row = $this->db->where('id', $id)->where('status', $this->status_bisa_ditandai)->get('pengajuan_pbg')->row_array();
+		$row = $this->db->where('id', $id)->where_in('status', $this->status_tpa_aktif)->get('pengajuan_pbg')->row_array();
 
 		if ($row === NULL)
 		{
@@ -264,13 +376,30 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 			return;
 		}
 
+		$peran = (string) $this->session->userdata('role');
+		if (! in_array($peran, $this->peran_bidang, TRUE))
+		{
+			$this->session->set_flashdata('error', 'Akun peran TPA generik tidak berpartisipasi dalam persetujuan per bidang - gunakan salah satu akun spesialis (Arsitek/Struktur/MEP) untuk mengirim keputusan.');
+			redirect('tpa-pengajuan-pbg/lihat/' . $id);
+			return;
+		}
+
+		$sudah_memutuskan = $this->db->where('id_pengajuan', $id)->where('bidang', $peran)->get('pengajuan_pbg_persetujuan_tpa')->row_array();
+		if ($sudah_memutuskan !== NULL)
+		{
+			$this->session->set_flashdata('error', 'Bidang Anda sudah mengirim keputusan untuk permohonan ini - muat ulang halaman.');
+			redirect('tpa-pengajuan-pbg/lihat/' . $id);
+			return;
+		}
+
 		$status_baru  = (string) $this->input->post('status_baru');
 		$catatan      = trim((string) $this->input->post('catatan_tpa'));
-		// 'disetujui_tpa' = semua dokumen dinilai sudah sesuai, tidak
-		// perlu perbaikan - satu-satunya keputusan di sini yang
-		// catatannya OPSIONAL (2 lainnya tetap wajib diisi alasannya).
-		$status_valid  = array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi', 'disetujui_tpa');
-		$butuh_catatan = ($status_baru !== 'disetujui_tpa');
+		// 'disetujui' = bidang ini menilai dokumen di bidangnya sudah
+		// sesuai, tidak perlu perbaikan - satu-satunya keputusan di
+		// sini yang catatannya OPSIONAL (2 lainnya tetap wajib diisi
+		// alasannya).
+		$status_valid  = array('disetujui', 'perbaikan_dokumen', 'perbaikan_dokumen_konsultasi');
+		$butuh_catatan = ($status_baru !== 'disetujui');
 
 		if (! in_array($status_baru, $status_valid, TRUE))
 		{
@@ -286,31 +415,39 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 			redirect('tpa-pengajuan-pbg/lihat/' . $id);
 			return;
 		}
-		// Tidak boleh menyetujui semua kalau masih ada dokumen yang
-		// ditandai "tidak sesuai" dan belum dibatalkan tandanya -
-		// dua-duanya sekaligus kontradiktif.
-		if ($status_baru === 'disetujui_tpa')
+		// Tidak boleh menyetujui kalau masih ada dokumen yang
+		// KELIHATAN oleh bidang ini ditandai "tidak sesuai" dan belum
+		// dibatalkan tandanya - dua-duanya sekaligus kontradiktif.
+		if ($status_baru === 'disetujui' && $this->_ada_dokumen_ditolak_untuk($id, $peran))
 		{
-			$masih_ditolak = $this->db->where('id_pengajuan', $id)->where('status', 'ditolak')->count_all_results('pengajuan_pbg_dokumen');
-			if ($masih_ditolak > 0)
-			{
-				$this->session->set_flashdata('error', 'Masih ada ' . $masih_ditolak . ' dokumen bertanda "tidak sesuai" - batalkan dulu tandanya (atau pilih salah satu jenis Perbaikan Dokumen) sebelum menyetujui semua.');
-				$this->session->set_flashdata('old', array('catatan_tpa' => $catatan, 'status_baru' => $status_baru));
-				redirect('tpa-pengajuan-pbg/lihat/' . $id);
-				return;
-			}
+			$this->session->set_flashdata('error', 'Masih ada dokumen bertanda "tidak sesuai" di bidang Anda - batalkan dulu tandanya (atau pilih salah satu jenis Perbaikan Dokumen) sebelum menyetujui.');
+			$this->session->set_flashdata('old', array('catatan_tpa' => $catatan, 'status_baru' => $status_baru));
+			redirect('tpa-pengajuan-pbg/lihat/' . $id);
+			return;
 		}
 
-		$this->db->where('id', $id)->update('pengajuan_pbg', array(
+		$this->db->insert('pengajuan_pbg_persetujuan_tpa', array(
+			'id_pengajuan'  => $id,
+			'bidang'        => $peran,
 			'status'        => $status_baru,
-			'catatan_tpa'   => ($catatan !== '') ? $catatan : NULL,
+			'catatan'       => ($catatan !== '') ? $catatan : NULL,
 			'ditinjau_oleh' => (int) $this->session->userdata('user_id'),
 			'ditinjau_pada' => date('Y-m-d H:i:s'),
 		));
 
-		$pesan_sukses = ($status_baru === 'disetujui_tpa')
-			? 'Permohonan ditandai selesai ditinjau - semua dokumen dinyatakan sesuai.'
-			: 'Catatan perbaikan berhasil dikirim - permohonan kembali ke PU/pemohon untuk ditindaklanjuti.';
+		$status_keseluruhan = $this->_hitung_status_keseluruhan($id);
+		$this->db->where('id', $id)->update('pengajuan_pbg', array('status' => $status_keseluruhan));
+
+		if ($status_baru === 'disetujui')
+		{
+			$pesan_sukses = ($status_keseluruhan === 'disetujui_tpa')
+				? 'Persetujuan bidang Anda terkirim - ketiga bidang TPA sudah menyetujui, permohonan selesai ditinjau.'
+				: 'Persetujuan bidang Anda terkirim - masih menunggu bidang TPA lain menyelesaikan peninjauan.';
+		}
+		else
+		{
+			$pesan_sukses = 'Catatan perbaikan berhasil dikirim - permohonan kembali ke PU/pemohon untuk ditindaklanjuti.';
+		}
 		$this->session->set_flashdata('sukses', $pesan_sukses);
 		redirect('tpa-pengajuan-pbg');
 	}
