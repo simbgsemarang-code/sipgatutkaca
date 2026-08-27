@@ -248,10 +248,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </div>
     </div>
 
-    <div class="reveal" style="margin-top:64px;text-align:center">
+    <div class="reveal" style="margin-top:64px;text-align:center;max-width:680px;margin-left:auto;margin-right:auto">
       <p class="eyebrow">Panduan</p>
       <h2 style="font-size:clamp(1.3rem,2.2vw,1.7rem);margin:0 auto">Tatacara dan SOP PBG</h2>
-      <a class="btn btn-gold" style="margin-top:28px" href="<?php echo base_url('tatacara'); ?>">Lihat Tatacara dan SOP →</a>
+      <p class="section-lead" style="margin:16px auto 0">Siapkan identitas pemohon, bukti hak atas tanah atau perjanjian pemanfaatan, dan uraian rencana kegiatan beserta perkiraan luas lantai dan lahan.</p>
+      <p class="section-lead" style="margin-top:14px">Telusuri pengajuan PBG Anda melalui menu <a href="<?php echo base_url('konsultasi'); ?>" style="color:var(--gold-300)">Konsultasi</a>, atau ajukan <a href="<?php echo base_url('itr'); ?>" style="color:var(--gold-300)">PBG dan SLF</a> untuk keterangan resmi tertulis mengenai persetujuan PBG.</p>
     </div>
   </div>
 </section>
