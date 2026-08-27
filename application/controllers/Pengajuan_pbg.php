@@ -260,23 +260,27 @@ class Pengajuan_pbg extends CI_Controller {
 		$data['persetujuan']      = $persetujuan;
 		$data['opsi_kepemilikan'] = $this->opsi_kepemilikan;
 		$data['opsi_kondisi']     = $this->opsi_kondisi;
+		$data['sukses']           = $this->session->flashdata('sukses');
+		$data['error']            = $this->session->flashdata('error');
 		$data['nama_pengguna']    = $this->session->userdata('nama');
 
 		$this->load->view('pages/pengajuan_pbg_detail', $data);
 	}
 
 	/**
-	 * Form respons perbaikan - dipakai kalau TPA sudah menandai
-	 * permohonan perlu Perbaikan Dokumen atau Perbaikan Dokumen
-	 * Konsultasi (lihat Tpa_pengajuan_pbg::kirim_catatan()). Termasuk
-	 * "Ubah Data Tanah" (Panduan Permohonan PBG hal. 111-115) - field
-	 * tanah_* di form ini bisa diedit ulang, bukan cuma unggah ulang
-	 * dokumen yang ditandai.
+	 * Form edit permohonan - dipakai baik saat TPA sudah menandai
+	 * permohonan perlu Perbaikan Dokumen/Perbaikan Dokumen Konsultasi
+	 * (lihat Tpa_pengajuan_pbg::kirim_catatan()) MAUPUN saat PU/pemohon
+	 * mau mengedit sendiri tanpa diminta (status masih Verifikasi
+	 * Kelengkapan Dokumen) - lihat _ambil_bisa_diedit(). Termasuk
+	 * "Ubah Data Tanah" (Panduan Permohonan PBG hal. 111-115) dan
+	 * unggah ulang SELURUH dokumen teknis (bukan cuma yang ditandai
+	 * tidak sesuai).
 	 */
 	public function perbaiki($id = null)
 	{
 		$id  = (int) $id;
-		$row = $this->_ambil_perlu_perbaikan($id);
+		$row = $this->_ambil_bisa_diedit($id);
 
 		if ($row === NULL)
 		{
@@ -284,22 +288,32 @@ class Pengajuan_pbg extends CI_Controller {
 			return;
 		}
 
-		$data['row']           = $row;
-		$data['dokumen']       = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
-		$data['peta_dokumen']  = $this->peta_dokumen;
-		$data['error']         = $this->session->flashdata('error');
-		$data['sukses']        = $this->session->flashdata('sukses');
-		$data['old']           = $this->session->flashdata('old');
-		$data['nama_pengguna'] = $this->session->userdata('nama');
+		$persetujuan = array();
+		foreach ($this->db->select('pengajuan_pbg_persetujuan_tpa.*, peninjau.nama AS nama_peninjau')
+			->from('pengajuan_pbg_persetujuan_tpa')
+			->join('users AS peninjau', 'peninjau.id = pengajuan_pbg_persetujuan_tpa.ditinjau_oleh', 'left')
+			->where('id_pengajuan', $id)->get()->result_array() as $p)
+		{
+			$persetujuan[$p['bidang']] = $p;
+		}
+
+		$data['row']              = $row;
+		$data['dokumen']          = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
+		$data['persetujuan']      = $persetujuan;
+		$data['peta_dokumen']     = $this->peta_dokumen;
+		$data['error']            = $this->session->flashdata('error');
+		$data['sukses']           = $this->session->flashdata('sukses');
+		$data['old']              = $this->session->flashdata('old');
+		$data['nama_pengguna']    = $this->session->userdata('nama');
 
 		$this->load->view('pages/pengajuan_pbg_perbaikan', $data);
 	}
 
-	/** Simpan respons perbaikan (POST) - unggah ulang dokumen yang ditandai + perbarui data tanah, lalu kirim balik ke TPA. */
+	/** Simpan hasil edit (POST) - perbarui data tanah + unggah ulang dokumen, lalu sesuaikan status/persetujuan TPA. */
 	public function kirim_perbaikan($id = null)
 	{
 		$id  = (int) $id;
-		$row = $this->_ambil_perlu_perbaikan($id);
+		$row = $this->_ambil_bisa_diedit($id);
 
 		if ($row === NULL)
 		{
@@ -342,8 +356,13 @@ class Pengajuan_pbg extends CI_Controller {
 		// karena konsultasi menggantikan sisa proses tinjau-ulang
 		// dokumen. Perbaikan dokumen BIASA cuma menghapus baris bidang
 		// yang tadi minta perbaikan itu (supaya ditinjau ulang) - bidang
-		// lain yang sudah lebih dulu menyetujui TIDAK ikut direset,
-		// lalu status keseluruhan dihitung ulang lewat
+		// lain yang sudah lebih dulu menyetujui TIDAK ikut direset.
+		// EDIT SUKARELA (status masih verifikasi_dokumen - PU mengedit
+		// sendiri, tidak ada bidang yang minta) mereset SEMUA baris
+		// persetujuan yang mungkin sudah ada - bidang yang sudah
+		// menyetujui belum tentu melihat versi data/dokumen yang baru
+		// diubah, jadi wajib meninjau ulang demi menjaga integritas
+		// persetujuan. Status keseluruhan dihitung ulang lewat
 		// _hitung_status_keseluruhan() (sama seperti dipakai
 		// Tpa_pengajuan_pbg::kirim_catatan() - disalin, bukan dibagi
 		// lewat library).
@@ -352,10 +371,15 @@ class Pengajuan_pbg extends CI_Controller {
 			$this->db->where('id_pengajuan', $id)->where_in('status', array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'))->delete('pengajuan_pbg_persetujuan_tpa');
 			$status_lanjut = 'menunggu_jadwal_konsultasi';
 		}
-		else
+		elseif ($row['status'] === 'perbaikan_dokumen')
 		{
 			$this->db->where('id_pengajuan', $id)->where('status', 'perbaikan_dokumen')->delete('pengajuan_pbg_persetujuan_tpa');
 			$status_lanjut = $this->_hitung_status_keseluruhan($id);
+		}
+		else
+		{
+			$this->db->where('id_pengajuan', $id)->delete('pengajuan_pbg_persetujuan_tpa');
+			$status_lanjut = 'verifikasi_dokumen';
 		}
 		$this->db->where('id', $id)->update('pengajuan_pbg', array('status' => $status_lanjut));
 
@@ -365,7 +389,10 @@ class Pengajuan_pbg extends CI_Controller {
 			'disetujui_tpa'              => 'Disetujui Semua TPA',
 		);
 		$label_lanjut = isset($label_status[$status_lanjut]) ? $label_status[$status_lanjut] : $status_lanjut;
-		$this->session->set_flashdata('sukses', 'Perbaikan berhasil dikirim. Status permohonan sekarang: ' . $label_lanjut . '.');
+		$pesan_sukses = ($row['status'] === 'verifikasi_dokumen')
+			? 'Perubahan berhasil disimpan. Kalau ada bidang TPA yang sebelumnya sudah menyetujui, mereka akan meninjau ulang.'
+			: 'Perbaikan berhasil dikirim. Status permohonan sekarang: ' . $label_lanjut . '.';
+		$this->session->set_flashdata('sukses', $pesan_sukses);
 		redirect('pengajuan-pbg/lihat/' . $id);
 	}
 
@@ -586,14 +613,23 @@ class Pengajuan_pbg extends CI_Controller {
 		return $this->db->where('id', $id)->where('status', 'draf')->get('pengajuan_pbg')->row_array();
 	}
 
-	private function _ambil_perlu_perbaikan($id)
+	/**
+	 * Permohonan yang datanya/dokumennya boleh diedit lewat
+	 * perbaiki()/kirim_perbaikan() - baik karena TPA menandai perlu
+	 * perbaikan (perbaikan_dokumen/perbaikan_dokumen_konsultasi) MAUPUN
+	 * PU/pemohon mau mengedit sendiri tanpa diminta selama masih
+	 * verifikasi_dokumen. TIDAK termasuk 'draf' (pakai tambah() -
+	 * wizard penuh), 'menunggu_jadwal_konsultasi', atau 'disetujui_tpa'
+	 * (sudah lewat tahap dokumen/terkunci).
+	 */
+	private function _ambil_bisa_diedit($id)
 	{
 		if ($id <= 0)
 		{
 			return NULL;
 		}
 		return $this->db->where('id', $id)
-			->where_in('status', array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'))
+			->where_in('status', array('verifikasi_dokumen', 'perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'))
 			->get('pengajuan_pbg')->row_array();
 	}
 

@@ -7,27 +7,44 @@ $opt = function ($kunci, $nilai) use ($row) {
 	return (isset($row[$kunci]) && (string) $row[$kunci] === $nilai) ? 'selected' : '';
 };
 
-// Cari slug (mis. "situasi") dari label tersimpan (mis. "Gambar
-// Situasi") supaya nama field unggah ulang cocok dengan yang dibaca
-// Pengajuan_pbg::_proses_unggah_dokumen().
-$slug_dari_label = array();
-foreach ($peta_dokumen as $grup) {
-	foreach ($grup['dokumen'] as $slug => $label) { $slug_dari_label[$label] = $slug; }
+// Dokumen yang sudah terunggah, dikunci per label supaya loop
+// checklist di bawah bisa menunjukkan status "Terunggah"/"Ditolak"
+// per slug (bukan cuma daftar yang ditolak saja).
+$dokumen_by_label = array();
+foreach ($dokumen as $d) {
+	$dokumen_by_label[$d['jenis_dokumen']] = $d;
 }
 
-$dokumen_ditolak = array();
-foreach ($dokumen as $d) {
-	if (isset($d['status']) && $d['status'] === 'ditolak') { $dokumen_ditolak[] = $d; }
-}
+// Sedang merespons tanda TPA (perbaikan_dokumen/...konsultasi), atau
+// PU/pemohon mengedit sendiri tanpa diminta (masih verifikasi_dokumen)?
+// Menentukan judul/teks halaman + kartu catatan TPA di bawah - lihat
+// Pengajuan_pbg::_ambil_bisa_diedit().
+$sedang_merespons_tpa = in_array($row['status'], array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'), TRUE);
 
 $label_status_lanjut = ($row['status'] === 'perbaikan_dokumen_konsultasi') ? 'Menunggu Jadwal Konsultasi' : 'Verifikasi Kelengkapan Dokumen';
+
+// Bidang yang catatannya masih relevan ditampilkan di kartu "Catatan
+// dari TPA" - cuma yang statusnya masih perbaikan_dokumen/...konsultasi
+// (baris yang statusnya 'disetujui' bukan alasan permohonan ini perlu
+// diperbaiki, jadi tidak ditampilkan di sini).
+$label_bidang = array(
+	'tpa_arsitek'  => 'Bidang Arsitektur & Tata Kota',
+	'tpa_struktur' => 'Bidang Struktur & Sipil',
+	'tpa_mep'      => 'Bidang Mekanikal, Elektrikal & Perpipaan (MEP)',
+);
+$catatan_blocking = array();
+foreach ($persetujuan as $kode_bidang => $p) {
+	if (in_array($p['status'], array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'), TRUE) && !empty($p['catatan'])) {
+		$catatan_blocking[$kode_bidang] = $p;
+	}
+}
 ?>
 <!DOCTYPE html>
 <html lang="id" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Perbaiki Permohonan PBG — Portal PU · SIP Gatutkaca</title>
+<title><?php echo $sedang_merespons_tpa ? 'Perbaiki Permohonan PBG' : 'Edit Permohonan PBG'; ?> — Portal PU · SIP Gatutkaca</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -106,8 +123,13 @@ section{padding:60px 0 100px}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem);line-height:1.2}
 .section-lead{color:var(--muted);max-width:66ch;margin-top:14px}
 .tag{display:inline-block;border:1px solid var(--line);padding:4px 14px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-300);margin-top:14px}
+.tag-verifikasi_dokumen{color:#5FC2E0;border-color:#1E86A3}
 .tag-perbaikan_dokumen{color:#E0526B;border-color:#E0526B}
 .tag-perbaikan_dokumen_konsultasi{color:#E0526B;border-color:#E0526B}
+.tag-terunggah{color:#6FCF97;border-color:#2EA84F;margin-top:0;padding:3px 10px;font-size:.62rem}
+.tag-ditolak{color:#E0526B;border-color:#E0526B;margin-top:0;padding:3px 10px;font-size:.62rem}
+.doc-group-title{font-family:var(--display);font-size:1rem;color:var(--gold-300);margin:26px 0 12px}
+.doc-group-title:first-child{margin-top:0}
 
 .alert{padding:16px 20px;margin:26px 0 0;font-size:.88rem;border:1px solid}
 .alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
@@ -205,42 +227,73 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <section style="padding-top:100px">
   <div class="dash-wrap">
     <p class="eyebrow"><a href="<?php echo base_url('pengajuan-pbg/lihat/' . (int) $row['id']); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Detail Permohonan</a></p>
-    <h2>Perbaiki Permohonan — <?php echo htmlspecialchars($row['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></h2>
-    <span class="tag tag-<?php echo htmlspecialchars($row['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo $row['status'] === 'perbaikan_dokumen_konsultasi' ? 'Perbaikan Dokumen Konsultasi' : 'Perbaikan Dokumen'; ?></span>
-    <p class="section-lead">Lengkapi dokumen dan data yang diminta TPA di bawah ini, lalu kirim. Setelah dikirim, status permohonan berubah menjadi <strong><?php echo htmlspecialchars($label_status_lanjut, ENT_QUOTES, 'UTF-8'); ?></strong>.</p>
+    <h2><?php echo $sedang_merespons_tpa ? 'Perbaiki Permohonan' : 'Edit Permohonan'; ?> — <?php echo htmlspecialchars($row['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></h2>
+    <span class="tag tag-<?php echo htmlspecialchars($row['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php
+      echo ($row['status'] === 'perbaikan_dokumen_konsultasi') ? 'Perbaikan Dokumen Konsultasi'
+         : (($row['status'] === 'perbaikan_dokumen') ? 'Perbaikan Dokumen' : 'Verifikasi Kelengkapan Dokumen');
+    ?></span>
+    <?php if ($sedang_merespons_tpa): ?>
+      <p class="section-lead">Lengkapi dokumen dan data yang diminta TPA di bawah ini, lalu kirim. Setelah dikirim, status permohonan berubah menjadi <strong><?php echo htmlspecialchars($label_status_lanjut, ENT_QUOTES, 'UTF-8'); ?></strong>.</p>
+    <?php else: ?>
+      <p class="section-lead">Ubah data atau unggah ulang dokumen mana pun di bawah ini, lalu kirim. Permohonan tetap berstatus Verifikasi Kelengkapan Dokumen - kalau ada bidang TPA yang sebelumnya sudah menyetujui, mereka akan diminta meninjau ulang.</p>
+    <?php endif; ?>
 
     <?php if (!empty($error)): ?>
       <div class="alert alert-err"><?php echo nl2br(htmlspecialchars($error, ENT_QUOTES, 'UTF-8')); ?></div>
     <?php endif; ?>
 
-    <?php if (!empty($row['catatan_tpa'])): ?>
+    <?php if (!empty($catatan_blocking)): ?>
       <div class="catatan-box">
-        <p><strong>Catatan dari TPA:</strong><br><?php echo nl2br(htmlspecialchars($row['catatan_tpa'], ENT_QUOTES, 'UTF-8')); ?></p>
-        <?php if (!empty($row['ditinjau_pada'])): ?>
-          <p class="meta"><?php echo htmlspecialchars(date('d M Y H:i', strtotime($row['ditinjau_pada'])), ENT_QUOTES, 'UTF-8'); ?></p>
-        <?php endif; ?>
+        <p><strong>Catatan dari TPA:</strong></p>
+        <?php foreach ($catatan_blocking as $kode_bidang => $p): ?>
+          <p style="margin-top:12px"><strong><?php echo htmlspecialchars(isset($label_bidang[$kode_bidang]) ? $label_bidang[$kode_bidang] : $kode_bidang, ENT_QUOTES, 'UTF-8'); ?>:</strong><br><?php echo nl2br(htmlspecialchars($p['catatan'], ENT_QUOTES, 'UTF-8')); ?></p>
+          <p class="meta">Oleh <?php echo htmlspecialchars($p['nama_peninjau'], ENT_QUOTES, 'UTF-8'); ?> — <?php echo !empty($p['ditinjau_pada']) ? htmlspecialchars(date('d M Y H:i', strtotime($p['ditinjau_pada'])), ENT_QUOTES, 'UTF-8') : '—'; ?></p>
+        <?php endforeach; ?>
       </div>
     <?php endif; ?>
 
     <form action="<?php echo base_url('pengajuan-pbg/kirim-perbaikan/' . (int) $row['id']); ?>" method="post" enctype="multipart/form-data">
 
-      <?php if (!empty($dokumen_ditolak)): ?>
-        <div class="wiz-card">
-          <h3>Dokumen yang Perlu Diunggah Ulang</h3>
-          <?php foreach ($dokumen_ditolak as $d): ?>
-            <?php $slug = isset($slug_dari_label[$d['jenis_dokumen']]) ? $slug_dari_label[$d['jenis_dokumen']] : null; ?>
-            <div class="dok-tolak-item">
-              <div class="nama"><?php echo htmlspecialchars($d['jenis_dokumen'], ENT_QUOTES, 'UTF-8'); ?></div>
-              <?php if (!empty($d['catatan_penolakan'])): ?>
+      <div class="wiz-card">
+        <h3>Dokumen Teknis</h3>
+        <p style="color:var(--muted);font-size:.85rem;margin-top:-8px;margin-bottom:22px">Unggah ulang dokumen mana pun yang perlu diperbarui - berkas baru menggantikan yang lama. Dokumen bertanda "Ditolak" wajib diunggah ulang.</p>
+        <?php foreach ($peta_dokumen as $judul_grup => $grup): ?>
+          <p class="doc-group-title"><?php echo htmlspecialchars($judul_grup, ENT_QUOTES, 'UTF-8'); ?></p>
+          <?php foreach ($grup['dokumen'] as $slug => $label): ?>
+            <?php $d = isset($dokumen_by_label[$label]) ? $dokumen_by_label[$label] : null; ?>
+            <div class="dok-tolak-item" style="<?php echo (!$d || $d['status'] !== 'ditolak') ? 'border-color:var(--line)' : ''; ?>">
+              <div class="nama">
+                <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
+                <?php if ($d !== null): ?>
+                  <span class="tag tag-<?php echo ($d['status'] === 'ditolak') ? 'ditolak' : 'terunggah'; ?>"><?php echo ($d['status'] === 'ditolak') ? 'Ditolak' : 'Terunggah'; ?></span>
+                  <a href="<?php echo base_url('pengajuan-pbg/berkas/dokumen/' . (int) $d['id']); ?>" target="_blank" rel="noopener noreferrer" style="font-size:.78rem;text-decoration:underline;color:var(--gold-300);margin-left:4px">lihat berkas saat ini</a>
+                <?php endif; ?>
+              </div>
+              <?php if ($d !== null && $d['status'] === 'ditolak' && !empty($d['catatan_penolakan'])): ?>
                 <div class="alasan"><?php echo htmlspecialchars($d['catatan_penolakan'], ENT_QUOTES, 'UTF-8'); ?></div>
               <?php endif; ?>
-              <?php if ($slug !== null): ?>
-                <input type="file" name="dokumen[<?php echo $slug; ?>]" accept=".jpg,.jpeg,.png,.pdf">
-              <?php endif; ?>
+              <input type="file" name="dokumen[<?php echo $slug; ?>]" accept=".jpg,.jpeg,.png,.pdf">
             </div>
           <?php endforeach; ?>
+        <?php endforeach; ?>
+      </div>
+
+      <div class="wiz-card">
+        <h3>Lampiran Lain</h3>
+        <p style="color:var(--muted);font-size:.85rem;margin-top:-8px;margin-bottom:22px">Peta prototipe dan peta lokasi bangunan bisa diunggah ulang di sini kalau perlu diganti - lampiran kepemilikan tanah ada di bagian "Ubah Data Tanah" di bawah.</p>
+        <div class="field-row">
+          <div class="field">
+            <label>Peta / Denah Prototipe</label>
+            <?php if (!empty($row['prototipe_peta'])): ?><p style="font-size:.8rem;color:var(--muted);margin-bottom:8px">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/prototipe_peta/' . (int) $row['id']); ?>" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">lihat</a></p><?php endif; ?>
+            <input type="file" name="prototipe_peta" accept=".jpg,.jpeg,.png,.pdf">
+          </div>
+          <div class="field">
+            <label>Peta Lokasi Bangunan</label>
+            <?php if (!empty($row['bangunan_peta'])): ?><p style="font-size:.8rem;color:var(--muted);margin-bottom:8px">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/bangunan_peta/' . (int) $row['id']); ?>" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">lihat</a></p><?php endif; ?>
+            <input type="file" name="bangunan_peta" accept=".jpg,.jpeg,.png,.pdf">
+          </div>
         </div>
-      <?php endif; ?>
+      </div>
 
       <div class="wiz-card">
         <h3>Ubah Data Tanah</h3>
@@ -301,7 +354,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </div>
 
       <div class="wiz-nav">
-        <button type="submit" class="btn btn-gold btn-sm">Kirim Perbaikan</button>
+        <button type="submit" class="btn btn-gold btn-sm"><?php echo $sedang_merespons_tpa ? 'Kirim Perbaikan' : 'Simpan Perubahan'; ?></button>
       </div>
     </form>
   </div>

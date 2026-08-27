@@ -109,6 +109,9 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 section{padding:60px 0 100px}
 .eyebrow{font-size:.7rem;letter-spacing:.38em;text-transform:uppercase;color:var(--gold-500);margin-bottom:14px}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem);line-height:1.2}
+.alert{padding:16px 20px;margin:26px 0 0;font-size:.88rem;border:1px solid}
+.alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
+.alert-err{background:rgba(224,82,107,.12);border-color:#E0526B;color:#F3AEB9}
 .tag{display:inline-block;border:1px solid var(--line);padding:4px 14px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-300);margin-top:14px}
 .tag-draf{color:#F0A048;border-color:#B4573B}
 .tag-verifikasi_dokumen{color:#5FC2E0;border-color:#1E86A3}
@@ -210,6 +213,15 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <a href="<?php echo base_url('pengajuan-pbg/tambah/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Lanjutkan Permohonan</a>
     <?php elseif ($perlu_perbaikan): ?>
       <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Perbaiki Permohonan</a>
+    <?php elseif ($row['status'] === 'verifikasi_dokumen'): ?>
+      <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Edit Permohonan</a>
+    <?php endif; ?>
+
+    <?php if (!empty($sukses)): ?>
+      <div class="alert alert-ok"><?php echo htmlspecialchars($sukses, ENT_QUOTES, 'UTF-8'); ?></div>
+    <?php endif; ?>
+    <?php if (!empty($error)): ?>
+      <div class="alert alert-err"><?php echo nl2br(htmlspecialchars($error, ENT_QUOTES, 'UTF-8')); ?></div>
     <?php endif; ?>
 
     <?php if (!empty($persetujuan) || $perlu_perbaikan || $row['status'] === 'disetujui_tpa'): ?>
