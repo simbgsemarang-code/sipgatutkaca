@@ -251,13 +251,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <div class="page-breadcrumb reveal">
       <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>PBG
     </div>
-    <div class="reveal">
-      <p class="eyebrow">Persyaratan Layanan</p>
-      <h2>Persyaratan PBG (Persetujuan Bangunan Gedung)</h2>
-      <p class="section-lead">Siapkan kelengkapan data umum dan data teknis berikut sebelum mengajukan Persetujuan Bangunan Gedung (PBG), mengikuti Peraturan Bupati Cilacap Nomor 52 Tahun 2023 tentang Tata Cara Penyelenggaraan Persetujuan Bangunan Gedung dan Sertifikat Laik Fungsi.</p>
-    </div>
 
-    <div class="reveal" style="margin-top:56px">
+    <div class="reveal">
       <p class="eyebrow" style="margin-bottom:0">Data Umum</p>
     </div>
 
