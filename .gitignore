@@ -8,6 +8,11 @@ application/logs/*.log
 # Local database credentials
 application/config/database.php
 
+# Berkas unggahan pemohon (dokumen PBG) - data pengguna, bukan source
+# code. Folder tetap ditrack lewat index.html placeholder-nya.
+application/uploads/pengajuan_pbg/*
+!application/uploads/pengajuan_pbg/index.html
+
 # Konfigurasi rahasia webhook auto-deploy (berisi secret asli - lihat
 # deploy-hook.config.php.example untuk templatenya) + file runtime
 # yang dibuat otomatis oleh deploy-hook.php
