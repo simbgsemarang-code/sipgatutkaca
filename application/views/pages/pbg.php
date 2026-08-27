@@ -275,6 +275,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div class="list-item"><span class="list-key">Dokumen Pendukung</span><span class="list-val">Dokumen lingkungan (seperti SPPL/UKL-UPL) dan foto lokasi beserta titik koordinat.</span></div>
       </div>
     </div>
+
+    <div class="reveal" style="margin-top:56px;text-align:center">
+      <a class="btn btn-gold" href="https://simbg.pu.go.id/#kalkulator-retribusi" target="_blank" rel="noopener noreferrer">Kalkulator PBG</a>
+    </div>
   </div>
 </section>
 
