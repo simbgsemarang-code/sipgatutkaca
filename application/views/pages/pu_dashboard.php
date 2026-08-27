@@ -90,6 +90,13 @@ section{padding:60px 0 100px}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:32ch}
 .section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
 
+/* ===== KARTU STATISTIK ===== */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:20px}
+.stat-card{background:var(--surface);padding:24px 26px}
+.stat-card b{display:block;font-family:var(--display);font-weight:400;font-size:2.1rem;color:var(--gold-300)}
+.stat-card span{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+@media(max-width:700px){.stat-row{grid-template-columns:1fr}}
+
 /* ===== TABEL ===== */
 table{width:100%;border-collapse:collapse;margin-top:44px;font-size:.9rem}
 th{font-family:var(--display);font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:.74rem;color:var(--gold-300);text-align:left;padding:16px 14px;border-bottom:1px solid var(--gold-500)}
@@ -206,7 +213,23 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-wrap">
     <div class="reveal">
       <p class="eyebrow">Portal PU — Pekerjaan Umum</p>
-      <h2>Tinjau Saran &amp; Masukan Warga</h2>
+      <h2>Dashboard</h2>
+    </div>
+
+    <div class="reveal">
+      <p class="eyebrow" style="margin-bottom:8px">Ringkasan</p>
+      <h2 style="font-size:1.3rem">Pengajuan PBG</h2>
+      <div class="stat-row">
+        <div class="stat-card"><b><?php echo (int) $total_pbg; ?></b><span>Total Permohonan</span></div>
+        <div class="stat-card"><b><?php echo (int) $draf_pbg; ?></b><span>Draf</span></div>
+        <div class="stat-card"><b><?php echo (int) $terkirim_pbg; ?></b><span>Verifikasi Kelengkapan Dokumen</span></div>
+      </div>
+      <a href="<?php echo base_url('pengajuan-pbg'); ?>" style="display:inline-block;margin-top:16px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300);text-decoration:underline">Lihat Daftar Permohonan →</a>
+    </div>
+
+    <div class="reveal" style="margin-top:60px">
+      <p class="eyebrow">Saran &amp; Masukan Warga</p>
+      <h2 style="font-size:1.3rem">Tinjau Saran &amp; Masukan Warga</h2>
       <p class="section-lead">Sebagai tim Pekerjaan Umum, Anda membantu menindaklanjuti saran dan masukan yang masuk dari warga terkait layanan penataan ruang. Perbarui status tiap masukan setelah ditinjau atau selesai ditangani.</p>
     </div>
 

@@ -91,13 +91,6 @@ section{padding:60px 0 100px}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:32ch}
 .section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
 
-/* ===== KARTU STATISTIK ===== */
-.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:36px}
-.stat-card{background:var(--surface);padding:24px 26px}
-.stat-card b{display:block;font-family:var(--display);font-weight:400;font-size:2.1rem;color:var(--gold-300)}
-.stat-card span{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-@media(max-width:700px){.stat-row{grid-template-columns:1fr}}
-
 /* ===== TOOLBAR ===== */
 .toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:44px}
 .toolbar input[type=search]{background:var(--input);border:1px solid var(--line);color:var(--text);padding:12px 16px;font-family:var(--body);font-size:.85rem;min-width:260px}
@@ -225,12 +218,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <?php if (!empty($error)): ?>
       <div class="alert alert-err reveal"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
-
-    <div class="stat-row reveal">
-      <div class="stat-card"><b><?php echo (int) $total; ?></b><span>Total Permohonan</span></div>
-      <div class="stat-card"><b><?php echo (int) $jumlah_draf; ?></b><span>Draf</span></div>
-      <div class="stat-card"><b><?php echo (int) $jumlah_terkirim; ?></b><span>Verifikasi Kelengkapan Dokumen</span></div>
-    </div>
 
     <div class="toolbar reveal">
       <p class="eyebrow" style="margin-bottom:0">Daftar Permohonan</p>

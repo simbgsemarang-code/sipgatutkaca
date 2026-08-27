@@ -141,23 +141,10 @@ class Pengajuan_pbg extends CI_Controller {
 	/** Daftar Permohonan - semua permohonan yang pernah diinput staf PU (loket bersama, tidak disaring per staf). */
 	public function index()
 	{
-		$semua = $this->db->order_by('created_at', 'DESC')->get('pengajuan_pbg')->result_array();
-		$jumlah_draf = 0;
-		foreach ($semua as $p)
-		{
-			if ($p['status'] === 'draf')
-			{
-				$jumlah_draf++;
-			}
-		}
-
-		$data['daftar']          = $semua;
-		$data['total']           = count($semua);
-		$data['jumlah_draf']     = $jumlah_draf;
-		$data['jumlah_terkirim'] = count($semua) - $jumlah_draf;
-		$data['sukses']          = $this->session->flashdata('sukses');
-		$data['error']           = $this->session->flashdata('error');
-		$data['nama_pengguna']   = $this->session->userdata('nama');
+		$data['daftar']        = $this->db->order_by('created_at', 'DESC')->get('pengajuan_pbg')->result_array();
+		$data['sukses']        = $this->session->flashdata('sukses');
+		$data['error']         = $this->session->flashdata('error');
+		$data['nama_pengguna'] = $this->session->userdata('nama');
 
 		$this->load->view('pages/pengajuan_pbg_list', $data);
 	}
