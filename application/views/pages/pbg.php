@@ -96,6 +96,13 @@ section.alt{background:var(--bg-alt)}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:24ch}
 .section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
 
+/* ===== DAFTAR LABEL/KETERANGAN ===== */
+.list{margin-top:30px;text-align:left}
+.list-item{display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--line)}
+.list-item:first-child{border-top:1px solid var(--line)}
+.list-key{font-family:var(--display);color:var(--gold-300);letter-spacing:.06em;min-width:180px;font-size:.95rem;flex:0 0 auto}
+.list-val{color:var(--muted);font-size:.92rem}
+
 /* ===== TABEL & FORM ===== */
 table{width:100%;border-collapse:collapse;margin-top:44px;font-size:.9rem}
 th{font-family:var(--display);font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:.74rem;color:var(--gold-300);text-align:left;padding:16px 14px;border-bottom:1px solid var(--gold-500)}
@@ -160,6 +167,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   section{padding:76px 0}
   .tim-icon-box{width:120px;height:120px}
   .tim-icon-box svg{width:88px;height:88px}
+  .list-item{flex-direction:column;gap:6px}
+  .list-key{min-width:0}
 }
 .auth-actions{display:flex;align-items:center;gap:14px}
 .user-menu{position:relative}
@@ -253,6 +262,18 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <h2 style="font-size:clamp(1.3rem,2.2vw,1.7rem);margin:0 auto">Tatacara dan SOP PBG</h2>
       <p class="section-lead" style="margin:16px auto 0">Siapkan identitas pemohon, bukti hak atas tanah atau perjanjian pemanfaatan, dan uraian rencana kegiatan beserta perkiraan luas lantai dan lahan.</p>
       <p class="section-lead" style="margin-top:14px">Telusuri pengajuan PBG Anda melalui menu <a href="<?php echo base_url('konsultasi'); ?>" style="color:var(--gold-300)">Konsultasi</a>, atau ajukan <a href="<?php echo base_url('itr'); ?>" style="color:var(--gold-300)">PBG dan SLF</a> untuk keterangan resmi tertulis mengenai persetujuan PBG.</p>
+    </div>
+
+    <div class="reveal" style="margin-top:64px;max-width:680px;margin-left:auto;margin-right:auto">
+      <p class="eyebrow" style="text-align:center">Persyaratan</p>
+      <h2 style="font-size:clamp(1.3rem,2.2vw,1.7rem);margin:0 auto;text-align:center">Persyaratan Dokumen PBG</h2>
+      <div class="list">
+        <div class="list-item"><span class="list-key">Identitas Pemohon</span><span class="list-val">Scan KTP atau KITAS.</span></div>
+        <div class="list-item"><span class="list-key">Data Tanah</span><span class="list-val">Bukti kepemilikan tanah (SHM, HGB, atau AJB).</span></div>
+        <div class="list-item"><span class="list-key">Legalitas Tata Ruang</span><span class="list-val">Dokumen Kesesuaian Kegiatan Pemanfaatan Ruang (KKPR) atau Surat Keterangan Rencana Kota (SKRK/KRK).</span></div>
+        <div class="list-item"><span class="list-key">Dokumen Teknis</span><span class="list-val">Gambar rencana arsitektur, struktur, serta mekanikal, elektrikal, dan plumbing (MEP).</span></div>
+        <div class="list-item"><span class="list-key">Dokumen Pendukung</span><span class="list-val">Dokumen lingkungan (seperti SPPL/UKL-UPL) dan foto lokasi beserta titik koordinat.</span></div>
+      </div>
     </div>
   </div>
 </section>
