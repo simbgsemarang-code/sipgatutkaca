@@ -25,21 +25,30 @@ class Login extends CI_Controller {
 	 * 'grup' dipakai _akun_uji_untuk() untuk menyaring sesuai ?from=.
 	 * Semua akun anggota grup yang sama ditampilkan sekaligus (mis.
 	 * grup 'pu' menampilkan Ahmad Wijaya DAN Siti Rahmawati).
+	 *
+	 * Sengaja TIDAK ada akun uji coba untuk peran pemohon - beda dari
+	 * admin/pu/tpa (dibuatkan admin lewat /admin/pengguna), pemohon
+	 * sendiri yang mendaftar (lihat tampilkan_daftar di index()), jadi
+	 * cara uji yang lebih apa adanya adalah daftar akun baru lewat
+	 * halaman PBG/SLF, bukan lewat kredensial bersama yang dipajang.
 	 */
 	private $akun_uji = array(
-		array('grup' => 'admin',   'label' => 'Admin',        'nama' => 'Administrator',     'email' => 'admin@sipgatutkaca.local',             'password' => 'f0250dc5621e'),
-		array('grup' => 'pu',      'label' => 'PU',            'nama' => 'Ahmad Wijaya',      'email' => 'ahmad.wijaya@sipgatutkaca.local',      'password' => 'b596c84a9d7a'),
-		array('grup' => 'pu',      'label' => 'PU',            'nama' => 'Siti Rahmawati',    'email' => 'siti.rahmawati@sipgatutkaca.local',    'password' => 'e2160c77feb5'),
-		array('grup' => 'tpa',     'label' => 'TPA Arsitek',   'nama' => 'Rudi Hartono',      'email' => 'rudi.hartono@sipgatutkaca.local',      'password' => '191b9dc53b2d'),
-		array('grup' => 'tpa',     'label' => 'TPA Struktur',  'nama' => 'Yulia Permatasari', 'email' => 'yulia.permatasari@sipgatutkaca.local', 'password' => 'b59981e87fad'),
-		array('grup' => 'tpa',     'label' => 'TPA MEP',       'nama' => 'Hendra Kusnadi',    'email' => 'hendra.kusnadi@sipgatutkaca.local',    'password' => '6f21a582f9ec'),
-		array('grup' => 'pemohon', 'label' => 'Pemohon',       'nama' => 'Uji Coba Pemohon',  'email' => 'pemohon.uji@sipgatutkaca.local',       'password' => '092d2a5cd461'),
+		array('grup' => 'admin', 'label' => 'Admin',       'nama' => 'Administrator',     'email' => 'admin@sipgatutkaca.local',             'password' => 'f0250dc5621e'),
+		array('grup' => 'pu',    'label' => 'PU',           'nama' => 'Ahmad Wijaya',      'email' => 'ahmad.wijaya@sipgatutkaca.local',      'password' => 'b596c84a9d7a'),
+		array('grup' => 'pu',    'label' => 'PU',           'nama' => 'Siti Rahmawati',    'email' => 'siti.rahmawati@sipgatutkaca.local',    'password' => 'e2160c77feb5'),
+		array('grup' => 'tpa',   'label' => 'TPA Arsitek',  'nama' => 'Rudi Hartono',      'email' => 'rudi.hartono@sipgatutkaca.local',      'password' => '191b9dc53b2d'),
+		array('grup' => 'tpa',   'label' => 'TPA Struktur', 'nama' => 'Yulia Permatasari', 'email' => 'yulia.permatasari@sipgatutkaca.local', 'password' => 'b59981e87fad'),
+		array('grup' => 'tpa',   'label' => 'TPA MEP',      'nama' => 'Hendra Kusnadi',    'email' => 'hendra.kusnadi@sipgatutkaca.local',    'password' => '6f21a582f9ec'),
 	);
 
 	/**
 	 * Grup akun uji coba mana yang relevan untuk tiap nilai ?from=.
-	 * PBG dan SLF sama-sama memakai grup 'pemohon' (satu-satunya peran
-	 * warga/pemohon di sistem ini).
+	 * 'pbg' dan 'slf' TETAP dipetakan ke grup 'pemohon' walau grup itu
+	 * sekarang kosong (lihat $akun_uji) - PENTING supaya halaman login
+	 * yang diakses publik lewat tombol Ajukan PBG/SLF tetap hanya
+	 * menampilkan array kosong (panel disembunyikan), bukan malah jatuh
+	 * ke default "tampilkan semua akun" di _akun_uji_untuk() sehingga
+	 * kredensial admin/pu/tpa bocor ke pengunjung umum.
 	 */
 	private $peta_tombol_uji = array(
 		'admin' => 'admin',
