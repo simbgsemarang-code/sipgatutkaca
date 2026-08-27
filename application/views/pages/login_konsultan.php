@@ -261,7 +261,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="wrap">
     <p class="hero-eyebrow">Khusus Petugas</p>
     <h1>Gerbang Tugas <em>Sang Penelaah</em></h1>
-    <p class="hero-lead">Portal masuk bagi Tim Penilai Assesment (TPA) dan Pekerjaan Umum (PU) untuk menindaklanjuti permohonan konsultasi dan penilaian kesesuaian ruang.</p>
+    <p class="hero-lead">Portal masuk bagi Tim Profesi Ahli (TPA) dan Pekerjaan Umum (PU) untuk menindaklanjuti permohonan konsultasi dan penilaian kesesuaian ruang.</p>
 
   </div>
 </section>
@@ -274,7 +274,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <h2 style="font-size:1.6rem;margin-bottom:10px">Masuk Kesatuan Tugas</h2>
       <p id="timDesc" class="note" style="margin:0 0 26px">Pilih kesatuan tugas Anda di bawah ini.</p>
       <div class="tim-switch" role="group" aria-label="Pilih kesatuan tugas">
-        <button type="button" class="tim-opt" data-tim="TPA"><b>TPA</b><span>Tim Penilai Assesment</span></button>
+        <button type="button" class="tim-opt" data-tim="TPA"><b>TPA</b><span>Tim Profesi Ahli</span></button>
         <button type="button" class="tim-opt" data-tim="PU"><b>PU</b><span>Pekerjaan Umum</span></button>
       </div>
       <div class="field"><label for="tk-nip">NIP / ID Petugas</label><input id="tk-nip" type="text" placeholder="Nomor Induk Pegawai"></div>
@@ -298,7 +298,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
 <script>
 (function(){
-  var NAMA={TPA:"Tim Penilai Assesment",PU:"Pekerjaan Umum"};
+  var NAMA={TPA:"Tim Profesi Ahli",PU:"Pekerjaan Umum"};
   var desc=document.getElementById("timDesc"),btn=document.getElementById("tkMasuk"),cur=null;
   function pilih(t){
     cur=t;

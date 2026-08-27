@@ -201,9 +201,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <section style="padding-top:100px">
   <div class="dash-wrap">
     <div class="reveal">
-      <p class="eyebrow">Portal TPA — Tim Penilai Assesment</p>
+      <p class="eyebrow">Portal TPA — Tim Profesi Ahli</p>
       <h2>Tinjau Saran &amp; Masukan Warga</h2>
-      <p class="section-lead">Sebagai Tim Penilai Assesment, Anda membantu menindaklanjuti saran dan masukan yang masuk dari warga terkait penilaian kelayakan bangunan gedung. Perbarui status tiap masukan setelah ditinjau atau selesai ditangani.</p>
+      <p class="section-lead">Sebagai Tim Profesi Ahli, Anda membantu menindaklanjuti saran dan masukan yang masuk dari warga terkait penilaian kelayakan bangunan gedung. Perbarui status tiap masukan setelah ditinjau atau selesai ditangani.</p>
     </div>
 
     <?php if (!empty($sukses)): ?>

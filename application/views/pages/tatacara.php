@@ -1074,7 +1074,7 @@
             <div class="step-num">04</div>
             <div>
               <h3>Tata Cara Pengajuan SHST</h3>
-              <p>Tim teknis menilai rencana terhadap Kelayakan Bangunan Gedung; penilaian dilakukan melalui konsultasi dengan tim penilai assesment.</p><span class="tag">Lihat Tata Cara</span>
+              <p>Tim teknis menilai rencana terhadap Kelayakan Bangunan Gedung; penilaian dilakukan melalui konsultasi dengan Tim Profesi Ahli.</p><span class="tag">Lihat Tata Cara</span>
             </div>
           </div>
           <div class="step">

@@ -211,7 +211,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <div class="reveal">
       <p class="eyebrow">Panel Admin</p>
       <h2>Kelola Pengguna</h2>
-      <p class="section-lead">Tambahkan akun untuk staf Tim Penilai Assesment (Arsitek, Struktur, atau MEP), Pekerjaan Umum (PU), atau admin lain — dan lihat seluruh pengguna yang sudah terdaftar. Akun pemohon hanya bisa dibuat lewat pendaftaran mandiri di halaman <?php echo base_url('daftar'); ?>.</p>
+      <p class="section-lead">Tambahkan akun untuk staf Tim Profesi Ahli (Arsitek, Struktur, atau MEP), Pekerjaan Umum (PU), atau admin lain — dan lihat seluruh pengguna yang sudah terdaftar. Akun pemohon hanya bisa dibuat lewat pendaftaran mandiri di halaman <?php echo base_url('daftar'); ?>.</p>
     </div>
 
     <?php if (!empty($sukses)): ?>
@@ -248,9 +248,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
             <option value="" disabled <?php echo $peran_terpilih === '' ? 'selected' : ''; ?>>— Pilih jenis pengguna —</option>
             <option value="admin" <?php echo $peran_terpilih === 'admin' ? 'selected' : ''; ?>>Admin</option>
             <option value="pu" <?php echo $peran_terpilih === 'pu' ? 'selected' : ''; ?>>PU — Pekerjaan Umum</option>
-            <option value="tpa_arsitek" <?php echo $peran_terpilih === 'tpa_arsitek' ? 'selected' : ''; ?>>TPA Arsitek — Tim Penilai Assesment Arsitektur</option>
-            <option value="tpa_struktur" <?php echo $peran_terpilih === 'tpa_struktur' ? 'selected' : ''; ?>>TPA Struktur — Tim Penilai Assesment Struktur</option>
-            <option value="tpa_mep" <?php echo $peran_terpilih === 'tpa_mep' ? 'selected' : ''; ?>>TPA MEP — Tim Penilai Assesment Mekanikal, Elektrikal, Plambing</option>
+            <option value="tpa_arsitek" <?php echo $peran_terpilih === 'tpa_arsitek' ? 'selected' : ''; ?>>TPA Arsitek — Tim Profesi Ahli Arsitektur</option>
+            <option value="tpa_struktur" <?php echo $peran_terpilih === 'tpa_struktur' ? 'selected' : ''; ?>>TPA Struktur — Tim Profesi Ahli Struktur</option>
+            <option value="tpa_mep" <?php echo $peran_terpilih === 'tpa_mep' ? 'selected' : ''; ?>>TPA MEP — Tim Profesi Ahli Mekanikal, Elektrikal, Plambing</option>
           </select>
         </div>
         <button class="btn btn-gold" type="submit" style="width:100%">Tambah Pengguna</button>
