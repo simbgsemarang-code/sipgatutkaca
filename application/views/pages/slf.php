@@ -251,7 +251,33 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <div class="page-breadcrumb reveal">
       <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>SLF
     </div>
-    <div class="reveal">
+
+    <div class="reveal" style="text-align:center">
+      <p class="eyebrow">Untuk Petugas</p>
+      <h2 style="font-size:clamp(1.3rem,2.2vw,1.7rem);margin:0 auto">Portal Tim Penelaah SLF</h2>
+      <div class="tim-row">
+        <a class="tim-btn" href="<?php echo base_url('login?from=tpa'); ?>">
+          <span class="tim-icon-box">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+              <path d="M8 36V22l14-10 14 10v14" stroke="#F8F4EA" stroke-width="2" />
+              <path d="M17 36v-9h10v9M8 36h28" stroke="#F8F4EA" stroke-width="2" />
+            </svg>
+          </span>
+          <span class="tim-label-box"><b>TPA</b></span>
+        </a>
+        <a class="tim-btn" href="<?php echo base_url('login?from=pu'); ?>">
+          <span class="tim-icon-box">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+              <path d="M10 34l10-10m4-4l10-10M24 20l-4 4" stroke="#F8F4EA" stroke-width="2" />
+              <path d="M30 6l8 8-5 5-8-8zM6 33l5-5 5 5-5 5z" stroke="#F8F4EA" stroke-width="2" />
+            </svg>
+          </span>
+          <span class="tim-label-box"><b>PU</b></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:64px">
       <p class="eyebrow">Persyaratan Layanan</p>
       <h2>Persyaratan SLF (Sertifikat Laik Fungsi)</h2>
       <p class="section-lead">Siapkan kelengkapan data umum dan data teknis berikut sebelum mengajukan Sertifikat Laik Fungsi (SLF), mengikuti Peraturan Bupati Cilacap Nomor 52 Tahun 2023 tentang Tata Cara Penyelenggaraan Persetujuan Bangunan Gedung dan Sertifikat Laik Fungsi.</p>
@@ -335,31 +361,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <div class="reveal" style="margin-top:56px;text-align:center;display:flex;gap:18px;justify-content:center;flex-wrap:wrap">
       <a class="btn btn-gold" href="<?php echo base_url('login?from=slf'); ?>">Ajukan SLF →</a>
       <a class="btn btn-ghost" href="<?php echo base_url(); ?>">← Beranda</a>
-    </div>
-
-    <div class="reveal" style="margin-top:64px;text-align:center">
-      <p class="eyebrow">Untuk Petugas</p>
-      <h2 style="font-size:clamp(1.3rem,2.2vw,1.7rem);margin:0 auto">Portal Tim Penelaah SLF</h2>
-      <div class="tim-row">
-        <a class="tim-btn" href="<?php echo base_url('login?from=tpa'); ?>">
-          <span class="tim-icon-box">
-            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-              <path d="M8 36V22l14-10 14 10v14" stroke="#F8F4EA" stroke-width="2" />
-              <path d="M17 36v-9h10v9M8 36h28" stroke="#F8F4EA" stroke-width="2" />
-            </svg>
-          </span>
-          <span class="tim-label-box"><b>TPA</b></span>
-        </a>
-        <a class="tim-btn" href="<?php echo base_url('login?from=pu'); ?>">
-          <span class="tim-icon-box">
-            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-              <path d="M10 34l10-10m4-4l10-10M24 20l-4 4" stroke="#F8F4EA" stroke-width="2" />
-              <path d="M30 6l8 8-5 5-8-8zM6 33l5-5 5 5-5 5z" stroke="#F8F4EA" stroke-width="2" />
-            </svg>
-          </span>
-          <span class="tim-label-box"><b>PU</b></span>
-        </a>
-      </div>
     </div>
   </div>
 </section>
