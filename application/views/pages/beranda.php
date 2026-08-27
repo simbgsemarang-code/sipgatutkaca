@@ -382,7 +382,7 @@
         max-width: 320px;
         margin: -16px auto 0;
         background: var(--gold-500);
-        color: var(--bg);
+        color: #081826;
         font-size: .76rem;
         font-weight: 600;
         letter-spacing: .03em;
@@ -390,7 +390,7 @@
         text-align: center;
         padding: 14px 24px;
         border-radius: 20px;
-        border: 3px solid var(--bg);
+        border: 3px solid #081826;
         position: relative;
         z-index: 2
       }
@@ -404,7 +404,7 @@
         line-height: 1.4;
         max-width: 640px;
         margin: 40px auto 0;
-        color: var(--gold-100);
+        color: #F8F4EA;
         text-shadow: 0 2px 10px var(--shadow)
       }
 
