@@ -248,6 +248,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </div>
     </div>
 
+    <div class="reveal" style="margin-top:64px;text-align:center">
+      <p class="eyebrow">Panduan</p>
+      <h2 style="font-size:clamp(1.3rem,2.2vw,1.7rem);margin:0 auto">Tatacara dan SOP PBG</h2>
+      <a class="btn btn-gold" style="margin-top:28px" href="<?php echo base_url('tatacara'); ?>">Lihat Tatacara dan SOP →</a>
+    </div>
   </div>
 </section>
 
