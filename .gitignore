@@ -13,6 +13,13 @@ application/config/database.php
 application/uploads/pengajuan_pbg/*
 !application/uploads/pengajuan_pbg/index.html
 
+# Kecuali folder dummy_lengkap/ - berkas CONTOH/dummy (bukan data
+# pengguna sungguhan) untuk 1 data uji coba Pengajuan PBG lengkap,
+# lihat database/pengajuan_pbg_dummy_lengkap.sql. Folder unggahan
+# pengguna sungguhan (nama folder = ID numerik permohonan) tetap
+# diabaikan seperti biasa.
+!application/uploads/pengajuan_pbg/dummy_lengkap/
+
 # Konfigurasi rahasia webhook auto-deploy (berisi secret asli - lihat
 # deploy-hook.config.php.example untuk templatenya) + file runtime
 # yang dibuat otomatis oleh deploy-hook.php

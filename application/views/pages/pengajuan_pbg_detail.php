@@ -270,6 +270,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div class="kv"><span>Jenis Prototipe</span><b><?php echo $t($row['prototipe_jenis']); ?></b></div>
         <div class="kv"><span>Jumlah Unit Dibangun</span><b><?php echo $t($row['prototipe_jumlah_unit']); ?></b></div>
         <div class="kv"><span>Masa Pemanfaatan</span><b><?php echo $t($row['masa_pemanfaatan'] === 'lebih_5_tahun' ? 'Lebih dari 5 tahun' : ($row['masa_pemanfaatan'] === 'kurang_5_tahun' ? 'Kurang dari 5 tahun' : null)); ?></b></div>
+        <div class="kv"><span>Koordinat Prototipe</span><b><?php echo $t(trim($row['prototipe_latitude'] . ', ' . $row['prototipe_longitude'], ', ')); ?></b></div>
+        <div class="kv"><span>Peta / Denah Prototipe</span><b><?php echo !empty($row['prototipe_peta']) ? '<a href="' . base_url('pengajuan-pbg/berkas/prototipe_peta/' . (int) $row['id']) . '" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">Lihat berkas</a>' : '—'; ?></b></div>
       </div>
     </div>
     <?php endif; ?>
