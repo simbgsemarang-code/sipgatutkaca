@@ -179,10 +179,22 @@ class Pengajuan_pbg extends CI_Controller {
 	/** Daftar Permohonan - semua permohonan yang pernah diinput staf PU (loket bersama, tidak disaring per staf). */
 	public function index()
 	{
-		$data['daftar']        = $this->db->order_by('created_at', 'DESC')->get('pengajuan_pbg')->result_array();
-		$data['sukses']        = $this->session->flashdata('sukses');
-		$data['error']         = $this->session->flashdata('error');
-		$data['nama_pengguna'] = $this->session->userdata('nama');
+		// Dikelompokkan per id_pengajuan supaya tabel daftar bisa
+		// menunjukkan bidang TPA mana yang sudah/belum memutuskan,
+		// tanpa query terpisah per baris - lihat
+		// Tpa_pengajuan_pbg::_hitung_status_keseluruhan() untuk
+		// catatan lengkap soal tabel pengajuan_pbg_persetujuan_tpa.
+		$persetujuan_per_id = array();
+		foreach ($this->db->get('pengajuan_pbg_persetujuan_tpa')->result_array() as $p)
+		{
+			$persetujuan_per_id[$p['id_pengajuan']][$p['bidang']] = $p['status'];
+		}
+
+		$data['daftar']             = $this->db->order_by('created_at', 'DESC')->get('pengajuan_pbg')->result_array();
+		$data['persetujuan_per_id'] = $persetujuan_per_id;
+		$data['sukses']             = $this->session->flashdata('sukses');
+		$data['error']              = $this->session->flashdata('error');
+		$data['nama_pengguna']      = $this->session->userdata('nama');
 
 		$this->load->view('pages/pengajuan_pbg_list', $data);
 	}
@@ -350,7 +362,7 @@ class Pengajuan_pbg extends CI_Controller {
 		$label_status = array(
 			'verifikasi_dokumen'         => 'Verifikasi Kelengkapan Dokumen',
 			'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi',
-			'disetujui_tpa'              => 'Disetujui TPA',
+			'disetujui_tpa'              => 'Disetujui Semua TPA',
 		);
 		$label_lanjut = isset($label_status[$status_lanjut]) ? $label_status[$status_lanjut] : $status_lanjut;
 		$this->session->set_flashdata('sukses', 'Perbaikan berhasil dikirim. Status permohonan sekarang: ' . $label_lanjut . '.');

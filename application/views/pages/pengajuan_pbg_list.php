@@ -110,6 +110,7 @@ td:first-child{color:var(--text);font-weight:500}
 .tag-disetujui_tpa{color:#6FCF97;border-color:#2EA84F}
 .aksi-cell{display:flex;gap:8px;flex-wrap:wrap}
 .no-reg{font-size:.72rem;color:var(--muted)}
+.bidang-progres{margin-top:6px;font-size:.68rem;letter-spacing:.02em;color:var(--muted)}
 
 .alert{padding:16px 20px;margin-bottom:0;margin-top:36px;font-size:.88rem;border:1px solid}
 .alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
@@ -240,8 +241,32 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <td class="no-reg"><?php echo !empty($r['no_registrasi']) ? htmlspecialchars($r['no_registrasi'], ENT_QUOTES, 'UTF-8') : 'Belum Terdefinisi'; ?></td>
               <td><?php echo !empty($r['lokasi_alamat']) ? htmlspecialchars(mb_strimwidth($r['lokasi_alamat'], 0, 60, '…'), ENT_QUOTES, 'UTF-8') : '—'; ?></td>
               <td>
-                <?php $label_status = array('draf' => 'Draf', 'verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi', 'disetujui_tpa' => 'Disetujui TPA'); ?>
+                <?php $label_status = array('draf' => 'Draf', 'verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi', 'disetujui_tpa' => 'Disetujui Semua TPA'); ?>
                 <span class="tag tag-<?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$r['status']]) ? $label_status[$r['status']] : $r['status'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <?php if (in_array($r['status'], array('verifikasi_dokumen', 'perbaikan_dokumen'), TRUE)): ?>
+                  <?php
+                  $singkat_bidang  = array('tpa_arsitek' => 'Arsitek', 'tpa_struktur' => 'Struktur', 'tpa_mep' => 'MEP');
+                  $sudah_per_bidang = isset($persetujuan_per_id[$r['id']]) ? $persetujuan_per_id[$r['id']] : array();
+                  $bagian = array();
+                  foreach ($singkat_bidang as $kode_bidang => $nama_singkat)
+                  {
+                    if (! isset($sudah_per_bidang[$kode_bidang]))
+                    {
+                      $ket = 'Menunggu';
+                    }
+                    elseif ($sudah_per_bidang[$kode_bidang] === 'disetujui')
+                    {
+                      $ket = 'Disetujui';
+                    }
+                    else
+                    {
+                      $ket = 'Perbaikan';
+                    }
+                    $bagian[] = $nama_singkat . ': ' . $ket;
+                  }
+                  ?>
+                  <div class="bidang-progres"><?php echo htmlspecialchars(implode(' · ', $bagian), ENT_QUOTES, 'UTF-8'); ?></div>
+                <?php endif; ?>
               </td>
               <td><?php echo htmlspecialchars(date('d M Y', strtotime($r['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
               <td class="aksi-cell">

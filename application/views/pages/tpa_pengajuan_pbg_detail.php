@@ -13,7 +13,7 @@ $label_status = array(
 	'perbaikan_dokumen'            => 'Perbaikan Dokumen',
 	'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi',
 	'menunggu_jadwal_konsultasi'   => 'Menunggu Jadwal Konsultasi',
-	'disetujui_tpa'                => 'Disetujui TPA',
+	'disetujui_tpa'                => 'Disetujui Semua TPA',
 );
 ?>
 <!DOCTYPE html>
@@ -247,7 +247,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     ?>
     <div class="card">
       <h4>Status Persetujuan 3 Bidang TPA</h4>
-      <p style="color:var(--muted);font-size:.82rem;margin-top:-12px;margin-bottom:16px">Permohonan baru berstatus Disetujui TPA kalau ketiga bidang di bawah sudah menyetujui.</p>
+      <p style="color:var(--muted);font-size:.82rem;margin-top:-12px;margin-bottom:16px">Permohonan baru berstatus Disetujui Semua TPA kalau ketiga bidang di bawah sudah menyetujui.</p>
       <div class="kv-grid">
         <?php foreach ($label_bidang as $kode_bidang => $nama_bidang): ?>
           <div class="kv full">
@@ -375,7 +375,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <?php if (!empty($bidang_boleh_menilai)): ?>
       <div class="card">
         <h4>Kirim Keputusan Peninjauan — Bidang Anda</h4>
-        <p style="color:var(--muted);font-size:.88rem">Tandai dulu dokumen yang tidak sesuai di atas (kalau ada), lalu pilih keputusan BIDANG ANDA dan tulis catatan untuk pemohon/PU di bawah ini (catatan wajib diisi untuk 2 jenis perbaikan, opsional untuk "Dokumen Sesuai"). Bidang TPA lain meninjau &amp; memutuskan secara terpisah - permohonan baru berstatus Disetujui TPA kalau ketiga bidang sudah menyetujui (lihat kartu status di atas).</p>
+        <p style="color:var(--muted);font-size:.88rem">Tandai dulu dokumen yang tidak sesuai di atas (kalau ada), lalu pilih keputusan BIDANG ANDA dan tulis catatan untuk pemohon/PU di bawah ini (catatan wajib diisi untuk 2 jenis perbaikan, opsional untuk "Dokumen Sesuai"). Bidang TPA lain meninjau &amp; memutuskan secara terpisah - permohonan baru berstatus Disetujui Semua TPA kalau ketiga bidang sudah menyetujui (lihat kartu status di atas).</p>
         <form class="keputusan-form" action="<?php echo base_url('tpa-pengajuan-pbg/kirim-catatan/' . (int) $row['id']); ?>" method="post">
           <div class="opt-list">
             <label>

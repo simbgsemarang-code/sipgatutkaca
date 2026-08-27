@@ -18,7 +18,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * per bidang per permohonan (tanpa baris = bidang itu belum
  * meninjau). Kolom pengajuan_pbg.status DITURUNKAN dari isi tabel
  * itu lewat _hitung_status_keseluruhan(), bukan ditulis langsung
- * oleh satu keputusan: permohonan baru berstatus "Disetujui TPA"
+ * oleh satu keputusan: permohonan baru berstatus "Disetujui Semua TPA"
  * kalau KETIGA bidang sudah menyetujui. Kalau satu bidang menandai
  * "Perbaikan Dokumen" dan PU sudah memperbaikinya, cuma baris bidang
  * itu yang dihapus (perlu ditinjau ulang) - bidang lain yang sudah
@@ -266,7 +266,7 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 	 * keluar satu arah, mengalahkan segalanya); ada bidang minta
 	 * perbaikan dokumen biasa -> itu; ketiga bidang sudah py baris
 	 * keputusan (berarti pasti semuanya 'disetujui', karena 2
-	 * kemungkinan lain sudah ditangani duluan) -> Disetujui TPA;
+	 * kemungkinan lain sudah ditangani duluan) -> Disetujui Semua TPA;
 	 * selain itu masih menunggu sebagian bidang -> tetap Verifikasi
 	 * Kelengkapan Dokumen.
 	 */

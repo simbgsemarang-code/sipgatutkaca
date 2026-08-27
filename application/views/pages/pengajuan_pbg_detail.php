@@ -14,7 +14,7 @@ $label_status = array(
 	'perbaikan_dokumen'            => 'Perbaikan Dokumen',
 	'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi',
 	'menunggu_jadwal_konsultasi'   => 'Menunggu Jadwal Konsultasi',
-	'disetujui_tpa'                => 'Disetujui TPA',
+	'disetujui_tpa'                => 'Disetujui Semua TPA',
 );
 $perlu_perbaikan = in_array($row['status'], array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'), TRUE);
 $label_bidang = array(
@@ -215,7 +215,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <?php if (!empty($persetujuan) || $perlu_perbaikan || $row['status'] === 'disetujui_tpa'): ?>
       <div class="card" style="border-color:<?php echo ($row['status'] === 'disetujui_tpa') ? '#2EA84F' : '#B4573B'; ?>;background:<?php echo ($row['status'] === 'disetujui_tpa') ? 'rgba(46,168,79,.06)' : 'rgba(240,160,72,.06)'; ?>">
         <h4>Status Persetujuan TPA per Bidang</h4>
-        <p style="color:var(--muted);font-size:.82rem;margin-top:-12px;margin-bottom:16px">Permohonan berstatus Disetujui TPA kalau ketiga bidang di bawah sudah menyetujui.</p>
+        <p style="color:var(--muted);font-size:.82rem;margin-top:-12px;margin-bottom:16px">Permohonan berstatus Disetujui Semua TPA kalau ketiga bidang di bawah sudah menyetujui.</p>
         <div class="kv-grid">
           <?php foreach ($label_bidang as $kode_bidang => $nama_bidang): ?>
             <div class="kv full">

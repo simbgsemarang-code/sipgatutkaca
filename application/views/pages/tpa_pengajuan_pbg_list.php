@@ -204,7 +204,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
           <tr><td colspan="6">Belum ada permohonan PBG yang perlu ditinjau.</td></tr>
         <?php else: ?>
           <?php foreach ($daftar as $r): ?>
-            <?php $label_status = array('verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi', 'disetujui_tpa' => 'Disetujui TPA'); ?>
+            <?php $label_status = array('verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi', 'disetujui_tpa' => 'Disetujui Semua TPA'); ?>
             <tr>
               <td><?php echo htmlspecialchars($r['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></td>
               <td class="no-reg"><?php echo !empty($r['no_registrasi']) ? htmlspecialchars($r['no_registrasi'], ENT_QUOTES, 'UTF-8') : 'Belum Terdefinisi'; ?></td>
