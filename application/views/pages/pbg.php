@@ -96,20 +96,6 @@ section.alt{background:var(--bg-alt)}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:24ch}
 .section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
 
-
-/* ===== TIMELINE TATA CARA / DATA TEKNIS ===== */
-.steps{margin-top:46px;display:grid;gap:0}
-.step{display:grid;grid-template-columns:90px 1fr;gap:30px;padding:34px 0;border-bottom:1px solid var(--line);align-items:start}
-.step:first-child{border-top:1px solid var(--line)}
-.step-num{font-family:var(--display);font-size:2.4rem;color:var(--gold-300);line-height:1}
-.step h3{font-family:var(--display);font-weight:400;font-size:1.25rem;color:var(--text);margin-bottom:8px;letter-spacing:.04em}
-.step p{color:var(--muted);font-size:.93rem;max-width:70ch}
-.step .tag{margin-top:12px}
-
-.pbg-sub{list-style:none;margin-top:12px}
-.pbg-sub li{display:flex;gap:14px;padding:7px 0;color:var(--muted);font-size:.9rem}
-.pbg-letter{font-family:var(--display);color:var(--gold-300);min-width:20px;flex:0 0 auto}
-
 /* ===== TABEL & FORM ===== */
 table{width:100%;border-collapse:collapse;margin-top:44px;font-size:.9rem}
 th{font-family:var(--display);font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:.74rem;color:var(--gold-300);text-align:left;padding:16px 14px;border-bottom:1px solid var(--gold-500)}
@@ -172,8 +158,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 }
 @media(max-width:560px){
   section{padding:76px 0}
-  .step{grid-template-columns:56px 1fr;gap:18px}
-  .step-num{font-size:1.7rem}
   .tim-icon-box{width:120px;height:120px}
   .tim-icon-box svg{width:88px;height:88px}
 }
@@ -264,53 +248,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </div>
     </div>
 
-    <div class="reveal" style="margin-top:64px">
-      <p class="eyebrow" style="margin-bottom:0">Data Teknis</p>
-      <h2 style="font-size:clamp(1.5rem,2.6vw,2rem);margin-top:14px">Kelengkapan Dokumen Rencana Teknis</h2>
-    </div>
-
-    <div class="steps reveal">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div>
-          <h3>Data Teknis Arsitektur</h3>
-          <ol class="pbg-sub">
-            <li><span class="pbg-letter">a.</span><span>Gambar Teknis perencanaan Arsitektur</span></li>
-            <li><span class="pbg-letter">b.</span><span>Spesifikasi Teknis Arsitektur Bangunan</span></li>
-            <li><span class="pbg-letter">c.</span><span>Rencana Anggaran Biaya (RAB)</span></li>
-          </ol>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div>
-          <h3>Data Teknis Struktur</h3>
-          <ol class="pbg-sub">
-            <li><span class="pbg-letter">a.</span><span>Gambar Teknis perencanaan Struktur</span></li>
-            <li><span class="pbg-letter">b.</span><span>Spesifikasi Teknis Struktur Bangunan</span></li>
-            <li><span class="pbg-letter">c.</span><span>Perhitungan Teknis Struktur</span></li>
-            <li><span class="pbg-letter">d.</span><span>Rencana Anggaran Biaya (RAB)</span></li>
-          </ol>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div>
-          <h3>Data Teknis MEP</h3>
-          <ol class="pbg-sub">
-            <li><span class="pbg-letter">a.</span><span>Gambar Teknis perencanaan Mekanikal, Elektrikal, dan Plambing</span></li>
-            <li><span class="pbg-letter">b.</span><span>Spesifikasi Teknis Mekanikal, Elektrikal, dan Plambing</span></li>
-            <li><span class="pbg-letter">c.</span><span>Perhitungan Teknis Mekanikal, Elektrikal, dan Plambing</span></li>
-            <li><span class="pbg-letter">d.</span><span>Rencana Anggaran Biaya (RAB)</span></li>
-          </ol>
-        </div>
-      </div>
-    </div>
-
-    <div class="reveal" style="margin-top:56px;text-align:center;display:flex;gap:18px;justify-content:center;flex-wrap:wrap">
-      <a class="btn btn-gold" href="<?php echo base_url('login?from=pbg'); ?>">Ajukan PBG →</a>
-      <a class="btn btn-ghost" href="<?php echo base_url(); ?>">← Beranda</a>
-    </div>
   </div>
 </section>
 
