@@ -215,7 +215,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div>
         <p class="eyebrow">Portal PU — Pekerjaan Umum</p>
         <h2>Pengajuan PBG</h2>
-        <p class="section-lead">Loket input permohonan Persetujuan Bangunan Gedung (PBG) mewakili warga yang datang langsung. Isi formulir bertahap, unggah dokumen teknisnya, lalu kirim untuk masuk antrean verifikasi kelengkapan dokumen.</p>
       </div>
       <a href="<?php echo base_url('pengajuan-pbg/tambah'); ?>" class="btn btn-gold btn-sm" style="flex:0 0 auto">+ Tambah Permohonan</a>
     </div>
