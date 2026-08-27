@@ -11,12 +11,14 @@
 -- atau lewat query DELETE manual.
 
 INSERT INTO `users` (`nik`, `nama`, `email`, `password`, `role`) VALUES
-  (NULL, 'Uji Coba PU', 'pu.uji@sipgatutkaca.local', '$2y$12$37OBk0CjdWaWtulQatiXv.dSD5kfd742cAbLJmGj5ZpJlimk3WtU.', 'pu'),
+  (NULL, 'Ahmad Wijaya', 'ahmad.wijaya@sipgatutkaca.local', '$2y$12$HOB7fUciCO5hJywRSKRiBe7ucnZ9rsDc9S2ATJOZzJ8ZtfOIro2pW', 'pu'),
+  (NULL, 'Siti Rahmawati', 'siti.rahmawati@sipgatutkaca.local', '$2y$12$S2YPBKKXMsY5NMXwbMi6SeeDrT/AXZw0N4UFmU7SBgAHOU97sJpk2', 'pu'),
   (NULL, 'Uji Coba TPA', 'tpa.uji@sipgatutkaca.local', '$2y$12$GjElyhNoN8uPw1Q1izr0DeO/eBGEY2Y6hwdtAz756fdh80xGbwiG6', 'tpa'),
   (NULL, 'Uji Coba Pemohon', 'pemohon.uji@sipgatutkaca.local', '$2y$12$E3eIivhnW59fPDgFmK3f5uW/zUrOtXPlJEiv/DsOwNxytetcGwOve', 'pemohon');
 
 -- Kata sandi masing-masing (SEBELUM di-hash, di atas sudah dalam
 -- bentuk bcrypt hash siap pakai):
---   pu.uji@sipgatutkaca.local       / 1965ad22f258
---   tpa.uji@sipgatutkaca.local      / 309997a80684
---   pemohon.uji@sipgatutkaca.local  / 092d2a5cd461
+--   ahmad.wijaya@sipgatutkaca.local    / b596c84a9d7a
+--   siti.rahmawati@sipgatutkaca.local  / e2160c77feb5
+--   tpa.uji@sipgatutkaca.local         / 309997a80684
+--   pemohon.uji@sipgatutkaca.local     / 092d2a5cd461

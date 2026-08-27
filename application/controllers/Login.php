@@ -22,7 +22,7 @@ class Login extends CI_Controller {
 	 */
 	private $akun_uji = array(
 		'admin'   => array('label' => 'Admin',   'email' => 'admin@sipgatutkaca.local',      'password' => 'f0250dc5621e'),
-		'pu'      => array('label' => 'PU',      'email' => 'pu.uji@sipgatutkaca.local',      'password' => '1965ad22f258'),
+		'pu'      => array('label' => 'PU',      'email' => 'ahmad.wijaya@sipgatutkaca.local', 'password' => 'b596c84a9d7a'),
 		'tpa'     => array('label' => 'TPA',     'email' => 'tpa.uji@sipgatutkaca.local',     'password' => '309997a80684'),
 		'pemohon' => array('label' => 'Pemohon', 'email' => 'pemohon.uji@sipgatutkaca.local', 'password' => '092d2a5cd461'),
 	);
