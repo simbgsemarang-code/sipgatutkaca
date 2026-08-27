@@ -280,17 +280,16 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </div>
     </div>
 
-    <div class="card">
-      <h4>Dokumen Teknis Terunggah</h4>
-      <p style="color:var(--muted);font-size:.82rem;margin-top:-12px;margin-bottom:10px">Dikelompokkan sesuai bidang peninjauan Anda.</p>
-      <?php if (empty($dokumen_kelompok)): ?>
+    <?php if (empty($dokumen_kelompok)): ?>
+      <div class="card">
+        <h4>Dokumen Teknis Terunggah</h4>
         <p class="doc-empty">Tidak ada dokumen di bidang Anda untuk permohonan ini.</p>
-      <?php else: ?>
-        <?php foreach ($dokumen_kelompok as $judul_grup => $grup): ?>
-          <?php if (empty($grup['berkas']) && $judul_grup !== 'Bidang Struktur & Sipil'): ?>
-            <?php continue; ?>
-          <?php endif; ?>
-          <p class="doc-group-title"><?php echo htmlspecialchars($judul_grup, ENT_QUOTES, 'UTF-8'); ?></p>
+      </div>
+    <?php else: ?>
+      <p style="color:var(--muted);font-size:.78rem;margin:26px 2px 0">Dokumen teknis terunggah — satu kartu per bidang, sesuai peninjauan Anda.</p>
+      <?php foreach ($dokumen_kelompok as $judul_grup => $grup): ?>
+        <div class="card">
+          <h4><?php echo htmlspecialchars($judul_grup, ENT_QUOTES, 'UTF-8'); ?></h4>
 
           <?php if ($judul_grup === 'Bidang Struktur & Sipil' && !empty($row['tanah_lampiran'])): ?>
             <div class="doc-review-item">
@@ -304,7 +303,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
           <?php endif; ?>
 
           <?php if (empty($grup['berkas'])): ?>
-            <p class="doc-empty" style="margin-bottom:14px">Belum ada dokumen diunggah untuk bidang ini.</p>
+            <p class="doc-empty">Belum ada dokumen diunggah untuk bidang ini.</p>
           <?php endif; ?>
 
           <?php foreach ($grup['berkas'] as $d): ?>
@@ -339,9 +338,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <?php endif; ?>
             </div>
           <?php endforeach; ?>
-        <?php endforeach; ?>
-      <?php endif; ?>
-    </div>
+        </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
 
     <?php if (!empty($bisa_ditandai)): ?>
       <div class="card">
