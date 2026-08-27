@@ -76,6 +76,15 @@ h1 em{font-style:normal;color:#E4C87B}
 .btn{display:inline-block;padding:15px 34px;font-size:.78rem;letter-spacing:.26em;text-transform:uppercase;transition:.3s;cursor:pointer;border:none;font-family:var(--body)}
 .btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
 .btn-gold:hover{filter:brightness(1.08);transform:translateY(-2px)}
+
+/* ===== PORTAL TIM PENELAAH (TPA/PU) ===== */
+.tim-row{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;margin-top:36px}
+.tim-btn{display:flex;flex-direction:column;align-items:center;text-align:center;transition:.3s}
+.tim-icon-box{width:150px;height:150px;display:grid;place-items:center;background:linear-gradient(160deg,#1E86A3,#145E75);border:5px solid #F8F4EA;position:relative;z-index:2;box-shadow:0 10px 20px var(--shadow);transition:transform .3s,box-shadow .3s}
+.tim-icon-box svg{width:112px;height:112px}
+.tim-btn:hover .tim-icon-box{transform:translateY(-4px) scale(1.04);box-shadow:0 14px 26px var(--shadow)}
+.tim-label-box{display:flex;align-items:center;justify-content:center;min-height:88px;margin:-16px auto 0;background:#E9EEF1;border:1px solid #C7D2D8;padding:16px 10px;width:88%;max-width:190px;text-align:center}
+.tim-btn .tim-label-box b{font-family:var(--display);font-weight:400;font-size:1.15rem;letter-spacing:.06em;color:#223842;display:block;margin:0}
 .btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
 .hero-actions{display:flex;gap:18px;flex-wrap:wrap}
@@ -178,6 +187,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   section{padding:76px 0}
   .step{grid-template-columns:56px 1fr;gap:18px}
   .step-num{font-size:1.7rem}
+  .tim-icon-box{width:120px;height:120px}
+  .tim-icon-box svg{width:88px;height:88px}
 }
 .auth-actions{display:flex;align-items:center;gap:14px}
 .user-menu{position:relative}
@@ -318,6 +329,31 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <div class="reveal" style="margin-top:56px;text-align:center;display:flex;gap:18px;justify-content:center;flex-wrap:wrap">
       <a class="btn btn-gold" href="<?php echo base_url('login?from=pbg'); ?>">Ajukan PBG →</a>
       <a class="btn btn-ghost" href="<?php echo base_url(); ?>">← Beranda</a>
+    </div>
+
+    <div class="reveal" style="margin-top:64px;text-align:center">
+      <p class="eyebrow">Untuk Petugas</p>
+      <h2 style="font-size:clamp(1.3rem,2.2vw,1.7rem);margin:0 auto">Portal Tim Penelaah PBG</h2>
+      <div class="tim-row">
+        <a class="tim-btn" href="<?php echo base_url('login?from=tpa'); ?>">
+          <span class="tim-icon-box">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+              <path d="M8 36V22l14-10 14 10v14" stroke="#F8F4EA" stroke-width="2" />
+              <path d="M17 36v-9h10v9M8 36h28" stroke="#F8F4EA" stroke-width="2" />
+            </svg>
+          </span>
+          <span class="tim-label-box"><b>TPA</b></span>
+        </a>
+        <a class="tim-btn" href="<?php echo base_url('login?from=pu'); ?>">
+          <span class="tim-icon-box">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+              <path d="M10 34l10-10m4-4l10-10M24 20l-4 4" stroke="#F8F4EA" stroke-width="2" />
+              <path d="M30 6l8 8-5 5-8-8zM6 33l5-5 5 5-5 5z" stroke="#F8F4EA" stroke-width="2" />
+            </svg>
+          </span>
+          <span class="tim-label-box"><b>PU</b></span>
+        </a>
+      </div>
     </div>
   </div>
 </section>
