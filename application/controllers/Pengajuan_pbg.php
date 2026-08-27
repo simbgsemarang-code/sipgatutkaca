@@ -182,7 +182,13 @@ class Pengajuan_pbg extends CI_Controller {
 	public function lihat($id = null)
 	{
 		$id  = (int) $id;
-		$row = $id > 0 ? $this->db->where('id', $id)->get('pengajuan_pbg')->row_array() : NULL;
+		$row = $id > 0
+			? $this->db->select('pengajuan_pbg.*, peninjau.nama AS nama_peninjau')
+				->from('pengajuan_pbg')
+				->join('users AS peninjau', 'peninjau.id = pengajuan_pbg.ditinjau_oleh', 'left')
+				->where('pengajuan_pbg.id', $id)
+				->get()->row_array()
+			: NULL;
 
 		if ($row === NULL)
 		{
@@ -197,6 +203,87 @@ class Pengajuan_pbg extends CI_Controller {
 		$data['nama_pengguna']    = $this->session->userdata('nama');
 
 		$this->load->view('pages/pengajuan_pbg_detail', $data);
+	}
+
+	/**
+	 * Form respons perbaikan - dipakai kalau TPA sudah menandai
+	 * permohonan perlu Perbaikan Dokumen atau Perbaikan Dokumen
+	 * Konsultasi (lihat Tpa_pengajuan_pbg::kirim_catatan()). Termasuk
+	 * "Ubah Data Tanah" (Panduan Permohonan PBG hal. 111-115) - field
+	 * tanah_* di form ini bisa diedit ulang, bukan cuma unggah ulang
+	 * dokumen yang ditandai.
+	 */
+	public function perbaiki($id = null)
+	{
+		$id  = (int) $id;
+		$row = $this->_ambil_perlu_perbaikan($id);
+
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$data['row']           = $row;
+		$data['dokumen']       = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
+		$data['peta_dokumen']  = $this->peta_dokumen;
+		$data['error']         = $this->session->flashdata('error');
+		$data['sukses']        = $this->session->flashdata('sukses');
+		$data['old']           = $this->session->flashdata('old');
+		$data['nama_pengguna'] = $this->session->userdata('nama');
+
+		$this->load->view('pages/pengajuan_pbg_perbaikan', $data);
+	}
+
+	/** Simpan respons perbaikan (POST) - unggah ulang dokumen yang ditandai + perbarui data tanah, lalu kirim balik ke TPA. */
+	public function kirim_perbaikan($id = null)
+	{
+		$id  = (int) $id;
+		$row = $this->_ambil_perlu_perbaikan($id);
+
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$p = function ($nama) {
+			$v = trim((string) $this->input->post($nama));
+			return $v !== '' ? $v : NULL;
+		};
+
+		$this->db->where('id', $id)->update('pengajuan_pbg', array(
+			'tanah_jenis_dokumen'   => $p('tanah_jenis_dokumen'),
+			'tanah_nomor_dokumen'   => $p('tanah_nomor_dokumen'),
+			'tanah_tanggal_terbit'  => $p('tanah_tanggal_terbit'),
+			'tanah_luas'            => $p('tanah_luas'),
+			'tanah_hak_kepemilikan' => $p('tanah_hak_kepemilikan'),
+			'tanah_nama_pemilik'    => $p('tanah_nama_pemilik'),
+			'tanah_provinsi'        => $p('tanah_provinsi'),
+			'tanah_kabupaten'       => $p('tanah_kabupaten'),
+			'tanah_kecamatan'       => $p('tanah_kecamatan'),
+			'tanah_kelurahan'       => $p('tanah_kelurahan'),
+			'tanah_alamat'          => $p('tanah_alamat'),
+			'tanah_pemilik_sama'    => $p('tanah_pemilik_sama'),
+			'tanah_nomor_izin'      => $p('tanah_nomor_izin'),
+			'tanah_tanggal_izin'    => $p('tanah_tanggal_izin'),
+		));
+
+		$this->_proses_unggah_tunggal($id, 'prototipe_peta');
+		$this->_proses_unggah_tunggal($id, 'bangunan_peta');
+		$this->_proses_unggah_tunggal($id, 'tanah_lampiran');
+		$this->_proses_unggah_dokumen($id);
+
+		// Status berikutnya tergantung status SAAT INI (sebelum
+		// diperbarui) - perbaikan dokumen biasa kembali ke antrean
+		// verifikasi, perbaikan dokumen konsultasi lanjut ke menunggu
+		// jadwal konsultasi.
+		$status_lanjut = ($row['status'] === 'perbaikan_dokumen_konsultasi') ? 'menunggu_jadwal_konsultasi' : 'verifikasi_dokumen';
+		$this->db->where('id', $id)->update('pengajuan_pbg', array('status' => $status_lanjut));
+
+		$label_lanjut = ($status_lanjut === 'menunggu_jadwal_konsultasi') ? 'Menunggu Jadwal Konsultasi' : 'Verifikasi Kelengkapan Dokumen';
+		$this->session->set_flashdata('sukses', 'Perbaikan berhasil dikirim. Status permohonan sekarang: ' . $label_lanjut . '.');
+		redirect('pengajuan-pbg/lihat/' . $id);
 	}
 
 	/**
@@ -390,6 +477,17 @@ class Pengajuan_pbg extends CI_Controller {
 			return NULL;
 		}
 		return $this->db->where('id', $id)->where('status', 'draf')->get('pengajuan_pbg')->row_array();
+	}
+
+	private function _ambil_perlu_perbaikan($id)
+	{
+		if ($id <= 0)
+		{
+			return NULL;
+		}
+		return $this->db->where('id', $id)
+			->where_in('status', array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'))
+			->get('pengajuan_pbg')->row_array();
 	}
 
 	/**

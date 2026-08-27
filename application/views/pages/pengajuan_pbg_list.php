@@ -104,6 +104,9 @@ td:first-child{color:var(--text);font-weight:500}
 .tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300)}
 .tag-draf{color:#F0A048;border-color:#B4573B}
 .tag-verifikasi_dokumen{color:#5FC2E0;border-color:#1E86A3}
+.tag-perbaikan_dokumen{color:#E0526B;border-color:#E0526B}
+.tag-perbaikan_dokumen_konsultasi{color:#E0526B;border-color:#E0526B}
+.tag-menunggu_jadwal_konsultasi{color:#6FCF97;border-color:#2EA84F}
 .aksi-cell{display:flex;gap:8px;flex-wrap:wrap}
 .no-reg{font-size:.72rem;color:var(--muted)}
 
@@ -236,7 +239,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <td class="no-reg"><?php echo !empty($r['no_registrasi']) ? htmlspecialchars($r['no_registrasi'], ENT_QUOTES, 'UTF-8') : 'Belum Terdefinisi'; ?></td>
               <td><?php echo !empty($r['lokasi_alamat']) ? htmlspecialchars(mb_strimwidth($r['lokasi_alamat'], 0, 60, '…'), ENT_QUOTES, 'UTF-8') : '—'; ?></td>
               <td>
-                <?php $label_status = array('draf' => 'Draf', 'verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen'); ?>
+                <?php $label_status = array('draf' => 'Draf', 'verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi'); ?>
                 <span class="tag tag-<?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$r['status']]) ? $label_status[$r['status']] : $r['status'], ENT_QUOTES, 'UTF-8'); ?></span>
               </td>
               <td><?php echo htmlspecialchars(date('d M Y', strtotime($r['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
@@ -247,6 +250,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
                   <form action="<?php echo base_url('pengajuan-pbg/hapus/' . (int) $r['id']); ?>" method="post" style="margin:0" onsubmit="return confirm('Hapus draf permohonan ini?');">
                     <button type="submit" class="btn btn-danger btn-xs" style="cursor:pointer">Hapus</button>
                   </form>
+                <?php elseif (in_array($r['status'], array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'), TRUE)): ?>
+                  <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $r['id']); ?>" class="btn btn-gold btn-xs">Perbaiki</a>
                 <?php endif; ?>
               </td>
             </tr>
