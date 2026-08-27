@@ -266,24 +266,52 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 
 		$status_baru  = (string) $this->input->post('status_baru');
 		$catatan      = trim((string) $this->input->post('catatan_tpa'));
-		$status_valid = array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi');
+		// 'disetujui_tpa' = semua dokumen dinilai sudah sesuai, tidak
+		// perlu perbaikan - satu-satunya keputusan di sini yang
+		// catatannya OPSIONAL (2 lainnya tetap wajib diisi alasannya).
+		$status_valid  = array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi', 'disetujui_tpa');
+		$butuh_catatan = ($status_baru !== 'disetujui_tpa');
 
-		if (! in_array($status_baru, $status_valid, TRUE) || $catatan === '')
+		if (! in_array($status_baru, $status_valid, TRUE))
 		{
-			$this->session->set_flashdata('error', 'Pilih jenis perbaikan dan isi catatan untuk pemohon terlebih dahulu.');
+			$this->session->set_flashdata('error', 'Pilih salah satu keputusan peninjauan terlebih dahulu.');
 			$this->session->set_flashdata('old', array('catatan_tpa' => $catatan, 'status_baru' => $status_baru));
 			redirect('tpa-pengajuan-pbg/lihat/' . $id);
 			return;
 		}
+		if ($butuh_catatan && $catatan === '')
+		{
+			$this->session->set_flashdata('error', 'Isi catatan untuk pemohon/PU terlebih dahulu.');
+			$this->session->set_flashdata('old', array('catatan_tpa' => $catatan, 'status_baru' => $status_baru));
+			redirect('tpa-pengajuan-pbg/lihat/' . $id);
+			return;
+		}
+		// Tidak boleh menyetujui semua kalau masih ada dokumen yang
+		// ditandai "tidak sesuai" dan belum dibatalkan tandanya -
+		// dua-duanya sekaligus kontradiktif.
+		if ($status_baru === 'disetujui_tpa')
+		{
+			$masih_ditolak = $this->db->where('id_pengajuan', $id)->where('status', 'ditolak')->count_all_results('pengajuan_pbg_dokumen');
+			if ($masih_ditolak > 0)
+			{
+				$this->session->set_flashdata('error', 'Masih ada ' . $masih_ditolak . ' dokumen bertanda "tidak sesuai" - batalkan dulu tandanya (atau pilih salah satu jenis Perbaikan Dokumen) sebelum menyetujui semua.');
+				$this->session->set_flashdata('old', array('catatan_tpa' => $catatan, 'status_baru' => $status_baru));
+				redirect('tpa-pengajuan-pbg/lihat/' . $id);
+				return;
+			}
+		}
 
 		$this->db->where('id', $id)->update('pengajuan_pbg', array(
 			'status'        => $status_baru,
-			'catatan_tpa'   => $catatan,
+			'catatan_tpa'   => ($catatan !== '') ? $catatan : NULL,
 			'ditinjau_oleh' => (int) $this->session->userdata('user_id'),
 			'ditinjau_pada' => date('Y-m-d H:i:s'),
 		));
 
-		$this->session->set_flashdata('sukses', 'Catatan perbaikan berhasil dikirim - permohonan kembali ke PU/pemohon untuk ditindaklanjuti.');
+		$pesan_sukses = ($status_baru === 'disetujui_tpa')
+			? 'Permohonan ditandai selesai ditinjau - semua dokumen dinyatakan sesuai.'
+			: 'Catatan perbaikan berhasil dikirim - permohonan kembali ke PU/pemohon untuk ditindaklanjuti.';
+		$this->session->set_flashdata('sukses', $pesan_sukses);
 		redirect('tpa-pengajuan-pbg');
 	}
 

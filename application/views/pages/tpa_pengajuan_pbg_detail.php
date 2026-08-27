@@ -13,6 +13,7 @@ $label_status = array(
 	'perbaikan_dokumen'            => 'Perbaikan Dokumen',
 	'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi',
 	'menunggu_jadwal_konsultasi'   => 'Menunggu Jadwal Konsultasi',
+	'disetujui_tpa'                => 'Disetujui TPA',
 );
 ?>
 <!DOCTYPE html>
@@ -103,6 +104,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem)
 .tag-perbaikan_dokumen{color:#F0A048;border-color:#B4573B}
 .tag-perbaikan_dokumen_konsultasi{color:#F0A048;border-color:#B4573B}
 .tag-menunggu_jadwal_konsultasi{color:#6FCF97;border-color:#2EA84F}
+.tag-disetujui_tpa{color:#6FCF97;border-color:#2EA84F}
 .tag-terunggah{color:#6FCF97;border-color:#2EA84F;margin-top:0}
 .tag-ditolak{color:#E0526B;border-color:#E0526B;margin-top:0}
 
@@ -345,9 +347,13 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <?php if (!empty($bisa_ditandai)): ?>
       <div class="card">
         <h4>Kirim Keputusan Peninjauan</h4>
-        <p style="color:var(--muted);font-size:.88rem">Tandai dulu dokumen yang tidak sesuai di atas (kalau ada), lalu pilih jenis perbaikan dan tulis catatan untuk pemohon/PU di bawah ini.</p>
+        <p style="color:var(--muted);font-size:.88rem">Tandai dulu dokumen yang tidak sesuai di atas (kalau ada), lalu pilih keputusan dan tulis catatan untuk pemohon/PU di bawah ini (catatan wajib diisi untuk 2 jenis perbaikan, opsional untuk "Semua Dokumen Sesuai").</p>
         <form class="keputusan-form" action="<?php echo base_url('tpa-pengajuan-pbg/kirim-catatan/' . (int) $row['id']); ?>" method="post">
           <div class="opt-list">
+            <label>
+              <span class="opt-title"><input type="radio" name="status_baru" value="disetujui_tpa" <?php echo (isset($old['status_baru']) && $old['status_baru'] === 'disetujui_tpa') ? 'checked' : ''; ?>> Semua Dokumen Sesuai</span>
+              <span class="opt-hint">Tidak ada dokumen yang perlu diperbaiki. Permohonan ditandai selesai ditinjau TPA (status Disetujui TPA).</span>
+            </label>
             <label>
               <span class="opt-title"><input type="radio" name="status_baru" value="perbaikan_dokumen" <?php echo (isset($old['status_baru']) && $old['status_baru'] === 'perbaikan_dokumen') ? 'checked' : ''; ?>> Perbaikan Dokumen</span>
               <span class="opt-hint">Ada dokumen yang perlu diunggah ulang / data yang perlu diperbaiki. Setelah diperbaiki, permohonan kembali ke status Verifikasi Kelengkapan Dokumen.</span>
@@ -357,8 +363,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <span class="opt-hint">Perlu perbaikan terkait hasil konsultasi. Setelah diperbaiki, permohonan lanjut ke status Menunggu Jadwal Konsultasi.</span>
             </label>
           </div>
-          <label for="f-catatan-tpa" style="display:block;margin-top:20px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Catatan untuk Pemohon/PU</label>
-          <textarea id="f-catatan-tpa" name="catatan_tpa" required placeholder="Jelaskan apa yang perlu diperbaiki secara keseluruhan"><?php echo isset($old['catatan_tpa']) ? htmlspecialchars($old['catatan_tpa'], ENT_QUOTES, 'UTF-8') : ''; ?></textarea>
+          <label for="f-catatan-tpa" style="display:block;margin-top:20px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Catatan untuk Pemohon/PU (opsional untuk "Semua Dokumen Sesuai")</label>
+          <textarea id="f-catatan-tpa" name="catatan_tpa" placeholder="Jelaskan apa yang perlu diperbaiki secara keseluruhan - atau kosongkan kalau semua dokumen sudah sesuai"><?php echo isset($old['catatan_tpa']) ? htmlspecialchars($old['catatan_tpa'], ENT_QUOTES, 'UTF-8') : ''; ?></textarea>
           <button type="submit" class="btn btn-gold btn-sm" style="margin-top:18px">Kirim Keputusan</button>
         </form>
       </div>

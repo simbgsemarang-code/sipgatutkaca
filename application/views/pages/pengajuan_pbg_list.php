@@ -107,6 +107,7 @@ td:first-child{color:var(--text);font-weight:500}
 .tag-perbaikan_dokumen{color:#E0526B;border-color:#E0526B}
 .tag-perbaikan_dokumen_konsultasi{color:#E0526B;border-color:#E0526B}
 .tag-menunggu_jadwal_konsultasi{color:#6FCF97;border-color:#2EA84F}
+.tag-disetujui_tpa{color:#6FCF97;border-color:#2EA84F}
 .aksi-cell{display:flex;gap:8px;flex-wrap:wrap}
 .no-reg{font-size:.72rem;color:var(--muted)}
 
@@ -239,7 +240,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <td class="no-reg"><?php echo !empty($r['no_registrasi']) ? htmlspecialchars($r['no_registrasi'], ENT_QUOTES, 'UTF-8') : 'Belum Terdefinisi'; ?></td>
               <td><?php echo !empty($r['lokasi_alamat']) ? htmlspecialchars(mb_strimwidth($r['lokasi_alamat'], 0, 60, '…'), ENT_QUOTES, 'UTF-8') : '—'; ?></td>
               <td>
-                <?php $label_status = array('draf' => 'Draf', 'verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi'); ?>
+                <?php $label_status = array('draf' => 'Draf', 'verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi', 'disetujui_tpa' => 'Disetujui TPA'); ?>
                 <span class="tag tag-<?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$r['status']]) ? $label_status[$r['status']] : $r['status'], ENT_QUOTES, 'UTF-8'); ?></span>
               </td>
               <td><?php echo htmlspecialchars(date('d M Y', strtotime($r['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>

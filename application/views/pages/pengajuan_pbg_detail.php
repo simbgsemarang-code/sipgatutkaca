@@ -11,6 +11,7 @@ $label_status = array(
 	'perbaikan_dokumen'            => 'Perbaikan Dokumen',
 	'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi',
 	'menunggu_jadwal_konsultasi'   => 'Menunggu Jadwal Konsultasi',
+	'disetujui_tpa'                => 'Disetujui TPA',
 );
 $perlu_perbaikan = in_array($row['status'], array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'), TRUE);
 ?>
@@ -101,6 +102,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem)
 .tag-perbaikan_dokumen{color:#E0526B;border-color:#E0526B}
 .tag-perbaikan_dokumen_konsultasi{color:#E0526B;border-color:#E0526B}
 .tag-menunggu_jadwal_konsultasi{color:#6FCF97;border-color:#2EA84F}
+.tag-disetujui_tpa{color:#6FCF97;border-color:#2EA84F}
 .tag-terunggah{color:#6FCF97;border-color:#2EA84F;margin-top:0}
 .tag-ditolak{color:#E0526B;border-color:#E0526B;margin-top:0}
 
@@ -201,6 +203,17 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="card" style="border-color:#B4573B;background:rgba(240,160,72,.06)">
         <h4>Catatan Peninjauan TPA</h4>
         <p style="white-space:pre-line"><?php echo $t($row['catatan_tpa']); ?></p>
+        <p style="color:var(--muted);font-size:.8rem;margin-top:12px">Oleh <?php echo $t($row['nama_peninjau']); ?> — <?php echo !empty($row['ditinjau_pada']) ? htmlspecialchars(date('d M Y H:i', strtotime($row['ditinjau_pada'])), ENT_QUOTES, 'UTF-8') : '—'; ?></p>
+      </div>
+    <?php endif; ?>
+
+    <?php if ($row['status'] === 'disetujui_tpa'): ?>
+      <div class="card" style="border-color:#2EA84F;background:rgba(46,168,79,.06)">
+        <h4>Catatan Peninjauan TPA</h4>
+        <p>Semua dokumen dinyatakan sesuai - tidak ada perbaikan yang diperlukan.</p>
+        <?php if (!empty($row['catatan_tpa'])): ?>
+          <p style="white-space:pre-line;margin-top:10px"><?php echo $t($row['catatan_tpa']); ?></p>
+        <?php endif; ?>
         <p style="color:var(--muted);font-size:.8rem;margin-top:12px">Oleh <?php echo $t($row['nama_peninjau']); ?> — <?php echo !empty($row['ditinjau_pada']) ? htmlspecialchars(date('d M Y H:i', strtotime($row['ditinjau_pada'])), ENT_QUOTES, 'UTF-8') : '—'; ?></p>
       </div>
     <?php endif; ?>

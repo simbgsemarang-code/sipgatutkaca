@@ -95,6 +95,7 @@ td:first-child{color:var(--text);font-weight:500}
 .tag-perbaikan_dokumen{color:#F0A048;border-color:#B4573B}
 .tag-perbaikan_dokumen_konsultasi{color:#F0A048;border-color:#B4573B}
 .tag-menunggu_jadwal_konsultasi{color:#6FCF97;border-color:#2EA84F}
+.tag-disetujui_tpa{color:#6FCF97;border-color:#2EA84F}
 .no-reg{font-size:.72rem;color:var(--muted)}
 
 .alert{padding:16px 20px;margin-bottom:0;margin-top:36px;font-size:.88rem;border:1px solid}
@@ -203,7 +204,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
           <tr><td colspan="6">Belum ada permohonan PBG yang perlu ditinjau.</td></tr>
         <?php else: ?>
           <?php foreach ($daftar as $r): ?>
-            <?php $label_status = array('verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi'); ?>
+            <?php $label_status = array('verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi', 'disetujui_tpa' => 'Disetujui TPA'); ?>
             <tr>
               <td><?php echo htmlspecialchars($r['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></td>
               <td class="no-reg"><?php echo !empty($r['no_registrasi']) ? htmlspecialchars($r['no_registrasi'], ENT_QUOTES, 'UTF-8') : 'Belum Terdefinisi'; ?></td>
