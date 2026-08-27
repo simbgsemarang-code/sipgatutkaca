@@ -10,14 +10,20 @@
 -- Jalankan lewat phpMyAdmin -> pilih database Anda -> tab SQL -> paste
 -- semua isi file ini -> Go.
 --
--- Aman dijalankan berkali-kali - INSERT di bawah cuma akan gagal diam
--- -diam kalau email-nya sudah pernah dipakai (kolom email UNIQUE).
+-- Aman dijalankan berkali-kali - INSERT IGNORE di bawah cuma akan
+-- melewati (skip) baris yang email-nya sudah pernah dipakai (kolom
+-- email UNIQUE), baris lain yang belum ada tetap masuk seperti biasa.
+-- SENGAJA pakai INSERT IGNORE, bukan INSERT biasa - keenam baris di
+-- bawah ini satu statement, jadi kalau cuma satu baris yang bentrok
+-- (mis. Ahmad Wijaya sudah ada dari menjalankan versi file ini
+-- sebelumnya), INSERT biasa akan menggagalkan SELURUH statement -
+-- termasuk baris lain yang sebetulnya belum ada dan seharusnya masuk.
 --
 -- Ini akun UJI COBA, bukan untuk dipakai produksi sungguhan - setelah
 -- selesai uji coba, sebaiknya dihapus lewat halaman /admin/pengguna
 -- atau lewat query DELETE manual.
 
-INSERT INTO `users` (`nik`, `nama`, `email`, `password`, `role`) VALUES
+INSERT IGNORE INTO `users` (`nik`, `nama`, `email`, `password`, `role`) VALUES
   (NULL, 'Ahmad Wijaya', 'ahmad.wijaya@sipgatutkaca.local', '$2y$12$HOB7fUciCO5hJywRSKRiBe7ucnZ9rsDc9S2ATJOZzJ8ZtfOIro2pW', 'pu'),
   (NULL, 'Siti Rahmawati', 'siti.rahmawati@sipgatutkaca.local', '$2y$12$S2YPBKKXMsY5NMXwbMi6SeeDrT/AXZw0N4UFmU7SBgAHOU97sJpk2', 'pu'),
   (NULL, 'Rudi Hartono', 'rudi.hartono@sipgatutkaca.local', '$2y$12$vGMasnSZusvhY58V8C77Tu/XwVlWZBGuONiQU.YDnOGcCsp6ZNsUm', 'tpa_arsitek'),
