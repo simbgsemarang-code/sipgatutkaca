@@ -260,7 +260,6 @@ class Pengajuan_pbg extends CI_Controller {
 		$data['row']              = $row;
 		$data['dokumen']          = $dokumen;
 		$data['persetujuan']      = $persetujuan;
-		$data['checklist']        = $this->_hitung_checklist($row, $dokumen);
 		$data['opsi_kepemilikan'] = $this->opsi_kepemilikan;
 		$data['opsi_kondisi']     = $this->opsi_kondisi;
 		$data['sukses']           = $this->session->flashdata('sukses');
@@ -268,6 +267,27 @@ class Pengajuan_pbg extends CI_Controller {
 		$data['nama_pengguna']    = $this->session->userdata('nama');
 
 		$this->load->view('pages/pengajuan_pbg_detail', $data);
+	}
+
+	/** Halaman checklist kelengkapan tersendiri - dihubungkan lewat tombol "Checklist" di kolom Aksi pada daftar permohonan. */
+	public function checklist($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('pengajuan_pbg')->row_array() : NULL;
+
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$dokumen = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
+
+		$data['row']           = $row;
+		$data['checklist']     = $this->_hitung_checklist($row, $dokumen);
+		$data['nama_pengguna'] = $this->session->userdata('nama');
+
+		$this->load->view('pages/pengajuan_pbg_checklist', $data);
 	}
 
 	/**

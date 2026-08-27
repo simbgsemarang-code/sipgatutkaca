@@ -107,19 +107,6 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem)
 .tag-disetujui_tpa{color:#6FCF97;border-color:#2EA84F}
 .tag-terunggah{color:#6FCF97;border-color:#2EA84F;margin-top:0}
 .tag-ditolak{color:#E0526B;border-color:#E0526B;margin-top:0}
-.tag-lengkap{color:#6FCF97;border-color:#2EA84F;margin-top:0}
-.tag-belum-lengkap{color:#F0A048;border-color:#B4573B;margin-top:0}
-
-.checklist-sub{font-family:var(--display);font-weight:400;font-size:.92rem;color:var(--gold-300);margin:22px 0 10px}
-.checklist-sub:first-child{margin-top:0}
-.checklist-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px 24px}
-.checklist-grid.satu-kolom{grid-template-columns:1fr}
-.check-item{display:flex;align-items:center;gap:9px;font-size:.85rem}
-.check-item.missing{color:var(--muted)}
-.check-mark{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:.66rem;flex:0 0 auto}
-.check-item.ok .check-mark{background:rgba(46,168,79,.16);color:#2EA84F}
-.check-item.missing .check-mark{background:rgba(78,96,112,.15);color:var(--muted)}
-.check-item.warn .check-mark{background:rgba(224,82,107,.15);color:#E0526B}
 
 .alert{padding:16px 20px;margin:26px 0 0;font-size:.88rem;border:1px solid}
 .alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
@@ -246,37 +233,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="alert alert-err"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
-    <?php
-    $jml_data_ok  = count(array_filter($checklist['data']));
-    $jml_data_all = count($checklist['data']);
-    $jml_dok_ok   = count(array_filter($checklist['dokumen'], function ($s) { return $s === 'lengkap'; }));
-    $jml_dok_all  = count($checklist['dokumen']);
-    $checklist_lengkap = ($jml_data_ok === $jml_data_all) && ($jml_dok_ok === $jml_dok_all);
-    ?>
-    <div class="card">
-      <h4>Checklist Kelengkapan Persyaratan</h4>
-      <p style="color:var(--muted);font-size:.82rem;margin-top:-12px;margin-bottom:6px">Dihitung otomatis dari data &amp; dokumen yang sudah diisi/diunggah - bukan status tersimpan. Ditampilkan utuh (semua bidang), tidak disaring sesuai peninjauan Anda.</p>
-      <span class="tag tag-<?php echo $checklist_lengkap ? 'lengkap' : 'belum-lengkap'; ?>"><?php echo $checklist_lengkap ? 'Semua Persyaratan Lengkap' : 'Belum Lengkap'; ?></span>
-      <span style="margin-left:10px;color:var(--muted);font-size:.82rem">Data: <?php echo $jml_data_ok; ?>/<?php echo $jml_data_all; ?> · Dokumen: <?php echo $jml_dok_ok; ?>/<?php echo $jml_dok_all; ?></span>
-
-      <p class="checklist-sub">Data Permohonan</p>
-      <div class="checklist-grid">
-        <?php foreach ($checklist['data'] as $label => $ok): ?>
-          <div class="check-item <?php echo $ok ? 'ok' : 'missing'; ?>">
-            <span class="check-mark"><?php echo $ok ? '✓' : '✗'; ?></span><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
-          </div>
-        <?php endforeach; ?>
-      </div>
-
-      <p class="checklist-sub">Dokumen Teknis</p>
-      <div class="checklist-grid satu-kolom">
-        <?php foreach ($checklist['dokumen'] as $label => $status): ?>
-          <div class="check-item <?php echo ($status === 'lengkap') ? 'ok' : (($status === 'ditolak') ? 'warn' : 'missing'); ?>">
-            <span class="check-mark"><?php echo ($status === 'lengkap') ? '✓' : (($status === 'ditolak') ? '⚠' : '✗'); ?></span><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?><?php echo ($status === 'ditolak') ? ' — ditolak, perlu diunggah ulang' : ''; ?>
-          </div>
-        <?php endforeach; ?>
-      </div>
-    </div>
+    <p style="margin-top:16px"><a href="<?php echo base_url('tpa-pengajuan-pbg/checklist/' . (int) $row['id']); ?>" style="color:var(--gold-300);text-decoration:underline;font-size:.85rem">Lihat Checklist Kelengkapan Persyaratan →</a></p>
 
     <?php
     $label_bidang = array(

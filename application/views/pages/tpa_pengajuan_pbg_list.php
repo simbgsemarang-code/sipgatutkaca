@@ -97,6 +97,7 @@ td:first-child{color:var(--text);font-weight:500}
 .tag-menunggu_jadwal_konsultasi{color:#6FCF97;border-color:#2EA84F}
 .tag-disetujui_tpa{color:#6FCF97;border-color:#2EA84F}
 .no-reg{font-size:.72rem;color:var(--muted)}
+.aksi-cell{display:flex;gap:8px;flex-wrap:wrap}
 
 .alert{padding:16px 20px;margin-bottom:0;margin-top:36px;font-size:.88rem;border:1px solid}
 .alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
@@ -211,7 +212,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <td><?php echo !empty($r['lokasi_alamat']) ? htmlspecialchars(mb_strimwidth($r['lokasi_alamat'], 0, 60, '…'), ENT_QUOTES, 'UTF-8') : '—'; ?></td>
               <td><span class="tag tag-<?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$r['status']]) ? $label_status[$r['status']] : $r['status'], ENT_QUOTES, 'UTF-8'); ?></span></td>
               <td><?php echo htmlspecialchars(date('d M Y', strtotime($r['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
-              <td><a href="<?php echo base_url('tpa-pengajuan-pbg/lihat/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Tinjau</a></td>
+              <td class="aksi-cell">
+                <a href="<?php echo base_url('tpa-pengajuan-pbg/lihat/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Tinjau</a>
+                <a href="<?php echo base_url('tpa-pengajuan-pbg/checklist/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Checklist</a>
+              </td>
             </tr>
           <?php endforeach; ?>
         <?php endif; ?>

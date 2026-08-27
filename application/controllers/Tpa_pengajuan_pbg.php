@@ -180,7 +180,6 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 
 		$data['row']              = $row;
 		$data['dokumen_kelompok'] = $this->_kelompokkan_dokumen($dokumen_terunggah, $peran);
-		$data['checklist']        = $this->_hitung_checklist($row, $dokumen_terunggah);
 		$data['bisa_ditandai']    = in_array($row['status'], $this->status_tpa_aktif, TRUE);
 		$data['persetujuan']      = $persetujuan;
 		$data['bidang_saya']      = $bidang_saya;
@@ -192,6 +191,27 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 		$data['old']              = $this->session->flashdata('old');
 		$data['nama_pengguna']    = $this->session->userdata('nama');
 		$this->load->view('pages/tpa_pengajuan_pbg_detail', $data);
+	}
+
+	/** Halaman checklist kelengkapan tersendiri - dihubungkan lewat tombol "Checklist" di kolom Aksi pada daftar permohonan. */
+	public function checklist($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->where('status !=', 'draf')->get('pengajuan_pbg')->row_array() : NULL;
+
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$dokumen_terunggah = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
+
+		$data['row']           = $row;
+		$data['checklist']     = $this->_hitung_checklist($row, $dokumen_terunggah);
+		$data['nama_pengguna'] = $this->session->userdata('nama');
+
+		$this->load->view('pages/tpa_pengajuan_pbg_checklist', $data);
 	}
 
 	/**

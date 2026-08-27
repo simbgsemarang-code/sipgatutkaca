@@ -271,6 +271,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <td><?php echo htmlspecialchars(date('d M Y', strtotime($r['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
               <td class="aksi-cell">
                 <a href="<?php echo base_url('pengajuan-pbg/lihat/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Lihat</a>
+                <a href="<?php echo base_url('pengajuan-pbg/checklist/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Checklist</a>
                 <?php if ($r['status'] === 'draf'): ?>
                   <a href="<?php echo base_url('pengajuan-pbg/tambah/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Lanjutkan</a>
                   <form action="<?php echo base_url('pengajuan-pbg/hapus/' . (int) $r['id']); ?>" method="post" style="margin:0" onsubmit="return confirm('Hapus draf permohonan ini?');">
