@@ -132,7 +132,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </span>
     </a>
     <div class="auth-actions">
-      <a class="btn btn-ghost btn-sm" href="<?php echo base_url('konsultasi'); ?>">Masuk</a>
+      <a class="btn btn-ghost btn-sm" href="<?php echo base_url('login?from=admin'); ?>">Masuk</a>
     </div>
   </div>
 </header>
@@ -243,8 +243,12 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     document.querySelectorAll('a[href]').forEach(function(a){
       var h=a.getAttribute('href');
       if(!h||/^(https?:|mailto:|#)/.test(h))return;
-      var parts=h.split('#');var base=parts[0].split('?')[0];
-      a.setAttribute('href',base+'?theme='+theme+(parts[1]?'#'+parts[1]:''));
+      var hash='';var hi=h.indexOf('#');
+      if(hi>=0){hash=h.slice(hi);h=h.slice(0,hi);}
+      var qi=h.indexOf('?');var base=qi>=0?h.slice(0,qi):h;
+      var qs=new URLSearchParams(qi>=0?h.slice(qi+1):'');
+      qs.set('theme',theme);
+      a.setAttribute('href',base+'?'+qs.toString()+hash);
     });
   }
   window.__applyTheme=applyTheme;
