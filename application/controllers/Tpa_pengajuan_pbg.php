@@ -40,6 +40,13 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 	/** 3 spesialisasi yang SUNGGUHAN berpartisipasi dalam persetujuan per bidang - tidak termasuk 'tpa' generik. */
 	private $peran_bidang = array('tpa_arsitek', 'tpa_struktur', 'tpa_mep');
 
+	/** Sama persis dengan Pengajuan_pbg::$kolom_reviewer - disalin, bukan dibagi lewat library. Peran bidang -> kolom penugasan di pengajuan_pbg (lihat database/pengajuan_pbg_reviewer.sql). Dipakai _bidang_boleh_akses() utk membatasi akses per permohonan. */
+	private $kolom_reviewer = array(
+		'tpa_arsitek'  => 'reviewer_arsitek_id',
+		'tpa_struktur' => 'reviewer_struktur_id',
+		'tpa_mep'      => 'reviewer_mep_id',
+	);
+
 	/**
 	 * Status permohonan yang TPA-nya masih "aktif" - bidang yang belum
 	 * mengirim keputusan masih boleh menandai dokumen & mengirim
@@ -134,10 +141,28 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 		}
 	}
 
-	/** Daftar permohonan yang sudah terkirim (bukan draf) - jadi antrean peninjauan TPA. */
+	/**
+	 * Daftar permohonan yang sudah terkirim (bukan draf) - jadi antrean
+	 * peninjauan TPA. Utk akun bidang spesialis (bukan 'tpa' generik),
+	 * DISARING supaya cuma menampilkan permohonan yang kolom
+	 * penugasan bidangnya masih kosong (belum ditugaskan - perilaku
+	 * lama, semua staf boleh) ATAU sudah ditugaskan ke akun yang login
+	 * sendiri - lihat _bidang_boleh_akses() dan
+	 * database/pengajuan_pbg_reviewer.sql.
+	 */
 	public function index()
 	{
-		$data['daftar']        = $this->db->where('status !=', 'draf')->order_by('created_at', 'DESC')->get('pengajuan_pbg')->result_array();
+		$peran   = (string) $this->session->userdata('role');
+		$user_id = (int) $this->session->userdata('user_id');
+
+		$query = $this->db->where('status !=', 'draf');
+		if (isset($this->kolom_reviewer[$peran]))
+		{
+			$kolom = $this->kolom_reviewer[$peran];
+			$query->group_start()->where("$kolom IS NULL", NULL, FALSE)->or_where($kolom, $user_id)->group_end();
+		}
+
+		$data['daftar']        = $query->order_by('created_at', 'DESC')->get('pengajuan_pbg')->result_array();
 		$data['sukses']        = $this->session->flashdata('sukses');
 		$data['error']         = $this->session->flashdata('error');
 		$data['nama_pengguna'] = $this->session->userdata('nama');
@@ -149,9 +174,12 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 	{
 		$id  = (int) $id;
 		$row = $id > 0
-			? $this->db->select('pengajuan_pbg.*, peninjau.nama AS nama_peninjau')
+			? $this->db->select('pengajuan_pbg.*, peninjau.nama AS nama_peninjau, ra.nama AS nama_reviewer_arsitek, rs.nama AS nama_reviewer_struktur, rm.nama AS nama_reviewer_mep')
 				->from('pengajuan_pbg')
 				->join('users AS peninjau', 'peninjau.id = pengajuan_pbg.ditinjau_oleh', 'left')
+				->join('users AS ra', 'ra.id = pengajuan_pbg.reviewer_arsitek_id', 'left')
+				->join('users AS rs', 'rs.id = pengajuan_pbg.reviewer_struktur_id', 'left')
+				->join('users AS rm', 'rm.id = pengajuan_pbg.reviewer_mep_id', 'left')
 				->where('pengajuan_pbg.id', $id)->where('pengajuan_pbg.status !=', 'draf')
 				->get()->row_array()
 			: NULL;
@@ -162,8 +190,14 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 			return;
 		}
 
+		$peran = (string) $this->session->userdata('role');
+		if (! $this->_bidang_boleh_akses($row, $peran, (int) $this->session->userdata('user_id')))
+		{
+			show_404();
+			return;
+		}
+
 		$dokumen_terunggah = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
-		$peran             = (string) $this->session->userdata('role');
 
 		$persetujuan = array();
 		foreach ($this->db->select('pengajuan_pbg_persetujuan_tpa.*, peninjau.nama AS nama_peninjau')
@@ -200,6 +234,13 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 		$row = $id > 0 ? $this->db->where('id', $id)->where('status !=', 'draf')->get('pengajuan_pbg')->row_array() : NULL;
 
 		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$peran = (string) $this->session->userdata('role');
+		if (! $this->_bidang_boleh_akses($row, $peran, (int) $this->session->userdata('user_id')))
 		{
 			show_404();
 			return;
@@ -275,6 +316,28 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 		}
 
 		return $hasil;
+	}
+
+	/**
+	 * $peran (akun yang login) boleh mengakses $row (permohonan) ini?
+	 * SELALU true utk 'tpa' generik dan peran non-TPA - tidak terikat
+	 * penugasan per permohonan sama sekali. Utk 3 peran bidang
+	 * spesialis: true kalau kolom penugasan bidang itu di $row masih
+	 * NULL (belum ditugaskan PU - perilaku lama, semua staf bidang
+	 * boleh akses) ATAU sama dengan $user_id yang login (staf yang
+	 * ditugaskan). Kalau sudah ditugaskan ke ORANG LAIN, akses ditolak.
+	 * Lihat database/pengajuan_pbg_reviewer.sql dan
+	 * Pengajuan_pbg::reviewer()/simpan_reviewer() (tempat PU
+	 * mengatur penugasan ini).
+	 */
+	private function _bidang_boleh_akses($row, $peran, $user_id)
+	{
+		if (! isset($this->kolom_reviewer[$peran]))
+		{
+			return TRUE;
+		}
+		$kolom = $this->kolom_reviewer[$peran];
+		return ($row[$kolom] === NULL) || ((int) $row[$kolom] === (int) $user_id);
 	}
 
 	/**
@@ -416,6 +479,14 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 			return;
 		}
 
+		$permohonan = $this->db->where('id', $dok['id_pengajuan'])->get('pengajuan_pbg')->row_array();
+		$peran      = (string) $this->session->userdata('role');
+		if ($permohonan === NULL || ! $this->_bidang_boleh_akses($permohonan, $peran, (int) $this->session->userdata('user_id')))
+		{
+			show_404();
+			return;
+		}
+
 		$tujuan_ulang = 'tpa-pengajuan-pbg/lihat/' . (int) $dok['id_pengajuan'];
 		$aksi = (string) $this->input->post('aksi');
 
@@ -469,6 +540,12 @@ class Tpa_pengajuan_pbg extends CI_Controller {
 		{
 			$this->session->set_flashdata('error', 'Akun peran TPA generik tidak berpartisipasi dalam persetujuan per bidang - gunakan salah satu akun spesialis (Arsitek/Struktur/MEP) untuk mengirim keputusan.');
 			redirect('tpa-pengajuan-pbg/lihat/' . $id);
+			return;
+		}
+		if (! $this->_bidang_boleh_akses($row, $peran, (int) $this->session->userdata('user_id')))
+		{
+			$this->session->set_flashdata('error', 'Anda tidak ditugaskan sebagai reviewer bidang ini untuk permohonan tersebut.');
+			redirect('tpa-pengajuan-pbg');
 			return;
 		}
 

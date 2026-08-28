@@ -246,6 +246,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       'perbaikan_dokumen'            => 'Perbaikan Dokumen',
       'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi',
     );
+    $nama_reviewer_bidang = array(
+      'tpa_arsitek'  => isset($row['nama_reviewer_arsitek']) ? $row['nama_reviewer_arsitek'] : null,
+      'tpa_struktur' => isset($row['nama_reviewer_struktur']) ? $row['nama_reviewer_struktur'] : null,
+      'tpa_mep'      => isset($row['nama_reviewer_mep']) ? $row['nama_reviewer_mep'] : null,
+    );
     ?>
     <div class="card">
       <h4>Status Persetujuan 3 Bidang TPA</h4>
@@ -253,7 +258,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="kv-grid">
         <?php foreach ($label_bidang as $kode_bidang => $nama_bidang): ?>
           <div class="kv full">
-            <span><?php echo htmlspecialchars($nama_bidang, ENT_QUOTES, 'UTF-8'); ?></span>
+            <span><?php echo htmlspecialchars($nama_bidang, ENT_QUOTES, 'UTF-8'); ?><span style="display:block;color:var(--muted);font-size:.76rem;font-weight:400;text-transform:none;letter-spacing:normal;margin-top:4px">Ditugaskan: <?php echo empty($nama_reviewer_bidang[$kode_bidang]) ? 'Belum ditugaskan (semua staf bidang ini boleh meninjau)' : $t($nama_reviewer_bidang[$kode_bidang]); ?></span></span>
             <?php if (isset($persetujuan[$kode_bidang])): $p = $persetujuan[$kode_bidang]; ?>
               <b>
                 <span class="tag tag-<?php echo ($p['status'] === 'disetujui') ? 'disetujui_tpa' : htmlspecialchars($p['status'], ENT_QUOTES, 'UTF-8'); ?>" style="margin-top:4px"><?php echo htmlspecialchars(isset($label_status_bidang[$p['status']]) ? $label_status_bidang[$p['status']] : $p['status'], ENT_QUOTES, 'UTF-8'); ?></span>

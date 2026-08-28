@@ -156,6 +156,20 @@ class Pengajuan_pbg extends CI_Controller {
 	/** Sama persis dengan Tpa_pengajuan_pbg::$peran_bidang - disalin, bukan dibagi lewat library. Dipakai _hitung_status_keseluruhan() di bawah. */
 	private $peran_bidang = array('tpa_arsitek', 'tpa_struktur', 'tpa_mep');
 
+	/** Sama persis dengan Tpa_pengajuan_pbg::$kolom_reviewer - disalin, bukan dibagi lewat library. Peran bidang -> kolom penugasan di pengajuan_pbg (lihat database/pengajuan_pbg_reviewer.sql). */
+	private $kolom_reviewer = array(
+		'tpa_arsitek'  => 'reviewer_arsitek_id',
+		'tpa_struktur' => 'reviewer_struktur_id',
+		'tpa_mep'      => 'reviewer_mep_id',
+	);
+
+	/** Sama persis dengan Tpa_pengajuan_pbg::$label_bidang di view - disalin, bukan dibagi lewat library. */
+	private $label_bidang = array(
+		'tpa_arsitek'  => 'Bidang Arsitektur & Tata Kota',
+		'tpa_struktur' => 'Bidang Struktur & Sipil',
+		'tpa_mep'      => 'Bidang Mekanikal, Elektrikal & Perpipaan (MEP)',
+	);
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -233,9 +247,12 @@ class Pengajuan_pbg extends CI_Controller {
 	{
 		$id  = (int) $id;
 		$row = $id > 0
-			? $this->db->select('pengajuan_pbg.*, peninjau.nama AS nama_peninjau')
+			? $this->db->select('pengajuan_pbg.*, peninjau.nama AS nama_peninjau, ra.nama AS nama_reviewer_arsitek, rs.nama AS nama_reviewer_struktur, rm.nama AS nama_reviewer_mep')
 				->from('pengajuan_pbg')
 				->join('users AS peninjau', 'peninjau.id = pengajuan_pbg.ditinjau_oleh', 'left')
+				->join('users AS ra', 'ra.id = pengajuan_pbg.reviewer_arsitek_id', 'left')
+				->join('users AS rs', 'rs.id = pengajuan_pbg.reviewer_struktur_id', 'left')
+				->join('users AS rm', 'rm.id = pengajuan_pbg.reviewer_mep_id', 'left')
 				->where('pengajuan_pbg.id', $id)
 				->get()->row_array()
 			: NULL;
@@ -288,6 +305,74 @@ class Pengajuan_pbg extends CI_Controller {
 		$data['nama_pengguna'] = $this->session->userdata('nama');
 
 		$this->load->view('pages/pengajuan_pbg_checklist', $data);
+	}
+
+	/**
+	 * Form "Atur Reviewer TPA" - PU menugaskan 1 staf per bidang utk
+	 * meninjau permohonan ini. Kalau dibiarkan kosong (— Belum
+	 * Ditugaskan —), SEMUA staf bidang itu tetap boleh meninjau
+	 * (perilaku lama) - lihat database/pengajuan_pbg_reviewer.sql dan
+	 * Tpa_pengajuan_pbg::_bidang_boleh_akses().
+	 */
+	public function reviewer($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('pengajuan_pbg')->row_array() : NULL;
+
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$staf_per_bidang = array();
+		foreach ($this->kolom_reviewer as $peran => $kolom)
+		{
+			$staf_per_bidang[$peran] = $this->db->where('role', $peran)->order_by('nama', 'ASC')->get('users')->result_array();
+		}
+
+		$data['row']              = $row;
+		$data['label_bidang']     = $this->label_bidang;
+		$data['staf_per_bidang']  = $staf_per_bidang;
+		$data['error']            = $this->session->flashdata('error');
+		$data['sukses']           = $this->session->flashdata('sukses');
+		$data['nama_pengguna']    = $this->session->userdata('nama');
+
+		$this->load->view('pages/pengajuan_pbg_reviewer', $data);
+	}
+
+	/** Simpan hasil "Atur Reviewer TPA" (POST). */
+	public function simpan_reviewer($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('pengajuan_pbg')->row_array() : NULL;
+
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$data_simpan = array();
+		foreach ($this->kolom_reviewer as $peran => $kolom)
+		{
+			$dipilih = (int) $this->input->post($kolom);
+			if ($dipilih > 0)
+			{
+				// Pastikan ID yang dikirim benar akun berperan sesuai
+				// bidangnya - jangan percaya begitu saja input dari form.
+				$valid = $this->db->where('id', $dipilih)->where('role', $peran)->get('users')->row_array();
+				$data_simpan[$kolom] = ($valid !== NULL) ? $dipilih : NULL;
+			}
+			else
+			{
+				$data_simpan[$kolom] = NULL;
+			}
+		}
+
+		$this->db->where('id', $id)->update('pengajuan_pbg', $data_simpan);
+		$this->session->set_flashdata('sukses', 'Penugasan reviewer TPA berhasil disimpan.');
+		redirect('pengajuan-pbg/reviewer/' . $id);
 	}
 
 	/**

@@ -2,43 +2,13 @@
 $t = function ($v) {
 	return ($v === null || $v === '') ? '—' : htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 };
-$tgl = function ($v) {
-	return ($v === null || $v === '') ? '—' : htmlspecialchars(date('d M Y', strtotime($v)), ENT_QUOTES, 'UTF-8');
-};
-$tgl_jam = function ($v) {
-	return ($v === null || $v === '') ? '—' : htmlspecialchars(date('d M Y H:i', strtotime($v)), ENT_QUOTES, 'UTF-8');
-};
-$label_status = array(
-	'draf'                         => 'Draf',
-	'verifikasi_dokumen'           => 'Verifikasi Kelengkapan Dokumen',
-	'perbaikan_dokumen'            => 'Perbaikan Dokumen',
-	'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi',
-	'menunggu_jadwal_konsultasi'   => 'Menunggu Jadwal Konsultasi',
-	'disetujui_tpa'                => 'Disetujui Semua TPA',
-);
-$perlu_perbaikan = in_array($row['status'], array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'), TRUE);
-$label_bidang = array(
-	'tpa_arsitek'  => 'Bidang Arsitektur & Tata Kota',
-	'tpa_struktur' => 'Bidang Struktur & Sipil',
-	'tpa_mep'      => 'Bidang Mekanikal, Elektrikal & Perpipaan (MEP)',
-);
-$label_status_bidang = array(
-	'disetujui'                    => 'Disetujui',
-	'perbaikan_dokumen'            => 'Perbaikan Dokumen',
-	'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi',
-);
-$nama_reviewer_bidang = array(
-	'tpa_arsitek'  => isset($row['nama_reviewer_arsitek']) ? $row['nama_reviewer_arsitek'] : null,
-	'tpa_struktur' => isset($row['nama_reviewer_struktur']) ? $row['nama_reviewer_struktur'] : null,
-	'tpa_mep'      => isset($row['nama_reviewer_mep']) ? $row['nama_reviewer_mep'] : null,
-);
 ?>
 <!DOCTYPE html>
 <html lang="id" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detail Permohonan PBG — Portal PU · SIP Gatutkaca</title>
+<title>Atur Reviewer TPA — Portal PU · SIP Gatutkaca</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -114,32 +84,20 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 section{padding:60px 0 100px}
 .eyebrow{font-size:.7rem;letter-spacing:.38em;text-transform:uppercase;color:var(--gold-500);margin-bottom:14px}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem);line-height:1.2}
+.section-lead{color:var(--muted);max-width:66ch;margin-top:14px}
 .alert{padding:16px 20px;margin:26px 0 0;font-size:.88rem;border:1px solid}
 .alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
 .alert-err{background:rgba(224,82,107,.12);border-color:#E0526B;color:#F3AEB9}
-.tag{display:inline-block;border:1px solid var(--line);padding:4px 14px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-300);margin-top:14px}
-.tag-draf{color:#F0A048;border-color:#B4573B}
-.tag-verifikasi_dokumen{color:#5FC2E0;border-color:#1E86A3}
-.tag-perbaikan_dokumen{color:#E0526B;border-color:#E0526B}
-.tag-perbaikan_dokumen_konsultasi{color:#E0526B;border-color:#E0526B}
-.tag-menunggu_jadwal_konsultasi{color:#6FCF97;border-color:#2EA84F}
-.tag-disetujui_tpa{color:#6FCF97;border-color:#2EA84F}
-.tag-terunggah{color:#6FCF97;border-color:#2EA84F;margin-top:0}
-.tag-ditolak{color:#E0526B;border-color:#E0526B;margin-top:0}
 
 .card{background:var(--surface);border:1px solid var(--line);padding:32px 36px;margin-top:26px}
-.card h4{font-family:var(--display);font-weight:400;font-size:1.05rem;color:var(--gold-300);margin-bottom:20px;letter-spacing:.04em}
-.kv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px 30px}
-.kv{border-bottom:1px solid var(--line);padding-bottom:12px}
-.kv span{display:block;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
-.kv b{font-weight:500;font-size:.92rem;white-space:pre-line}
-.kv.full{grid-column:1 / -1}
-@media(max-width:640px){.kv-grid{grid-template-columns:1fr}}
-
-.doc-item{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:.88rem}
-.doc-item:last-child{border-bottom:none}
-.doc-item a{color:var(--gold-300);text-decoration:underline}
-.doc-empty{color:var(--muted);font-size:.88rem}
+.card h4{font-family:var(--display);font-weight:400;font-size:1.05rem;color:var(--gold-300);margin-bottom:6px;letter-spacing:.04em}
+.card .hint{color:var(--muted);font-size:.82rem;margin-bottom:18px}
+.field{margin-bottom:22px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.field select{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:12px 14px;font-family:var(--body);font-size:.9rem}
+.field select:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+.field .kosong{color:var(--muted);font-size:.82rem;margin-top:8px}
 
 footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px solid var(--line)}
 .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:50px}
@@ -211,19 +169,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-main">
 <section style="padding-top:100px">
   <div class="dash-wrap">
-    <p class="eyebrow"><a href="<?php echo base_url('pengajuan-pbg'); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Daftar Permohonan</a></p>
-    <h2><?php echo $t($row['nama_pemohon']); ?></h2>
-    <span class="tag tag-<?php echo htmlspecialchars($row['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$row['status']]) ? $label_status[$row['status']] : $row['status'], ENT_QUOTES, 'UTF-8'); ?></span>
-    <?php if ($row['status'] === 'draf'): ?>
-      <a href="<?php echo base_url('pengajuan-pbg/tambah/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Lanjutkan Permohonan</a>
-    <?php elseif ($perlu_perbaikan): ?>
-      <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Perbaiki Permohonan</a>
-    <?php elseif ($row['status'] === 'verifikasi_dokumen'): ?>
-      <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Edit Permohonan</a>
-    <?php endif; ?>
-    <?php if ($row['status'] !== 'draf'): ?>
-      <a href="<?php echo base_url('pengajuan-pbg/reviewer/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Atur Reviewer TPA</a>
-    <?php endif; ?>
+    <p class="eyebrow"><a href="<?php echo base_url('pengajuan-pbg/lihat/' . (int) $row['id']); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Detail Permohonan</a></p>
+    <h2>Atur Reviewer TPA — <?php echo $t($row['nama_pemohon']); ?></h2>
+    <p class="section-lead">Tentukan staf TPA yang ditugaskan meninjau tiap bidang untuk permohonan ini. Kalau dibiarkan "— Belum Ditugaskan —", SEMUA staf bidang itu tetap bisa meninjau permohonan ini (perilaku biasa) - begitu diisi, HANYA staf yang dipilih di sini yang bisa mengakses bidang tersebut.</p>
 
     <?php if (!empty($sukses)): ?>
       <div class="alert alert-ok"><?php echo htmlspecialchars($sukses, ENT_QUOTES, 'UTF-8'); ?></div>
@@ -232,139 +180,27 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="alert alert-err"><?php echo nl2br(htmlspecialchars($error, ENT_QUOTES, 'UTF-8')); ?></div>
     <?php endif; ?>
 
-    <p style="margin-top:16px"><a href="<?php echo base_url('pengajuan-pbg/checklist/' . (int) $row['id']); ?>" style="color:var(--gold-300);text-decoration:underline;font-size:.85rem">Lihat Checklist Kelengkapan Persyaratan →</a></p>
-
-    <?php if (!empty($persetujuan) || $perlu_perbaikan || $row['status'] === 'disetujui_tpa'): ?>
-      <div class="card" style="border-color:<?php echo ($row['status'] === 'disetujui_tpa') ? '#2EA84F' : '#B4573B'; ?>;background:<?php echo ($row['status'] === 'disetujui_tpa') ? 'rgba(46,168,79,.06)' : 'rgba(240,160,72,.06)'; ?>">
-        <h4>Status Persetujuan TPA per Bidang</h4>
-        <p style="color:var(--muted);font-size:.82rem;margin-top:-12px;margin-bottom:16px">Permohonan berstatus Disetujui Semua TPA kalau ketiga bidang di bawah sudah menyetujui.</p>
-        <div class="kv-grid">
-          <?php foreach ($label_bidang as $kode_bidang => $nama_bidang): ?>
-            <div class="kv full">
-              <span><?php echo htmlspecialchars($nama_bidang, ENT_QUOTES, 'UTF-8'); ?><span style="display:block;color:var(--muted);font-size:.76rem;font-weight:400;margin-top:4px">Ditugaskan: <?php echo empty($nama_reviewer_bidang[$kode_bidang]) ? 'Belum ditugaskan (semua staf bidang ini boleh meninjau)' : $t($nama_reviewer_bidang[$kode_bidang]); ?></span></span>
-              <?php if (isset($persetujuan[$kode_bidang])): $p = $persetujuan[$kode_bidang]; ?>
-                <b>
-                  <span class="tag tag-<?php echo ($p['status'] === 'disetujui') ? 'disetujui_tpa' : htmlspecialchars($p['status'], ENT_QUOTES, 'UTF-8'); ?>" style="margin-top:4px"><?php echo htmlspecialchars(isset($label_status_bidang[$p['status']]) ? $label_status_bidang[$p['status']] : $p['status'], ENT_QUOTES, 'UTF-8'); ?></span>
-                  <span style="display:block;color:var(--muted);font-size:.78rem;margin-top:6px">Oleh <?php echo $t($p['nama_peninjau']); ?> — <?php echo $tgl_jam($p['ditinjau_pada']); ?></span>
-                  <?php if (!empty($p['catatan'])): ?>
-                    <span style="display:block;white-space:pre-line;margin-top:6px;font-weight:400"><?php echo $t($p['catatan']); ?></span>
-                  <?php endif; ?>
-                </b>
-              <?php else: ?>
-                <b style="color:var(--muted);font-weight:400">Menunggu ditinjau</b>
-              <?php endif; ?>
-            </div>
-          <?php endforeach; ?>
-        </div>
-      </div>
-    <?php endif; ?>
-
     <div class="card">
-      <h4>Data Pemohon &amp; Registrasi</h4>
-      <div class="kv-grid">
-        <div class="kv"><span>No. Registrasi</span><b><?php echo !empty($row['no_registrasi']) ? $t($row['no_registrasi']) : 'Belum Terdefinisi'; ?></b></div>
-        <div class="kv"><span>Diinput Pada</span><b><?php echo $tgl($row['created_at']); ?></b></div>
-        <div class="kv"><span>NIK Pemohon</span><b><?php echo $t($row['nik_pemohon']); ?></b></div>
-        <div class="kv"><span>Kontak Pemohon</span><b><?php echo $t($row['kontak_pemohon']); ?></b></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h4>Intensitas Pemanfaatan Ruang</h4>
-      <div class="kv-grid">
-        <div class="kv"><span>Sudah Memiliki Data</span><b><?php echo $t($row['intensitas_ada'] === 'ya' ? 'Ya' : ($row['intensitas_ada'] === 'tidak' ? 'Tidak' : null)); ?></b></div>
-        <div class="kv"><span>Nomor Dokumen</span><b><?php echo $t($row['intensitas_no_dokumen']); ?></b></div>
-        <div class="kv"><span>GSB</span><b><?php echo $t($row['intensitas_gsb']); ?></b></div>
-        <div class="kv"><span>KDB</span><b><?php echo $t($row['intensitas_kdb']); ?></b></div>
-        <div class="kv"><span>KLB</span><b><?php echo $t($row['intensitas_klb']); ?></b></div>
-        <div class="kv"><span>KDH</span><b><?php echo $t($row['intensitas_kdh']); ?></b></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h4>Lokasi &amp; Kepemilikan Bangunan</h4>
-      <div class="kv-grid">
-        <div class="kv full"><span>Alamat Lokasi Bangunan</span><b><?php echo $t($row['lokasi_alamat']); ?></b></div>
-        <div class="kv"><span>Provinsi / Kab-Kota</span><b><?php echo $t(trim($row['lokasi_provinsi'] . ' / ' . $row['lokasi_kabupaten'], ' /')); ?></b></div>
-        <div class="kv"><span>Kecamatan / Kelurahan</span><b><?php echo $t(trim($row['lokasi_kecamatan'] . ' / ' . $row['lokasi_kelurahan'], ' /')); ?></b></div>
-        <div class="kv"><span>Jumlah Bukti Kepemilikan Tanah</span><b><?php echo $t($row['jumlah_bukti_tanah']); ?></b></div>
-        <div class="kv"><span>Kepemilikan Bangunan</span><b><?php echo $t(isset($opsi_kepemilikan[$row['kepemilikan_bangunan']]) ? $opsi_kepemilikan[$row['kepemilikan_bangunan']] : null); ?></b></div>
-        <div class="kv"><span>Kondisi Bangunan</span><b><?php echo $t(isset($opsi_kondisi[$row['kondisi_bangunan']]) ? $opsi_kondisi[$row['kondisi_bangunan']] : null); ?></b></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h4>Fungsi Bangunan</h4>
-      <div class="kv-grid">
-        <div class="kv full"><span>Fungsi &amp; Sub Fungsi Terpilih</span><b><?php echo $t($row['fungsi_bangunan']); ?></b></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h4>Data Bangunan</h4>
-      <div class="kv-grid">
-        <div class="kv"><span>Nama Bangunan</span><b><?php echo $t($row['bangunan_nama']); ?></b></div>
-        <div class="kv"><span>Memiliki Basemen</span><b><?php echo $t($row['punya_basemen'] === 'ya' ? 'Ya' : ($row['punya_basemen'] === 'tidak' ? 'Tidak' : null)); ?></b></div>
-        <div class="kv"><span>Luas Per Unit (Selain Basemen)</span><b><?php echo $t($row['bangunan_luas_per_unit']); ?> m²</b></div>
-        <div class="kv"><span>Tinggi Bangunan</span><b><?php echo $t($row['bangunan_tinggi']); ?> m</b></div>
-        <div class="kv"><span>Jumlah Lantai</span><b><?php echo $t($row['bangunan_jumlah_lantai']); ?></b></div>
-        <div class="kv"><span>Luas / Jumlah Lapis Basemen</span><b><?php echo $t($row['bangunan_luas_basemen']); ?> m² / <?php echo $t($row['bangunan_jumlah_lapis_basemen']); ?></b></div>
-        <div class="kv"><span>Jumlah Unit</span><b><?php echo $t($row['bangunan_jumlah_unit']); ?></b></div>
-        <div class="kv"><span>Estimasi Jumlah Penghuni</span><b><?php echo $t($row['bangunan_estimasi_penghuni']); ?></b></div>
-        <div class="kv"><span>Koordinat Bangunan</span><b><?php echo $t(trim($row['bangunan_latitude'] . ', ' . $row['bangunan_longitude'], ', ')); ?></b></div>
-        <div class="kv"><span>Peta Lokasi Bangunan</span><b><?php echo !empty($row['bangunan_peta']) ? '<a href="' . base_url('pengajuan-pbg/berkas/bangunan_peta/' . (int) $row['id']) . '" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">Lihat berkas</a>' : '—'; ?></b></div>
-      </div>
-    </div>
-
-    <?php if ($row['pakai_prototipe'] === 'ya' || $row['masa_pemanfaatan'] !== null): ?>
-    <div class="card">
-      <h4>Desain Prototipe</h4>
-      <div class="kv-grid">
-        <div class="kv"><span>Pakai Desain Prototipe</span><b><?php echo $t($row['pakai_prototipe'] === 'ya' ? 'Ya' : ($row['pakai_prototipe'] === 'tidak' ? 'Tidak' : null)); ?></b></div>
-        <div class="kv"><span>Jenis Prototipe</span><b><?php echo $t($row['prototipe_jenis']); ?></b></div>
-        <div class="kv"><span>Jumlah Unit Dibangun</span><b><?php echo $t($row['prototipe_jumlah_unit']); ?></b></div>
-        <div class="kv"><span>Masa Pemanfaatan</span><b><?php echo $t($row['masa_pemanfaatan'] === 'lebih_5_tahun' ? 'Lebih dari 5 tahun' : ($row['masa_pemanfaatan'] === 'kurang_5_tahun' ? 'Kurang dari 5 tahun' : null)); ?></b></div>
-        <div class="kv"><span>Koordinat Prototipe</span><b><?php echo $t(trim($row['prototipe_latitude'] . ', ' . $row['prototipe_longitude'], ', ')); ?></b></div>
-        <div class="kv"><span>Peta / Denah Prototipe</span><b><?php echo !empty($row['prototipe_peta']) ? '<a href="' . base_url('pengajuan-pbg/berkas/prototipe_peta/' . (int) $row['id']) . '" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">Lihat berkas</a>' : '—'; ?></b></div>
-      </div>
-    </div>
-    <?php endif; ?>
-
-    <div class="card">
-      <h4>Dokumen Tanah Bangunan</h4>
-      <div class="kv-grid">
-        <div class="kv"><span>Jenis Dokumen Kepemilikan</span><b><?php echo $t($row['tanah_jenis_dokumen']); ?></b></div>
-        <div class="kv"><span>Nomor / Tanggal Terbit</span><b><?php echo $t($row['tanah_nomor_dokumen']); ?> — <?php echo $tgl($row['tanah_tanggal_terbit']); ?></b></div>
-        <div class="kv"><span>Luas Tanah</span><b><?php echo $t($row['tanah_luas']); ?> m²</b></div>
-        <div class="kv"><span>Hak Kepemilikan</span><b><?php echo $t($row['tanah_hak_kepemilikan']); ?></b></div>
-        <div class="kv"><span>Nama Pemilik Hak Tanah</span><b><?php echo $t($row['tanah_nama_pemilik']); ?></b></div>
-        <div class="kv"><span>Lampiran Dokumen</span><b><?php echo !empty($row['tanah_lampiran']) ? '<a href="' . base_url('pengajuan-pbg/berkas/tanah_lampiran/' . (int) $row['id']) . '" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">Lihat berkas</a>' : '—'; ?></b></div>
-        <div class="kv full"><span>Alamat Lokasi Tanah</span><b><?php echo $t($row['tanah_alamat']); ?></b></div>
-        <div class="kv"><span>Pemilik Tanah = Pemilik Bangunan?</span><b><?php echo $t($row['tanah_pemilik_sama'] === 'sama' ? 'Sama' : ($row['tanah_pemilik_sama'] === 'tidak' ? 'Tidak' : null)); ?></b></div>
-        <div class="kv"><span>Nomor / Tanggal Izin Pemanfaatan</span><b><?php echo $t($row['tanah_nomor_izin']); ?> — <?php echo $tgl($row['tanah_tanggal_izin']); ?></b></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h4>Dokumen Teknis Terunggah</h4>
-      <?php if (empty($dokumen)): ?>
-        <p class="doc-empty">Belum ada dokumen teknis yang diunggah.</p>
-      <?php else: ?>
-        <?php foreach ($dokumen as $d): ?>
-          <div class="doc-item" style="flex-wrap:wrap;align-items:flex-start">
-            <span>
-              <?php echo htmlspecialchars($d['jenis_dokumen'], ENT_QUOTES, 'UTF-8'); ?> — <?php echo htmlspecialchars($d['nama_file_asli'], ENT_QUOTES, 'UTF-8'); ?>
-              <?php if (isset($d['status']) && $d['status'] === 'ditolak'): ?>
-                <br><span class="tag tag-ditolak">Ditolak</span>
-                <?php if (!empty($d['catatan_penolakan'])): ?>
-                  <br><span style="color:var(--muted);font-size:.82rem"><?php echo $t($d['catatan_penolakan']); ?></span>
-                <?php endif; ?>
-              <?php endif; ?>
-            </span>
-            <a href="<?php echo base_url('pengajuan-pbg/berkas/dokumen/' . (int) $d['id']); ?>" target="_blank" rel="noopener noreferrer">Lihat</a>
+      <h4>Penugasan per Bidang</h4>
+      <p class="hint">Daftar pilihan diambil dari akun yang berperan sesuai bidangnya masing-masing.</p>
+      <form action="<?php echo base_url('pengajuan-pbg/simpan-reviewer/' . (int) $row['id']); ?>" method="post">
+        <?php foreach ($label_bidang as $kode_bidang => $nama_bidang): ?>
+          <?php $kolom = 'reviewer_' . str_replace('tpa_', '', $kode_bidang) . '_id'; ?>
+          <div class="field">
+            <label for="f-<?php echo $kode_bidang; ?>"><?php echo htmlspecialchars($nama_bidang, ENT_QUOTES, 'UTF-8'); ?></label>
+            <select id="f-<?php echo $kode_bidang; ?>" name="<?php echo $kolom; ?>">
+              <option value="">— Belum Ditugaskan (semua staf bidang ini boleh meninjau) —</option>
+              <?php foreach ($staf_per_bidang[$kode_bidang] as $staf): ?>
+                <option value="<?php echo (int) $staf['id']; ?>" <?php echo ((int) $row[$kolom] === (int) $staf['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($staf['nama'], ENT_QUOTES, 'UTF-8'); ?> (<?php echo htmlspecialchars($staf['email'], ENT_QUOTES, 'UTF-8'); ?>)</option>
+              <?php endforeach; ?>
+            </select>
+            <?php if (empty($staf_per_bidang[$kode_bidang])): ?>
+              <p class="kosong">Belum ada akun berperan <?php echo htmlspecialchars($kode_bidang, ENT_QUOTES, 'UTF-8'); ?> di sistem.</p>
+            <?php endif; ?>
           </div>
         <?php endforeach; ?>
-      <?php endif; ?>
+        <button type="submit" class="btn btn-gold btn-sm" style="margin-top:6px">Simpan Penugasan</button>
+      </form>
     </div>
   </div>
 </section>
