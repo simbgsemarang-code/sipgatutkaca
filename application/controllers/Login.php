@@ -42,20 +42,28 @@ class Login extends CI_Controller {
 	);
 
 	/**
-	 * Grup akun uji coba mana yang relevan untuk tiap nilai ?from=.
-	 * 'pbg' dan 'slf' TETAP dipetakan ke grup 'pemohon' walau grup itu
-	 * sekarang kosong (lihat $akun_uji) - PENTING supaya halaman login
-	 * yang diakses publik lewat tombol Ajukan PBG/SLF tetap hanya
-	 * menampilkan array kosong (panel disembunyikan), bukan malah jatuh
-	 * ke default "tampilkan semua akun" di _akun_uji_untuk() sehingga
-	 * kredensial admin/pu/tpa bocor ke pengunjung umum.
+	 * Grup akun uji coba mana yang relevan untuk tiap nilai ?from=
+	 * (SATU $from bisa memetakan ke BEBERAPA grup sekaligus - dipakai
+	 * supaya ketiga portal staf menampilkan gabungan admin+pu+tpa,
+	 * bukan cuma grupnya sendiri-sendiri, karena tombol "Masuk" di
+	 * kop halaman manapun sama-sama mengarah ke login?from=admin dan
+	 * staf sering perlu ganti-ganti akun peran saat menguji).
+	 *
+	 * 'pbg' dan 'slf' TETAP dipetakan HANYA ke grup 'pemohon' walau
+	 * grup itu sekarang kosong (lihat $akun_uji) - PENTING supaya
+	 * halaman login yang diakses publik lewat tombol Ajukan PBG/SLF
+	 * tetap hanya menampilkan array kosong (panel disembunyikan),
+	 * bukan malah jatuh ke default "tampilkan semua akun" di
+	 * _akun_uji_untuk() sehingga kredensial admin/pu/tpa bocor ke
+	 * pengunjung umum. JANGAN gabungkan 'pemohon' dengan grup staf di
+	 * atas.
 	 */
 	private $peta_tombol_uji = array(
-		'admin' => 'admin',
-		'pu'    => 'pu',
-		'tpa'   => 'tpa',
-		'pbg'   => 'pemohon',
-		'slf'   => 'pemohon',
+		'admin' => array('admin', 'pu', 'tpa'),
+		'pu'    => array('admin', 'pu', 'tpa'),
+		'tpa'   => array('admin', 'pu', 'tpa'),
+		'pbg'   => array('pemohon'),
+		'slf'   => array('pemohon'),
 	);
 
 	public function __construct()
@@ -239,11 +247,12 @@ class Login extends CI_Controller {
 	/**
 	 * Daftar kredensial uji coba yang ditampilkan, disaring sesuai
 	 * halaman/tombol asal ($from). Kalau $from cocok dengan salah satu
-	 * peta_tombol_uji, HANYA akun-akun segrup yang relevan yang
-	 * ditampilkan (semuanya, bukan cuma satu - mis. grup 'tpa'
-	 * menampilkan ketiga spesialisasi sekaligus). Kalau tidak ada
-	 * $from spesifik (kunjungan langsung ke /login), tampilkan semua
-	 * akun dari semua grup. Selalu kosong di luar ENVIRONMENT
+	 * peta_tombol_uji, HANYA akun yang grupnya ada di daftar grup
+	 * $from itu yang ditampilkan (mis. 'admin'/'pu'/'tpa' sama-sama
+	 * memetakan ke gabungan admin+pu+tpa, jadi ketiganya menampilkan
+	 * akun staf yang sama - lihat catatan $peta_tombol_uji). Kalau
+	 * tidak ada $from spesifik (kunjungan langsung ke /login), tampilkan
+	 * semua akun dari semua grup. Selalu kosong di luar ENVIRONMENT
 	 * development.
 	 */
 	private function _akun_uji_untuk($from)
@@ -255,9 +264,9 @@ class Login extends CI_Controller {
 
 		if (isset($this->peta_tombol_uji[$from]))
 		{
-			$grup = $this->peta_tombol_uji[$from];
-			return array_values(array_filter($this->akun_uji, function ($a) use ($grup) {
-				return $a['grup'] === $grup;
+			$grup_diizinkan = $this->peta_tombol_uji[$from];
+			return array_values(array_filter($this->akun_uji, function ($a) use ($grup_diizinkan) {
+				return in_array($a['grup'], $grup_diizinkan, TRUE);
 			}));
 		}
 
