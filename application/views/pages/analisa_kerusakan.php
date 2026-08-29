@@ -398,7 +398,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       var m=makeMarker(d);group.addLayer(m);bounds.push([d.lat,d.lng]);
     });
     elShown.textContent=curFiltered.length;
-    if(fit&&bounds.length)map.fitBounds(bounds,{padding:[46,46],maxZoom:14});
+    // maxZoom dibatasi supaya kalau hasil saringan tinggal 1 titik,
+    // peta tidak melompat terlalu dekat.
+    if(fit&&bounds.length)map.fitBounds(bounds,{padding:[55,55],maxZoom:13});
   }
 
   function photoBoxHTML(d){
@@ -464,12 +466,24 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   elKondisi.addEventListener("change",function(){render(true)});
   elReset.addEventListener("click",function(){
     elCari.value="";elKec.value="";elKondisi.value="";
-    render(false);map.setView([-7.53,108.99],10);
+    render(true);
   });
   document.getElementById("prevPage").addEventListener("click",function(){if(curPage>1){curPage--;renderGallery();}});
   document.getElementById("nextPage").addEventListener("click",function(){curPage++;renderGallery();});
 
+  // Isi marker + galeri dulu tanpa menggeser peta...
   render(false);
+  // ...lalu saat peta siap, bingkai otomatis ke SEMUA titik bangunan
+  // (fitBounds) supaya posisi & zoom awal langsung menampilkan seluruh
+  // sebaran se-Kabupaten, bukan view [-7.53,108.99]/z10 yang statis.
+  // invalidateSize() memastikan ukuran kontainer sudah benar (animasi
+  // .reveal / layout) sebelum perhitungan fitBounds.
+  function bingkaiSemua(){
+    map.invalidateSize();
+    if(curFiltered.length) map.fitBounds(curFiltered.map(function(d){return [d.lat,d.lng];}),{padding:[55,55],maxZoom:13});
+  }
+  map.whenReady(bingkaiSemua);
+  setTimeout(bingkaiSemua,600);
 })();
 </script>
 
