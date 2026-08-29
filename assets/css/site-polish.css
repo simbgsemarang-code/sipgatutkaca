@@ -50,6 +50,27 @@ html[data-theme="light"] .is-inner-page .dash-sidebar {
   background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,244,235,.95));
 }
 
+/* Framed map — give the Leaflet canvas a clear picture frame (mat + line +
+   depth) so it reads as a deliberate panel, matching the filter card above.
+   Box-shadow only, so no layout shift and no horizontal overflow. */
+.map-shell {
+  border: 1px solid rgba(160,124,45,.55) !important;
+  border-radius: 22px !important;
+  box-shadow:
+    0 0 0 8px var(--surface, #fff),
+    0 0 0 9px var(--line),
+    0 28px 60px rgba(21,42,59,.20),
+    0 8px 18px rgba(21,42,59,.10) !important;
+}
+@media (max-width: 560px) {
+  .map-shell {
+    box-shadow:
+      0 0 0 4px var(--surface, #fff),
+      0 0 0 5px var(--line),
+      0 16px 34px rgba(21,42,59,.18) !important;
+  }
+}
+
 ::selection { background: var(--gold-500, #a57e2c); color: #fff; }
 :focus-visible { outline: 3px solid rgba(201,162,75,.65) !important; outline-offset: 3px; }
 
