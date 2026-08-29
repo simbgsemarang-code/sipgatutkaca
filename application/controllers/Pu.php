@@ -53,6 +53,26 @@ class Pu extends CI_Controller {
 			$data['terkirim_pbg'] = $data['total_pbg'] - $data['draf_pbg'];
 		}
 
+		// Ringkasan Pengajuan SLF - pola sama persis dengan blok PBG di
+		// atas, dibungkus table_exists() supaya dashboard tetap normal
+		// kalau database/pengajuan_slf.sql belum dijalankan.
+		$data['total_slf']    = 0;
+		$data['draf_slf']     = 0;
+		$data['terkirim_slf'] = 0;
+		if ($this->db->table_exists('pengajuan_slf'))
+		{
+			$status_slf = $this->db->select('status')->get('pengajuan_slf')->result_array();
+			$data['total_slf'] = count($status_slf);
+			foreach ($status_slf as $p)
+			{
+				if ($p['status'] === 'draf')
+				{
+					$data['draf_slf']++;
+				}
+			}
+			$data['terkirim_slf'] = $data['total_slf'] - $data['draf_slf'];
+		}
+
 		$this->load->view('pages/pu_dashboard', $data);
 	}
 

@@ -44,7 +44,7 @@ foreach ($persetujuan as $kode_bidang => $p) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?php echo $sedang_merespons_tpa ? 'Perbaiki Permohonan PBG' : 'Edit Permohonan PBG'; ?> — Portal PU · SIP Gatutkaca</title>
+<title><?php echo $sedang_merespons_tpa ? 'Perbaiki Permohonan SLF' : 'Edit Permohonan SLF'; ?> — Portal PU · SIP Gatutkaca</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -214,11 +214,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
-      <a href="<?php echo base_url('pengajuan-pbg'); ?>" class="active">
+      <a href="<?php echo base_url('pengajuan-pbg'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Pengajuan PBG
       </a>
-      <a href="<?php echo base_url('pengajuan-slf'); ?>">
+      <a href="<?php echo base_url('pengajuan-slf'); ?>" class="active">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 2.5h8L14.5 5.5V15a.5.5 0 01-.5.5H3.5a.5.5 0 01-.5-.5V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 8.6l1.7 1.7L11 6.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Pengajuan SLF
       </a>
@@ -230,7 +230,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-main">
 <section style="padding-top:100px">
   <div class="dash-wrap">
-    <p class="eyebrow"><a href="<?php echo base_url('pengajuan-pbg/lihat/' . (int) $row['id']); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Detail Permohonan</a></p>
+    <p class="eyebrow"><a href="<?php echo base_url('pengajuan-slf/lihat/' . (int) $row['id']); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Detail Permohonan</a></p>
     <h2><?php echo $sedang_merespons_tpa ? 'Perbaiki Permohonan' : 'Edit Permohonan'; ?> — <?php echo htmlspecialchars($row['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></h2>
     <span class="tag tag-<?php echo htmlspecialchars($row['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php
       echo ($row['status'] === 'perbaikan_dokumen_konsultasi') ? 'Perbaikan Dokumen Konsultasi'
@@ -256,7 +256,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       </div>
     <?php endif; ?>
 
-    <form action="<?php echo base_url('pengajuan-pbg/kirim-perbaikan/' . (int) $row['id']); ?>" method="post" enctype="multipart/form-data">
+    <form action="<?php echo base_url('pengajuan-slf/kirim-perbaikan/' . (int) $row['id']); ?>" method="post" enctype="multipart/form-data">
 
       <div class="wiz-card">
         <h3>Dokumen Teknis</h3>
@@ -270,7 +270,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
                 <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
                 <?php if ($d !== null): ?>
                   <span class="tag tag-<?php echo ($d['status'] === 'ditolak') ? 'ditolak' : 'terunggah'; ?>"><?php echo ($d['status'] === 'ditolak') ? 'Ditolak' : 'Terunggah'; ?></span>
-                  <a href="<?php echo base_url('pengajuan-pbg/berkas/dokumen/' . (int) $d['id']); ?>" target="_blank" rel="noopener noreferrer" style="font-size:.78rem;text-decoration:underline;color:var(--gold-300);margin-left:4px">lihat berkas saat ini</a>
+                  <a href="<?php echo base_url('pengajuan-slf/berkas/dokumen/' . (int) $d['id']); ?>" target="_blank" rel="noopener noreferrer" style="font-size:.78rem;text-decoration:underline;color:var(--gold-300);margin-left:4px">lihat berkas saat ini</a>
                 <?php endif; ?>
               </div>
               <?php if ($d !== null && $d['status'] === 'ditolak' && !empty($d['catatan_penolakan'])): ?>
@@ -288,12 +288,12 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div class="field-row">
           <div class="field">
             <label>Peta / Denah Prototipe</label>
-            <?php if (!empty($row['prototipe_peta'])): ?><p style="font-size:.8rem;color:var(--muted);margin-bottom:8px">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/prototipe_peta/' . (int) $row['id']); ?>" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">lihat</a></p><?php endif; ?>
+            <?php if (!empty($row['prototipe_peta'])): ?><p style="font-size:.8rem;color:var(--muted);margin-bottom:8px">Sudah diunggah — <a href="<?php echo base_url('pengajuan-slf/berkas/prototipe_peta/' . (int) $row['id']); ?>" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">lihat</a></p><?php endif; ?>
             <input type="file" name="prototipe_peta" accept=".jpg,.jpeg,.png,.pdf">
           </div>
           <div class="field">
             <label>Peta Lokasi Bangunan</label>
-            <?php if (!empty($row['bangunan_peta'])): ?><p style="font-size:.8rem;color:var(--muted);margin-bottom:8px">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/bangunan_peta/' . (int) $row['id']); ?>" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">lihat</a></p><?php endif; ?>
+            <?php if (!empty($row['bangunan_peta'])): ?><p style="font-size:.8rem;color:var(--muted);margin-bottom:8px">Sudah diunggah — <a href="<?php echo base_url('pengajuan-slf/berkas/bangunan_peta/' . (int) $row['id']); ?>" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">lihat</a></p><?php endif; ?>
             <input type="file" name="bangunan_peta" accept=".jpg,.jpeg,.png,.pdf">
           </div>
         </div>
@@ -324,7 +324,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         </div>
         <div class="field">
           <label>Lampiran Dokumen Kepemilikan Tanah (jpg/png/pdf, maks 5MB)</label>
-          <?php if (!empty($row['tanah_lampiran'])): ?><p style="font-size:.8rem;color:var(--muted);margin-bottom:8px">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/tanah_lampiran/' . (int) $row['id']); ?>" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">lihat</a></p><?php endif; ?>
+          <?php if (!empty($row['tanah_lampiran'])): ?><p style="font-size:.8rem;color:var(--muted);margin-bottom:8px">Sudah diunggah — <a href="<?php echo base_url('pengajuan-slf/berkas/tanah_lampiran/' . (int) $row['id']); ?>" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">lihat</a></p><?php endif; ?>
           <input type="file" name="tanah_lampiran" accept=".jpg,.jpeg,.png,.pdf">
         </div>
 

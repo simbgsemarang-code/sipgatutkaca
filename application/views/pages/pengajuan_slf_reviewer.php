@@ -1,9 +1,14 @@
+<?php
+$t = function ($v) {
+	return ($v === null || $v === '') ? '—' : htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
+};
+?>
 <!DOCTYPE html>
 <html lang="id" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal TPA — SIP Gatutkaca · Kabupaten Cilacap</title>
+<title>Atur Reviewer TPA — Portal PU · SIP Gatutkaca</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,20 +18,16 @@
   --gold-500:#C9A24B;--gold-300:#E4C87B;--gold-100:#F3E3B8;
   --display:'Marcellus',serif;--body:'Plus Jakarta Sans',system-ui,sans-serif;
 }
-/* ====== TEMA GELAP (bawaan) ====== */
 html[data-theme="dark"]{
   --bg:#081826;--bg-alt:#0C2236;--surface:#0C2236;--surface-hi:#123249;
   --text:#F8F4EA;--muted:#B9C7D2;--line:rgba(201,162,75,.28);
   --head-bg:rgba(8,24,38,.94);--head-grad:rgba(8,24,38,.85);
-  --hero-1:rgba(8,24,38,.95);--hero-2:rgba(8,24,38,.78);--hero-3:rgba(8,24,38,.28);
   --foot:#050F19;--input:#0F2A40;--shadow:rgba(0,0,0,.5);
 }
-/* ====== TEMA TERANG ====== */
 html[data-theme="light"]{
   --bg:#FDFBF5;--bg-alt:#F6F1E3;--surface:#FFFFFF;--surface-hi:#FAF5E8;
   --text:#152A3B;--muted:#4E6070;--line:rgba(160,124,45,.35);
   --head-bg:rgba(253,251,245,.94);--head-grad:rgba(253,251,245,.85);
-  --hero-1:rgba(13,29,44,.88);--hero-2:rgba(13,29,44,.66);--hero-3:rgba(13,29,44,.22);
   --foot:#122536;--input:#FFFFFF;--shadow:rgba(21,42,59,.18);
   --gold-500:#A57E2C;--gold-300:#8F6C1F;--gold-100:#6E5314;
 }
@@ -37,7 +38,6 @@ img{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
 
-/* ===== NAVBAR ===== */
 header{position:fixed;inset:0 0 auto 0;z-index:60;transition:.4s;background:linear-gradient(180deg,var(--head-grad),transparent)}
 header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;height:84px;gap:18px}
@@ -47,7 +47,6 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .brand-sub{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
 .auth-actions{display:flex;align-items:center;gap:14px}
 
-/* ===== MENU PENGGUNA (dropdown navbar) ===== */
 .user-menu{position:relative}
 .user-menu-btn{display:flex;align-items:center;gap:8px;background:none;border:none;font-family:var(--body);font-size:.78rem;letter-spacing:.08em;color:var(--gold-300);font-weight:600;cursor:pointer;padding:8px 2px}
 .user-menu-btn svg{transition:transform .25s}
@@ -58,7 +57,6 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .user-menu-panel a:hover{background:var(--surface-hi);color:var(--gold-300)}
 .user-menu-panel a.logout:hover{color:#E0526B;background:rgba(224,82,107,.08)}
 
-/* ===== TATA LETAK DASHBOARD (sidebar) ===== */
 .dash-layout{display:flex;padding-top:84px}
 .dash-sidebar{width:240px;flex:0 0 240px;height:calc(100vh - 84px);position:sticky;top:84px;background:var(--surface);border-right:1px solid var(--line);padding:40px 0;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto}
 .dash-sidebar nav{display:flex;flex-direction:column;gap:4px}
@@ -67,11 +65,11 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .dash-sidebar a.active{color:var(--gold-300);border-left-color:var(--gold-500);background:var(--surface-hi)}
 .dash-sidebar a.logout:hover{color:#E0526B;background:rgba(224,82,107,.08)}
 .dash-main{flex:1;min-width:0}
-.dash-wrap{max-width:1400px;margin:0;padding:0 44px}
+.dash-wrap{max-width:980px;margin:0;padding:0 44px}
 @media(max-width:860px){
   .dash-layout{flex-direction:column}
   .dash-sidebar{width:100%;flex:0 0 auto;height:auto;min-height:0;flex-direction:row;justify-content:space-between;align-items:center;border-right:none;border-bottom:1px solid var(--line);padding:0}
-  .dash-sidebar nav{flex-direction:row;justify-content:center}
+  .dash-sidebar nav{flex-direction:row;justify-content:center;flex-wrap:wrap}
   .dash-sidebar a{padding:14px 20px;border-left:none;border-bottom:3px solid transparent}
   .dash-sidebar a.active{border-left-color:transparent;border-bottom-color:var(--gold-500)}
   .dash-wrap{padding:0 24px}
@@ -79,38 +77,36 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 
 .btn{display:inline-block;padding:15px 34px;font-size:.78rem;letter-spacing:.26em;text-transform:uppercase;transition:.3s;cursor:pointer;border:none;font-family:var(--body)}
 .btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
-.btn-gold:hover{filter:brightness(1.08);transform:translateY(-2px)}
 .btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
 .btn-sm{padding:11px 26px;font-size:.72rem;letter-spacing:.2em}
 
-/* ===== SECTION ===== */
 section{padding:60px 0 100px}
 .eyebrow{font-size:.7rem;letter-spacing:.38em;text-transform:uppercase;color:var(--gold-500);margin-bottom:14px}
-h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:32ch}
-.section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
-
-/* ===== TABEL ===== */
-table{width:100%;border-collapse:collapse;margin-top:44px;font-size:.9rem}
-th{font-family:var(--display);font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:.74rem;color:var(--gold-300);text-align:left;padding:16px 14px;border-bottom:1px solid var(--gold-500)}
-td{padding:16px 14px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:top}
-td:first-child{color:var(--text);font-weight:500}
-.tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-300)}
-.tag-baru{color:#F0A048;border-color:#B4573B}
-.tag-ditinjau{color:#5FC2E0;border-color:#1E86A3}
-.tag-selesai{color:#6FCF97;border-color:#2EA84F}
-
-.status-form{display:flex;gap:8px;align-items:center}
-.status-form select{background:var(--input);border:1px solid var(--line);color:var(--text);padding:8px 10px;font-family:var(--body);font-size:.8rem}
-.status-form select:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
-.status-form button{background:none;border:1px solid var(--gold-500);color:var(--gold-300);padding:8px 14px;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;font-family:var(--body)}
-.status-form button:hover{background:var(--gold-500);color:var(--bg)}
-
-.alert{padding:16px 20px;margin-bottom:26px;font-size:.88rem;border:1px solid}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem);line-height:1.2}
+.section-lead{color:var(--muted);max-width:66ch;margin-top:14px}
+.alert{padding:16px 20px;margin:26px 0 0;font-size:.88rem;border:1px solid}
 .alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
 .alert-err{background:rgba(224,82,107,.12);border-color:#E0526B;color:#F3AEB9}
 
-/* ===== PANEL WARNA ===== */
+.card{background:var(--surface);border:1px solid var(--line);padding:32px 36px;margin-top:26px}
+.card h4{font-family:var(--display);font-weight:400;font-size:1.05rem;color:var(--gold-300);margin-bottom:6px;letter-spacing:.04em}
+.card .hint{color:var(--muted);font-size:.82rem;margin-bottom:18px}
+.field{margin-bottom:22px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.field select{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:12px 14px;font-family:var(--body);font-size:.9rem}
+.field select:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+.field .kosong{color:var(--muted);font-size:.82rem;margin-top:8px}
+
+footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px solid var(--line)}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:50px}
+.foot-grid h4{font-family:var(--display);font-weight:400;letter-spacing:.14em;color:#E4C87B;margin-bottom:18px;font-size:1rem}
+.foot-grid p,.foot-grid li{font-size:.88rem;color:#B9C7D2}
+.foot-grid ul{list-style:none;display:grid;gap:10px}
+.foot-grid a:hover{color:#E4C87B}
+.credit{margin-top:50px;padding-top:22px;border-top:1px solid rgba(185,199,210,.15);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:.72rem;color:rgba(185,199,210,.6);letter-spacing:.06em}
+
 .theme-fab{position:fixed;right:26px;bottom:26px;z-index:80;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold-500);background:var(--surface);color:var(--gold-300);cursor:pointer;display:grid;place-items:center;box-shadow:0 8px 26px var(--shadow);transition:transform .3s}
 .theme-fab:hover{transform:rotate(24deg)}
 .theme-panel{position:fixed;right:26px;bottom:94px;z-index:80;background:var(--surface);border:1px solid var(--line);box-shadow:0 16px 42px var(--shadow);padding:22px;width:230px;opacity:0;transform:translateY(12px);pointer-events:none;transition:.3s}
@@ -124,29 +120,7 @@ td:first-child{color:var(--text);font-weight:500}
 .swatch .sw-dark{background:linear-gradient(135deg,#081826,#123249)}
 .swatch .sw-light{background:linear-gradient(135deg,#F8F4EA,#EFE7D6)}
 .swatch span{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
-
-/* ===== FOOTER ===== */
-footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px solid var(--line)}
-.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:50px}
-.foot-grid h4{font-family:var(--display);font-weight:400;letter-spacing:.14em;color:#E4C87B;margin-bottom:18px;font-size:1rem}
-.foot-grid p,.foot-grid li{font-size:.88rem;color:#B9C7D2}
-.foot-grid ul{list-style:none;display:grid;gap:10px}
-.foot-grid a:hover{color:#E4C87B}
-.credit{margin-top:50px;padding-top:22px;border-top:1px solid rgba(185,199,210,.15);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:.72rem;color:rgba(185,199,210,.6);letter-spacing:.06em}
-
-/* ===== REVEAL ===== */
-.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s ease}
-.reveal.in{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){
-  .reveal{opacity:1;transform:none;transition:none}
-  html{scroll-behavior:auto}
-}
-
-/* ===== RESPONSIF ===== */
-@media(max-width:980px){
-  .foot-grid{grid-template-columns:1fr}
-  table{display:block;overflow-x:auto}
-}
+@media(max-width:980px){.foot-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -168,14 +142,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <div class="user-menu-panel" id="userMenuPanel" role="menu">
-          <a href="<?php echo base_url('pengaturan'); ?>" role="menuitem">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="2.3" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5v1.6M8 12.9v1.6M14.5 8h-1.6M3.1 8H1.5M12.4 3.6l-1.1 1.1M4.7 11.3l-1.1 1.1M12.4 12.4l-1.1-1.1M4.7 4.7L3.6 3.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            Pengaturan
-          </a>
-          <a href="<?php echo base_url('login/keluar'); ?>" role="menuitem" class="logout">
-            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 12.5L15 9l-4-3.5M15 9H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Logout
-          </a>
+          <a href="<?php echo base_url('pengaturan'); ?>" role="menuitem">Pengaturan</a>
+          <a href="<?php echo base_url('login/keluar'); ?>" role="menuitem" class="logout">Logout</a>
         </div>
       </div>
     </div>
@@ -185,84 +153,58 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <div class="dash-layout">
   <aside class="dash-sidebar">
     <nav>
-      <a href="<?php echo base_url('tpa'); ?>" class="active">
+      <a href="<?php echo base_url('pu'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
-      <a href="<?php echo base_url('tpa-pengajuan-pbg'); ?>">
+      <a href="<?php echo base_url('pengajuan-pbg'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Pengajuan PBG
       </a>
-      <a href="<?php echo base_url('tpa-pengajuan-slf'); ?>">
+      <a href="<?php echo base_url('pengajuan-slf'); ?>" class="active">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 2.5h8L14.5 5.5V15a.5.5 0 01-.5.5H3.5a.5.5 0 01-.5-.5V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 8.6l1.7 1.7L11 6.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Pengajuan SLF
       </a>
     </nav>
     <nav>
-      <a href="<?php echo base_url('login/keluar'); ?>" class="logout">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 12.5L15 9l-4-3.5M15 9H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Logout
-      </a>
+      <a href="<?php echo base_url('login/keluar'); ?>" class="logout">Logout</a>
     </nav>
   </aside>
   <div class="dash-main">
 <section style="padding-top:100px">
   <div class="dash-wrap">
-    <div class="reveal">
-      <p class="eyebrow">Portal TPA — Tim Profesi Ahli</p>
-      <h2>Tinjau Saran &amp; Masukan Warga</h2>
-      <p class="section-lead">Sebagai Tim Profesi Ahli, Anda membantu menindaklanjuti saran dan masukan yang masuk dari warga terkait penilaian kelayakan bangunan gedung. Perbarui status tiap masukan setelah ditinjau atau selesai ditangani.</p>
-    </div>
+    <p class="eyebrow"><a href="<?php echo base_url('pengajuan-slf/lihat/' . (int) $row['id']); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Detail Permohonan</a></p>
+    <h2>Atur Reviewer TPA — <?php echo $t($row['nama_pemohon']); ?></h2>
+    <p class="section-lead">Tentukan staf TPA yang ditugaskan meninjau tiap bidang untuk permohonan ini. Kalau dibiarkan "— Belum Ditugaskan —", SEMUA staf bidang itu tetap bisa meninjau permohonan ini (perilaku biasa) - begitu diisi, HANYA staf yang dipilih di sini yang bisa mengakses bidang tersebut.</p>
 
     <?php if (!empty($sukses)): ?>
-      <div class="alert alert-ok reveal" style="margin-top:36px"><?php echo htmlspecialchars($sukses, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-ok"><?php echo htmlspecialchars($sukses, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
     <?php if (!empty($error)): ?>
-      <div class="alert alert-err reveal" style="margin-top:36px"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-err"><?php echo nl2br(htmlspecialchars($error, ENT_QUOTES, 'UTF-8')); ?></div>
     <?php endif; ?>
 
-    <div class="reveal">
-      <p class="eyebrow" style="margin-bottom:8px">Kotak Masuk</p>
-      <h2 style="font-size:1.3rem">Total: <?php echo count($daftar_masukan); ?> masukan</h2>
-      <table>
-        <thead><tr><th>Nama</th><th>Topik</th><th>Pesan</th><th>Status</th><th>Tanggal</th><th>Perbarui Status</th></tr></thead>
-        <tbody>
-          <?php if (empty($daftar_masukan)): ?>
-            <tr><td colspan="6">Belum ada saran atau masukan yang masuk.</td></tr>
-          <?php else: ?>
-            <?php foreach ($daftar_masukan as $m): ?>
-              <tr>
-                <td>
-                  <?php echo htmlspecialchars($m['nama'], ENT_QUOTES, 'UTF-8'); ?>
-                  <?php if (!empty($m['email']) || !empty($m['no_hp'])): ?>
-                    <br><span style="font-size:.82rem">
-                      <?php echo htmlspecialchars((string) $m['email'], ENT_QUOTES, 'UTF-8'); ?>
-                      <?php echo !empty($m['no_hp']) ? ' · ' . htmlspecialchars($m['no_hp'], ENT_QUOTES, 'UTF-8') : ''; ?>
-                    </span>
-                  <?php endif; ?>
-                </td>
-                <td><?php echo !empty($m['topik']) ? htmlspecialchars($m['topik'], ENT_QUOTES, 'UTF-8') : '—'; ?></td>
-                <td style="max-width:280px"><?php echo nl2br(htmlspecialchars($m['pesan'], ENT_QUOTES, 'UTF-8')); ?></td>
-                <td>
-                  <?php $kelas_status = array('baru' => 'tag tag-baru', 'ditinjau' => 'tag tag-ditinjau', 'selesai' => 'tag tag-selesai'); ?>
-                  <span class="<?php echo isset($kelas_status[$m['status']]) ? $kelas_status[$m['status']] : 'tag'; ?>"><?php echo htmlspecialchars(strtoupper($m['status']), ENT_QUOTES, 'UTF-8'); ?></span>
-                </td>
-                <td><?php echo htmlspecialchars(date('d M Y', strtotime($m['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
-                <td>
-                  <form class="status-form" action="<?php echo base_url('tpa/tandai-status/' . (int) $m['id']); ?>" method="post">
-                    <select name="status">
-                      <option value="baru" <?php echo $m['status'] === 'baru' ? 'selected' : ''; ?>>Baru</option>
-                      <option value="ditinjau" <?php echo $m['status'] === 'ditinjau' ? 'selected' : ''; ?>>Ditinjau</option>
-                      <option value="selesai" <?php echo $m['status'] === 'selesai' ? 'selected' : ''; ?>>Selesai</option>
-                    </select>
-                    <button type="submit">Simpan</button>
-                  </form>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
+    <div class="card">
+      <h4>Penugasan per Bidang</h4>
+      <p class="hint">Daftar pilihan diambil dari akun yang berperan sesuai bidangnya masing-masing.</p>
+      <form action="<?php echo base_url('pengajuan-slf/simpan-reviewer/' . (int) $row['id']); ?>" method="post">
+        <?php foreach ($label_bidang as $kode_bidang => $nama_bidang): ?>
+          <?php $kolom = 'reviewer_' . str_replace('tpa_', '', $kode_bidang) . '_id'; ?>
+          <div class="field">
+            <label for="f-<?php echo $kode_bidang; ?>"><?php echo htmlspecialchars($nama_bidang, ENT_QUOTES, 'UTF-8'); ?></label>
+            <select id="f-<?php echo $kode_bidang; ?>" name="<?php echo $kolom; ?>">
+              <option value="">— Belum Ditugaskan (semua staf bidang ini boleh meninjau) —</option>
+              <?php foreach ($staf_per_bidang[$kode_bidang] as $staf): ?>
+                <option value="<?php echo (int) $staf['id']; ?>" <?php echo ((int) $row[$kolom] === (int) $staf['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($staf['nama'], ENT_QUOTES, 'UTF-8'); ?> (<?php echo htmlspecialchars($staf['email'], ENT_QUOTES, 'UTF-8'); ?>)</option>
+              <?php endforeach; ?>
+            </select>
+            <?php if (empty($staf_per_bidang[$kode_bidang])): ?>
+              <p class="kosong">Belum ada akun berperan <?php echo htmlspecialchars($kode_bidang, ENT_QUOTES, 'UTF-8'); ?> di sistem.</p>
+            <?php endif; ?>
+          </div>
+        <?php endforeach; ?>
+        <button type="submit" class="btn btn-gold btn-sm" style="margin-top:6px">Simpan Penugasan</button>
+      </form>
     </div>
   </div>
 </section>
@@ -323,7 +265,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 (function(){
   var p=new URLSearchParams(location.search);
   var t=p.get('theme')==='dark'?'dark':'light';
-  applyTheme(t,false);
+  applyTheme(t);
   function applyTheme(theme){
     document.documentElement.setAttribute('data-theme',theme);
     document.querySelectorAll('.swatch').forEach(function(s){
@@ -353,10 +295,6 @@ document.addEventListener('click',function(e){
 });
 var bar=document.getElementById('topbar');
 addEventListener('scroll',function(){bar.classList.toggle('scrolled',scrollY>40)},{passive:true});
-var io=new IntersectionObserver(function(es){es.forEach(function(e){
-  if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
-})},{threshold:.12});
-document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
 </script>
 </body>
 </html>

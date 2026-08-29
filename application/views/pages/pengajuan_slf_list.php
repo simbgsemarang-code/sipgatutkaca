@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal TPA — SIP Gatutkaca · Kabupaten Cilacap</title>
+<title>Pengajuan SLF — Portal PU · SIP Gatutkaca</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,6 @@ html[data-theme="dark"]{
   --bg:#081826;--bg-alt:#0C2236;--surface:#0C2236;--surface-hi:#123249;
   --text:#F8F4EA;--muted:#B9C7D2;--line:rgba(201,162,75,.28);
   --head-bg:rgba(8,24,38,.94);--head-grad:rgba(8,24,38,.85);
-  --hero-1:rgba(8,24,38,.95);--hero-2:rgba(8,24,38,.78);--hero-3:rgba(8,24,38,.28);
   --foot:#050F19;--input:#0F2A40;--shadow:rgba(0,0,0,.5);
 }
 /* ====== TEMA TERANG ====== */
@@ -26,7 +25,6 @@ html[data-theme="light"]{
   --bg:#FDFBF5;--bg-alt:#F6F1E3;--surface:#FFFFFF;--surface-hi:#FAF5E8;
   --text:#152A3B;--muted:#4E6070;--line:rgba(160,124,45,.35);
   --head-bg:rgba(253,251,245,.94);--head-grad:rgba(253,251,245,.85);
-  --hero-1:rgba(13,29,44,.88);--hero-2:rgba(13,29,44,.66);--hero-3:rgba(13,29,44,.22);
   --foot:#122536;--input:#FFFFFF;--shadow:rgba(21,42,59,.18);
   --gold-500:#A57E2C;--gold-300:#8F6C1F;--gold-100:#6E5314;
 }
@@ -71,7 +69,7 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 @media(max-width:860px){
   .dash-layout{flex-direction:column}
   .dash-sidebar{width:100%;flex:0 0 auto;height:auto;min-height:0;flex-direction:row;justify-content:space-between;align-items:center;border-right:none;border-bottom:1px solid var(--line);padding:0}
-  .dash-sidebar nav{flex-direction:row;justify-content:center}
+  .dash-sidebar nav{flex-direction:row;justify-content:center;flex-wrap:wrap}
   .dash-sidebar a{padding:14px 20px;border-left:none;border-bottom:3px solid transparent}
   .dash-sidebar a.active{border-left-color:transparent;border-bottom-color:var(--gold-500)}
   .dash-wrap{padding:0 24px}
@@ -83,6 +81,9 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
 .btn-sm{padding:11px 26px;font-size:.72rem;letter-spacing:.2em}
+.btn-xs{padding:8px 16px;font-size:.68rem;letter-spacing:.12em}
+.btn-danger{border:1px solid #E0526B;color:#E0526B;background:transparent}
+.btn-danger:hover{background:#E0526B;color:#fff}
 
 /* ===== SECTION ===== */
 section{padding:60px 0 100px}
@@ -90,23 +91,28 @@ section{padding:60px 0 100px}
 h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:32ch}
 .section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
 
+/* ===== TOOLBAR ===== */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:44px}
+.toolbar input[type=search]{background:var(--input);border:1px solid var(--line);color:var(--text);padding:12px 16px;font-family:var(--body);font-size:.85rem;min-width:260px}
+.toolbar input[type=search]:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+
 /* ===== TABEL ===== */
-table{width:100%;border-collapse:collapse;margin-top:44px;font-size:.9rem}
-th{font-family:var(--display);font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:.74rem;color:var(--gold-300);text-align:left;padding:16px 14px;border-bottom:1px solid var(--gold-500)}
-td{padding:16px 14px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:top}
+table{width:100%;border-collapse:collapse;margin-top:26px;font-size:.88rem}
+th{font-family:var(--display);font-weight:400;letter-spacing:.1em;text-transform:uppercase;font-size:.72rem;color:var(--gold-300);text-align:left;padding:14px;border-bottom:1px solid var(--gold-500)}
+td{padding:14px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:top}
 td:first-child{color:var(--text);font-weight:500}
-.tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-300)}
-.tag-baru{color:#F0A048;border-color:#B4573B}
-.tag-ditinjau{color:#5FC2E0;border-color:#1E86A3}
-.tag-selesai{color:#6FCF97;border-color:#2EA84F}
+.tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300)}
+.tag-draf{color:#F0A048;border-color:#B4573B}
+.tag-verifikasi_dokumen{color:#5FC2E0;border-color:#1E86A3}
+.tag-perbaikan_dokumen{color:#E0526B;border-color:#E0526B}
+.tag-perbaikan_dokumen_konsultasi{color:#E0526B;border-color:#E0526B}
+.tag-menunggu_jadwal_konsultasi{color:#6FCF97;border-color:#2EA84F}
+.tag-disetujui_tpa{color:#6FCF97;border-color:#2EA84F}
+.aksi-cell{display:flex;gap:8px;flex-wrap:wrap}
+.no-reg{font-size:.72rem;color:var(--muted)}
+.bidang-progres{margin-top:6px;font-size:.68rem;letter-spacing:.02em;color:var(--muted)}
 
-.status-form{display:flex;gap:8px;align-items:center}
-.status-form select{background:var(--input);border:1px solid var(--line);color:var(--text);padding:8px 10px;font-family:var(--body);font-size:.8rem}
-.status-form select:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
-.status-form button{background:none;border:1px solid var(--gold-500);color:var(--gold-300);padding:8px 14px;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;font-family:var(--body)}
-.status-form button:hover{background:var(--gold-500);color:var(--bg)}
-
-.alert{padding:16px 20px;margin-bottom:26px;font-size:.88rem;border:1px solid}
+.alert{padding:16px 20px;margin-bottom:0;margin-top:36px;font-size:.88rem;border:1px solid}
 .alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
 .alert-err{background:rgba(224,82,107,.12);border-color:#E0526B;color:#F3AEB9}
 
@@ -142,7 +148,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   html{scroll-behavior:auto}
 }
 
-/* ===== RESPONSIF ===== */
 @media(max-width:980px){
   .foot-grid{grid-template-columns:1fr}
   table{display:block;overflow-x:auto}
@@ -185,15 +190,15 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <div class="dash-layout">
   <aside class="dash-sidebar">
     <nav>
-      <a href="<?php echo base_url('tpa'); ?>" class="active">
+      <a href="<?php echo base_url('pu'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
-      <a href="<?php echo base_url('tpa-pengajuan-pbg'); ?>">
+      <a href="<?php echo base_url('pengajuan-pbg'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Pengajuan PBG
       </a>
-      <a href="<?php echo base_url('tpa-pengajuan-slf'); ?>">
+      <a href="<?php echo base_url('pengajuan-slf'); ?>" class="active">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 2.5h8L14.5 5.5V15a.5.5 0 01-.5.5H3.5a.5.5 0 01-.5-.5V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 8.6l1.7 1.7L11 6.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Pengajuan SLF
       </a>
@@ -208,62 +213,83 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-main">
 <section style="padding-top:100px">
   <div class="dash-wrap">
-    <div class="reveal">
-      <p class="eyebrow">Portal TPA — Tim Profesi Ahli</p>
-      <h2>Tinjau Saran &amp; Masukan Warga</h2>
-      <p class="section-lead">Sebagai Tim Profesi Ahli, Anda membantu menindaklanjuti saran dan masukan yang masuk dari warga terkait penilaian kelayakan bangunan gedung. Perbarui status tiap masukan setelah ditinjau atau selesai ditangani.</p>
+    <div class="reveal" style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap">
+      <div>
+        <p class="eyebrow">Portal PU — Pekerjaan Umum</p>
+        <h2>Pengajuan SLF</h2>
+      </div>
+      <a href="<?php echo base_url('pengajuan-slf/tambah'); ?>" class="btn btn-gold btn-sm" style="flex:0 0 auto">+ Tambah Permohonan</a>
     </div>
 
     <?php if (!empty($sukses)): ?>
-      <div class="alert alert-ok reveal" style="margin-top:36px"><?php echo htmlspecialchars($sukses, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-ok reveal"><?php echo htmlspecialchars($sukses, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
     <?php if (!empty($error)): ?>
-      <div class="alert alert-err reveal" style="margin-top:36px"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-err reveal"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
-    <div class="reveal">
-      <p class="eyebrow" style="margin-bottom:8px">Kotak Masuk</p>
-      <h2 style="font-size:1.3rem">Total: <?php echo count($daftar_masukan); ?> masukan</h2>
-      <table>
-        <thead><tr><th>Nama</th><th>Topik</th><th>Pesan</th><th>Status</th><th>Tanggal</th><th>Perbarui Status</th></tr></thead>
-        <tbody>
-          <?php if (empty($daftar_masukan)): ?>
-            <tr><td colspan="6">Belum ada saran atau masukan yang masuk.</td></tr>
-          <?php else: ?>
-            <?php foreach ($daftar_masukan as $m): ?>
-              <tr>
-                <td>
-                  <?php echo htmlspecialchars($m['nama'], ENT_QUOTES, 'UTF-8'); ?>
-                  <?php if (!empty($m['email']) || !empty($m['no_hp'])): ?>
-                    <br><span style="font-size:.82rem">
-                      <?php echo htmlspecialchars((string) $m['email'], ENT_QUOTES, 'UTF-8'); ?>
-                      <?php echo !empty($m['no_hp']) ? ' · ' . htmlspecialchars($m['no_hp'], ENT_QUOTES, 'UTF-8') : ''; ?>
-                    </span>
-                  <?php endif; ?>
-                </td>
-                <td><?php echo !empty($m['topik']) ? htmlspecialchars($m['topik'], ENT_QUOTES, 'UTF-8') : '—'; ?></td>
-                <td style="max-width:280px"><?php echo nl2br(htmlspecialchars($m['pesan'], ENT_QUOTES, 'UTF-8')); ?></td>
-                <td>
-                  <?php $kelas_status = array('baru' => 'tag tag-baru', 'ditinjau' => 'tag tag-ditinjau', 'selesai' => 'tag tag-selesai'); ?>
-                  <span class="<?php echo isset($kelas_status[$m['status']]) ? $kelas_status[$m['status']] : 'tag'; ?>"><?php echo htmlspecialchars(strtoupper($m['status']), ENT_QUOTES, 'UTF-8'); ?></span>
-                </td>
-                <td><?php echo htmlspecialchars(date('d M Y', strtotime($m['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
-                <td>
-                  <form class="status-form" action="<?php echo base_url('tpa/tandai-status/' . (int) $m['id']); ?>" method="post">
-                    <select name="status">
-                      <option value="baru" <?php echo $m['status'] === 'baru' ? 'selected' : ''; ?>>Baru</option>
-                      <option value="ditinjau" <?php echo $m['status'] === 'ditinjau' ? 'selected' : ''; ?>>Ditinjau</option>
-                      <option value="selesai" <?php echo $m['status'] === 'selesai' ? 'selected' : ''; ?>>Selesai</option>
-                    </select>
-                    <button type="submit">Simpan</button>
-                  </form>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
+    <div class="toolbar reveal">
+      <p class="eyebrow" style="margin-bottom:0">Daftar Permohonan</p>
+      <input type="search" id="cariPermohonan" placeholder="Cari nama pemohon atau lokasi…">
     </div>
+
+    <table id="tabelPermohonan">
+      <thead><tr><th>Nama Pemohon</th><th>No. Registrasi</th><th>Lokasi Bangunan</th><th>Status</th><th>Diinput</th><th>Aksi</th></tr></thead>
+      <tbody>
+        <?php if (empty($daftar)): ?>
+          <tr><td colspan="6">Belum ada permohonan SLF yang diinput.</td></tr>
+        <?php else: ?>
+          <?php foreach ($daftar as $r): ?>
+            <tr>
+              <td><?php echo htmlspecialchars($r['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></td>
+              <td class="no-reg"><?php echo !empty($r['no_registrasi']) ? htmlspecialchars($r['no_registrasi'], ENT_QUOTES, 'UTF-8') : 'Belum Terdefinisi'; ?></td>
+              <td><?php echo !empty($r['lokasi_alamat']) ? htmlspecialchars(mb_strimwidth($r['lokasi_alamat'], 0, 60, '…'), ENT_QUOTES, 'UTF-8') : '—'; ?></td>
+              <td>
+                <?php $label_status = array('draf' => 'Draf', 'verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi', 'disetujui_tpa' => 'Disetujui Semua TPA'); ?>
+                <span class="tag tag-<?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$r['status']]) ? $label_status[$r['status']] : $r['status'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <?php if (in_array($r['status'], array('verifikasi_dokumen', 'perbaikan_dokumen'), TRUE)): ?>
+                  <?php
+                  $singkat_bidang  = array('tpa_arsitek' => 'Arsitek', 'tpa_struktur' => 'Struktur', 'tpa_mep' => 'MEP');
+                  $sudah_per_bidang = isset($persetujuan_per_id[$r['id']]) ? $persetujuan_per_id[$r['id']] : array();
+                  $bagian = array();
+                  foreach ($singkat_bidang as $kode_bidang => $nama_singkat)
+                  {
+                    if (! isset($sudah_per_bidang[$kode_bidang]))
+                    {
+                      $ket = 'Menunggu';
+                    }
+                    elseif ($sudah_per_bidang[$kode_bidang] === 'disetujui')
+                    {
+                      $ket = 'Disetujui';
+                    }
+                    else
+                    {
+                      $ket = 'Perbaikan';
+                    }
+                    $bagian[] = $nama_singkat . ': ' . $ket;
+                  }
+                  ?>
+                  <div class="bidang-progres"><?php echo htmlspecialchars(implode(' · ', $bagian), ENT_QUOTES, 'UTF-8'); ?></div>
+                <?php endif; ?>
+              </td>
+              <td><?php echo htmlspecialchars(date('d M Y', strtotime($r['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
+              <td class="aksi-cell">
+                <a href="<?php echo base_url('pengajuan-slf/lihat/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Lihat</a>
+                <a href="<?php echo base_url('pengajuan-slf/checklist/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Checklist</a>
+                <?php if ($r['status'] === 'draf'): ?>
+                  <a href="<?php echo base_url('pengajuan-slf/tambah/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Lanjutkan</a>
+                  <form action="<?php echo base_url('pengajuan-slf/hapus/' . (int) $r['id']); ?>" method="post" style="margin:0" onsubmit="return confirm('Hapus draf permohonan ini?');">
+                    <button type="submit" class="btn btn-danger btn-xs" style="cursor:pointer">Hapus</button>
+                  </form>
+                <?php elseif (in_array($r['status'], array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'), TRUE)): ?>
+                  <a href="<?php echo base_url('pengajuan-slf/perbaiki/' . (int) $r['id']); ?>" class="btn btn-gold btn-xs">Perbaiki</a>
+                <?php endif; ?>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </tbody>
+    </table>
   </div>
 </section>
   </div>
@@ -323,7 +349,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 (function(){
   var p=new URLSearchParams(location.search);
   var t=p.get('theme')==='dark'?'dark':'light';
-  applyTheme(t,false);
+  applyTheme(t);
   function applyTheme(theme){
     document.documentElement.setAttribute('data-theme',theme);
     document.querySelectorAll('.swatch').forEach(function(s){
@@ -357,6 +383,16 @@ var io=new IntersectionObserver(function(es){es.forEach(function(e){
   if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
 })},{threshold:.12});
 document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+
+// ===== Pencarian tabel di sisi klien (tanpa round-trip server) =====
+var input=document.getElementById('cariPermohonan');
+var baris=document.querySelectorAll('#tabelPermohonan tbody tr');
+input.addEventListener('input',function(){
+  var q=input.value.trim().toLowerCase();
+  baris.forEach(function(tr){
+    tr.style.display = tr.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  });
+});
 </script>
 </body>
 </html>

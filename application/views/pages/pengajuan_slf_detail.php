@@ -1,10 +1,10 @@
 <?php
-// Dipakai bersama oleh Portal PU (Pengajuan_pbg::lihat) dan Panel Admin
-// (Admin::pengajuan_lihat). Dalam admin_mode: sidebar + tautan berkas
-// diarahkan ke rute admin, dan semua tombol aksi PU disembunyikan
-// (admin cuma boleh melihat, bukan mengubah permohonan).
+// Dipakai bersama oleh Portal PU (Pengajuan_slf::lihat) dan Panel Admin
+// (Admin::pengajuan_slf_lihat). Dalam admin_mode: sidebar + tautan
+// berkas diarahkan ke rute admin, dan semua tombol aksi PU
+// disembunyikan (admin cuma boleh melihat, bukan mengubah permohonan).
 $admin_mode  = isset($admin_mode) ? (bool) $admin_mode : FALSE;
-$berkas_base = $admin_mode ? 'admin/berkas/' : 'pengajuan-pbg/berkas/';
+$berkas_base = $admin_mode ? 'admin/berkas-slf/' : 'pengajuan-slf/berkas/';
 $t = function ($v) {
 	return ($v === null || $v === '') ? '—' : htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 };
@@ -44,7 +44,7 @@ $nama_reviewer_bidang = array(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detail Permohonan PBG — <?php echo $admin_mode ? 'Panel Admin' : 'Portal PU'; ?> · SIP Gatutkaca</title>
+<title>Detail Permohonan SLF — <?php echo $admin_mode ? 'Panel Admin' : 'Portal PU'; ?> · SIP Gatutkaca</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,11 +206,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="6.5" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.4"/><path d="M1.8 15c0-2.6 2.1-4.4 4.7-4.4S11.2 12.4 11.2 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12.4 4.2a2.3 2.3 0 010 4.4M13.6 14.8c0-2.1-1-3.7-2.6-4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Kelola Pengguna
       </a>
-      <a href="<?php echo base_url('admin/pengajuan'); ?>" class="active">
+      <a href="<?php echo base_url('admin/pengajuan'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Pengajuan PBG
       </a>
-      <a href="<?php echo base_url('admin/pengajuan-slf'); ?>">
+      <a href="<?php echo base_url('admin/pengajuan-slf'); ?>" class="active">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 2.5h8L14.5 5.5V15a.5.5 0 01-.5.5H3.5a.5.5 0 01-.5-.5V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 8.6l1.7 1.7L11 6.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Pengajuan SLF
       </a>
@@ -219,11 +219,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
-      <a href="<?php echo base_url('pengajuan-pbg'); ?>" class="active">
+      <a href="<?php echo base_url('pengajuan-pbg'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Pengajuan PBG
       </a>
-      <a href="<?php echo base_url('pengajuan-slf'); ?>">
+      <a href="<?php echo base_url('pengajuan-slf'); ?>" class="active">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 2.5h8L14.5 5.5V15a.5.5 0 01-.5.5H3.5a.5.5 0 01-.5-.5V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 8.6l1.7 1.7L11 6.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Pengajuan SLF
       </a>
@@ -236,19 +236,19 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-main">
 <section style="padding-top:100px">
   <div class="dash-wrap">
-    <p class="eyebrow"><a href="<?php echo base_url($admin_mode ? 'admin/pengajuan' : 'pengajuan-pbg'); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Daftar <?php echo $admin_mode ? 'Pengajuan' : 'Permohonan'; ?></a></p>
+    <p class="eyebrow"><a href="<?php echo base_url($admin_mode ? 'admin/pengajuan-slf' : 'pengajuan-slf'); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Daftar <?php echo $admin_mode ? 'Pengajuan SLF' : 'Permohonan'; ?></a></p>
     <h2><?php echo $t($row['nama_pemohon']); ?></h2>
     <span class="tag tag-<?php echo htmlspecialchars($row['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$row['status']]) ? $label_status[$row['status']] : $row['status'], ENT_QUOTES, 'UTF-8'); ?></span>
     <?php if (! $admin_mode): ?>
       <?php if ($row['status'] === 'draf'): ?>
-        <a href="<?php echo base_url('pengajuan-pbg/tambah/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Lanjutkan Permohonan</a>
+        <a href="<?php echo base_url('pengajuan-slf/tambah/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Lanjutkan Permohonan</a>
       <?php elseif ($perlu_perbaikan): ?>
-        <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Perbaiki Permohonan</a>
+        <a href="<?php echo base_url('pengajuan-slf/perbaiki/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Perbaiki Permohonan</a>
       <?php elseif ($row['status'] === 'verifikasi_dokumen'): ?>
-        <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Edit Permohonan</a>
+        <a href="<?php echo base_url('pengajuan-slf/perbaiki/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Edit Permohonan</a>
       <?php endif; ?>
       <?php if ($row['status'] !== 'draf'): ?>
-        <a href="<?php echo base_url('pengajuan-pbg/reviewer/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Atur Reviewer TPA</a>
+        <a href="<?php echo base_url('pengajuan-slf/reviewer/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Atur Reviewer TPA</a>
       <?php endif; ?>
     <?php endif; ?>
 
@@ -260,7 +260,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <?php endif; ?>
 
     <?php if (! $admin_mode): ?>
-    <p style="margin-top:16px"><a href="<?php echo base_url('pengajuan-pbg/checklist/' . (int) $row['id']); ?>" style="color:var(--gold-300);text-decoration:underline;font-size:.85rem">Lihat Checklist Kelengkapan Persyaratan →</a></p>
+    <p style="margin-top:16px"><a href="<?php echo base_url('pengajuan-slf/checklist/' . (int) $row['id']); ?>" style="color:var(--gold-300);text-decoration:underline;font-size:.85rem">Lihat Checklist Kelengkapan Persyaratan →</a></p>
     <?php endif; ?>
 
     <?php if (!empty($persetujuan) || $perlu_perbaikan || $row['status'] === 'disetujui_tpa'): ?>

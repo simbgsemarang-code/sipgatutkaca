@@ -245,6 +245,138 @@ class Admin extends CI_Controller {
 		echo read_file($path);
 	}
 
+	/**
+	 * Daftar SEMUA permohonan SLF, read-only untuk admin - pola sama
+	 * persis dengan pengajuan() versi PBG di atas, cuma ganti tabel
+	 * pengajuan_slf* dan view admin_pengajuan_slf.
+	 */
+	public function pengajuan_slf()
+	{
+		$persetujuan_per_id = array();
+		foreach ($this->db->get('pengajuan_slf_persetujuan_tpa')->result_array() as $p)
+		{
+			$persetujuan_per_id[$p['id_pengajuan']][$p['bidang']] = $p['status'];
+		}
+
+		$data['daftar'] = $this->db
+			->select('pengajuan_slf.*, pembuat.nama AS nama_pembuat')
+			->from('pengajuan_slf')
+			->join('users AS pembuat', 'pembuat.id = pengajuan_slf.dibuat_oleh', 'left')
+			->order_by('pengajuan_slf.created_at', 'DESC')
+			->get()->result_array();
+		$data['persetujuan_per_id'] = $persetujuan_per_id;
+		$data['nama_admin']         = $this->session->userdata('nama');
+
+		$this->load->view('pages/admin_pengajuan_slf', $data);
+	}
+
+	/**
+	 * Detail satu permohonan SLF, read-only - menyalin
+	 * pengajuan_lihat() versi PBG, ganti tabel pengajuan_slf* dan
+	 * view pengajuan_slf_detail (flag admin_mode di sana yang
+	 * menyembunyikan aksi PU + mengarahkan sidebar/berkas ke rute admin).
+	 */
+	public function pengajuan_slf_lihat($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0
+			? $this->db->select('pengajuan_slf.*, peninjau.nama AS nama_peninjau, ra.nama AS nama_reviewer_arsitek, rs.nama AS nama_reviewer_struktur, rm.nama AS nama_reviewer_mep, pembuat.nama AS nama_pembuat')
+				->from('pengajuan_slf')
+				->join('users AS peninjau', 'peninjau.id = pengajuan_slf.ditinjau_oleh', 'left')
+				->join('users AS ra', 'ra.id = pengajuan_slf.reviewer_arsitek_id', 'left')
+				->join('users AS rs', 'rs.id = pengajuan_slf.reviewer_struktur_id', 'left')
+				->join('users AS rm', 'rm.id = pengajuan_slf.reviewer_mep_id', 'left')
+				->join('users AS pembuat', 'pembuat.id = pengajuan_slf.dibuat_oleh', 'left')
+				->where('pengajuan_slf.id', $id)
+				->get()->row_array()
+			: NULL;
+
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$persetujuan = array();
+		foreach ($this->db->select('pengajuan_slf_persetujuan_tpa.*, peninjau.nama AS nama_peninjau')
+			->from('pengajuan_slf_persetujuan_tpa')
+			->join('users AS peninjau', 'peninjau.id = pengajuan_slf_persetujuan_tpa.ditinjau_oleh', 'left')
+			->where('id_pengajuan', $id)->get()->result_array() as $p)
+		{
+			$persetujuan[$p['bidang']] = $p;
+		}
+
+		$data['row']              = $row;
+		$data['dokumen']          = $this->db->where('id_pengajuan', $id)->get('pengajuan_slf_dokumen')->result_array();
+		$data['persetujuan']      = $persetujuan;
+		$data['opsi_kepemilikan'] = array(
+			'perorangan'        => 'Perorangan',
+			'badan_hukum_usaha' => 'Badan Hukum / Badan Usaha',
+			'pemerintah'        => 'Pemerintah',
+		);
+		$data['opsi_kondisi'] = array(
+			'sudah_ada'        => 'Sudah Ada (Eksisting)',
+			'belum_berdiri'    => 'Belum Berdiri',
+			'sedang_dibangun'  => 'Sedang Dibangun',
+			'renovasi'         => 'Renovasi (Perubahan Bangunan Gedung)',
+			'perpanjangan_slf' => 'Sudah Ada (Perpanjangan SLF)',
+		);
+		$data['sukses']        = NULL;
+		$data['error']         = NULL;
+		$data['nama_pengguna'] = $this->session->userdata('nama');
+		$data['admin_mode']    = TRUE;
+
+		$this->load->view('pages/pengajuan_slf_detail', $data);
+	}
+
+	/** Sajikan berkas permohonan SLF mana pun - salinan berkas() versi PBG dengan tabel/direktori pengajuan_slf. */
+	public function berkas_slf($tipe = null, $id = null)
+	{
+		$id          = (int) $id;
+		$kolom_valid = array('prototipe_peta', 'bangunan_peta', 'tanah_lampiran');
+
+		if ($tipe === 'dokumen')
+		{
+			$dok = $this->db->where('id', $id)->get('pengajuan_slf_dokumen')->row_array();
+			if ($dok === NULL)
+			{
+				show_404();
+				return;
+			}
+			$path       = APPPATH . 'uploads/pengajuan_slf/' . $dok['path_file'];
+			$nama_unduh = $dok['nama_file_asli'];
+		}
+		elseif (in_array($tipe, $kolom_valid, TRUE))
+		{
+			$row = $this->db->where('id', $id)->get('pengajuan_slf')->row_array();
+			if ($row === NULL || empty($row[$tipe]))
+			{
+				show_404();
+				return;
+			}
+			$path       = APPPATH . 'uploads/pengajuan_slf/' . $row[$tipe];
+			$nama_unduh = basename($path);
+		}
+		else
+		{
+			show_404();
+			return;
+		}
+
+		if (! is_file($path))
+		{
+			show_404();
+			return;
+		}
+
+		$this->load->helper('file');
+		$mime = function_exists('mime_content_type') ? mime_content_type($path) : 'application/octet-stream';
+		header('Content-Type: ' . $mime);
+		header('Content-Disposition: inline; filename="' . str_replace('"', '', $nama_unduh) . '"');
+		header('Content-Length: ' . filesize($path));
+		echo read_file($path);
+	}
+
 	public function hapus_pengguna($id = null)
 	{
 		$id = (int) $id;

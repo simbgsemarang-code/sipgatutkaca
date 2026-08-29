@@ -25,7 +25,7 @@ if (!empty($dokumen_ada)) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?php echo $lama !== null ? 'Lanjutkan' : 'Tambah'; ?> Permohonan PBG — Portal PU · SIP Gatutkaca</title>
+<title><?php echo $lama !== null ? 'Lanjutkan' : 'Tambah'; ?> Permohonan SLF — Portal PU · SIP Gatutkaca</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -218,11 +218,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
-      <a href="<?php echo base_url('pengajuan-pbg'); ?>" class="active">
+      <a href="<?php echo base_url('pengajuan-pbg'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Pengajuan PBG
       </a>
-      <a href="<?php echo base_url('pengajuan-slf'); ?>">
+      <a href="<?php echo base_url('pengajuan-slf'); ?>" class="active">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 2.5h8L14.5 5.5V15a.5.5 0 01-.5.5H3.5a.5.5 0 01-.5-.5V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 8.6l1.7 1.7L11 6.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Pengajuan SLF
       </a>
@@ -234,8 +234,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-main">
 <section style="padding-top:100px">
   <div class="dash-wrap">
-    <p class="eyebrow">Portal PU — <a href="<?php echo base_url('pengajuan-pbg'); ?>" style="color:inherit;text-decoration:underline">Pengajuan PBG</a></p>
-    <h2><?php echo $lama !== null ? 'Lanjutkan Permohonan' : 'Tambah Permohonan PBG'; ?></h2>
+    <p class="eyebrow">Portal PU — <a href="<?php echo base_url('pengajuan-slf'); ?>" style="color:inherit;text-decoration:underline">Pengajuan SLF</a></p>
+    <h2><?php echo $lama !== null ? 'Lanjutkan Permohonan' : 'Tambah Permohonan SLF'; ?></h2>
     <p class="section-lead">Isi formulir bertahap ini mewakili warga yang datang ke loket. Bisa disimpan sebagai draf dulu kapan saja, dan dilanjutkan lagi nanti.</p>
 
     <?php if (!empty($error)): ?>
@@ -247,7 +247,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="bar"><i id="wizBar"></i></div>
     </div>
 
-    <form id="formPengajuan" action="<?php echo base_url('pengajuan-pbg/simpan' . ($lama !== null ? '/' . (int) $lama['id'] : '')); ?>" method="post" enctype="multipart/form-data">
+    <form id="formPengajuan" action="<?php echo base_url('pengajuan-slf/simpan' . ($lama !== null ? '/' . (int) $lama['id'] : '')); ?>" method="post" enctype="multipart/form-data">
       <input type="hidden" name="aksi" id="inputAksi" value="draf">
       <div class="wiz-card">
 
@@ -371,7 +371,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
             </div>
             <div class="file-row">
               <span class="fr-label">Gambar Peta Lokasi Bangunan (jpg/png/pdf, maks 5MB)</span>
-              <?php if ($berkas_ada('prototipe_peta')): ?><span class="fr-status">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/prototipe_peta/' . (int) $lama['id']); ?>" target="_blank" rel="noopener noreferrer">lihat</a></span><?php endif; ?>
+              <?php if ($berkas_ada('prototipe_peta')): ?><span class="fr-status">Sudah diunggah — <a href="<?php echo base_url('pengajuan-slf/berkas/prototipe_peta/' . (int) $lama['id']); ?>" target="_blank" rel="noopener noreferrer">lihat</a></span><?php endif; ?>
               <input type="file" name="prototipe_peta" accept=".jpg,.jpeg,.png,.pdf">
             </div>
           </div>
@@ -443,7 +443,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
           </div>
           <div class="file-row">
             <span class="fr-label">Gambar Peta Lokasi Bangunan (jpg/png/pdf, maks 5MB)</span>
-            <?php if ($berkas_ada('bangunan_peta')): ?><span class="fr-status">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/bangunan_peta/' . (int) $lama['id']); ?>" target="_blank" rel="noopener noreferrer">lihat</a></span><?php endif; ?>
+            <?php if ($berkas_ada('bangunan_peta')): ?><span class="fr-status">Sudah diunggah — <a href="<?php echo base_url('pengajuan-slf/berkas/bangunan_peta/' . (int) $lama['id']); ?>" target="_blank" rel="noopener noreferrer">lihat</a></span><?php endif; ?>
             <input type="file" name="bangunan_peta" accept=".jpg,.jpeg,.png,.pdf">
           </div>
         </div>
@@ -474,7 +474,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
           </div>
           <div class="file-row">
             <span class="fr-label">Lampiran Dokumen Kepemilikan Tanah (jpg/png/pdf, maks 5MB)</span>
-            <?php if ($berkas_ada('tanah_lampiran')): ?><span class="fr-status">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/tanah_lampiran/' . (int) $lama['id']); ?>" target="_blank" rel="noopener noreferrer">lihat</a></span><?php endif; ?>
+            <?php if ($berkas_ada('tanah_lampiran')): ?><span class="fr-status">Sudah diunggah — <a href="<?php echo base_url('pengajuan-slf/berkas/tanah_lampiran/' . (int) $lama['id']); ?>" target="_blank" rel="noopener noreferrer">lihat</a></span><?php endif; ?>
             <input type="file" name="tanah_lampiran" accept=".jpg,.jpeg,.png,.pdf">
           </div>
 
@@ -517,7 +517,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <div class="file-row">
                 <span class="fr-label"><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></span>
                 <?php if (isset($dokumen_terunggah[$label])): ?>
-                  <span class="fr-status">Sudah diunggah: <?php echo htmlspecialchars($dokumen_terunggah[$label]['nama_file_asli'], ENT_QUOTES, 'UTF-8'); ?> — <a href="<?php echo base_url('pengajuan-pbg/berkas/dokumen/' . (int) $dokumen_terunggah[$label]['id']); ?>" target="_blank" rel="noopener noreferrer">lihat</a></span>
+                  <span class="fr-status">Sudah diunggah: <?php echo htmlspecialchars($dokumen_terunggah[$label]['nama_file_asli'], ENT_QUOTES, 'UTF-8'); ?> — <a href="<?php echo base_url('pengajuan-slf/berkas/dokumen/' . (int) $dokumen_terunggah[$label]['id']); ?>" target="_blank" rel="noopener noreferrer">lihat</a></span>
                 <?php endif; ?>
                 <input type="file" name="dokumen[<?php echo $slug; ?>]" accept=".jpg,.jpeg,.png,.pdf">
               </div>
@@ -529,7 +529,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div class="wiz-step" data-step="9">
           <h3>Siap Dikirim</h3>
           <p class="wiz-desc">Periksa kembali tiap langkah lewat tombol Kembali kalau masih ada yang perlu diubah. Setelah dikirim, status permohonan berubah menjadi <strong>Verifikasi Kelengkapan Dokumen</strong> dan nomor registrasi diterbitkan otomatis.</p>
-          <p class="hint" style="margin-top:0">Belum yakin datanya sudah lengkap? Gunakan tombol <strong>Simpan Sebagai Draf</strong> di bawah - permohonan bisa dilanjutkan kapan saja lewat menu Pengajuan PBG.</p>
+          <p class="hint" style="margin-top:0">Belum yakin datanya sudah lengkap? Gunakan tombol <strong>Simpan Sebagai Draf</strong> di bawah - permohonan bisa dilanjutkan kapan saja lewat menu Pengajuan SLF.</p>
         </div>
 
       </div>
