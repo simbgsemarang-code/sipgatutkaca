@@ -8,6 +8,48 @@ body {
     radial-gradient(circle at 98% 28%, rgba(30,134,163,.08), transparent 26rem);
 }
 
+/* Bright, layered canvas for every service and dashboard page (not Beranda). */
+html[data-theme="light"] body.is-inner-page {
+  --bg: #f7f5f0;
+  --bg-alt: #eee9df;
+  --surface: rgba(255,255,255,.92);
+  --surface-hi: #fffaf0;
+  --input: #fffdfa;
+  --line: rgba(152,112,43,.22);
+  background-color: #f7f5f0;
+  background-image:
+    radial-gradient(ellipse 52rem 31rem at -8% -12%, rgba(223,184,104,.25), transparent 66%),
+    radial-gradient(ellipse 48rem 32rem at 108% 5%, rgba(82,157,180,.16), transparent 63%),
+    linear-gradient(135deg, #faf9f5 0%, #f5f0e7 48%, #eef3f3 100%);
+  background-attachment: fixed;
+}
+html[data-theme="light"] .is-inner-page .dash-main,
+html[data-theme="light"] .is-inner-page main {
+  position: relative;
+}
+html[data-theme="light"] .is-inner-page .dash-main::before,
+html[data-theme="light"] .is-inner-page main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(160,124,45,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(160,124,45,.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(to bottom, #000, transparent 78%);
+}
+html[data-theme="light"] .is-inner-page .info-card,
+html[data-theme="light"] .is-inner-page .form-card,
+html[data-theme="light"] .is-inner-page .card,
+html[data-theme="light"] .is-inner-page .user-menu-panel,
+html[data-theme="light"] .is-inner-page .theme-panel {
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(12px);
+}
+html[data-theme="light"] .is-inner-page .dash-sidebar {
+  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,244,235,.95));
+}
+
 ::selection { background: var(--gold-500, #a57e2c); color: #fff; }
 :focus-visible { outline: 3px solid rgba(201,162,75,.65) !important; outline-offset: 3px; }
 
@@ -59,6 +101,10 @@ input:focus, select:focus, textarea:focus {
   .dash-sidebar { box-shadow: 0 8px 18px rgba(21,42,59,.04); }
   .dash-sidebar a { border-radius: 0; margin-right: 0; }
   .card:hover { transform: none; }
+}
+
+@media (max-width: 860px) {
+  html[data-theme="light"] body.is-inner-page { background-attachment: scroll; }
 }
 
 @media (prefers-reduced-motion: reduce) {

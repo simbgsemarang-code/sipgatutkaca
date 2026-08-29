@@ -25,6 +25,13 @@ class MY_Output extends CI_Output
 			$output = preg_replace('/<\/head>/i', $stylesheet.'</head>', $output, 1);
 		}
 
+		// Beranda retains its photographic hero treatment; the remaining pages
+		// receive the brighter application-shell background from the shared CSS.
+		if (is_string($output) && stripos($output, '<title>Beranda') === FALSE)
+		{
+			$output = preg_replace('/<body(\s*)>/i', '<body$1 class="is-inner-page">', $output, 1);
+		}
+
 		parent::_display($output);
 	}
 }
