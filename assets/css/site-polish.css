@@ -103,6 +103,12 @@ input:focus, select:focus, textarea:focus {
   .card:hover { transform: none; }
 }
 
+/* Footer sits on a permanently dark panel, so its brand block must stay
+   light regardless of theme (the default var(--muted) is near-black on
+   the light theme and becomes unreadable there). */
+footer .brand .brand-name { color: #E9CE8A; }
+footer .brand .brand-sub  { color: #C6D2DC; }
+
 @media (max-width: 860px) {
   html[data-theme="light"] body.is-inner-page { background-attachment: scroll; }
 }
