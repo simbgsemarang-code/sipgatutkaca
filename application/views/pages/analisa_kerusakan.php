@@ -92,13 +92,16 @@ input:focus,select:focus,textarea:focus{outline:1px solid var(--gold-500);border
 .stat span{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 
 /* ===== PETA ===== */
-.map-filter{position:absolute;top:16px;left:16px;right:16px;z-index:1000;display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:16px;align-items:end;
+.map-filter{position:absolute;top:16px;left:16px;right:16px;z-index:20;display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:16px;align-items:end;
   background:rgba(255,255,255,.5);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
   border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:16px 22px;box-shadow:0 12px 34px rgba(21,42,59,.20)}
 .map-filter label{color:var(--gold-300)}
 html[data-theme="dark"] .map-filter{background:rgba(10,26,40,.5);border-color:rgba(201,162,75,.35)}
 #btnReset{padding:13px 30px}
-.map-shell{position:relative;width:94vw;margin-left:calc(50% - 47vw);margin-right:calc(50% - 47vw);border:1px solid var(--line);box-shadow:0 18px 50px var(--shadow);border-radius:22px;overflow:hidden}
+/* z-index:0 mengurung seluruh isi peta (termasuk panel filter yang
+   melayang) dalam satu stacking context di bawah navbar fixed (z-index
+   60) — supaya panel tidak menembus/menimpa header saat halaman digulir. */
+.map-shell{position:relative;z-index:0;width:94vw;margin-left:calc(50% - 47vw);margin-right:calc(50% - 47vw);border:1px solid var(--line);box-shadow:0 18px 50px var(--shadow);border-radius:22px;overflow:hidden}
 #map{height:640px;width:100%;background:#dfeee2;z-index:1}
 .legend{background:#fff;color:#223;padding:12px 16px;font-size:.78rem;line-height:2;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 .legend b{display:block;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.68rem;margin-bottom:4px;color:#8a6a1c}
