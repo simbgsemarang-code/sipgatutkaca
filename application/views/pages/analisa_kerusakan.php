@@ -231,10 +231,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <div class="page-breadcrumb reveal">
       <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>Analisa Kerusakan
     </div>
-    <div class="reveal" style="max-width:760px">
+    <div class="reveal" style="max-width:760px;margin:0 auto;text-align:center">
       <p class="eyebrow">Analisa Kerusakan</p>
-      <h2>Pantauan Kondisi Bangunan Milik Daerah</h2>
-      <p class="section-lead">Sebaran dan kondisi bangunan gedung milik Pemerintah Kabupaten Cilacap berdasarkan hasil pendataan — dapat disaring per kecamatan dan tingkat kerusakan, lengkap dengan titik koordinat pada peta.</p>
+      <h2 style="margin:0 auto">ANALISIS KERUSAKAN</h2>
     </div>
 
     <div class="map-shell reveal" style="margin-top:52px">
