@@ -190,7 +190,13 @@ class Pengajuan_pbg extends CI_Controller {
 		}
 	}
 
-	/** Daftar Permohonan - semua permohonan yang pernah diinput staf PU (loket bersama, tidak disaring per staf). */
+	/**
+	 * Daftar Permohonan - HANYA yang diinput staf PU yang sedang login
+	 * (lihat _milik_saya()) - tiap akun PU cuma melihat & mengelola
+	 * input miliknya sendiri, tidak tercampur punya staf PU lain.
+	 * Sebelumnya loket bersama (semua staf PU melihat semua input) -
+	 * diubah karena PU eksplisit minta dibatasi per staf.
+	 */
 	public function index()
 	{
 		// Dikelompokkan per id_pengajuan supaya tabel daftar bisa
@@ -198,13 +204,17 @@ class Pengajuan_pbg extends CI_Controller {
 		// tanpa query terpisah per baris - lihat
 		// Tpa_pengajuan_pbg::_hitung_status_keseluruhan() untuk
 		// catatan lengkap soal tabel pengajuan_pbg_persetujuan_tpa.
+		// Sengaja TIDAK disaring dulu ke id milik sendiri di sini (query
+		// terpisah, murah) - penyaringan sebenarnya tetap di $data['daftar']
+		// di bawah, baris persetujuan milik permohonan orang lain yang
+		// ikut termuat di sini cukup tidak pernah dipakai/dirender.
 		$persetujuan_per_id = array();
 		foreach ($this->db->get('pengajuan_pbg_persetujuan_tpa')->result_array() as $p)
 		{
 			$persetujuan_per_id[$p['id_pengajuan']][$p['bidang']] = $p['status'];
 		}
 
-		$data['daftar']             = $this->db->order_by('created_at', 'DESC')->get('pengajuan_pbg')->result_array();
+		$data['daftar']             = $this->db->where('dibuat_oleh', (int) $this->session->userdata('user_id'))->order_by('created_at', 'DESC')->get('pengajuan_pbg')->result_array();
 		$data['persetujuan_per_id'] = $persetujuan_per_id;
 		$data['sukses']             = $this->session->flashdata('sukses');
 		$data['error']              = $this->session->flashdata('error');
@@ -257,7 +267,7 @@ class Pengajuan_pbg extends CI_Controller {
 				->get()->row_array()
 			: NULL;
 
-		if ($row === NULL)
+		if ($row === NULL || ! $this->_milik_saya($row))
 		{
 			show_404();
 			return;
@@ -292,7 +302,7 @@ class Pengajuan_pbg extends CI_Controller {
 		$id  = (int) $id;
 		$row = $id > 0 ? $this->db->where('id', $id)->get('pengajuan_pbg')->row_array() : NULL;
 
-		if ($row === NULL)
+		if ($row === NULL || ! $this->_milik_saya($row))
 		{
 			show_404();
 			return;
@@ -319,7 +329,7 @@ class Pengajuan_pbg extends CI_Controller {
 		$id  = (int) $id;
 		$row = $id > 0 ? $this->db->where('id', $id)->get('pengajuan_pbg')->row_array() : NULL;
 
-		if ($row === NULL)
+		if ($row === NULL || ! $this->_milik_saya($row))
 		{
 			show_404();
 			return;
@@ -347,7 +357,7 @@ class Pengajuan_pbg extends CI_Controller {
 		$id  = (int) $id;
 		$row = $id > 0 ? $this->db->where('id', $id)->get('pengajuan_pbg')->row_array() : NULL;
 
-		if ($row === NULL)
+		if ($row === NULL || ! $this->_milik_saya($row))
 		{
 			show_404();
 			return;
@@ -746,13 +756,22 @@ class Pengajuan_pbg extends CI_Controller {
 				show_404();
 				return;
 			}
+			// $dok sendiri tidak punya dibuat_oleh - ambil induknya dulu
+			// supaya tetap bisa dicek _milik_saya() (jangan sampai staf PU
+			// lain bisa buka dokumen lewat tebak-tebak id_dokumen).
+			$induk = $this->db->where('id', $dok['id_pengajuan'])->get('pengajuan_pbg')->row_array();
+			if ($induk === NULL || ! $this->_milik_saya($induk))
+			{
+				show_404();
+				return;
+			}
 			$path       = APPPATH . 'uploads/pengajuan_pbg/' . $dok['path_file'];
 			$nama_unduh = $dok['nama_file_asli'];
 		}
 		elseif (in_array($tipe, $kolom_valid, TRUE))
 		{
 			$row = $this->db->where('id', $id)->get('pengajuan_pbg')->row_array();
-			if ($row === NULL || empty($row[$tipe]))
+			if ($row === NULL || empty($row[$tipe]) || ! $this->_milik_saya($row))
 			{
 				show_404();
 				return;
@@ -782,13 +801,27 @@ class Pengajuan_pbg extends CI_Controller {
 		echo read_file($path);
 	}
 
+	/**
+	 * $row (hasil query pengajuan_pbg, kolom dibuat_oleh wajib ikut
+	 * ter-SELECT) ini benar diinput akun PU yang sedang login? Dipakai
+	 * di semua endpoint controller ini supaya 1 staf PU tidak bisa
+	 * melihat/mengubah/mengunduh berkas permohonan yang diinput staf PU
+	 * lain lewat tebak-tebak URL/id - lihat catatan index().
+	 */
+	private function _milik_saya($row)
+	{
+		return ((int) $row['dibuat_oleh'] === (int) $this->session->userdata('user_id'));
+	}
+
 	private function _ambil_draf($id)
 	{
 		if ($id <= 0)
 		{
 			return NULL;
 		}
-		return $this->db->where('id', $id)->where('status', 'draf')->get('pengajuan_pbg')->row_array();
+		return $this->db->where('id', $id)->where('status', 'draf')
+			->where('dibuat_oleh', (int) $this->session->userdata('user_id'))
+			->get('pengajuan_pbg')->row_array();
 	}
 
 	/**
@@ -798,7 +831,8 @@ class Pengajuan_pbg extends CI_Controller {
 	 * PU/pemohon mau mengedit sendiri tanpa diminta selama masih
 	 * verifikasi_dokumen. TIDAK termasuk 'draf' (pakai tambah() -
 	 * wizard penuh), 'menunggu_jadwal_konsultasi', atau 'disetujui_tpa'
-	 * (sudah lewat tahap dokumen/terkunci).
+	 * (sudah lewat tahap dokumen/terkunci). Dibatasi ke milik akun PU
+	 * yang login sendiri - lihat _milik_saya().
 	 */
 	private function _ambil_bisa_diedit($id)
 	{
@@ -807,6 +841,7 @@ class Pengajuan_pbg extends CI_Controller {
 			return NULL;
 		}
 		return $this->db->where('id', $id)
+			->where('dibuat_oleh', (int) $this->session->userdata('user_id'))
 			->where_in('status', array('verifikasi_dokumen', 'perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'))
 			->get('pengajuan_pbg')->row_array();
 	}
