@@ -257,6 +257,16 @@
         color: #E4C87B
       }
 
+      /* Tombol Dashboard/Masuk di kop duduk di atas foto hero yang
+         transparan sebelum discroll (lihat "header{}" di atas) -
+         .btn-ghost polos (background transparan) nyaris tak
+         kelihatan di sana. Kasih latar solid (sama seperti
+         header.scrolled) KHUSUS di kop, tanpa mengubah .btn-ghost
+         di tempat lain. */
+      .auth-actions .btn-ghost {
+        background: var(--head-bg)
+      }
+
       .btn-sm {
         padding: 11px 26px;
         font-size: .72rem;

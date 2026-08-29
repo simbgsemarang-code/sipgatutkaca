@@ -87,6 +87,8 @@ h1 em{font-style:normal;color:#E4C87B}
 .tim-btn .tim-label-box b{font-family:var(--display);font-weight:400;font-size:1.15rem;letter-spacing:.06em;color:#223842;display:block;margin:0}
 .btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
+/* Tombol Dashboard/Masuk di kop transparan di atas hero sebelum discroll - kasih latar solid (sama seperti header.scrolled) supaya tetap kelihatan. */
+.auth-actions .btn-ghost{background:var(--head-bg)}
 .hero-actions{display:flex;gap:18px;flex-wrap:wrap}
 
 /* ===== SECTION ===== */

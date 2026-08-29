@@ -76,6 +76,8 @@ h1 em{font-style:normal;color:#E4C87B}
 .btn-gold:hover{filter:brightness(1.08);transform:translateY(-2px)}
 .btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
+/* Tombol Dashboard/Masuk di kop transparan di atas hero sebelum discroll - kasih latar solid (sama seperti header.scrolled) supaya tetap kelihatan. */
+.auth-actions .btn-ghost{background:var(--head-bg)}
 .btn-sm{padding:11px 26px;font-size:.72rem;letter-spacing:.2em}
 
 section{padding:100px 0}
