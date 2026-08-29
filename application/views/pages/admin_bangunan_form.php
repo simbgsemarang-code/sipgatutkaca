@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pengajuan PBG — Panel Admin · SIP Gatutkaca</title>
+<title>Tambah / Ubah Bangunan — Panel Admin · SIP Gatutkaca</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -124,7 +124,20 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   .foot-grid{grid-template-columns:1fr}
   table{display:block;overflow-x:auto}
 }
+.btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
+.btn-gold:hover{filter:brightness(1.08)}
+.form-card{background:var(--surface);border:1px solid var(--line);padding:34px 38px;max-width:760px;margin-top:30px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.fld{margin-bottom:18px}
+.fld label{display:block;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:12px 14px;font-family:var(--body);font-size:.92rem}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+.fld .req{color:#E0526B}
+#pickMap{height:300px;width:100%;border:1px solid var(--line);margin-top:6px;background:#dfeee2}
+.alertbox{padding:14px 18px;margin-top:24px;font-size:.88rem;border:1px solid}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 </head>
 <body>
 
@@ -166,7 +179,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="6.5" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.4"/><path d="M1.8 15c0-2.6 2.1-4.4 4.7-4.4S11.2 12.4 11.2 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12.4 4.2a2.3 2.3 0 010 4.4M13.6 14.8c0-2.1-1-3.7-2.6-4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Kelola Pengguna
       </a>
-      <a href="<?php echo base_url('admin/pengajuan'); ?>" class="active">
+      <a href="<?php echo base_url('admin/pengajuan'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Pengajuan PBG
       </a>
@@ -174,7 +187,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 2.5h8L14.5 5.5V15a.5.5 0 01-.5.5H3.5a.5.5 0 01-.5-.5V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 8.6l1.7 1.7L11 6.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Pengajuan SLF
       </a>
-      <a href="<?php echo base_url('admin/bangunan'); ?>">
+      <a href="<?php echo base_url('admin/bangunan'); ?>" class="active">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 1.5c-2.9 0-5 2.1-5 4.9 0 3.4 5 10.1 5 10.1s5-6.7 5-10.1c0-2.8-2.1-4.9-5-4.9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="9" cy="6.4" r="1.9" stroke="currentColor" stroke-width="1.4"/></svg>
         Sebaran Bangunan
       </a>
@@ -187,68 +200,101 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </nav>
   </aside>
   <div class="dash-main">
+<?php
+$edit = ($row !== NULL);
+$v = function ($kolom, $default = '') use ($row, $old) {
+  if (isset($old[$kolom])) return $old[$kolom];
+  if ($row !== NULL && isset($row[$kolom]) && $row[$kolom] !== NULL) return $row[$kolom];
+  return $default;
+};
+$lat0 = $v('latitude', '-7.53');
+$lng0 = $v('longitude', '108.99');
+?>
 <section style="padding-top:100px">
   <div class="dash-wrap">
-    <div>
-      <p class="eyebrow">Panel Admin</p>
-      <h2>Pengajuan PBG</h2>
-      <p style="color:var(--muted);max-width:64ch;margin-top:14px">Seluruh permohonan PBG yang diinput staf PU di loket. Halaman ini hanya untuk pemantauan — penambahan, perbaikan, dan penghapusan permohonan tetap dilakukan lewat Portal PU.</p>
-    </div>
+    <p class="eyebrow"><a href="<?php echo base_url('admin/bangunan'); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Daftar Sebaran Bangunan</a></p>
+    <h2><?php echo $edit ? 'Ubah Bangunan' : 'Tambah Bangunan'; ?></h2>
 
-    <div class="toolbar">
-      <p class="eyebrow" style="margin-bottom:0">Total: <?php echo count($daftar); ?> permohonan</p>
-      <input type="search" id="cariPermohonan" placeholder="Cari nama pemohon, PU, atau lokasi…">
-    </div>
+    <?php if (!empty($error)): ?>
+      <div class="alertbox" style="border-color:#E0526B;background:rgba(224,82,107,.12);color:#E0526B"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+    <?php endif; ?>
 
-    <table id="tabelPermohonan">
-      <thead><tr><th>Nama Pemohon</th><th>No. Registrasi</th><th>Diinput Oleh</th><th>Lokasi Bangunan</th><th>Status</th><th>Diinput</th><th>Aksi</th></tr></thead>
-      <tbody>
-        <?php if (empty($daftar)): ?>
-          <tr><td colspan="7">Belum ada permohonan PBG yang diinput.</td></tr>
-        <?php else: ?>
-          <?php foreach ($daftar as $r): ?>
-            <tr>
-              <td><?php echo htmlspecialchars($r['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></td>
-              <td class="no-reg"><?php echo !empty($r['no_registrasi']) ? htmlspecialchars($r['no_registrasi'], ENT_QUOTES, 'UTF-8') : 'Belum Terdefinisi'; ?></td>
-              <td><?php echo !empty($r['nama_pembuat']) ? htmlspecialchars($r['nama_pembuat'], ENT_QUOTES, 'UTF-8') : '—'; ?></td>
-              <td><?php echo !empty($r['lokasi_alamat']) ? htmlspecialchars(mb_strimwidth($r['lokasi_alamat'], 0, 60, '…'), ENT_QUOTES, 'UTF-8') : '—'; ?></td>
-              <td>
-                <?php $label_status = array('draf' => 'Draf', 'verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi', 'disetujui_tpa' => 'Disetujui Semua TPA'); ?>
-                <span class="tag tag-<?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$r['status']]) ? $label_status[$r['status']] : $r['status'], ENT_QUOTES, 'UTF-8'); ?></span>
-                <?php if (in_array($r['status'], array('verifikasi_dokumen', 'perbaikan_dokumen'), TRUE)): ?>
-                  <?php
-                  $singkat_bidang  = array('tpa_arsitek' => 'Arsitek', 'tpa_struktur' => 'Struktur', 'tpa_mep' => 'MEP');
-                  $sudah_per_bidang = isset($persetujuan_per_id[$r['id']]) ? $persetujuan_per_id[$r['id']] : array();
-                  $bagian = array();
-                  foreach ($singkat_bidang as $kode_bidang => $nama_singkat)
-                  {
-                    if (! isset($sudah_per_bidang[$kode_bidang]))
-                    {
-                      $ket = 'Menunggu';
-                    }
-                    elseif ($sudah_per_bidang[$kode_bidang] === 'disetujui')
-                    {
-                      $ket = 'Disetujui';
-                    }
-                    else
-                    {
-                      $ket = 'Perbaikan';
-                    }
-                    $bagian[] = $nama_singkat . ': ' . $ket;
-                  }
-                  ?>
-                  <div class="bidang-progres"><?php echo htmlspecialchars(implode(' · ', $bagian), ENT_QUOTES, 'UTF-8'); ?></div>
-                <?php endif; ?>
-              </td>
-              <td><?php echo htmlspecialchars(date('d M Y', strtotime($r['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
-              <td>
-                <a href="<?php echo base_url('admin/pengajuan-lihat/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Lihat</a>
-              </td>
-            </tr>
-          <?php endforeach; ?>
-        <?php endif; ?>
-      </tbody>
-    </table>
+    <form class="form-card" method="post" action="<?php echo base_url('admin/bangunan-simpan' . ($edit ? '/' . (int) $row['id'] : '')); ?>" id="fbangunan">
+      <div class="fld">
+        <label>Nama Bangunan <span class="req">*</span></label>
+        <input type="text" name="nama_bangunan" required value="<?php echo htmlspecialchars($v('nama_bangunan'), ENT_QUOTES, 'UTF-8'); ?>">
+      </div>
+
+      <div class="grid2">
+        <div class="fld">
+          <label>OPD</label>
+          <input type="text" name="opd" value="<?php echo htmlspecialchars($v('opd'), ENT_QUOTES, 'UTF-8'); ?>">
+        </div>
+        <div class="fld">
+          <label>Unit</label>
+          <input type="text" name="unit" value="<?php echo htmlspecialchars($v('unit'), ENT_QUOTES, 'UTF-8'); ?>">
+        </div>
+        <div class="fld">
+          <label>Institusi</label>
+          <input type="text" name="institusi" value="<?php echo htmlspecialchars($v('institusi'), ENT_QUOTES, 'UTF-8'); ?>">
+        </div>
+        <div class="fld">
+          <label>Fungsi Bangunan</label>
+          <input type="text" name="fungsi" placeholder="mis. Perkantoran / Pendidikan / Hunian" value="<?php echo htmlspecialchars($v('fungsi'), ENT_QUOTES, 'UTF-8'); ?>">
+        </div>
+        <div class="fld">
+          <label>Jumlah Lantai</label>
+          <input type="number" name="jumlah_lantai" min="0" value="<?php echo htmlspecialchars($v('jumlah_lantai'), ENT_QUOTES, 'UTF-8'); ?>">
+        </div>
+        <div class="fld">
+          <label>Kondisi <span class="req">*</span></label>
+          <select name="kondisi" required>
+            <?php $kon_now = (string) $v('kondisi', '1'); ?>
+            <?php foreach ($kondisi_label as $kk => $vv): ?>
+              <option value="<?php echo $kk; ?>" <?php echo $kon_now === (string) $kk ? 'selected' : ''; ?>><?php echo $vv; ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="fld">
+          <label>Kecamatan</label>
+          <input type="text" name="kecamatan" value="<?php echo htmlspecialchars($v('kecamatan'), ENT_QUOTES, 'UTF-8'); ?>">
+        </div>
+        <div class="fld">
+          <label>Kelurahan / Desa</label>
+          <input type="text" name="kelurahan" value="<?php echo htmlspecialchars($v('kelurahan'), ENT_QUOTES, 'UTF-8'); ?>">
+        </div>
+      </div>
+
+      <div class="fld">
+        <label>Alamat</label>
+        <textarea name="alamat" rows="2"><?php echo htmlspecialchars($v('alamat'), ENT_QUOTES, 'UTF-8'); ?></textarea>
+      </div>
+
+      <div class="fld">
+        <label>URL Foto <span style="text-transform:none;letter-spacing:0;color:var(--muted)">(opsional)</span></label>
+        <input type="url" name="foto" placeholder="https://…" value="<?php echo htmlspecialchars($v('foto'), ENT_QUOTES, 'UTF-8'); ?>">
+      </div>
+
+      <div class="grid2">
+        <div class="fld">
+          <label>Latitude <span class="req">*</span></label>
+          <input type="text" id="f-lat" name="latitude" required value="<?php echo htmlspecialchars($lat0, ENT_QUOTES, 'UTF-8'); ?>">
+        </div>
+        <div class="fld">
+          <label>Longitude <span class="req">*</span></label>
+          <input type="text" id="f-lng" name="longitude" required value="<?php echo htmlspecialchars($lng0, ENT_QUOTES, 'UTF-8'); ?>">
+        </div>
+      </div>
+      <div class="fld">
+        <label>Titik di Peta <span style="text-transform:none;letter-spacing:0;color:var(--muted)">— klik peta atau seret penanda untuk mengatur koordinat</span></label>
+        <div id="pickMap"></div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+        <button type="submit" class="btn btn-gold btn-sm"><?php echo $edit ? 'Simpan Perubahan' : 'Tambah ke Peta'; ?></button>
+        <a href="<?php echo base_url('admin/bangunan'); ?>" class="btn btn-ghost btn-sm">Batal</a>
+      </div>
+    </form>
   </div>
 </section>
   </div>
@@ -338,15 +384,28 @@ document.addEventListener('click',function(e){
 });
 var bar=document.getElementById('topbar');
 addEventListener('scroll',function(){bar.classList.toggle('scrolled',scrollY>40)},{passive:true});
+</script>
 
-var input=document.getElementById('cariPermohonan');
-var baris=document.querySelectorAll('#tabelPermohonan tbody tr');
-input.addEventListener('input',function(){
-  var q=input.value.trim().toLowerCase();
-  baris.forEach(function(tr){
-    tr.style.display = tr.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
-  });
-});
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  var latEl=document.getElementById('f-lat'), lngEl=document.getElementById('f-lng');
+  function val(el,fb){ var n=parseFloat(el.value); return isFinite(n)?n:fb; }
+  var lat=val(latEl,-7.53), lng=val(lngEl,108.99);
+  var map=L.map('pickMap').setView([lat,lng], (latEl.value&&lngEl.value)?15:10);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
+  var marker=L.marker([lat,lng],{draggable:true}).addTo(map);
+  function setFields(ll){ latEl.value=ll.lat.toFixed(6); lngEl.value=ll.lng.toFixed(6); }
+  marker.on('dragend',function(){ setFields(marker.getLatLng()); });
+  map.on('click',function(e){ marker.setLatLng(e.latlng); setFields(e.latlng); });
+  function syncFromFields(){
+    var la=parseFloat(latEl.value), ln=parseFloat(lngEl.value);
+    if(isFinite(la)&&isFinite(ln)){ marker.setLatLng([la,ln]); map.panTo([la,ln]); }
+  }
+  latEl.addEventListener('change',syncFromFields);
+  lngEl.addEventListener('change',syncFromFields);
+  setTimeout(function(){ map.invalidateSize(); },200);
+})();
 </script>
 </body>
 </html>

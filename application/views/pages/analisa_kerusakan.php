@@ -290,6 +290,17 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="gis-data.js"></script>
 <script>
+// Titik bangunan diambil dari endpoint yang dikelola admin
+// (Admin::bangunan* -> tabel bangunan_gis). gis-data.js tetap dipakai
+// untuk layer referensi (batas kecamatan/kabupaten/jalan). Kalau
+// endpoint gagal, jatuh ke gisBangunan bawaan gis-data.js.
+fetch("<?php echo base_url('gis/bangunan'); ?>", {headers:{"Accept":"application/json"}})
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(gj){ if(gj && gj.features) window.gisBangunan = gj; })
+  .catch(function(){})
+  .then(bootPetaAnalisa);
+
+function bootPetaAnalisa(){
 (function(){
   /* ============ KONDISI: LABEL & WARNA ============ */
   var KONDISI={
@@ -485,6 +496,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   map.whenReady(bingkaiSemua);
   setTimeout(bingkaiSemua,600);
 })();
+}
 </script>
 
 <footer>

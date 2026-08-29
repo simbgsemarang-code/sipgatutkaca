@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pengajuan PBG — Panel Admin · SIP Gatutkaca</title>
+<title>Sebaran Bangunan — Panel Admin · SIP Gatutkaca</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,8 +73,14 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .btn{display:inline-block;padding:15px 34px;font-size:.78rem;letter-spacing:.26em;text-transform:uppercase;transition:.3s;cursor:pointer;border:none;font-family:var(--body)}
 .btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
+.btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
+.btn-gold:hover{filter:brightness(1.08)}
 .btn-sm{padding:11px 26px;font-size:.72rem;letter-spacing:.2em}
 .btn-xs{padding:8px 16px;font-size:.68rem;letter-spacing:.12em}
+.aksi-cell{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field label{display:block}
+.field input,.field select{background:var(--input);border:1px solid var(--line);color:var(--text);padding:11px 14px;font-family:var(--body);font-size:.88rem}
+.field input:focus,.field select:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
 
 section{padding:60px 0 100px}
 .eyebrow{font-size:.7rem;letter-spacing:.38em;text-transform:uppercase;color:var(--gold-500);margin-bottom:14px}
@@ -166,7 +172,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="6.5" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.4"/><path d="M1.8 15c0-2.6 2.1-4.4 4.7-4.4S11.2 12.4 11.2 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12.4 4.2a2.3 2.3 0 010 4.4M13.6 14.8c0-2.1-1-3.7-2.6-4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Kelola Pengguna
       </a>
-      <a href="<?php echo base_url('admin/pengajuan'); ?>" class="active">
+      <a href="<?php echo base_url('admin/pengajuan'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Pengajuan PBG
       </a>
@@ -174,7 +180,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 2.5h8L14.5 5.5V15a.5.5 0 01-.5.5H3.5a.5.5 0 01-.5-.5V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 8.6l1.7 1.7L11 6.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Pengajuan SLF
       </a>
-      <a href="<?php echo base_url('admin/bangunan'); ?>">
+      <a href="<?php echo base_url('admin/bangunan'); ?>" class="active">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 1.5c-2.9 0-5 2.1-5 4.9 0 3.4 5 10.1 5 10.1s5-6.7 5-10.1c0-2.8-2.1-4.9-5-4.9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="9" cy="6.4" r="1.9" stroke="currentColor" stroke-width="1.4"/></svg>
         Sebaran Bangunan
       </a>
@@ -189,66 +195,95 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-main">
 <section style="padding-top:100px">
   <div class="dash-wrap">
-    <div>
-      <p class="eyebrow">Panel Admin</p>
-      <h2>Pengajuan PBG</h2>
-      <p style="color:var(--muted);max-width:64ch;margin-top:14px">Seluruh permohonan PBG yang diinput staf PU di loket. Halaman ini hanya untuk pemantauan — penambahan, perbaikan, dan penghapusan permohonan tetap dilakukan lewat Portal PU.</p>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap">
+      <div>
+        <p class="eyebrow">Panel Admin</p>
+        <h2>Sebaran Bangunan</h2>
+        <p style="color:var(--muted);max-width:70ch;margin-top:14px">Titik bangunan milik daerah yang tampil di peta <a href="<?php echo base_url('analisa-kerusakan'); ?>" style="color:var(--gold-300);text-decoration:underline">Analisa Kerusakan</a> &amp; <a href="<?php echo base_url('spasial'); ?>" style="color:var(--gold-300);text-decoration:underline">Spasial</a>. Tambah, ubah, atau hapus di sini — perubahan langsung tampil di peta.</p>
+      </div>
+      <a href="<?php echo base_url('admin/bangunan-tambah'); ?>" class="btn btn-gold btn-sm" style="flex:0 0 auto">+ Tambah Bangunan</a>
     </div>
 
-    <div class="toolbar">
-      <p class="eyebrow" style="margin-bottom:0">Total: <?php echo count($daftar); ?> permohonan</p>
-      <input type="search" id="cariPermohonan" placeholder="Cari nama pemohon, PU, atau lokasi…">
-    </div>
+    <?php if (!empty($sukses)): ?>
+      <div class="alert alert-ok" style="margin-top:28px;padding:14px 18px;border:1px solid #2EA84F;background:rgba(46,168,79,.12);color:#2EA84F;font-size:.88rem"><?php echo htmlspecialchars($sukses, ENT_QUOTES, 'UTF-8'); ?></div>
+    <?php endif; ?>
+    <?php if (!empty($error)): ?>
+      <div class="alert alert-err" style="margin-top:28px;padding:14px 18px;border:1px solid #E0526B;background:rgba(224,82,107,.12);color:#E0526B;font-size:.88rem"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+    <?php endif; ?>
 
-    <table id="tabelPermohonan">
-      <thead><tr><th>Nama Pemohon</th><th>No. Registrasi</th><th>Diinput Oleh</th><th>Lokasi Bangunan</th><th>Status</th><th>Diinput</th><th>Aksi</th></tr></thead>
+    <form method="get" action="<?php echo base_url('admin/bangunan'); ?>" class="toolbar" style="align-items:end">
+      <div class="field" style="margin:0;flex:1 1 240px">
+        <label style="display:block;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Cari</label>
+        <input type="search" name="q" value="<?php echo htmlspecialchars($q, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Nama bangunan, OPD, alamat…" style="width:100%">
+      </div>
+      <div class="field" style="margin:0">
+        <label style="display:block;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Kecamatan</label>
+        <select name="kec" style="min-width:170px;background:var(--input);border:1px solid var(--line);color:var(--text);padding:11px 14px;font-family:var(--body)">
+          <option value="">— Semua —</option>
+          <?php foreach ($daftar_kec as $k): ?>
+            <option value="<?php echo htmlspecialchars($k['kecamatan'], ENT_QUOTES, 'UTF-8'); ?>" <?php echo $kec === $k['kecamatan'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($k['kecamatan'], ENT_QUOTES, 'UTF-8'); ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="field" style="margin:0">
+        <label style="display:block;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Kondisi</label>
+        <select name="kondisi" style="min-width:150px;background:var(--input);border:1px solid var(--line);color:var(--text);padding:11px 14px;font-family:var(--body)">
+          <option value="">— Semua —</option>
+          <?php foreach ($kondisi_label as $kk => $vv): ?>
+            <option value="<?php echo $kk; ?>" <?php echo $kondisi === (string) $kk ? 'selected' : ''; ?>><?php echo $vv; ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <button class="btn btn-ghost btn-sm" type="submit">Terapkan</button>
+      <?php if ($q !== '' || $kec !== '' || $kondisi !== ''): ?>
+        <a class="btn btn-ghost btn-sm" href="<?php echo base_url('admin/bangunan'); ?>">Reset</a>
+      <?php endif; ?>
+    </form>
+
+    <p class="eyebrow" style="margin-top:20px;margin-bottom:0"><?php echo (int) $total; ?> bangunan<?php echo ($q !== '' || $kec !== '' || $kondisi !== '') ? ' (hasil saring)' : ''; ?> · halaman <?php echo (int) $page; ?>/<?php echo (int) $total_page; ?></p>
+
+    <table>
+      <thead><tr><th>Nama Bangunan</th><th>OPD / Unit</th><th>Kecamatan / Kelurahan</th><th>Fungsi</th><th>Kondisi</th><th>Koordinat</th><th>Aksi</th></tr></thead>
       <tbody>
         <?php if (empty($daftar)): ?>
-          <tr><td colspan="7">Belum ada permohonan PBG yang diinput.</td></tr>
+          <tr><td colspan="7">Tidak ada bangunan yang cocok.</td></tr>
         <?php else: ?>
+          <?php $warna_kondisi = array('1' => '#2EA84F', '2' => '#F2C230', '3' => '#D9822B', '4' => '#C0392B'); ?>
           <?php foreach ($daftar as $r): ?>
             <tr>
-              <td><?php echo htmlspecialchars($r['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></td>
-              <td class="no-reg"><?php echo !empty($r['no_registrasi']) ? htmlspecialchars($r['no_registrasi'], ENT_QUOTES, 'UTF-8') : 'Belum Terdefinisi'; ?></td>
-              <td><?php echo !empty($r['nama_pembuat']) ? htmlspecialchars($r['nama_pembuat'], ENT_QUOTES, 'UTF-8') : '—'; ?></td>
-              <td><?php echo !empty($r['lokasi_alamat']) ? htmlspecialchars(mb_strimwidth($r['lokasi_alamat'], 0, 60, '…'), ENT_QUOTES, 'UTF-8') : '—'; ?></td>
-              <td>
-                <?php $label_status = array('draf' => 'Draf', 'verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi', 'disetujui_tpa' => 'Disetujui Semua TPA'); ?>
-                <span class="tag tag-<?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$r['status']]) ? $label_status[$r['status']] : $r['status'], ENT_QUOTES, 'UTF-8'); ?></span>
-                <?php if (in_array($r['status'], array('verifikasi_dokumen', 'perbaikan_dokumen'), TRUE)): ?>
-                  <?php
-                  $singkat_bidang  = array('tpa_arsitek' => 'Arsitek', 'tpa_struktur' => 'Struktur', 'tpa_mep' => 'MEP');
-                  $sudah_per_bidang = isset($persetujuan_per_id[$r['id']]) ? $persetujuan_per_id[$r['id']] : array();
-                  $bagian = array();
-                  foreach ($singkat_bidang as $kode_bidang => $nama_singkat)
-                  {
-                    if (! isset($sudah_per_bidang[$kode_bidang]))
-                    {
-                      $ket = 'Menunggu';
-                    }
-                    elseif ($sudah_per_bidang[$kode_bidang] === 'disetujui')
-                    {
-                      $ket = 'Disetujui';
-                    }
-                    else
-                    {
-                      $ket = 'Perbaikan';
-                    }
-                    $bagian[] = $nama_singkat . ': ' . $ket;
-                  }
-                  ?>
-                  <div class="bidang-progres"><?php echo htmlspecialchars(implode(' · ', $bagian), ENT_QUOTES, 'UTF-8'); ?></div>
-                <?php endif; ?>
-              </td>
-              <td><?php echo htmlspecialchars(date('d M Y', strtotime($r['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
-              <td>
-                <a href="<?php echo base_url('admin/pengajuan-lihat/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Lihat</a>
+              <td><?php echo htmlspecialchars($r['nama_bangunan'], ENT_QUOTES, 'UTF-8'); ?></td>
+              <td style="font-size:.82rem"><?php echo htmlspecialchars($r['opd'] ?: '—', ENT_QUOTES, 'UTF-8'); ?></td>
+              <td style="font-size:.82rem"><?php echo htmlspecialchars(trim(($r['kecamatan'] ?: '—') . ' / ' . ($r['kelurahan'] ?: '—'), ' /'), ENT_QUOTES, 'UTF-8'); ?></td>
+              <td><?php echo htmlspecialchars($r['fungsi'] ?: '—', ENT_QUOTES, 'UTF-8'); ?></td>
+              <td><span class="tag" style="color:<?php echo $warna_kondisi[$r['kondisi']]; ?>;border-color:<?php echo $warna_kondisi[$r['kondisi']]; ?>"><?php echo htmlspecialchars(isset($kondisi_label[$r['kondisi']]) ? $kondisi_label[$r['kondisi']] : $r['kondisi'], ENT_QUOTES, 'UTF-8'); ?></span></td>
+              <td class="no-reg"><?php echo htmlspecialchars(round((float) $r['latitude'], 5) . ', ' . round((float) $r['longitude'], 5), ENT_QUOTES, 'UTF-8'); ?></td>
+              <td class="aksi-cell">
+                <a href="<?php echo base_url('admin/bangunan-ubah/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Ubah</a>
+                <form action="<?php echo base_url('admin/bangunan-hapus/' . (int) $r['id']); ?>" method="post" style="margin:0" onsubmit="return confirm('Hapus bangunan &quot;<?php echo htmlspecialchars(addslashes($r['nama_bangunan']), ENT_QUOTES, 'UTF-8'); ?>&quot; dari peta?');">
+                  <button type="submit" class="btn btn-xs" style="border:1px solid #E0526B;color:#E0526B;background:transparent;cursor:pointer">Hapus</button>
+                </form>
               </td>
             </tr>
           <?php endforeach; ?>
         <?php endif; ?>
       </tbody>
     </table>
+
+    <?php if ($total_page > 1): ?>
+      <?php
+      $qs = function ($p) use ($q, $kec, $kondisi) {
+        return '?' . http_build_query(array('q' => $q, 'kec' => $kec, 'kondisi' => $kondisi, 'page' => $p));
+      };
+      $start = max(1, $page - 3); $end = min($total_page, $page + 3);
+      ?>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:26px;align-items:center">
+        <?php if ($page > 1): ?><a class="btn btn-ghost btn-xs" href="<?php echo base_url('admin/bangunan') . $qs($page - 1); ?>">← Sebelumnya</a><?php endif; ?>
+        <?php for ($i = $start; $i <= $end; $i++): ?>
+          <a class="btn btn-xs <?php echo $i === $page ? 'btn-gold' : 'btn-ghost'; ?>" href="<?php echo base_url('admin/bangunan') . $qs($i); ?>"><?php echo $i; ?></a>
+        <?php endfor; ?>
+        <?php if ($page < $total_page): ?><a class="btn btn-ghost btn-xs" href="<?php echo base_url('admin/bangunan') . $qs($page + 1); ?>">Berikutnya →</a><?php endif; ?>
+      </div>
+    <?php endif; ?>
   </div>
 </section>
   </div>
@@ -338,15 +373,6 @@ document.addEventListener('click',function(e){
 });
 var bar=document.getElementById('topbar');
 addEventListener('scroll',function(){bar.classList.toggle('scrolled',scrollY>40)},{passive:true});
-
-var input=document.getElementById('cariPermohonan');
-var baris=document.querySelectorAll('#tabelPermohonan tbody tr');
-input.addEventListener('input',function(){
-  var q=input.value.trim().toLowerCase();
-  baris.forEach(function(tr){
-    tr.style.display = tr.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
-  });
-});
 </script>
 </body>
 </html>

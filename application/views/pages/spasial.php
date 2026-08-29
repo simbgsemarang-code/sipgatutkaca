@@ -353,6 +353,17 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
 <script src="https://cdn.jsdelivr.net/gh/gokertanrisever/leaflet-ruler@master/src/leaflet-ruler.js"></script>
 <script src="gis-data.js"></script>
 <script>
+// Titik bangunan diambil dari endpoint yang dikelola admin
+// (Admin::bangunan* -> tabel bangunan_gis). gis-data.js tetap dipakai
+// untuk layer referensi (batas kabupaten/kecamatan/jalan). Kalau
+// endpoint gagal, jatuh ke gisBangunan bawaan gis-data.js.
+fetch("<?php echo base_url('gis/bangunan'); ?>", {headers:{"Accept":"application/json"}})
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(gj){ if(gj && gj.features) window.gisBangunan = gj; })
+  .catch(function(){})
+  .then(bootPetaSpasial);
+
+function bootPetaSpasial(){
 (function(){
   /* ============ KATEGORI FUNGSI BANGUNAN & WARNA ============ */
   var FUNGSI_WARNA={
@@ -582,6 +593,7 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
     }
   });
 })();
+}
 </script>
 
 

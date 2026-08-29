@@ -392,4 +392,176 @@ class Admin extends CI_Controller {
 		$this->session->set_flashdata('sukses', 'Pengguna berhasil dihapus.');
 		redirect('admin/pengguna');
 	}
+
+	/* ================= KELOLA SEBARAN BANGUNAN (tabel bangunan_gis) =================
+	 * Data titik bangunan yang tampil di peta Analisa Kerusakan & Spasial.
+	 * Sumbernya sekarang tabel (bukan gis-data.js), disajikan ke peta lewat
+	 * Gis::bangunan(). Kolom `kondisi` ENUM '1'..'4' = Baik/Rusak Ringan/
+	 * Rusak Sedang/Rusak Berat. */
+
+	private $kondisi_label = array(
+		'1' => 'Baik',
+		'2' => 'Rusak Ringan',
+		'3' => 'Rusak Sedang',
+		'4' => 'Rusak Berat',
+	);
+
+	/** Daftar bangunan — dengan pencarian + saring kecamatan/kondisi + halaman. */
+	public function bangunan()
+	{
+		$q    = trim((string) $this->input->get('q'));
+		$kec  = trim((string) $this->input->get('kec'));
+		$kon  = trim((string) $this->input->get('kondisi'));
+		$page = max(1, (int) $this->input->get('page'));
+		$per  = 25;
+
+		$filter = function () use ($q, $kec, $kon) {
+			if ($q !== '')
+			{
+				$this->db->group_start()
+					->like('nama_bangunan', $q)
+					->or_like('opd', $q)
+					->or_like('alamat', $q)
+					->or_like('kelurahan', $q)
+					->group_end();
+			}
+			if ($kec !== '') $this->db->where('kecamatan', $kec);
+			if (in_array($kon, array('1', '2', '3', '4'), TRUE)) $this->db->where('kondisi', $kon);
+		};
+
+		$filter();
+		$total = $this->db->count_all_results('bangunan_gis');
+
+		$filter();
+		$data['daftar'] = $this->db
+			->order_by('id', 'DESC')
+			->limit($per, ($page - 1) * $per)
+			->get('bangunan_gis')->result_array();
+
+		$data['total']         = $total;
+		$data['page']          = $page;
+		$data['per']           = $per;
+		$data['total_page']    = max(1, (int) ceil($total / $per));
+		$data['q']             = $q;
+		$data['kec']           = $kec;
+		$data['kondisi']       = $kon;
+		$data['daftar_kec']    = $this->db->distinct()->select('kecamatan')->where('kecamatan !=', '')->order_by('kecamatan', 'ASC')->get('bangunan_gis')->result_array();
+		$data['kondisi_label'] = $this->kondisi_label;
+		$data['sukses']        = $this->session->flashdata('sukses');
+		$data['error']         = $this->session->flashdata('error');
+		$data['nama_admin']    = $this->session->userdata('nama');
+
+		$this->load->view('pages/admin_bangunan', $data);
+	}
+
+	/** Form tambah bangunan baru. */
+	public function bangunan_tambah()
+	{
+		$this->_bangunan_form(NULL);
+	}
+
+	/** Form ubah bangunan. */
+	public function bangunan_ubah($id = null)
+	{
+		$row = $this->db->where('id', (int) $id)->get('bangunan_gis')->row_array();
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+		$this->_bangunan_form($row);
+	}
+
+	private function _bangunan_form($row)
+	{
+		$data['row']           = $row;
+		$data['kondisi_label'] = $this->kondisi_label;
+		$data['error']         = $this->session->flashdata('error');
+		$data['old']           = $this->session->flashdata('old');
+		$data['nama_admin']    = $this->session->userdata('nama');
+		$this->load->view('pages/admin_bangunan_form', $data);
+	}
+
+	/** Simpan (POST) tambah maupun ubah. $id NULL = tambah. */
+	public function bangunan_simpan($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('bangunan_gis')->row_array() : NULL;
+		if ($id > 0 && $row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$p = function ($nama) {
+			$v = trim((string) $this->input->post($nama));
+			return $v !== '' ? $v : NULL;
+		};
+
+		$nama    = trim((string) $this->input->post('nama_bangunan'));
+		$lat_in  = trim((string) $this->input->post('latitude'));
+		$lng_in  = trim((string) $this->input->post('longitude'));
+		$kondisi = (string) $this->input->post('kondisi');
+		$lantai  = trim((string) $this->input->post('jumlah_lantai'));
+
+		$tujuan = $id > 0 ? 'admin/bangunan-ubah/' . $id : 'admin/bangunan-tambah';
+
+		$kosong = array();
+		if ($nama === '')                                    $kosong[] = 'Nama bangunan';
+		if (! is_numeric($lat_in) || abs((float) $lat_in) > 90)  $kosong[] = 'Latitude (angka -90..90)';
+		if (! is_numeric($lng_in) || abs((float) $lng_in) > 180) $kosong[] = 'Longitude (angka -180..180)';
+		if (! in_array($kondisi, array('1', '2', '3', '4'), TRUE)) $kosong[] = 'Kondisi';
+
+		if (! empty($kosong))
+		{
+			$this->session->set_flashdata('error', 'Periksa lagi: ' . implode(', ', $kosong) . '.');
+			$this->session->set_flashdata('old', $this->input->post());
+			redirect($tujuan);
+			return;
+		}
+
+		$simpan = array(
+			'opd'           => $p('opd'),
+			'unit'          => $p('unit'),
+			'institusi'     => $p('institusi'),
+			'nama_bangunan' => $nama,
+			'fungsi'        => $p('fungsi'),
+			'jumlah_lantai' => ($lantai !== '' && is_numeric($lantai)) ? (int) $lantai : NULL,
+			'kecamatan'     => $p('kecamatan'),
+			'kelurahan'     => $p('kelurahan'),
+			'alamat'        => $p('alamat'),
+			'kondisi'       => $kondisi,
+			'latitude'      => round((float) $lat_in, 8),
+			'longitude'     => round((float) $lng_in, 8),
+			'foto'          => $p('foto'),
+		);
+
+		if ($id > 0)
+		{
+			$this->db->where('id', $id)->update('bangunan_gis', $simpan);
+			$this->session->set_flashdata('sukses', 'Data bangunan "' . $nama . '" berhasil diperbarui.');
+		}
+		else
+		{
+			$this->db->insert('bangunan_gis', $simpan);
+			$this->session->set_flashdata('sukses', 'Bangunan "' . $nama . '" berhasil ditambahkan ke peta.');
+		}
+		redirect('admin/bangunan');
+	}
+
+	/** Hapus (POST). */
+	public function bangunan_hapus($id = null)
+	{
+		$id  = (int) $id;
+		$row = $this->db->where('id', $id)->get('bangunan_gis')->row_array();
+		if ($row === NULL)
+		{
+			$this->session->set_flashdata('error', 'Data bangunan tidak ditemukan.');
+			redirect('admin/bangunan');
+			return;
+		}
+		$this->db->where('id', $id)->delete('bangunan_gis');
+		$this->session->set_flashdata('sukses', 'Bangunan "' . $row['nama_bangunan'] . '" berhasil dihapus dari peta.');
+		redirect('admin/bangunan');
+	}
 }
