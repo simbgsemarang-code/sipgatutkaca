@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kelola Pengguna — SIP Gatutkaca · Kabupaten Cilacap</title>
+<title>Pengajuan PBG — Panel Admin · SIP Gatutkaca</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,20 +13,16 @@
   --gold-500:#C9A24B;--gold-300:#E4C87B;--gold-100:#F3E3B8;
   --display:'Marcellus',serif;--body:'Plus Jakarta Sans',system-ui,sans-serif;
 }
-/* ====== TEMA GELAP (bawaan) ====== */
 html[data-theme="dark"]{
   --bg:#081826;--bg-alt:#0C2236;--surface:#0C2236;--surface-hi:#123249;
   --text:#F8F4EA;--muted:#B9C7D2;--line:rgba(201,162,75,.28);
   --head-bg:rgba(8,24,38,.94);--head-grad:rgba(8,24,38,.85);
-  --hero-1:rgba(8,24,38,.95);--hero-2:rgba(8,24,38,.78);--hero-3:rgba(8,24,38,.28);
   --foot:#050F19;--input:#0F2A40;--shadow:rgba(0,0,0,.5);
 }
-/* ====== TEMA TERANG ====== */
 html[data-theme="light"]{
   --bg:#FDFBF5;--bg-alt:#F6F1E3;--surface:#FFFFFF;--surface-hi:#FAF5E8;
   --text:#152A3B;--muted:#4E6070;--line:rgba(160,124,45,.35);
   --head-bg:rgba(253,251,245,.94);--head-grad:rgba(253,251,245,.85);
-  --hero-1:rgba(13,29,44,.88);--hero-2:rgba(13,29,44,.66);--hero-3:rgba(13,29,44,.22);
   --foot:#122536;--input:#FFFFFF;--shadow:rgba(21,42,59,.18);
   --gold-500:#A57E2C;--gold-300:#8F6C1F;--gold-100:#6E5314;
 }
@@ -37,7 +33,6 @@ img{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
 
-/* ===== NAVBAR ===== */
 header{position:fixed;inset:0 0 auto 0;z-index:60;transition:.4s;background:linear-gradient(180deg,var(--head-grad),transparent)}
 header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;height:84px;gap:18px}
@@ -47,7 +42,6 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .brand-sub{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
 .auth-actions{display:flex;align-items:center;gap:14px}
 
-/* ===== MENU PENGGUNA (dropdown navbar) ===== */
 .user-menu{position:relative}
 .user-menu-btn{display:flex;align-items:center;gap:8px;background:none;border:none;font-family:var(--body);font-size:.78rem;letter-spacing:.08em;color:var(--gold-300);font-weight:600;cursor:pointer;padding:8px 2px}
 .user-menu-btn svg{transition:transform .25s}
@@ -58,7 +52,6 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .user-menu-panel a:hover{background:var(--surface-hi);color:var(--gold-300)}
 .user-menu-panel a.logout:hover{color:#E0526B;background:rgba(224,82,107,.08)}
 
-/* ===== TATA LETAK DASHBOARD (sidebar) ===== */
 .dash-layout{display:flex;padding-top:84px}
 .dash-sidebar{width:240px;flex:0 0 240px;height:calc(100vh - 84px);position:sticky;top:84px;background:var(--surface);border-right:1px solid var(--line);padding:40px 0;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto}
 .dash-sidebar nav{display:flex;flex-direction:column;gap:4px}
@@ -71,53 +64,40 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 @media(max-width:860px){
   .dash-layout{flex-direction:column}
   .dash-sidebar{width:100%;flex:0 0 auto;height:auto;min-height:0;flex-direction:row;justify-content:space-between;align-items:center;border-right:none;border-bottom:1px solid var(--line);padding:0}
-  .dash-sidebar nav{flex-direction:row;justify-content:center}
+  .dash-sidebar nav{flex-direction:row;justify-content:center;flex-wrap:wrap}
   .dash-sidebar a{padding:14px 20px;border-left:none;border-bottom:3px solid transparent}
   .dash-sidebar a.active{border-left-color:transparent;border-bottom-color:var(--gold-500)}
   .dash-wrap{padding:0 24px}
 }
 
 .btn{display:inline-block;padding:15px 34px;font-size:.78rem;letter-spacing:.26em;text-transform:uppercase;transition:.3s;cursor:pointer;border:none;font-family:var(--body)}
-.btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
-.btn-gold:hover{filter:brightness(1.08);transform:translateY(-2px)}
 .btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
 .btn-sm{padding:11px 26px;font-size:.72rem;letter-spacing:.2em}
+.btn-xs{padding:8px 16px;font-size:.68rem;letter-spacing:.12em}
 
-/* ===== SECTION ===== */
 section{padding:60px 0 100px}
 .eyebrow{font-size:.7rem;letter-spacing:.38em;text-transform:uppercase;color:var(--gold-500);margin-bottom:14px}
-h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:24ch}
-.section-lead{color:var(--muted);max-width:66ch;margin-top:18px}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:32ch}
 
-/* ===== TABEL & FORM ===== */
-table{width:100%;border-collapse:collapse;margin-top:44px;font-size:.9rem}
-th{font-family:var(--display);font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:.74rem;color:var(--gold-300);text-align:left;padding:16px 14px;border-bottom:1px solid var(--gold-500)}
-td{padding:16px 14px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:top}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:44px}
+.toolbar input[type=search]{background:var(--input);border:1px solid var(--line);color:var(--text);padding:12px 16px;font-family:var(--body);font-size:.85rem;min-width:260px}
+.toolbar input[type=search]:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+
+table{width:100%;border-collapse:collapse;margin-top:26px;font-size:.88rem}
+th{font-family:var(--display);font-weight:400;letter-spacing:.1em;text-transform:uppercase;font-size:.72rem;color:var(--gold-300);text-align:left;padding:14px;border-bottom:1px solid var(--gold-500)}
+td{padding:14px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:top}
 td:first-child{color:var(--text);font-weight:500}
-.tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-300)}
-.tag-pu{color:#5FC2E0;border-color:#1E86A3}
-.tag-tpa{color:#F0A048;border-color:#B4573B}
-.tag-pemohon{color:var(--muted);border-color:var(--line)}
-.dl{color:var(--gold-300);letter-spacing:.12em;font-size:.78rem;text-transform:uppercase;white-space:nowrap}
-.dl:hover{text-decoration:underline}
-.hapus-link{color:#E0526B;letter-spacing:.12em;font-size:.78rem;text-transform:uppercase;white-space:nowrap;background:none;border:none;cursor:pointer;font-family:var(--body)}
-.hapus-link:hover{text-decoration:underline}
+.tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300)}
+.tag-draf{color:#F0A048;border-color:#B4573B}
+.tag-verifikasi_dokumen{color:#5FC2E0;border-color:#1E86A3}
+.tag-perbaikan_dokumen{color:#E0526B;border-color:#E0526B}
+.tag-perbaikan_dokumen_konsultasi{color:#E0526B;border-color:#E0526B}
+.tag-menunggu_jadwal_konsultasi{color:#6FCF97;border-color:#2EA84F}
+.tag-disetujui_tpa{color:#6FCF97;border-color:#2EA84F}
+.no-reg{font-size:.72rem;color:var(--muted)}
+.bidang-progres{margin-top:6px;font-size:.68rem;letter-spacing:.02em;color:var(--muted)}
 
-.form-card{background:var(--surface);border:1px solid var(--line);padding:46px;max-width:520px}
-.field{margin-bottom:22px}
-label{display:block;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
-input,select,textarea{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:13px 15px;font-family:var(--body);font-size:.92rem}
-input:focus,select:focus,textarea:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
-.note{font-size:.78rem;color:var(--muted);margin-top:16px}
-.alert{padding:16px 20px;margin-bottom:26px;font-size:.88rem;border:1px solid}
-.alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
-.alert-err{background:rgba(224,82,107,.12);border-color:#E0526B;color:#F3AEB9}
-
-.split-admin{display:grid;grid-template-columns:1fr 1.3fr;gap:60px;align-items:start;margin-top:20px}
-.split-admin>*{min-width:0}
-
-/* ===== PANEL WARNA ===== */
 .theme-fab{position:fixed;right:26px;bottom:26px;z-index:80;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold-500);background:var(--surface);color:var(--gold-300);cursor:pointer;display:grid;place-items:center;box-shadow:0 8px 26px var(--shadow);transition:transform .3s}
 .theme-fab:hover{transform:rotate(24deg)}
 .theme-panel{position:fixed;right:26px;bottom:94px;z-index:80;background:var(--surface);border:1px solid var(--line);box-shadow:0 16px 42px var(--shadow);padding:22px;width:230px;opacity:0;transform:translateY(12px);pointer-events:none;transition:.3s}
@@ -132,7 +112,6 @@ input:focus,select:focus,textarea:focus{outline:1px solid var(--gold-500);border
 .swatch .sw-light{background:linear-gradient(135deg,#F8F4EA,#EFE7D6)}
 .swatch span{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 
-/* ===== FOOTER ===== */
 footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px solid var(--line)}
 .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:50px}
 .foot-grid h4{font-family:var(--display);font-weight:400;letter-spacing:.14em;color:#E4C87B;margin-bottom:18px;font-size:1rem}
@@ -141,17 +120,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .foot-grid a:hover{color:#E4C87B}
 .credit{margin-top:50px;padding-top:22px;border-top:1px solid rgba(185,199,210,.15);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:.72rem;color:rgba(185,199,210,.6);letter-spacing:.06em}
 
-/* ===== REVEAL ===== */
-.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s ease}
-.reveal.in{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){
-  .reveal{opacity:1;transform:none;transition:none}
-  html{scroll-behavior:auto}
-}
-
-/* ===== RESPONSIF ===== */
 @media(max-width:980px){
-  .split-admin{grid-template-columns:1fr}
   .foot-grid{grid-template-columns:1fr}
   table{display:block;overflow-x:auto}
 }
@@ -193,11 +162,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <div class="dash-layout">
   <aside class="dash-sidebar">
     <nav>
-      <a href="<?php echo base_url('admin/pengguna'); ?>" class="active">
+      <a href="<?php echo base_url('admin/pengguna'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="6.5" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.4"/><path d="M1.8 15c0-2.6 2.1-4.4 4.7-4.4S11.2 12.4 11.2 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12.4 4.2a2.3 2.3 0 010 4.4M13.6 14.8c0-2.1-1-3.7-2.6-4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Kelola Pengguna
       </a>
-      <a href="<?php echo base_url('admin/pengajuan'); ?>">
+      <a href="<?php echo base_url('admin/pengajuan'); ?>" class="active">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Pengajuan
       </a>
@@ -212,97 +181,66 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-main">
 <section style="padding-top:100px">
   <div class="dash-wrap">
-    <div class="reveal">
+    <div>
       <p class="eyebrow">Panel Admin</p>
-      <h2>Kelola Pengguna</h2>
-      <p class="section-lead">Tambahkan akun untuk staf Tim Profesi Ahli (Arsitek, Struktur, atau MEP), Pekerjaan Umum (PU), atau admin lain — dan lihat seluruh pengguna yang sudah terdaftar. Akun pemohon hanya bisa dibuat lewat pendaftaran mandiri di halaman <?php echo base_url('daftar'); ?>.</p>
+      <h2>Pengajuan PBG</h2>
+      <p style="color:var(--muted);max-width:64ch;margin-top:14px">Seluruh permohonan PBG yang diinput staf PU di loket. Halaman ini hanya untuk pemantauan — penambahan, perbaikan, dan penghapusan permohonan tetap dilakukan lewat Portal PU.</p>
     </div>
 
-    <?php if (!empty($sukses)): ?>
-      <div class="alert alert-ok reveal" style="margin-top:36px"><?php echo htmlspecialchars($sukses, ENT_QUOTES, 'UTF-8'); ?></div>
-    <?php endif; ?>
-    <?php if (!empty($error)): ?>
-      <div class="alert alert-err reveal" style="margin-top:36px"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
-    <?php endif; ?>
-
-    <div class="split-admin">
-      <form class="form-card reveal" action="<?php echo base_url('admin/tambah-pengguna'); ?>" method="post">
-        <p class="eyebrow" style="margin-bottom:8px">Tambah Pengguna</p>
-        <h2 style="font-size:1.3rem;margin-bottom:24px">Buat Akun Baru</h2>
-        <div class="field">
-          <label for="a-nama">Nama Lengkap</label>
-          <input id="a-nama" name="nama" type="text" required value="<?php echo isset($old['nama']) ? htmlspecialchars($old['nama'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-        </div>
-        <div class="field">
-          <label for="a-email">Surel</label>
-          <input id="a-email" name="email" type="email" required value="<?php echo isset($old['email']) ? htmlspecialchars($old['email'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-        </div>
-        <div class="field">
-          <label for="a-nik">NIK <span style="text-transform:none;letter-spacing:0">(opsional)</span></label>
-          <input id="a-nik" name="nik" type="text" value="<?php echo isset($old['nik']) ? htmlspecialchars($old['nik'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-        </div>
-        <div class="field">
-          <label for="a-password">Kata Sandi Awal</label>
-          <input id="a-password" name="password" type="password" required minlength="8" placeholder="Minimal 8 karakter">
-        </div>
-        <div class="field">
-          <label for="a-role">Jenis Pengguna</label>
-          <?php $peran_terpilih = isset($old['role']) ? $old['role'] : ''; ?>
-          <select id="a-role" name="role" required>
-            <option value="" disabled <?php echo $peran_terpilih === '' ? 'selected' : ''; ?>>— Pilih jenis pengguna —</option>
-            <option value="admin" <?php echo $peran_terpilih === 'admin' ? 'selected' : ''; ?>>Admin</option>
-            <option value="pu" <?php echo $peran_terpilih === 'pu' ? 'selected' : ''; ?>>PU — Pekerjaan Umum</option>
-            <option value="tpa_arsitek" <?php echo $peran_terpilih === 'tpa_arsitek' ? 'selected' : ''; ?>>TPA Arsitek — Tim Profesi Ahli Arsitektur</option>
-            <option value="tpa_struktur" <?php echo $peran_terpilih === 'tpa_struktur' ? 'selected' : ''; ?>>TPA Struktur — Tim Profesi Ahli Struktur</option>
-            <option value="tpa_mep" <?php echo $peran_terpilih === 'tpa_mep' ? 'selected' : ''; ?>>TPA MEP — Tim Profesi Ahli Mekanikal, Elektrikal, Plambing</option>
-          </select>
-        </div>
-        <button class="btn btn-gold" type="submit" style="width:100%">Tambah Pengguna</button>
-        <p class="note">Sampaikan kata sandi awal ini ke pengguna terkait secara langsung — sistem tidak mengirimkannya lewat surel.</p>
-      </form>
-
-      <div class="reveal">
-        <p class="eyebrow" style="margin-bottom:8px">Daftar Pengguna</p>
-        <h2 style="font-size:1.3rem">Total: <?php echo count($daftar_user); ?> akun</h2>
-        <table>
-          <thead><tr><th>Nama</th><th>Surel / NIK</th><th>Jenis</th><th>Terdaftar</th><th></th></tr></thead>
-          <tbody>
-            <?php if (empty($daftar_user)): ?>
-              <tr><td colspan="5">Belum ada pengguna.</td></tr>
-            <?php else: ?>
-              <?php foreach ($daftar_user as $u): ?>
-                <tr>
-                  <td><?php echo htmlspecialchars($u['nama'], ENT_QUOTES, 'UTF-8'); ?></td>
-                  <td>
-                    <?php echo htmlspecialchars($u['email'], ENT_QUOTES, 'UTF-8'); ?>
-                    <?php if (!empty($u['nik'])): ?><br><span style="font-size:.82rem">NIK: <?php echo htmlspecialchars($u['nik'], ENT_QUOTES, 'UTF-8'); ?></span><?php endif; ?>
-                  </td>
-                  <td>
-                    <?php
-                      // 'tpa'/'pemohon' generik dipertahankan di sini (bukan cuma
-                      // 3 spesialisasi baru) karena akun lama bertipe itu masih
-                      // bisa ada di tabel dan tetap harus tampil dengan tag yang
-                      // benar, walau sudah tidak bisa dipilih lagi saat membuat
-                      // pengguna baru.
-                      $kelas_tag = array('admin' => 'tag', 'pu' => 'tag tag-pu', 'tpa' => 'tag tag-tpa', 'tpa_arsitek' => 'tag tag-tpa', 'tpa_struktur' => 'tag tag-tpa', 'tpa_mep' => 'tag tag-tpa', 'pemohon' => 'tag tag-pemohon');
-                      $kelas = isset($kelas_tag[$u['role']]) ? $kelas_tag[$u['role']] : 'tag';
-                      $label_peran = strtoupper(str_replace('_', ' ', $u['role']));
-                    ?>
-                    <span class="<?php echo $kelas; ?>"><?php echo htmlspecialchars($label_peran, ENT_QUOTES, 'UTF-8'); ?></span>
-                  </td>
-                  <td><?php echo htmlspecialchars(date('d M Y', strtotime($u['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
-                  <td>
-                    <form action="<?php echo base_url('admin/hapus-pengguna/' . (int) $u['id']); ?>" method="post" onsubmit="return confirm('Hapus pengguna &quot;<?php echo htmlspecialchars(addslashes($u['nama']), ENT_QUOTES, 'UTF-8'); ?>&quot;?');" style="margin:0">
-                      <button type="submit" class="hapus-link">Hapus</button>
-                    </form>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            <?php endif; ?>
-          </tbody>
-        </table>
-      </div>
+    <div class="toolbar">
+      <p class="eyebrow" style="margin-bottom:0">Total: <?php echo count($daftar); ?> permohonan</p>
+      <input type="search" id="cariPermohonan" placeholder="Cari nama pemohon, PU, atau lokasi…">
     </div>
+
+    <table id="tabelPermohonan">
+      <thead><tr><th>Nama Pemohon</th><th>No. Registrasi</th><th>Diinput Oleh</th><th>Lokasi Bangunan</th><th>Status</th><th>Diinput</th><th>Aksi</th></tr></thead>
+      <tbody>
+        <?php if (empty($daftar)): ?>
+          <tr><td colspan="7">Belum ada permohonan PBG yang diinput.</td></tr>
+        <?php else: ?>
+          <?php foreach ($daftar as $r): ?>
+            <tr>
+              <td><?php echo htmlspecialchars($r['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></td>
+              <td class="no-reg"><?php echo !empty($r['no_registrasi']) ? htmlspecialchars($r['no_registrasi'], ENT_QUOTES, 'UTF-8') : 'Belum Terdefinisi'; ?></td>
+              <td><?php echo !empty($r['nama_pembuat']) ? htmlspecialchars($r['nama_pembuat'], ENT_QUOTES, 'UTF-8') : '—'; ?></td>
+              <td><?php echo !empty($r['lokasi_alamat']) ? htmlspecialchars(mb_strimwidth($r['lokasi_alamat'], 0, 60, '…'), ENT_QUOTES, 'UTF-8') : '—'; ?></td>
+              <td>
+                <?php $label_status = array('draf' => 'Draf', 'verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi', 'disetujui_tpa' => 'Disetujui Semua TPA'); ?>
+                <span class="tag tag-<?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$r['status']]) ? $label_status[$r['status']] : $r['status'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <?php if (in_array($r['status'], array('verifikasi_dokumen', 'perbaikan_dokumen'), TRUE)): ?>
+                  <?php
+                  $singkat_bidang  = array('tpa_arsitek' => 'Arsitek', 'tpa_struktur' => 'Struktur', 'tpa_mep' => 'MEP');
+                  $sudah_per_bidang = isset($persetujuan_per_id[$r['id']]) ? $persetujuan_per_id[$r['id']] : array();
+                  $bagian = array();
+                  foreach ($singkat_bidang as $kode_bidang => $nama_singkat)
+                  {
+                    if (! isset($sudah_per_bidang[$kode_bidang]))
+                    {
+                      $ket = 'Menunggu';
+                    }
+                    elseif ($sudah_per_bidang[$kode_bidang] === 'disetujui')
+                    {
+                      $ket = 'Disetujui';
+                    }
+                    else
+                    {
+                      $ket = 'Perbaikan';
+                    }
+                    $bagian[] = $nama_singkat . ': ' . $ket;
+                  }
+                  ?>
+                  <div class="bidang-progres"><?php echo htmlspecialchars(implode(' · ', $bagian), ENT_QUOTES, 'UTF-8'); ?></div>
+                <?php endif; ?>
+              </td>
+              <td><?php echo htmlspecialchars(date('d M Y', strtotime($r['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
+              <td>
+                <a href="<?php echo base_url('admin/pengajuan-lihat/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Lihat</a>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </tbody>
+    </table>
   </div>
 </section>
   </div>
@@ -362,7 +300,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 (function(){
   var p=new URLSearchParams(location.search);
   var t=p.get('theme')==='dark'?'dark':'light';
-  applyTheme(t,false);
+  applyTheme(t);
   function applyTheme(theme){
     document.documentElement.setAttribute('data-theme',theme);
     document.querySelectorAll('.swatch').forEach(function(s){
@@ -392,10 +330,15 @@ document.addEventListener('click',function(e){
 });
 var bar=document.getElementById('topbar');
 addEventListener('scroll',function(){bar.classList.toggle('scrolled',scrollY>40)},{passive:true});
-var io=new IntersectionObserver(function(es){es.forEach(function(e){
-  if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
-})},{threshold:.12});
-document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+
+var input=document.getElementById('cariPermohonan');
+var baris=document.querySelectorAll('#tabelPermohonan tbody tr');
+input.addEventListener('input',function(){
+  var q=input.value.trim().toLowerCase();
+  baris.forEach(function(tr){
+    tr.style.display = tr.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  });
+});
 </script>
 </body>
 </html>

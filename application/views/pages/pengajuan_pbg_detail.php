@@ -1,4 +1,10 @@
 <?php
+// Dipakai bersama oleh Portal PU (Pengajuan_pbg::lihat) dan Panel Admin
+// (Admin::pengajuan_lihat). Dalam admin_mode: sidebar + tautan berkas
+// diarahkan ke rute admin, dan semua tombol aksi PU disembunyikan
+// (admin cuma boleh melihat, bukan mengubah permohonan).
+$admin_mode  = isset($admin_mode) ? (bool) $admin_mode : FALSE;
+$berkas_base = $admin_mode ? 'admin/berkas/' : 'pengajuan-pbg/berkas/';
 $t = function ($v) {
 	return ($v === null || $v === '') ? '—' : htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 };
@@ -38,7 +44,7 @@ $nama_reviewer_bidang = array(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detail Permohonan PBG — Portal PU · SIP Gatutkaca</title>
+<title>Detail Permohonan PBG — <?php echo $admin_mode ? 'Panel Admin' : 'Portal PU'; ?> · SIP Gatutkaca</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -195,6 +201,16 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <div class="dash-layout">
   <aside class="dash-sidebar">
     <nav>
+      <?php if ($admin_mode): ?>
+      <a href="<?php echo base_url('admin/pengguna'); ?>">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="6.5" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.4"/><path d="M1.8 15c0-2.6 2.1-4.4 4.7-4.4S11.2 12.4 11.2 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12.4 4.2a2.3 2.3 0 010 4.4M13.6 14.8c0-2.1-1-3.7-2.6-4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Kelola Pengguna
+      </a>
+      <a href="<?php echo base_url('admin/pengajuan'); ?>" class="active">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Pengajuan
+      </a>
+      <?php else: ?>
       <a href="<?php echo base_url('pu'); ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
@@ -203,6 +219,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Pengajuan PBG
       </a>
+      <?php endif; ?>
     </nav>
     <nav>
       <a href="<?php echo base_url('login/keluar'); ?>" class="logout">Logout</a>
@@ -211,18 +228,20 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-main">
 <section style="padding-top:100px">
   <div class="dash-wrap">
-    <p class="eyebrow"><a href="<?php echo base_url('pengajuan-pbg'); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Daftar Permohonan</a></p>
+    <p class="eyebrow"><a href="<?php echo base_url($admin_mode ? 'admin/pengajuan' : 'pengajuan-pbg'); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Daftar <?php echo $admin_mode ? 'Pengajuan' : 'Permohonan'; ?></a></p>
     <h2><?php echo $t($row['nama_pemohon']); ?></h2>
     <span class="tag tag-<?php echo htmlspecialchars($row['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$row['status']]) ? $label_status[$row['status']] : $row['status'], ENT_QUOTES, 'UTF-8'); ?></span>
-    <?php if ($row['status'] === 'draf'): ?>
-      <a href="<?php echo base_url('pengajuan-pbg/tambah/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Lanjutkan Permohonan</a>
-    <?php elseif ($perlu_perbaikan): ?>
-      <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Perbaiki Permohonan</a>
-    <?php elseif ($row['status'] === 'verifikasi_dokumen'): ?>
-      <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Edit Permohonan</a>
-    <?php endif; ?>
-    <?php if ($row['status'] !== 'draf'): ?>
-      <a href="<?php echo base_url('pengajuan-pbg/reviewer/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Atur Reviewer TPA</a>
+    <?php if (! $admin_mode): ?>
+      <?php if ($row['status'] === 'draf'): ?>
+        <a href="<?php echo base_url('pengajuan-pbg/tambah/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Lanjutkan Permohonan</a>
+      <?php elseif ($perlu_perbaikan): ?>
+        <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Perbaiki Permohonan</a>
+      <?php elseif ($row['status'] === 'verifikasi_dokumen'): ?>
+        <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Edit Permohonan</a>
+      <?php endif; ?>
+      <?php if ($row['status'] !== 'draf'): ?>
+        <a href="<?php echo base_url('pengajuan-pbg/reviewer/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Atur Reviewer TPA</a>
+      <?php endif; ?>
     <?php endif; ?>
 
     <?php if (!empty($sukses)): ?>
@@ -232,7 +251,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="alert alert-err"><?php echo nl2br(htmlspecialchars($error, ENT_QUOTES, 'UTF-8')); ?></div>
     <?php endif; ?>
 
+    <?php if (! $admin_mode): ?>
     <p style="margin-top:16px"><a href="<?php echo base_url('pengajuan-pbg/checklist/' . (int) $row['id']); ?>" style="color:var(--gold-300);text-decoration:underline;font-size:.85rem">Lihat Checklist Kelengkapan Persyaratan →</a></p>
+    <?php endif; ?>
 
     <?php if (!empty($persetujuan) || $perlu_perbaikan || $row['status'] === 'disetujui_tpa'): ?>
       <div class="card" style="border-color:<?php echo ($row['status'] === 'disetujui_tpa') ? '#2EA84F' : '#B4573B'; ?>;background:<?php echo ($row['status'] === 'disetujui_tpa') ? 'rgba(46,168,79,.06)' : 'rgba(240,160,72,.06)'; ?>">
@@ -264,6 +285,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="kv-grid">
         <div class="kv"><span>No. Registrasi</span><b><?php echo !empty($row['no_registrasi']) ? $t($row['no_registrasi']) : 'Belum Terdefinisi'; ?></b></div>
         <div class="kv"><span>Diinput Pada</span><b><?php echo $tgl($row['created_at']); ?></b></div>
+        <?php if ($admin_mode): ?>
+        <div class="kv"><span>Diinput Oleh (Staf PU)</span><b><?php echo isset($row['nama_pembuat']) ? $t($row['nama_pembuat']) : '—'; ?></b></div>
+        <?php endif; ?>
         <div class="kv"><span>NIK Pemohon</span><b><?php echo $t($row['nik_pemohon']); ?></b></div>
         <div class="kv"><span>Kontak Pemohon</span><b><?php echo $t($row['kontak_pemohon']); ?></b></div>
       </div>
@@ -312,7 +336,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div class="kv"><span>Jumlah Unit</span><b><?php echo $t($row['bangunan_jumlah_unit']); ?></b></div>
         <div class="kv"><span>Estimasi Jumlah Penghuni</span><b><?php echo $t($row['bangunan_estimasi_penghuni']); ?></b></div>
         <div class="kv"><span>Koordinat Bangunan</span><b><?php echo $t(trim($row['bangunan_latitude'] . ', ' . $row['bangunan_longitude'], ', ')); ?></b></div>
-        <div class="kv"><span>Peta Lokasi Bangunan</span><b><?php echo !empty($row['bangunan_peta']) ? '<a href="' . base_url('pengajuan-pbg/berkas/bangunan_peta/' . (int) $row['id']) . '" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">Lihat berkas</a>' : '—'; ?></b></div>
+        <div class="kv"><span>Peta Lokasi Bangunan</span><b><?php echo !empty($row['bangunan_peta']) ? '<a href="' . base_url($berkas_base . 'bangunan_peta/' . (int) $row['id']) . '" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">Lihat berkas</a>' : '—'; ?></b></div>
       </div>
     </div>
 
@@ -325,7 +349,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div class="kv"><span>Jumlah Unit Dibangun</span><b><?php echo $t($row['prototipe_jumlah_unit']); ?></b></div>
         <div class="kv"><span>Masa Pemanfaatan</span><b><?php echo $t($row['masa_pemanfaatan'] === 'lebih_5_tahun' ? 'Lebih dari 5 tahun' : ($row['masa_pemanfaatan'] === 'kurang_5_tahun' ? 'Kurang dari 5 tahun' : null)); ?></b></div>
         <div class="kv"><span>Koordinat Prototipe</span><b><?php echo $t(trim($row['prototipe_latitude'] . ', ' . $row['prototipe_longitude'], ', ')); ?></b></div>
-        <div class="kv"><span>Peta / Denah Prototipe</span><b><?php echo !empty($row['prototipe_peta']) ? '<a href="' . base_url('pengajuan-pbg/berkas/prototipe_peta/' . (int) $row['id']) . '" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">Lihat berkas</a>' : '—'; ?></b></div>
+        <div class="kv"><span>Peta / Denah Prototipe</span><b><?php echo !empty($row['prototipe_peta']) ? '<a href="' . base_url($berkas_base . 'prototipe_peta/' . (int) $row['id']) . '" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">Lihat berkas</a>' : '—'; ?></b></div>
       </div>
     </div>
     <?php endif; ?>
@@ -338,7 +362,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div class="kv"><span>Luas Tanah</span><b><?php echo $t($row['tanah_luas']); ?> m²</b></div>
         <div class="kv"><span>Hak Kepemilikan</span><b><?php echo $t($row['tanah_hak_kepemilikan']); ?></b></div>
         <div class="kv"><span>Nama Pemilik Hak Tanah</span><b><?php echo $t($row['tanah_nama_pemilik']); ?></b></div>
-        <div class="kv"><span>Lampiran Dokumen</span><b><?php echo !empty($row['tanah_lampiran']) ? '<a href="' . base_url('pengajuan-pbg/berkas/tanah_lampiran/' . (int) $row['id']) . '" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">Lihat berkas</a>' : '—'; ?></b></div>
+        <div class="kv"><span>Lampiran Dokumen</span><b><?php echo !empty($row['tanah_lampiran']) ? '<a href="' . base_url($berkas_base . 'tanah_lampiran/' . (int) $row['id']) . '" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">Lihat berkas</a>' : '—'; ?></b></div>
         <div class="kv full"><span>Alamat Lokasi Tanah</span><b><?php echo $t($row['tanah_alamat']); ?></b></div>
         <div class="kv"><span>Pemilik Tanah = Pemilik Bangunan?</span><b><?php echo $t($row['tanah_pemilik_sama'] === 'sama' ? 'Sama' : ($row['tanah_pemilik_sama'] === 'tidak' ? 'Tidak' : null)); ?></b></div>
         <div class="kv"><span>Nomor / Tanggal Izin Pemanfaatan</span><b><?php echo $t($row['tanah_nomor_izin']); ?> — <?php echo $tgl($row['tanah_tanggal_izin']); ?></b></div>
@@ -361,7 +385,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
                 <?php endif; ?>
               <?php endif; ?>
             </span>
-            <a href="<?php echo base_url('pengajuan-pbg/berkas/dokumen/' . (int) $d['id']); ?>" target="_blank" rel="noopener noreferrer">Lihat</a>
+            <a href="<?php echo base_url($berkas_base . 'dokumen/' . (int) $d['id']); ?>" target="_blank" rel="noopener noreferrer">Lihat</a>
           </div>
         <?php endforeach; ?>
       <?php endif; ?>
