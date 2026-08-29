@@ -92,11 +92,14 @@ input:focus,select:focus,textarea:focus{outline:1px solid var(--gold-500);border
 .stat span{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 
 /* ===== PETA ===== */
-.map-filter{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:20px;align-items:end;margin-bottom:22px;width:94vw;margin-left:calc(50% - 47vw);margin-right:calc(50% - 47vw);background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 26px;box-shadow:0 4px 18px var(--shadow)}
+.map-filter{position:absolute;top:16px;left:16px;right:16px;z-index:1000;display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:16px;align-items:end;
+  background:rgba(255,255,255,.5);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
+  border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:16px 22px;box-shadow:0 12px 34px rgba(21,42,59,.20)}
 .map-filter label{color:var(--gold-300)}
+html[data-theme="dark"] .map-filter{background:rgba(10,26,40,.5);border-color:rgba(201,162,75,.35)}
 #btnReset{padding:13px 30px}
 .map-shell{position:relative;width:94vw;margin-left:calc(50% - 47vw);margin-right:calc(50% - 47vw);border:1px solid var(--line);box-shadow:0 18px 50px var(--shadow);border-radius:22px;overflow:hidden}
-#map{height:560px;width:100%;background:#dfeee2;z-index:1}
+#map{height:640px;width:100%;background:#dfeee2;z-index:1}
 .legend{background:#fff;color:#223;padding:12px 16px;font-size:.78rem;line-height:2;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 .legend b{display:block;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.68rem;margin-bottom:4px;color:#8a6a1c}
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:-1px;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
@@ -108,7 +111,12 @@ input:focus,select:focus,textarea:focus{outline:1px solid var(--gold-500);border
 .pp-status{display:inline-block;margin-top:8px;padding:2px 12px;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;border:1px solid}
 html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) saturate(.85)}
 @media(max-width:980px){.map-filter{grid-template-columns:1fr 1fr}#btnReset{width:100%}}
-@media(max-width:560px){.map-filter{grid-template-columns:1fr}#map{height:440px}}
+@media(max-width:820px){
+  /* Layar sempit: kembalikan filter jadi panel padat di atas peta (di
+     dalam bingkai), bukan overlay — supaya tidak menutupi peta. */
+  .map-filter{position:static;background:var(--surface);backdrop-filter:none;-webkit-backdrop-filter:none;border:none;border-bottom:1px solid var(--line);border-radius:0;box-shadow:none;padding:18px 20px}
+}
+@media(max-width:520px){.map-filter{grid-template-columns:1fr}#map{height:460px}}
 
 /* ===== GALERI KONDISI ===== */
 .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:52px}
@@ -226,29 +234,28 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <p class="section-lead">Sebaran dan kondisi bangunan gedung milik Pemerintah Kabupaten Cilacap berdasarkan hasil pendataan — dapat disaring per kecamatan dan tingkat kerusakan, lengkap dengan titik koordinat pada peta.</p>
     </div>
 
-    <div class="map-filter reveal" style="margin-top:52px">
-      <div class="field">
-        <label for="f-cari">Cari Bangunan (Nama / Alamat / OPD)</label>
-        <input id="f-cari" type="text" placeholder="Ketik nama, OPD, atau alamat" autocomplete="off">
+    <div class="map-shell reveal" style="margin-top:52px">
+      <div class="map-filter">
+        <div class="field">
+          <label for="f-cari">Cari Bangunan (Nama / Alamat / OPD)</label>
+          <input id="f-cari" type="text" placeholder="Ketik nama, OPD, atau alamat" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="f-kec">Kecamatan</label>
+          <select id="f-kec"><option value="">— Semua —</option></select>
+        </div>
+        <div class="field">
+          <label for="f-kondisi">Kondisi</label>
+          <select id="f-kondisi">
+            <option value="">— Semua —</option>
+            <option value="1">Baik</option>
+            <option value="2">Rusak Ringan</option>
+            <option value="3">Rusak Sedang</option>
+            <option value="4">Rusak Berat</option>
+          </select>
+        </div>
+        <button class="btn btn-gold" id="btnReset" type="button">Reset</button>
       </div>
-      <div class="field">
-        <label for="f-kec">Kecamatan</label>
-        <select id="f-kec"><option value="">— Semua —</option></select>
-      </div>
-      <div class="field">
-        <label for="f-kondisi">Kondisi</label>
-        <select id="f-kondisi">
-          <option value="">— Semua —</option>
-          <option value="1">Baik</option>
-          <option value="2">Rusak Ringan</option>
-          <option value="3">Rusak Sedang</option>
-          <option value="4">Rusak Berat</option>
-        </select>
-      </div>
-      <button class="btn btn-gold" id="btnReset" type="button">Reset</button>
-    </div>
-
-    <div class="map-shell reveal">
       <div id="map" role="application" aria-label="Peta kondisi bangunan Kabupaten Cilacap"></div>
     </div>
     <p class="map-count reveal">Menampilkan <b id="countShown">0</b> dari <b id="countAll">0</b> bangunan</p>
@@ -319,7 +326,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
   /* ============ PETA ============ */
   var osm=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"});
-  var map=L.map("map",{layers:[osm],zoomControl:true,scrollWheelZoom:true}).setView([-7.53,108.99],10);
+  var map=L.map("map",{layers:[osm],zoomControl:false,scrollWheelZoom:true}).setView([-7.53,108.99],10);
+  // Kontrol zoom dipindah ke bawah supaya tidak tertutup panel filter
+  // yang kini melayang penuh di sisi atas peta.
+  L.control.zoom({position:"bottomright"}).addTo(map);
   L.control.scale({imperial:false,position:"bottomleft"}).addTo(map);
 
   var legend=L.control({position:"bottomright"});
