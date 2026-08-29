@@ -296,7 +296,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 // endpoint gagal, jatuh ke gisBangunan bawaan gis-data.js.
 fetch("<?php echo base_url('gis/bangunan'); ?>", {headers:{"Accept":"application/json"}})
   .then(function(r){ return r.ok ? r.json() : null; })
-  .then(function(gj){ if(gj && gj.features) window.gisBangunan = gj; })
+  .then(function(gj){ if(gj && gj.features && gj.features.length) window.gisBangunan = gj; })
   .catch(function(){})
   .then(bootPetaAnalisa);
 

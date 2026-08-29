@@ -359,7 +359,7 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
 // endpoint gagal, jatuh ke gisBangunan bawaan gis-data.js.
 fetch("<?php echo base_url('gis/bangunan'); ?>", {headers:{"Accept":"application/json"}})
   .then(function(r){ return r.ok ? r.json() : null; })
-  .then(function(gj){ if(gj && gj.features) window.gisBangunan = gj; })
+  .then(function(gj){ if(gj && gj.features && gj.features.length) window.gisBangunan = gj; })
   .catch(function(){})
   .then(bootPetaSpasial);
 
