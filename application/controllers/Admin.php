@@ -815,4 +815,152 @@ class Admin extends CI_Controller {
 		$this->session->set_flashdata('sukses', 'Cagar budaya "' . $row['nama'] . '" berhasil dihapus.');
 		redirect('admin/cagar-budaya');
 	}
+
+	/* =====================================================================
+	 *  SARAN & MASUKAN (kotak masuk) + FAQ publik (tabel `faq`)
+	 * ===================================================================== */
+
+	private $saran_status = array('baru', 'ditinjau', 'selesai');
+
+	/** Kotak masuk saran + pengelolaan FAQ dalam satu halaman. */
+	public function saran()
+	{
+		$st   = trim((string) $this->input->get('status'));
+		$page = max(1, (int) $this->input->get('hal'));
+		$per  = 20;
+
+		if (in_array($st, $this->saran_status, TRUE)) $this->db->where('status', $st);
+		$total = $this->db->count_all_results('saran_masukan');
+
+		if (in_array($st, $this->saran_status, TRUE)) $this->db->where('status', $st);
+		$data['daftar'] = $this->db
+			->order_by('id', 'DESC')
+			->limit($per, ($page - 1) * $per)
+			->get('saran_masukan')->result_array();
+
+		$data['total']       = $total;
+		$data['page']        = $page;
+		$data['per']         = $per;
+		$data['total_page']  = max(1, (int) ceil($total / $per));
+		$data['status']      = $st;
+		$data['jml_status']  = array(
+			'baru'     => (int) $this->db->where('status', 'baru')->count_all_results('saran_masukan'),
+			'ditinjau' => (int) $this->db->where('status', 'ditinjau')->count_all_results('saran_masukan'),
+			'selesai'  => (int) $this->db->where('status', 'selesai')->count_all_results('saran_masukan'),
+		);
+		$data['faq'] = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('faq')->result_array();
+		$data['sukses']      = $this->session->flashdata('sukses');
+		$data['error']       = $this->session->flashdata('error');
+		$data['nama_admin']  = $this->session->userdata('nama');
+
+		$this->load->view('pages/admin_saran', $data);
+	}
+
+	/** Ubah status + catatan internal sebuah saran. */
+	public function saran_simpan($id = null)
+	{
+		$id  = (int) $id;
+		$row = $this->db->where('id', $id)->get('saran_masukan')->row_array();
+		if ($row === NULL) { show_404(); return; }
+
+		$st      = (string) $this->input->post('status');
+		$catatan = trim((string) $this->input->post('catatan'));
+
+		$this->db->where('id', $id)->update('saran_masukan', array(
+			'status'  => in_array($st, $this->saran_status, TRUE) ? $st : $row['status'],
+			'catatan' => $catatan !== '' ? $catatan : NULL,
+		));
+		$this->session->set_flashdata('sukses', 'Saran #' . $id . ' diperbarui.');
+		redirect('admin/saran');
+	}
+
+	public function saran_hapus($id = null)
+	{
+		$id = (int) $id;
+		if ($this->db->where('id', $id)->get('saran_masukan')->num_rows() === 0)
+		{
+			$this->session->set_flashdata('error', 'Saran tidak ditemukan.');
+			redirect('admin/saran');
+			return;
+		}
+		$this->db->where('id', $id)->delete('saran_masukan');
+		$this->session->set_flashdata('sukses', 'Saran #' . $id . ' dihapus.');
+		redirect('admin/saran');
+	}
+
+	/** Buat draf FAQ dari sebuah saran (disembunyikan dulu, admin rapikan). */
+	public function saran_ke_faq($id = null)
+	{
+		$id  = (int) $id;
+		$row = $this->db->where('id', $id)->get('saran_masukan')->row_array();
+		if ($row === NULL) { show_404(); return; }
+
+		$pertanyaan = ($row['topik'] !== NULL && $row['topik'] !== '')
+			? $row['topik']
+			: 'Pertanyaan dari ' . $row['nama'];
+		$maks = (int) $this->db->select_max('urutan')->get('faq')->row()->urutan;
+
+		$this->db->insert('faq', array(
+			'pertanyaan'      => mb_substr($pertanyaan, 0, 255),
+			'jawaban'         => $row['pesan'],
+			'urutan'          => $maks + 1,
+			'tampil'          => 0,
+			'sumber_saran_id' => $id,
+		));
+		$this->session->set_flashdata('sukses', 'Draf FAQ dibuat dari saran #' . $id . '. Rapikan pertanyaan/jawabannya lalu centang "Tampil".');
+		redirect('admin/saran#faq');
+	}
+
+	/** Simpan (tambah/ubah) satu entri FAQ. $id NULL = tambah. */
+	public function faq_simpan($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('faq')->row_array() : NULL;
+		if ($id > 0 && $row === NULL) { show_404(); return; }
+
+		$pertanyaan = trim((string) $this->input->post('pertanyaan'));
+		$jawaban    = trim((string) $this->input->post('jawaban'));
+		$urutan     = (int) $this->input->post('urutan');
+		$tampil     = $this->input->post('tampil') === '1' ? 1 : 0;
+
+		if ($pertanyaan === '' || $jawaban === '')
+		{
+			$this->session->set_flashdata('error', 'Pertanyaan dan jawaban FAQ wajib diisi.');
+			redirect('admin/saran#faq');
+			return;
+		}
+
+		$simpan = array(
+			'pertanyaan' => mb_substr($pertanyaan, 0, 255),
+			'jawaban'    => $jawaban,
+			'urutan'     => $urutan,
+			'tampil'     => $tampil,
+		);
+
+		if ($id > 0)
+		{
+			$this->db->where('id', $id)->update('faq', $simpan);
+			$this->session->set_flashdata('sukses', 'FAQ diperbarui.');
+		}
+		else
+		{
+			$this->db->insert('faq', $simpan);
+			$this->session->set_flashdata('sukses', 'FAQ ditambahkan.');
+		}
+		redirect('admin/saran#faq');
+	}
+
+	public function faq_hapus($id = null)
+	{
+		$id = (int) $id;
+		if ($this->db->where('id', $id)->get('faq')->num_rows() === 0)
+		{
+			$this->session->set_flashdata('error', 'FAQ tidak ditemukan.');
+			redirect('admin/saran#faq');
+			return;
+		}
+		$this->db->where('id', $id)->delete('faq');
+		$this->session->set_flashdata('sukses', 'FAQ dihapus.');
+		redirect('admin/saran#faq');
+	}
 }

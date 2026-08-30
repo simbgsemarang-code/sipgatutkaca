@@ -182,6 +182,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 1.4l2.1 4.4 4.8.7-3.5 3.4.8 4.8L9 12.4l-4.2 2.3.8-4.8L2.1 6.5l4.8-.7L9 1.4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
         Kelola Cagar Budaya
       </a>
+      <a href="<?php echo base_url('admin/saran'); ?>">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M2.5 3.5h13a1 1 0 011 1v7a1 1 0 01-1 1H7l-3.5 3v-3H2.5a1 1 0 01-1-1v-7a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5 6.5h8M5 9h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Saran &amp; FAQ
+      </a>
     </nav>
     <nav>
       <a href="<?php echo base_url('login/keluar'); ?>" class="logout">

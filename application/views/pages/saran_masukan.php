@@ -190,29 +190,18 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <p class="eyebrow">Kami Mendengarkan</p>
       <h2>Saran dan Masukan</h2>
       <p class="section-lead">Sampaikan saran, kritik, atau masukan Anda terkait layanan SIP Gatutkaca maupun penataan bangunan di Kabupaten Cilacap. Setiap masukan akan ditinjau oleh tim DPUPR Kabupaten Cilacap.</p>
-      <p class="eyebrow" style="margin-top:40px">Pertanyaan Umum</p>
-      <div class="faq">
-        <details>
-          <summary>Kapan masukan saya ditinjau?</summary>
-          <p class="faq-a">Masukan ditinjau pada hari kerja, Senin&ndash;Jumat pukul 08.00&ndash;15.30 WIB.</p>
-        </details>
-        <details>
-          <summary>Apakah data kontak saya dipublikasikan?</summary>
-          <p class="faq-a">Tidak. Data kontak Anda hanya digunakan untuk menindaklanjuti masukan dan tidak dipublikasikan.</p>
-        </details>
-        <details>
-          <summary>Saya punya pengaduan teknis soal permohonan PBG/SLF, ke mana?</summary>
-          <p class="faq-a">Gunakan menu <a href="<?php echo base_url('konsultasi'); ?>" style="color:var(--gold-300);text-decoration:underline">Konsultasi</a> agar permohonan PBG/SLF Anda diproses oleh tim yang sesuai.</p>
-        </details>
-        <details>
-          <summary>Apakah nama, email, dan nomor HP wajib diisi?</summary>
-          <p class="faq-a">Hanya <em>Nama</em> dan <em>Saran / Masukan</em> yang wajib. <em>Email</em> serta <em>No. HP / WhatsApp</em> bersifat opsional, namun membantu tim menghubungi Anda bila perlu klarifikasi.</p>
-        </details>
-        <details>
-          <summary>Apakah saya akan mendapat balasan?</summary>
-          <p class="faq-a">Tim DPUPR Kabupaten Cilacap menindaklanjuti masukan yang memerlukan tanggapan melalui kontak yang Anda berikan.</p>
-        </details>
-      </div>
+      <?php $faq = isset($faq) ? $faq : array(); ?>
+      <?php if (! empty($faq)): ?>
+        <p class="eyebrow" style="margin-top:40px">Pertanyaan Umum</p>
+        <div class="faq">
+          <?php foreach ($faq as $q): ?>
+            <details>
+              <summary><?php echo htmlspecialchars($q['pertanyaan'], ENT_QUOTES, 'UTF-8'); ?></summary>
+              <p class="faq-a"><?php echo nl2br(htmlspecialchars($q['jawaban'], ENT_QUOTES, 'UTF-8')); ?></p>
+            </details>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
     </div>
 
     <div class="reveal">

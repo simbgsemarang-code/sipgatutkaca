@@ -105,6 +105,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <a href="<?php echo base_url('admin/pengajuan-slf'); ?>">Pengajuan SLF</a>
       <a href="<?php echo base_url('admin/bangunan'); ?>">Sebaran Bangunan</a>
       <a href="<?php echo base_url('admin/cagar-budaya'); ?>" class="active">Kelola Cagar Budaya</a>
+      <a href="<?php echo base_url('admin/saran'); ?>">Saran &amp; FAQ</a>
     </nav>
     <nav>
       <a href="<?php echo base_url('login/keluar'); ?>" class="logout">Logout</a>

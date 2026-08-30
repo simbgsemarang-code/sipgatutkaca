@@ -14,6 +14,17 @@ class Saran_masukan extends CI_Controller {
 		$data['sukses'] = $this->session->flashdata('sukses');
 		$data['error']  = $this->session->flashdata('error');
 		$data['old']    = $this->session->flashdata('old');
+
+		$data['faq'] = array();
+		if ($this->db->table_exists('faq'))
+		{
+			$data['faq'] = $this->db
+				->where('tampil', 1)
+				->order_by('urutan', 'ASC')
+				->order_by('id', 'ASC')
+				->get('faq')->result_array();
+		}
+
 		$this->load->view('pages/saran_masukan', $data);
 	}
 
