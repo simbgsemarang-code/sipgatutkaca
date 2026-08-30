@@ -131,6 +131,8 @@ td .tag{white-space:nowrap}
 .leaflet-popup-content .pp-act{display:flex;gap:8px;margin-top:12px}
 .leaflet-popup-content .pp-btn{flex:1;text-align:center;padding:8px 10px;font-size:.72rem;font-weight:600;border:1px solid #c9a24b;border-radius:7px;color:#8a6a1c;text-decoration:none;white-space:nowrap}
 .leaflet-popup-content .pp-btn:hover{background:#f5ecd6}
+.leaflet-popup-content .pp-btn-solid{background:#c9a24b;border-color:#c9a24b;color:#20140a}
+.leaflet-popup-content .pp-btn-solid:hover{background:#b98f38}
 .leaflet-control-layers{border-radius:4px;box-shadow:0 2px 10px rgba(0,0,0,.28);color:#223}
 .leaflet-control-layers-expanded{padding:10px 12px;min-width:172px;font-size:.76rem}
 .leaflet-control-layers-list{line-height:1.35;padding:0;margin:0}
@@ -451,6 +453,7 @@ $KAT_WARNA  = array(
   layerKecamatan.addTo(map);
 
   /* ---- Marker cagar budaya ---- */
+  var URL_DETAIL = "<?php echo base_url('cagar-budaya/detail'); ?>";
   var group=L.layerGroup().addTo(map);
   var markerById={};
   function popupHTML(d){
@@ -463,7 +466,10 @@ $KAT_WARNA  = array(
       (d.tahun?"<div class='pp-row'><span>Tahun</span><span>"+esc(d.tahun)+"</span></div>":"")+
       "<span class='pp-status' style='color:"+w+";border-color:"+w+"'>"+esc(d.status)+"</span>";
     if(d.deskripsi) h+="<p style='margin:10px 0 0;font-size:.8rem;color:#556'>"+esc(d.deskripsi)+"</p>";
-    if(dir) h+="<div class='pp-act'><a class='pp-btn' target='_blank' rel='noopener' href='"+dir+"'>Menuju Lokasi</a></div>";
+    h+="<div class='pp-act'>"+
+       "<a class='pp-btn pp-btn-solid' target='_blank' rel='noopener' href='"+URL_DETAIL+"/"+d.id+"'>Detail</a>"+
+       (dir?"<a class='pp-btn' target='_blank' rel='noopener' href='"+dir+"'>Menuju Lokasi</a>":"")+
+       "</div>";
     return h;
   }
   function makeMarker(d){

@@ -32,6 +32,34 @@ class Cagar_budaya extends CI_Controller {
 		$this->load->view('pages/cagar_budaya', $data);
 	}
 
+	/** Halaman detail satu objek cagar budaya (dibuka dari tombol
+	 *  "Detail" pada popup peta). Route: /cagar-budaya/detail/{id} */
+	public function detail($id = null)
+	{
+		$id  = (int) $id;
+		$row = ($id > 0 && $this->db->table_exists('cagar_budaya'))
+			? $this->db->where('id', $id)->get('cagar_budaya')->row_array()
+			: NULL;
+
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$data['cb']       = $row;
+		$data['foto_url']  = $this->_foto_url(isset($row['foto']) ? $row['foto'] : NULL);
+		$data['warna_kat'] = array(
+			'Benda'    => '#8E6FCE',
+			'Bangunan' => '#3E7CB1',
+			'Struktur' => '#C0392B',
+			'Situs'    => '#2EA84F',
+			'Kawasan'  => '#D9822B',
+		);
+
+		$this->load->view('pages/cagar_budaya_detail', $data);
+	}
+
 	private function _foto_url($f)
 	{
 		if ($f === NULL || $f === '') return NULL;
