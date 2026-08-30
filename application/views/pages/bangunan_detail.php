@@ -116,7 +116,6 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
     </a>
     <?php $sesi_nav = info_sesi_navbar(); ?>
     <div class="auth-actions">
-      <a class="btn btn-ghost btn-sm" href="<?php echo base_url('spasial'); ?>">Peta</a>
       <?php if ($sesi_nav['masuk']): ?>
         <a class="btn btn-ghost btn-sm" href="<?php echo base_url($sesi_nav['tujuan_dashboard']); ?>">Dashboard</a>
         <div class="user-menu">
@@ -150,8 +149,6 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
         <div class="map-actions">
           <a class="btn btn-gold btn-sm" target="_blank" rel="noopener noreferrer"
              href="https://www.google.com/maps/dir/?api=1&destination=<?php echo $lat; ?>,<?php echo $lng; ?>">Menuju Lokasi →</a>
-          <a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer"
-             href="https://www.google.com/maps/search/?api=1&query=<?php echo $lat; ?>,<?php echo $lng; ?>">Lihat di Google Maps</a>
         </div>
       </div>
 
