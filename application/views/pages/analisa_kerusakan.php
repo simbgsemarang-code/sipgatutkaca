@@ -245,11 +245,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>Analisa Kerusakan
     </div>
     <div class="reveal" style="max-width:760px;margin:0 auto;text-align:center">
-      <p class="eyebrow">Analisa Kerusakan</p>
       <h2 style="margin:0 auto">ANALISIS KERUSAKAN</h2>
     </div>
 
-    <div class="map-shell reveal" style="margin-top:52px">
+    <div class="map-shell reveal" style="margin-top:20px">
       <div class="map-filter">
         <div class="field">
           <label for="f-cari">Cari Bangunan (Nama / Alamat / OPD)</label>
