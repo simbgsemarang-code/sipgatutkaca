@@ -61,9 +61,9 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3vw,2.3rem)
 .subttl{color:var(--muted);font-size:.9rem;margin-bottom:26px}
 .subttl .kat{display:inline-block;padding:2px 12px;border-radius:999px;font-size:.72rem;font-weight:600;color:#fff;letter-spacing:.04em;vertical-align:1px}
 
-.hero-foto{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 12px 34px var(--shadow);margin-bottom:34px;background:var(--surface-hi)}
-.hero-foto img{width:100%;height:clamp(240px,42vw,440px);object-fit:cover}
-.hero-foto figcaption{padding:10px 16px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface)}
+.foto-objek{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 12px 34px var(--shadow);margin-top:34px;background:var(--surface-hi)}
+.foto-objek img{width:100%;height:clamp(240px,42vw,440px);object-fit:cover}
+.foto-objek figcaption{padding:10px 16px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface)}
 
 .detail-grid{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:34px;align-items:start}
 @media(max-width:880px){.detail-grid{grid-template-columns:1fr}}
@@ -146,15 +146,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
       &nbsp; <?php echo $e($cb['kecamatan']); ?><?php echo $cb['kelurahan'] ? ' · ' . $e($cb['kelurahan']) : ''; ?>
     </p>
 
-    <?php if (! empty($foto_url)): ?>
-      <figure class="hero-foto">
-        <img src="<?php echo htmlspecialchars($foto_url, ENT_QUOTES, 'UTF-8'); ?>" alt="Foto <?php echo htmlspecialchars($judul, ENT_QUOTES, 'UTF-8'); ?>"
-             referrerpolicy="no-referrer"
-             onerror="this.closest('.hero-foto').style.display='none'">
-        <figcaption>Foto: <?php echo htmlspecialchars($cb['sumber'] ?: 'sumber publik', ENT_QUOTES, 'UTF-8'); ?></figcaption>
-      </figure>
-    <?php endif; ?>
-
     <div class="detail-grid">
       <div>
         <?php if ($ada_titik): ?>
@@ -198,6 +189,15 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
         <?php endif; ?>
       </div>
     </div>
+
+    <?php if (! empty($foto_url)): ?>
+      <figure class="foto-objek">
+        <img src="<?php echo htmlspecialchars($foto_url, ENT_QUOTES, 'UTF-8'); ?>" alt="Foto <?php echo htmlspecialchars($judul, ENT_QUOTES, 'UTF-8'); ?>"
+             referrerpolicy="no-referrer"
+             onerror="this.closest('.foto-objek').style.display='none'">
+        <figcaption>Foto: <?php echo htmlspecialchars($cb['sumber'] ?: 'sumber publik', ENT_QUOTES, 'UTF-8'); ?></figcaption>
+      </figure>
+    <?php endif; ?>
   </div>
 </main>
 
