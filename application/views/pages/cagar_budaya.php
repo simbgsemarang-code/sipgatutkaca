@@ -351,7 +351,7 @@ $KAT_WARNA  = array(
 <section>
   <div class="wrap split">
     <figure class="photo-frame reveal">
-      <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Barracks,_Benteng_Pendem,_Cilacap_2015-03-21.jpg?width=1200" alt="Barak Benteng Pendem Cilacap" loading="lazy">
+      <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Barracks,_Benteng_Pendem,_Cilacap_2015-03-21.jpg?width=1200" alt="Barak Benteng Pendem Cilacap" referrerpolicy="no-referrer">
       <figcaption class="photo-cap">Benteng Pendem — salah satu peninggalan sejarah di Kabupaten Cilacap</figcaption>
     </figure>
     <div class="reveal">
