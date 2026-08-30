@@ -301,7 +301,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 </section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="gis-data.js"></script>
+<script src="<?php echo base_url('assets/js/Leaflet.VectorGrid.bundled.js'); ?>?v=<?php echo @filemtime(FCPATH.'assets/js/Leaflet.VectorGrid.bundled.js'); ?>"></script>
+<script src="<?php echo base_url('gis-data.js'); ?>?v=<?php echo @filemtime(FCPATH.'gis-data.js'); ?>"></script>
 <script>
 // Titik bangunan diambil dari endpoint yang dikelola admin
 // (Admin::bangunan* -> tabel bangunan_gis). gis-data.js tetap dipakai
@@ -350,56 +351,129 @@ function bootPetaAnalisa(){
   document.getElementById("stSedang").textContent=counts["3"];
   document.getElementById("stBerat").textContent=counts["4"];
 
-  /* ============ PETA: LAPIS DASAR ============ */
-  var _gt="&x={x}&y={y}&z={z}",_go={maxZoom:20,subdomains:["0","1","2","3"],attribution:"&copy; Google"};
-  var baseGmap    =L.tileLayer("https://mt{s}.google.com/vt/lyrs=m"+_gt,_go),
-      baseOsm     =L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}),
-      baseGhybrid =L.tileLayer("https://mt{s}.google.com/vt/lyrs=y"+_gt,_go),
-      baseGsat    =L.tileLayer("https://mt{s}.google.com/vt/lyrs=s"+_gt,_go),
-      baseGterrain=L.tileLayer("https://mt{s}.google.com/vt/lyrs=p"+_gt,_go);
-  var map=L.map("map",{layers:[baseGmap],zoomControl:false,scrollWheelZoom:true}).setView([-7.53,108.99],10);
+  /* ============ PETA: LAPIS DASAR (samakan dgn halaman /peta resmi) ============ */
+  var _G="https://{s}.google.com/vt/lyrs=",_Gt="&x={x}&y={y}&z={z}",
+      _Go={maxZoom:20,subdomains:["mt0","mt1","mt2","mt3"]},
+      _attr="&copy; <b>A.S - Kab. Cilacap</b>";
+  var baseGmap    =L.tileLayer(_G+"m"+_Gt,{maxZoom:20,subdomains:_Go.subdomains,attribution:"&copy; Google Maps | "+_attr}),
+      baseOsm     =L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap | "+_attr}),
+      baseGhybrid =L.tileLayer(_G+"y"+_Gt,_Go),
+      baseGsat    =L.tileLayer(_G+"s"+_Gt,_Go),
+      baseGterrain=L.tileLayer(_G+"p"+_Gt,_Go);
+  var map=L.map("map",{layers:[baseGmap],zoomControl:false,scrollWheelZoom:true}).setView([-7.47356,108.985062],10);
   // Kontrol zoom dipindah ke bawah supaya tidak tertutup panel filter
   // yang kini melayang penuh di sisi atas peta.
   L.control.zoom({position:"bottomright"}).addTo(map);
   L.control.scale({imperial:false,position:"bottomleft"}).addTo(map);
 
-  /* ============ WARNA WILAYAH KECAMATAN ============ */
-  var PALET_KEC=["#4E9F3D","#3E7CB1","#D9822B","#8E6FCE","#E0526B","#4FB0C6","#B5B53C","#C9A24B",
-    "#5FBF8F","#C97CC9","#7C93C9","#E0A15A","#6FC2A0","#C96F6F","#8FBF5F","#B58AE0",
-    "#5FA8D9","#D9C15F","#9C6FE0","#5FD9B0","#D95FA1","#7FD95F","#D98F5F","#5F8FD9"];
-  var kecColorMap={};
-  function kecStyle(f){
-    var nm=(f.properties&&f.properties.namaKecamatan)||"?";
-    if(!(nm in kecColorMap))kecColorMap[nm]=PALET_KEC[Object.keys(kecColorMap).length%PALET_KEC.length];
-    var c=kecColorMap[nm];
-    return{color:c,weight:1.6,opacity:.9,fillColor:c,fillOpacity:.28};
+  // Pane: RTRW di bawah garis/titik, titik bangunan paling atas.
+  map.createPane("paneRTRW");     map.getPane("paneRTRW").style.zIndex=350;
+  map.createPane("paneBangunan"); map.getPane("paneBangunan").style.zIndex=400;
+
+  /* ============ OVERLAY: ADMIN, JALAN & RTRW ============
+     Diambil dari gis-data.js (kec/desa/kab/jalan kabupaten) + gisJalan
+     Provinsi/Nasional (baru) + RTRW (vector tile MapTiler). Gaya
+     disamakan dengan halaman /peta resmi. "Bangunan" TIDAK di sini —
+     titiknya tetap dari tabel (endpoint /gis/bangunan) di bawah. */
+  function _warna(w){ return ({"1":"#FF1D1D","2":"#000CFF","3":"#FFB557","4":"#00B418"})[String(w)] || "#3388ff"; }
+  function _polyOnly(f){
+    var t=f.geometry&&f.geometry.type;
+    return t==="Polygon"||t==="MultiPolygon"||(t==="GeometryCollection"&&f.geometry.geometries.some(function(g){return g.type==="Polygon"||g.type==="MultiPolygon";}));
   }
-  var kecLayer=null;
-  if(window.gisKecamatan&&gisKecamatan.features){
-    kecLayer=L.geoJSON(gisKecamatan,{
-      style:kecStyle,
-      onEachFeature:function(f,l){
-        var nm=f.properties&&f.properties.namaKecamatan;
-        if(nm)l.bindTooltip("Kecamatan "+nm,{sticky:true});
-        l.on("mouseover",function(){ l.setStyle({fillOpacity:.42,weight:2.4}); });
-        l.on("mouseout",function(){ l.setStyle(kecStyle(f)); });
-      }
-    }).addTo(map);
+  function _has(v){ return v&&v.features&&v.features.length; }
+
+  /* Adm. Kabupaten (garis batas) */
+  var layerKabupaten=_has(window.gisKabupaten)?L.geoJSON(gisKabupaten,{
+    onEachFeature:function(f,l){
+      if(!(f.properties&&f.properties.idKabupaten))return;
+      l.setStyle({color:"#1B2631",weight:1,dashArray:"5, 3"});
+      l.bindTooltip("<b><i> Batas Adm. Kabupaten "+f.properties.namaKabupaten+"</i></b>");
+      l.bindPopup("<b>Batas Adm. Kabupaten "+f.properties.namaKabupaten+"</b>");
+      l.on("mouseover",function(e){e.target.setStyle({color:"#6E2C00"});});
+      l.on("mouseout", function(e){e.target.setStyle({color:"#1B2631"});});
+    }
+  }):L.layerGroup();
+
+  /* Adm. Kecamatan (poligon berwarna sesuai properti "warna") */
+  var layerKecamatan=_has(window.gisKecamatan)?L.geoJSON(gisKecamatan,{
+    filter:_polyOnly,
+    style:function(f){return{color:_warna(f.properties.warna),weight:1,opacity:.7,fillOpacity:.1,dashArray:"5,3"};},
+    onEachFeature:function(f,l){ if(f.properties&&f.properties.idKecamatan)l.bindPopup("Kec. "+f.properties.namaKecamatan); }
+  }):L.layerGroup();
+
+  /* Adm. Desa/Kelurahan */
+  var layerDesa=_has(window.gisDesa)?L.geoJSON(gisDesa,{
+    filter:_polyOnly,
+    style:function(f){return{color:_warna(f.properties.warna),weight:1,opacity:.7,fillOpacity:.05,dashArray:"5,3"};},
+    onEachFeature:function(f,l){ if(f.properties&&f.properties.idDesa)l.bindPopup("Desa. "+f.properties.namaDesa); }
+  }):L.layerGroup();
+
+  /* Jalan Nasional */
+  var layerJalanNasional=_has(window.gisJalanNasional)?L.geoJSON(gisJalanNasional,{
+    onEachFeature:function(f,l){
+      var p=f.properties||{}; if(!p.idJalanNasional)return;
+      l.setStyle({color:"#c61515",weight:3});
+      l.bindTooltip("<b><i> RUAS "+p.namaJalanNasional+"</i></b>");
+      l.bindPopup("<b>RUAS "+p.namaJalanNasional+"</b> <b>("+p.noJalanNasional+")</b><br> <i>Status <b> "+p.statusJalan+" </b></i> <i>Fungsi <b> "+p.fungsiJalan+" </b></i>");
+      l.on("mouseover",function(e){e.target.setStyle({color:"#FF4000"});});
+      l.on("mouseout", function(e){e.target.setStyle({color:"#c61515"});});
+    }
+  }):L.layerGroup();
+
+  /* Jalan Provinsi */
+  var layerJalanProvinsi=_has(window.gisJalanProvinsi)?L.geoJSON(gisJalanProvinsi,{
+    onEachFeature:function(f,l){
+      var p=f.properties||{}; if(!p.idJalanProvinsi)return;
+      l.setStyle({color:"#3e49da",weight:2});
+      l.bindTooltip("<b><i> RUAS "+p.namaJalanProvinsi+"</i></b>");
+      l.bindPopup("<b>RUAS "+p.namaJalanProvinsi+"</b> <b>("+p.noJalanProvinsi+")</b><br> <i>Status <b> "+p.statusJalan+" </b></i> <i>Fungsi <b> "+p.fungsiJalan+" </b></i>");
+      l.on("mouseover",function(e){e.target.setStyle({color:"#FF4000"});});
+      l.on("mouseout", function(e){e.target.setStyle({color:"#3e49da"});});
+    }
+  }):L.layerGroup();
+
+  /* Jalan Kabupaten */
+  var _KECJLN=["Dayeuhluhur","Wanareja","Majenang","Cimanggu","Karangpucung","Cipari","Sidareja","Kedungreja","Patimuan","Gandrungmangu","Bantarsari","Kampung Laut","Kawunganten","Jeruklegi","Kesugihan","Cilacap Utara","Cilacap Tengah","Cilacap Selatan","Adipala","Maos","Sampang","Kroya","Binangun","Nusawungu"];
+  var _UPTJLN={"1":"Majenang","2":"Sidareja","3":"Jeruklegi","4":"Kroya"};
+  var _jknAktif=null;
+  var layerJalanKabupaten=_has(window.gisJalan)?L.geoJSON(gisJalan,{
+    onEachFeature:function(f,l){
+      var p=f.properties||{}; if(!p.idJalan)return;
+      l.setStyle({color:"#ff5252",weight:2});
+      l.bindTooltip("<b><i> RUAS "+p.namaJalan+"</i></b>");
+      l.bindPopup("<b>RUAS "+p.namaJalan+"</b> <b>("+p.noJalan+")</b><br> <i>UPT Pemeliharaan Jalan <b>"+(_UPTJLN[p.upt]||"-")+"</b></i><br><i>Kecamatan <b>"+(_KECJLN[(parseInt(p.kecamatan,10)||0)-1]||"-")+"</b></i><hr>");
+      l.on("mouseover",function(e){ if(_jknAktif!==e.target)e.target.setStyle({color:"#FF4000"}); });
+      l.on("mouseout", function(e){ if(_jknAktif!==e.target)e.target.setStyle({color:"#ff5252"}); });
+      l.on("click",function(e){
+        if(e.originalEvent)L.DomEvent.stopPropagation(e.originalEvent);
+        if(_jknAktif&&_jknAktif!==e.target)_jknAktif.setStyle({color:"#ff5252",weight:2});
+        _jknAktif=e.target; e.target.setStyle({color:"#00FFFF",weight:3});
+      });
+    }
+  }):L.layerGroup();
+
+  /* RTRW — vector tile (MapTiler) via Leaflet.VectorGrid */
+  var layerRTRW=L.layerGroup();
+  if(L.vectorGrid&&L.vectorGrid.protobuf){
+    var _rtrwKode={1:"#ffffff",2:"#9a99ff",3:"#e5d9ff",4:"#b3e6e7",5:"#9af2cc",6:"#cb9998",7:"#fee6fe",8:"#73b2ff",9:"#72dffe",10:"#ccff80",11:"#99ff99",12:"#ffd37f",13:"#ffaa00",14:"#e74cff",15:"#e6e6b2",16:"#b8ffc7",17:"#ffffbe",18:"#c02f1a",19:"#cdffcc",20:"#c3ffcc",21:"#e699ff"};
+    L.vectorGrid.protobuf("https://api.maptiler.com/tiles/019714d6-e798-7829-a293-06f529070ecd/{z}/{x}/{y}.pbf?key=pP7Y0XrqMfIZ58PvGQHX",{
+      pane:"paneRTRW",
+      // MapTiler membalas HTTP 400 "Out of bounds" utk tile di luar cakupan
+      // data -> batasi permintaan tile ke bounding box dataset (dari tiles.json)
+      bounds:L.latLngBounds([[-7.784859999999999,108.55585],[-7.138700000000017,109.39394000000001]]),
+      minZoom:0,maxZoom:20,minNativeZoom:10,maxNativeZoom:17,
+      vectorTileLayerStyles:{ layerrtrw:function(p){ var c=(p&&_rtrwKode[p.KODE])||"#CCCCCC"; return {fill:true,fillColor:c,fillOpacity:.35,color:c,weight:1,opacity:.8}; } },
+      interactive:true,getFeatureId:function(f){return f.properties.ID;}
+    }).on("click",function(e){
+      if(e.originalEvent)L.DomEvent.stopPropagation(e.originalEvent);
+      var p=e.layer&&e.layer.properties;
+      if(p&&p.NAMOBJ)L.popup().setLatLng(e.latlng).setContent("<b>Nama:</b> "+p.NAMOBJ+"<br><b>Kec:</b> "+(p.KEC||"-")).openOn(map);
+    }).addTo(layerRTRW);
   }
 
-  /* ============ LAPIS REFERENSI WILAYAH (dari gis-data.js) ============ */
-  var kabLayer=(window.gisKabupaten&&gisKabupaten.features)
-    ? L.geoJSON(gisKabupaten,{style:{color:"#C9A24B",weight:2.2,dashArray:"7 6",fill:false}}).bindTooltip("Batas Kabupaten Cilacap",{sticky:true})
-    : null;
-  var desaLayer=(window.gisDesa&&gisDesa.features)
-    ? L.geoJSON(gisDesa,{style:{color:"#8FD3E8",weight:.8,opacity:.55,fillColor:"#8FD3E8",fillOpacity:.03},
-        onEachFeature:function(f,l){var nm=f.properties&&f.properties.namaDesa;if(nm)l.bindTooltip(nm,{sticky:true});}})
-    : null;
-  var jalanLayer=(window.gisJalan&&gisJalan.features)
-    ? L.geoJSON(gisJalan,{style:{color:"#E8B84B",weight:1.3,opacity:.6},
-        onEachFeature:function(f,l){var nm=f.properties&&f.properties.namaJalan;if(nm)l.bindTooltip(nm,{sticky:true});}})
-    : null;
-  if(kabLayer)kabLayer.addTo(map);
+  /* Aktif saat awal: Adm. Kabupaten + Adm. Kecamatan (Bangunan lihat di bawah) */
+  layerKabupaten.addTo(map);
+  layerKecamatan.addTo(map);
 
   var legend=L.control({position:"bottomright"});
   legend.onAdd=function(){
@@ -417,12 +491,23 @@ function bootPetaAnalisa(){
   var markerById={};
 
   /* ============ KONTROL LAPISAN ============ */
-  var _base={"Google Maps":baseGmap,"OpenStreetMap":baseOsm,"Google Hybrid":baseGhybrid,"Google Satelit":baseGsat,"Google Terrain":baseGterrain};
-  var _ovl={"Bangunan":group};
-  if(kabLayer)  _ovl["Batas Kabupaten"]=kabLayer;
-  if(kecLayer)  _ovl["Batas Kecamatan"]=kecLayer;
-  if(desaLayer) _ovl["Batas Desa"]=desaLayer;
-  if(jalanLayer)_ovl["Jaringan Jalan"]=jalanLayer;
+  var _base={
+    "Google Maps":baseGmap,
+    "OpenStreetMap":baseOsm,
+    "Google Hybrid":baseGhybrid,
+    "Google Satelite":baseGsat,
+    "Google Terrain":baseGterrain
+  };
+  var _ovl={
+    "Bangunan":group,
+    "Adm. Kabupaten":layerKabupaten,
+    "Adm. Kecamatan":layerKecamatan,
+    "Adm. Desa":layerDesa,
+    "Jalan Nasional":layerJalanNasional,
+    "Jalan Provinsi":layerJalanProvinsi,
+    "Jalan Kabupaten":layerJalanKabupaten,
+    "RTRW":layerRTRW
+  };
   L.control.layers(_base,_ovl,{position:"bottomleft",collapsed:true}).addTo(map);
 
   var URL_DETAIL="<?php echo base_url('bangunan'); ?>";
@@ -443,7 +528,7 @@ function bootPetaAnalisa(){
   }
   function makeMarker(d){
     var info=infoKondisi(d.kondisi);
-    var m=L.circleMarker([d.lat,d.lng],{radius:6,color:"#ffffff",weight:1.4,fillColor:info.color,fillOpacity:.9});
+    var m=L.circleMarker([d.lat,d.lng],{pane:"paneBangunan",radius:6,color:"#ffffff",weight:1.4,fillColor:info.color,fillOpacity:.9});
     m.bindPopup(popupHTML(d));
     m._data=d;
     markerById[d.id]=m;
