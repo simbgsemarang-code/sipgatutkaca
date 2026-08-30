@@ -53,10 +53,10 @@ header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:
 .user-menu-panel a{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.76rem;letter-spacing:.04em;color:var(--text)}
 .user-menu-panel a:hover{background:var(--surface-hi);color:var(--gold-300)}
 .user-menu-panel a.logout:hover{color:#E0526B;background:rgba(224,82,107,.08)}
-.hero-breadcrumb{margin-bottom:20px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(248,244,234,.7)}
-.hero-breadcrumb a{color:#E4C87B}
-.hero-breadcrumb a:hover{text-decoration:underline}
-.hero-breadcrumb .sep{margin:0 8px;color:rgba(248,244,234,.35)}
+.page-breadcrumb{margin-bottom:26px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.page-breadcrumb a{color:var(--gold-300)}
+.page-breadcrumb a:hover{text-decoration:underline}
+.page-breadcrumb .sep{margin:0 8px;color:var(--line)}
 
 .hero{position:relative;display:flex;align-items:center;overflow:hidden}
 .hero.page{min-height:56vh}
@@ -233,20 +233,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   </div>
 </header>
 
-<section class="hero page">
-  <div class="hero-bg" style="background-image:url('hero-kantor-dpupr.jpg')" role="img" aria-label="Gedung Kantor DPUPR Kabupaten Cilacap"></div>
+<section style="padding-top:calc(84px + 40px)">
   <div class="wrap">
-    <div class="hero-breadcrumb">
+    <div class="page-breadcrumb">
       <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>Cagar Budaya
     </div>
-    <p class="hero-eyebrow">Pelestarian Warisan</p>
-    <h1>Menjaga <em>Cagar Budaya</em> Kabupaten Cilacap</h1>
-    <p class="hero-lead">Bangunan dan struktur bersejarah adalah bagian dari identitas ruang kabupaten. Setiap rencana pembangunan di sekitarnya wajib memperhatikan status pelindungan cagar budaya sebelum persetujuan diterbitkan.</p>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
     <div class="reveal">
       <p class="eyebrow">Dasar Perlindungan</p>
       <h2>Apa yang Dimaksud Cagar Budaya</h2>
@@ -296,22 +287,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   </div>
 </section>
 
-<section>
-  <div class="wrap">
-    <div class="reveal">
-      <p class="eyebrow">Tata Cara</p>
-      <h2>Alur Pengusulan Penetapan</h2>
-      <p class="section-lead">Warga, komunitas, maupun instansi dapat mengusulkan suatu bangunan atau situs untuk dikaji dan ditetapkan sebagai cagar budaya melalui tahapan berikut.</p>
-    </div>
-    <div class="steps reveal">
-      <div class="step"><span class="step-num">01</span><div><h3>Pendaftaran Objek Diduga Cagar Budaya</h3><p>Pemilik, masyarakat, atau instansi mendaftarkan objek melalui Tim Pendaftaran Cagar Budaya kabupaten disertai data awal dan foto.</p></div></div>
-      <div class="step"><span class="step-num">02</span><div><h3>Kajian Tim Ahli Cagar Budaya</h3><p>Tim Ahli Cagar Budaya (TACB) melakukan kajian terhadap nilai penting objek berdasarkan kriteria usia, kesejarahan, keilmuan, dan kebudayaan.</p></div></div>
-      <div class="step"><span class="step-num">03</span><div><h3>Rekomendasi Penetapan</h3><p>Hasil kajian yang memenuhi kriteria direkomendasikan kepada Bupati untuk ditetapkan sebagai cagar budaya.</p></div></div>
-      <div class="step"><span class="step-num">04</span><div><h3>Penerbitan SK &amp; Pencatatan Register</h3><p>Objek yang ditetapkan dicatat dalam Register Nasional Cagar Budaya dan mendapat perlindungan hukum atas pemanfaatan maupun perubahannya.</p></div></div>
-    </div>
-  </div>
-</section>
-
 <?php
 $daftar     = isset($daftar) ? $daftar : array();
 $total      = isset($total) ? (int) $total : count($daftar);
@@ -324,7 +299,7 @@ $KAT_WARNA  = array(
   'Kawasan'  => '#D9822B',
 );
 ?>
-<section class="alt">
+<section>
   <div class="wrap">
     <div class="reveal">
       <p class="eyebrow">Sebaran &amp; Daftar</p>
