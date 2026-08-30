@@ -412,7 +412,10 @@ class Admin extends CI_Controller {
 		$q    = trim((string) $this->input->get('q'));
 		$kec  = trim((string) $this->input->get('kec'));
 		$kon  = trim((string) $this->input->get('kondisi'));
-		$page = max(1, (int) $this->input->get('page'));
+		// Param halaman sengaja 'hal', BUKAN 'page' - WAF/mod_security di
+		// host live memblokir (403) request apa pun yang punya query
+		// parameter bernama 'page' (pola scan LFI ?page=...).
+		$page = max(1, (int) $this->input->get('hal'));
 		$per  = 25;
 
 		$filter = function () use ($q, $kec, $kon) {

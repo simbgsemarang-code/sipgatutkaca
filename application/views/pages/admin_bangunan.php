@@ -272,7 +272,13 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <?php if ($total_page > 1): ?>
       <?php
       $qs = function ($p) use ($q, $kec, $kondisi) {
-        return '?' . http_build_query(array('q' => $q, 'kec' => $kec, 'kondisi' => $kondisi, 'page' => $p));
+        // Cuma kirim parameter yang terisi. Param halaman = 'hal', bukan
+        // 'page' (WAF host memblokir query ?page=...).
+        $par = array('hal' => $p);
+        if ($q !== '')       $par['q'] = $q;
+        if ($kec !== '')     $par['kec'] = $kec;
+        if ($kondisi !== '') $par['kondisi'] = $kondisi;
+        return '?' . http_build_query($par);
       };
       $start = max(1, $page - 3); $end = min($total_page, $page + 3);
       ?>
