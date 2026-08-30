@@ -270,25 +270,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   </div>
 </section>
 
-<section class="alt">
-  <div class="wrap split">
-    <figure class="photo-frame reveal">
-      <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Barracks,_Benteng_Pendem,_Cilacap_2015-03-21.jpg?width=1200" alt="Barak Benteng Pendem Cilacap" loading="lazy">
-      <figcaption class="photo-cap">Benteng Pendem — salah satu peninggalan sejarah di Kabupaten Cilacap</figcaption>
-    </figure>
-    <div class="reveal">
-      <p class="eyebrow">Kriteria Penetapan</p>
-      <h2>Nilai yang Dipertimbangkan</h2>
-      <div class="list">
-        <div class="list-item"><span class="list-key">Usia</span><span class="list-val">Berusia 50 tahun atau lebih, atau mewakili gaya arsitektur khas suatu masa.</span></div>
-        <div class="list-item"><span class="list-key">Kesejarahan</span><span class="list-val">Memiliki keterkaitan dengan peristiwa atau tokoh penting dalam sejarah wilayah.</span></div>
-        <div class="list-item"><span class="list-key">Keilmuan</span><span class="list-val">Bermanfaat bagi pengembangan ilmu pengetahuan, teknologi, dan pendidikan.</span></div>
-        <div class="list-item"><span class="list-key">Kebudayaan</span><span class="list-val">Memperkuat kepribadian bangsa dan menjadi bagian dari identitas kolektif daerah.</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <?php
 $daftar     = isset($daftar) ? $daftar : array();
 $total      = isset($total) ? (int) $total : count($daftar);
@@ -301,7 +282,7 @@ $KAT_WARNA  = array(
   'Kawasan'  => '#D9822B',
 );
 ?>
-<section>
+<section class="alt">
   <div class="wrap">
     <div class="reveal">
       <p class="eyebrow">Sebaran &amp; Daftar</p>
@@ -364,6 +345,25 @@ $KAT_WARNA  = array(
       </tbody>
     </table>
     <p class="note">Data dihimpun dari sumber publik: Registrasi Nasional Cagar Budaya (Kemdikbud), BPCB Jawa Tengah, Wikipedia, dan pemberitaan resmi Pemkab Cilacap. Sebagian koordinat masih perkiraan dan status sebagian objek masih dalam kajian. Data resmi dan termutakhir mengikuti penetapan Tim Ahli Cagar Budaya (TACB) dan SK Bupati Kabupaten Cilacap.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap split">
+    <figure class="photo-frame reveal">
+      <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Barracks,_Benteng_Pendem,_Cilacap_2015-03-21.jpg?width=1200" alt="Barak Benteng Pendem Cilacap" loading="lazy">
+      <figcaption class="photo-cap">Benteng Pendem — salah satu peninggalan sejarah di Kabupaten Cilacap</figcaption>
+    </figure>
+    <div class="reveal">
+      <p class="eyebrow">Kriteria Penetapan</p>
+      <h2>Nilai yang Dipertimbangkan</h2>
+      <div class="list">
+        <div class="list-item"><span class="list-key">Usia</span><span class="list-val">Berusia 50 tahun atau lebih, atau mewakili gaya arsitektur khas suatu masa.</span></div>
+        <div class="list-item"><span class="list-key">Kesejarahan</span><span class="list-val">Memiliki keterkaitan dengan peristiwa atau tokoh penting dalam sejarah wilayah.</span></div>
+        <div class="list-item"><span class="list-key">Keilmuan</span><span class="list-val">Bermanfaat bagi pengembangan ilmu pengetahuan, teknologi, dan pendidikan.</span></div>
+        <div class="list-item"><span class="list-key">Kebudayaan</span><span class="list-val">Memperkuat kepribadian bangsa dan menjadi bagian dari identitas kolektif daerah.</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
