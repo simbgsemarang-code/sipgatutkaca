@@ -523,6 +523,42 @@ class Admin extends CI_Controller {
 			return;
 		}
 
+		// ---- Foto: unggah file ke assets/foto-bangunan/ (web-accessible,
+		// beda dari application/uploads/ yang ditutup .htaccess) ----
+		$dir_foto = FCPATH . 'assets/foto-bangunan/';
+		$foto     = ($id > 0 && ! empty($row['foto'])) ? $row['foto'] : NULL; // pertahankan yang lama
+
+		if ($this->input->post('hapus_foto') === '1' && $foto !== NULL)
+		{
+			@unlink($dir_foto . basename($foto));
+			$foto = NULL;
+		}
+
+		if (! empty($_FILES['foto_file']['name']))
+		{
+			if (! is_dir($dir_foto)) @mkdir($dir_foto, 0755, TRUE);
+			$this->load->library('upload');
+			$this->upload->initialize(array(
+				'upload_path'   => $dir_foto,
+				'allowed_types' => 'jpg|jpeg|png|webp',
+				'max_size'      => 5120,
+				'encrypt_name'  => TRUE,
+			));
+			if ($this->upload->do_upload('foto_file'))
+			{
+				if ($foto !== NULL) @unlink($dir_foto . basename($foto));
+				$hasil = $this->upload->data();
+				$foto  = $hasil['file_name'];
+			}
+			else
+			{
+				$this->session->set_flashdata('error', 'Foto gagal diunggah: ' . strip_tags($this->upload->display_errors('', '')));
+				$this->session->set_flashdata('old', $this->input->post());
+				redirect($tujuan);
+				return;
+			}
+		}
+
 		$simpan = array(
 			'opd'           => $p('opd'),
 			'unit'          => $p('unit'),
@@ -536,7 +572,7 @@ class Admin extends CI_Controller {
 			'kondisi'       => $kondisi,
 			'latitude'      => round((float) $lat_in, 8),
 			'longitude'     => round((float) $lng_in, 8),
-			'foto'          => $p('foto'),
+			'foto'          => $foto,
 		);
 
 		if ($id > 0)
@@ -562,6 +598,10 @@ class Admin extends CI_Controller {
 			$this->session->set_flashdata('error', 'Data bangunan tidak ditemukan.');
 			redirect('admin/bangunan');
 			return;
+		}
+		if (! empty($row['foto']))
+		{
+			@unlink(FCPATH . 'assets/foto-bangunan/' . basename($row['foto']));
 		}
 		$this->db->where('id', $id)->delete('bangunan_gis');
 		$this->session->set_flashdata('sukses', 'Bangunan "' . $row['nama_bangunan'] . '" berhasil dihapus dari peta.');

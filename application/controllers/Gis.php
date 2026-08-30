@@ -36,7 +36,7 @@ class Gis extends CI_Controller {
 						'kelurahan'    => $r['kelurahan'],
 						'alamat'       => $r['alamat'],
 						'kondisi'      => (string) $r['kondisi'],
-						'foto'         => $r['foto'],
+						'foto'         => $this->_foto_url($r['foto']),
 						'titikLokasi'  => $lat . ',' . $lng,
 					),
 					'geometry' => array(
@@ -51,5 +51,15 @@ class Gis extends CI_Controller {
 			->set_content_type('application/json; charset=utf-8')
 			->set_header('Cache-Control: no-cache, must-revalidate')
 			->set_output(json_encode(array('type' => 'FeatureCollection', 'features' => $features)));
+	}
+
+	/** Kolom `foto` bisa berupa nama file hasil unggah (baru) atau URL
+	 *  penuh (data lama sebelum diganti ke input file) - normalkan jadi
+	 *  URL yang bisa dipakai langsung di <img src>. */
+	private function _foto_url($f)
+	{
+		if ($f === NULL || $f === '') return NULL;
+		if (preg_match('#^https?://#i', $f)) return $f;
+		return base_url('assets/foto-bangunan/' . ltrim($f, '/'));
 	}
 }

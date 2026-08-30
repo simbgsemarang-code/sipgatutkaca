@@ -219,7 +219,7 @@ $lng0 = $v('longitude', '108.99');
       <div class="alertbox" style="border-color:#E0526B;background:rgba(224,82,107,.12);color:#E0526B"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
-    <form class="form-card" method="post" action="<?php echo base_url('admin/bangunan-simpan' . ($edit ? '/' . (int) $row['id'] : '')); ?>" id="fbangunan">
+    <form class="form-card" method="post" enctype="multipart/form-data" action="<?php echo base_url('admin/bangunan-simpan' . ($edit ? '/' . (int) $row['id'] : '')); ?>" id="fbangunan">
       <div class="fld">
         <label>Nama Bangunan <span class="req">*</span></label>
         <input type="text" name="nama_bangunan" required value="<?php echo htmlspecialchars($v('nama_bangunan'), ENT_QUOTES, 'UTF-8'); ?>">
@@ -270,9 +270,22 @@ $lng0 = $v('longitude', '108.99');
         <textarea name="alamat" rows="2"><?php echo htmlspecialchars($v('alamat'), ENT_QUOTES, 'UTF-8'); ?></textarea>
       </div>
 
+      <?php
+      $foto_now = ($row !== NULL && ! empty($row['foto'])) ? $row['foto'] : '';
+      $foto_src = ($foto_now === '') ? '' : (preg_match('#^https?://#i', $foto_now) ? $foto_now : base_url('assets/foto-bangunan/' . $foto_now));
+      ?>
       <div class="fld">
-        <label>URL Foto <span style="text-transform:none;letter-spacing:0;color:var(--muted)">(opsional)</span></label>
-        <input type="url" name="foto" placeholder="https://…" value="<?php echo htmlspecialchars($v('foto'), ENT_QUOTES, 'UTF-8'); ?>">
+        <label>Foto Bangunan <span style="text-transform:none;letter-spacing:0;color:var(--muted)">(opsional)</span></label>
+        <?php if ($foto_src !== ''): ?>
+          <div style="margin-bottom:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <img src="<?php echo htmlspecialchars($foto_src, ENT_QUOTES, 'UTF-8'); ?>" alt="Foto bangunan saat ini" style="height:92px;width:auto;max-width:160px;border:1px solid var(--line);border-radius:8px;object-fit:cover">
+            <label style="display:flex;align-items:center;gap:8px;font-size:.8rem;letter-spacing:0;text-transform:none;color:var(--muted);margin:0;cursor:pointer">
+              <input type="checkbox" name="hapus_foto" value="1" style="width:auto"> Hapus foto ini
+            </label>
+          </div>
+        <?php endif; ?>
+        <input type="file" name="foto_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+        <p style="font-size:.72rem;color:var(--muted);margin-top:6px">JPG / PNG / WebP, maksimal 5 MB.<?php echo $foto_src !== '' ? ' Biarkan kosong kalau tidak ingin mengganti.' : ''; ?></p>
       </div>
 
       <div class="grid2">

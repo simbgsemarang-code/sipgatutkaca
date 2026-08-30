@@ -15,6 +15,12 @@ application/uploads/pengajuan_pbg/*
 application/uploads/pengajuan_slf/*
 !application/uploads/pengajuan_slf/index.html
 
+# Foto bangunan yang diunggah admin (Admin::bangunan_simpan) - web
+# accessible di assets/foto-bangunan/. Folder tetap ditrack lewat
+# index.html-nya.
+assets/foto-bangunan/*
+!assets/foto-bangunan/index.html
+
 # Kecuali folder dummy_lengkap/ - berkas CONTOH/dummy (bukan data
 # pengguna sungguhan) untuk 1 data uji coba Pengajuan PBG lengkap,
 # lihat database/pengajuan_pbg_dummy_lengkap.sql. Folder unggahan
