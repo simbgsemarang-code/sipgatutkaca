@@ -288,10 +288,15 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .map-count{margin-top:14px;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
 .map-count b{color:var(--gold-300);font-family:var(--display);font-weight:400}
 /* Popup */
-.leaflet-popup-content{font-family:var(--body);font-size:.85rem;line-height:1.6;color:#223}
+.leaflet-popup-content{font-family:var(--body);font-size:.85rem;line-height:1.6;color:#223;min-width:248px}
 .leaflet-popup-content h6{font-family:var(--display);font-weight:400;font-size:1rem;letter-spacing:.05em;color:#8a6a1c;margin:0 0 6px}
-.pp-row{display:flex;gap:8px}.pp-row span:first-child{min-width:86px;color:#889}
+.pp-row{display:flex;gap:8px}.pp-row span:first-child{min-width:104px;color:#889;flex:0 0 auto}
 .pp-status{display:inline-block;margin-top:8px;padding:2px 12px;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;border:1px solid}
+.leaflet-popup-content .pp-act{display:flex;gap:8px;margin-top:12px}
+.leaflet-popup-content .pp-btn{flex:1;text-align:center;padding:8px 10px;font-size:.72rem;font-weight:600;letter-spacing:.02em;border:1px solid #c9a24b;border-radius:7px;color:#8a6a1c;text-decoration:none;white-space:nowrap;transition:.15s}
+.leaflet-popup-content .pp-btn:hover{background:#f5ecd6}
+.leaflet-popup-content .pp-btn-solid{background:#c9a24b;border-color:#c9a24b;color:#20140a}
+.leaflet-popup-content .pp-btn-solid:hover{background:#b98f38}
 .pp-g{color:#1d7a38;border-color:#2EA84F}.pp-y{color:#9c7a10;border-color:#F2C230}
 /* Tile sedikit diredupkan pada tema gelap */
 html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) saturate(.85)}
@@ -387,13 +392,14 @@ function bootPetaSpasial(){
   var DATA=(gisBangunan.features||[]).map(function(f,i){
     var p=f.properties||{},c=(f.geometry&&f.geometry.coordinates)||[null,null];
     return{
-      id:i+1,
+      id:p.idBangunan||(i+1),
       nama:p.namaBangunan||"(Tanpa nama)",
       opd:p.opd||p.institusi||p.unit||"-",
       alamat:p.alamat||"-",
       kec:p.kecamatan||"-",
       kel:p.kelurahan||"-",
       fungsi:p.fungsi||"-",
+      kondisi:p.kondisi||"",
       lantai:p.jumlahLantai,
       lat:c[1],lng:c[0]
     };
@@ -509,15 +515,25 @@ function bootPetaSpasial(){
 
   /* Marker Bangunan */
   var group=L.layerGroup().addTo(map);
+  var KONDISI={"1":{label:"Baik",color:"#2EA84F"},"2":{label:"Rusak Ringan",color:"#F2C230"},"3":{label:"Rusak Sedang",color:"#D9822B"},"4":{label:"Rusak Berat",color:"#C0392B"}};
+  var URL_DETAIL="<?php echo base_url('bangunan'); ?>";
+  function esc(s){ return String(s==null?"":s).replace(/[&<>\"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
   function popupHTML(d){
     var warna=warnaFungsi(d.fungsi);
-    return "<h6>"+d.nama+"</h6>"+
-      "<div class='pp-row'><span>OPD</span><span>"+d.opd+"</span></div>"+
-      "<div class='pp-row'><span>Fungsi</span><span>"+d.fungsi+"</span></div>"+
-      "<div class='pp-row'><span>Alamat</span><span>"+d.alamat+"</span></div>"+
-      "<div class='pp-row'><span>Kecamatan</span><span>"+d.kec+"</span></div>"+
-      "<div class='pp-row'><span>Kelurahan</span><span>"+d.kel+"</span></div>"+
-      "<span class='pp-status' style='color:"+warna+";border-color:"+warna+"'>"+d.fungsi+"</span>";
+    var kon=KONDISI[d.kondisi];
+    var dir="https://www.google.com/maps/dir/?api=1&destination="+d.lat+","+d.lng;
+    var h="<h6>("+d.id+") "+esc(d.nama)+"</h6>"+
+      "<div class='pp-row'><span>OPD</span><span>"+esc(d.opd)+"</span></div>"+
+      "<div class='pp-row'><span>Fungsi</span><span>"+esc(d.fungsi)+"</span></div>"+
+      "<div class='pp-row'><span>Desa / Kelurahan</span><span>"+esc(d.kel)+"</span></div>"+
+      "<div class='pp-row'><span>Kecamatan</span><span>"+esc(d.kec)+"</span></div>"+
+      "<div class='pp-row'><span>Alamat</span><span>"+esc(d.alamat)+"</span></div>";
+    if(kon) h+="<span class='pp-status' style='color:"+kon.color+";border-color:"+kon.color+"'>"+kon.label+"</span>";
+    h+="<div class='pp-act'>"+
+        "<a class='pp-btn pp-btn-solid' target='_blank' rel='noopener' href='"+URL_DETAIL+"/"+d.id+"'>Detail Bangunan</a>"+
+        "<a class='pp-btn' target='_blank' rel='noopener' href='"+dir+"'>Menuju Lokasi</a>"+
+      "</div>";
+    return h;
   }
   function makeMarker(d){
     var c=warnaFungsi(d.fungsi);

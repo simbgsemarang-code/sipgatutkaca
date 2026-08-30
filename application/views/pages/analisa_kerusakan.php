@@ -108,10 +108,15 @@ html[data-theme="dark"] .map-filter{background:rgba(10,26,40,.5);border-color:rg
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:-1px;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 .map-count{margin-top:14px;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
 .map-count b{color:var(--gold-300);font-family:var(--display);font-weight:400}
-.leaflet-popup-content{font-family:var(--body);font-size:.85rem;line-height:1.6;color:#223}
+.leaflet-popup-content{font-family:var(--body);font-size:.85rem;line-height:1.6;color:#223;min-width:248px}
 .leaflet-popup-content h6{font-family:var(--display);font-weight:400;font-size:1rem;letter-spacing:.05em;color:#8a6a1c;margin:0 0 6px}
-.pp-row{display:flex;gap:8px}.pp-row span:first-child{min-width:78px;color:#889}
+.pp-row{display:flex;gap:8px}.pp-row span:first-child{min-width:104px;color:#889;flex:0 0 auto}
 .pp-status{display:inline-block;margin-top:8px;padding:2px 12px;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;border:1px solid}
+.leaflet-popup-content .pp-act{display:flex;gap:8px;margin-top:12px}
+.leaflet-popup-content .pp-btn{flex:1;text-align:center;padding:8px 10px;font-size:.72rem;font-weight:600;letter-spacing:.02em;border:1px solid #c9a24b;border-radius:7px;color:#8a6a1c;text-decoration:none;white-space:nowrap;transition:.15s}
+.leaflet-popup-content .pp-btn:hover{background:#f5ecd6}
+.leaflet-popup-content .pp-btn-solid{background:#c9a24b;border-color:#c9a24b;color:#20140a}
+.leaflet-popup-content .pp-btn-solid:hover{background:#b98f38}
 html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) saturate(.85)}
 @media(max-width:980px){.map-filter{grid-template-columns:1fr 1fr}#btnReset{width:100%}}
 @media(max-width:820px){
@@ -382,13 +387,21 @@ function bootPetaAnalisa(){
 
   var group=L.layerGroup().addTo(map);
   var markerById={};
+  var URL_DETAIL="<?php echo base_url('bangunan'); ?>";
+  function esc(s){ return String(s==null?"":s).replace(/[&<>\"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
   function popupHTML(d){
     var info=infoKondisi(d.kondisi);
-    return "<h6>"+d.nama+"</h6>"+
-      "<div class='pp-row'><span>OPD</span><span>"+d.opd+"</span></div>"+
-      "<div class='pp-row'><span>Alamat</span><span>"+d.alamat+"</span></div>"+
-      "<div class='pp-row'><span>Koordinat</span><span>"+d.lat.toFixed(6)+", "+d.lng.toFixed(6)+"</span></div>"+
-      "<span class='pp-status' style='color:"+info.color+";border-color:"+info.color+"'>"+info.label+"</span>";
+    var dir="https://www.google.com/maps/dir/?api=1&destination="+d.lat+","+d.lng;
+    return "<h6>("+d.id+") "+esc(d.nama)+"</h6>"+
+      "<div class='pp-row'><span>OPD</span><span>"+esc(d.opd)+"</span></div>"+
+      "<div class='pp-row'><span>Desa / Kelurahan</span><span>"+esc(d.kel)+"</span></div>"+
+      "<div class='pp-row'><span>Kecamatan</span><span>"+esc(d.kec)+"</span></div>"+
+      "<div class='pp-row'><span>Alamat</span><span>"+esc(d.alamat)+"</span></div>"+
+      "<span class='pp-status' style='color:"+info.color+";border-color:"+info.color+"'>"+info.label+"</span>"+
+      "<div class='pp-act'>"+
+        "<a class='pp-btn pp-btn-solid' target='_blank' rel='noopener' href='"+URL_DETAIL+"/"+d.id+"'>Detail Bangunan</a>"+
+        "<a class='pp-btn' target='_blank' rel='noopener' href='"+dir+"'>Menuju Lokasi</a>"+
+      "</div>";
   }
   function makeMarker(d){
     var info=infoKondisi(d.kondisi);

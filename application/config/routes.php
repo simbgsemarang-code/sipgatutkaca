@@ -58,3 +58,6 @@ $route['translate_uri_dashes'] = TRUE;
 | argumen ke Konsultasi::index() alih-alih ditafsirkan sebagai nama method.
 */
 $route['konsultasi/(:any)'] = 'konsultasi/index/$1';
+
+/* Detail bangunan publik: /bangunan/720 -> Bangunan::index(720) */
+$route['bangunan/(:num)'] = 'bangunan/index/$1';
