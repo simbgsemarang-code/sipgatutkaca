@@ -105,10 +105,6 @@ html[data-theme="dark"] .map-filter{background:rgba(10,26,40,.5);border-color:rg
 #map{height:640px;width:100%;background:#dfeee2;z-index:1}
 .legend{background:#fff;color:#223;padding:12px 16px;font-size:.78rem;line-height:2;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 .legend b{display:block;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.68rem;margin-bottom:4px;color:#8a6a1c}
-/* Kontrol lapisan (topright) diturunkan supaya tidak tertimpa panel filter melayang */
-.leaflet-top.leaflet-right{margin-top:104px}
-@media(max-width:980px){.leaflet-top.leaflet-right{margin-top:170px}}
-@media(max-width:820px){.leaflet-top.leaflet-right{margin-top:12px}}
 .leaflet-control-layers{border-radius:4px;box-shadow:0 2px 10px rgba(0,0,0,.28);color:#223}
 .leaflet-control-layers-expanded{padding:10px 12px;min-width:172px;font-size:.76rem}
 .leaflet-control-layers-list{line-height:1.35;padding:0;margin:0}
@@ -427,7 +423,7 @@ function bootPetaAnalisa(){
   if(kecLayer)  _ovl["Batas Kecamatan"]=kecLayer;
   if(desaLayer) _ovl["Batas Desa"]=desaLayer;
   if(jalanLayer)_ovl["Jaringan Jalan"]=jalanLayer;
-  L.control.layers(_base,_ovl,{position:"topright",collapsed:false}).addTo(map);
+  L.control.layers(_base,_ovl,{position:"bottomleft",collapsed:true}).addTo(map);
 
   var URL_DETAIL="<?php echo base_url('bangunan'); ?>";
   function esc(s){ return String(s==null?"":s).replace(/[&<>\"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }

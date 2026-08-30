@@ -251,7 +251,7 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
   L.control.layers(
     {"Google Maps":baseGmap,"OpenStreetMap":baseOsm,"Google Hybrid":baseGhybrid,"Google Satelit":baseGsat,"Google Terrain":baseGterrain},
     {"Titik Bangunan":titik},
-    {position:"topright",collapsed:false}
+    {position:"bottomleft",collapsed:true}
   ).addTo(map);
   setTimeout(function(){ map.invalidateSize(); }, 250);
 
