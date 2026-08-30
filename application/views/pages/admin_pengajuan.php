@@ -187,7 +187,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </nav>
   </aside>
   <div class="dash-main">
-<section style="padding-top:100px">
+<section style="padding-top:20px">
   <div class="dash-wrap">
     <div>
       <p class="eyebrow">Panel Admin</p>

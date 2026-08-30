@@ -210,7 +210,7 @@ $v = function ($kolom, $default = '') use ($row, $old) {
 $lat0 = $v('latitude', '-7.53');
 $lng0 = $v('longitude', '108.99');
 ?>
-<section style="padding-top:100px">
+<section style="padding-top:20px">
   <div class="dash-wrap">
     <p class="eyebrow"><a href="<?php echo base_url('admin/bangunan'); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Daftar Sebaran Bangunan</a></p>
     <h2><?php echo $edit ? 'Ubah Bangunan' : 'Tambah Bangunan'; ?></h2>
