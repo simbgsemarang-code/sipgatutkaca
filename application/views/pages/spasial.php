@@ -418,16 +418,19 @@ function bootPetaSpasial(){
     "#5FBF8F","#C97CC9","#7C93C9","#E0A15A","#6FC2A0","#C96F6F","#8FBF5F","#B58AE0",
     "#5FA8D9","#D9C15F","#9C6FE0","#5FD9B0","#D95FA1","#7FD95F","#D98F5F","#5F8FD9"];
   var kecColorMap={};
+  function kecStyle(f){
+    var nm=(f.properties&&f.properties.namaKecamatan)||"?";
+    if(!(nm in kecColorMap))kecColorMap[nm]=PALET_KEC[Object.keys(kecColorMap).length%PALET_KEC.length];
+    var c=kecColorMap[nm];
+    return{color:c,weight:1.6,opacity:.95,fillColor:c,fillOpacity:.5};
+  }
   var kecLayer=L.geoJSON(gisKecamatan,{
-    style:function(f){
-      var nm=(f.properties&&f.properties.namaKecamatan)||"?";
-      if(!(nm in kecColorMap))kecColorMap[nm]=PALET_KEC[Object.keys(kecColorMap).length%PALET_KEC.length];
-      var c=kecColorMap[nm];
-      return{color:c,weight:1.4,opacity:.7,fillColor:c,fillOpacity:.3};
-    },
+    style:kecStyle,
     onEachFeature:function(f,l){
       var nm=f.properties&&f.properties.namaKecamatan;
-      if(nm)l.bindTooltip(nm,{sticky:true});
+      if(nm)l.bindTooltip("Kecamatan "+nm,{sticky:true});
+      l.on("mouseover",function(){ l.setStyle({fillOpacity:.68,weight:2.4}); l.bringToFront(); });
+      l.on("mouseout",function(){ l.setStyle(kecStyle(f)); });
     }
   });
 

@@ -345,6 +345,29 @@ function bootPetaAnalisa(){
   L.control.zoom({position:"bottomright"}).addTo(map);
   L.control.scale({imperial:false,position:"bottomleft"}).addTo(map);
 
+  /* ============ WARNA WILAYAH KECAMATAN ============ */
+  var PALET_KEC=["#4E9F3D","#3E7CB1","#D9822B","#8E6FCE","#E0526B","#4FB0C6","#B5B53C","#C9A24B",
+    "#5FBF8F","#C97CC9","#7C93C9","#E0A15A","#6FC2A0","#C96F6F","#8FBF5F","#B58AE0",
+    "#5FA8D9","#D9C15F","#9C6FE0","#5FD9B0","#D95FA1","#7FD95F","#D98F5F","#5F8FD9"];
+  var kecColorMap={};
+  function kecStyle(f){
+    var nm=(f.properties&&f.properties.namaKecamatan)||"?";
+    if(!(nm in kecColorMap))kecColorMap[nm]=PALET_KEC[Object.keys(kecColorMap).length%PALET_KEC.length];
+    var c=kecColorMap[nm];
+    return{color:c,weight:1.6,opacity:.9,fillColor:c,fillOpacity:.28};
+  }
+  if(window.gisKecamatan&&gisKecamatan.features){
+    L.geoJSON(gisKecamatan,{
+      style:kecStyle,
+      onEachFeature:function(f,l){
+        var nm=f.properties&&f.properties.namaKecamatan;
+        if(nm)l.bindTooltip("Kecamatan "+nm,{sticky:true});
+        l.on("mouseover",function(){ l.setStyle({fillOpacity:.42,weight:2.4}); });
+        l.on("mouseout",function(){ l.setStyle(kecStyle(f)); });
+      }
+    }).addTo(map);
+  }
+
   var legend=L.control({position:"bottomright"});
   legend.onAdd=function(){
     var d=L.DomUtil.create("div","legend");
