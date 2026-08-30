@@ -35,6 +35,10 @@ deploy-hook.config.php
 deploy-hook.log
 deploy-hook.lock
 
+# Salinan situs lain / bahan referensi lokal (bukan source code)
+sgatut/
+download petunjuk simbg untuk pemohon.pdf
+
 # OS/editor cruft
 Thumbs.db
 .DS_Store

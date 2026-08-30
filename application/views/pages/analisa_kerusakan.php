@@ -105,6 +105,18 @@ html[data-theme="dark"] .map-filter{background:rgba(10,26,40,.5);border-color:rg
 #map{height:640px;width:100%;background:#dfeee2;z-index:1}
 .legend{background:#fff;color:#223;padding:12px 16px;font-size:.78rem;line-height:2;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 .legend b{display:block;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.68rem;margin-bottom:4px;color:#8a6a1c}
+/* Kontrol lapisan (topright) diturunkan supaya tidak tertimpa panel filter melayang */
+.leaflet-top.leaflet-right{margin-top:104px}
+@media(max-width:980px){.leaflet-top.leaflet-right{margin-top:170px}}
+@media(max-width:820px){.leaflet-top.leaflet-right{margin-top:12px}}
+.leaflet-control-layers{border-radius:4px;box-shadow:0 2px 10px rgba(0,0,0,.28);color:#223}
+.leaflet-control-layers-expanded{padding:10px 12px;min-width:172px;font-size:.76rem}
+.leaflet-control-layers-list{line-height:1.35;padding:0;margin:0}
+.leaflet-control-layers-base,.leaflet-control-layers-overlays{padding:0;margin:0}
+.leaflet-control-layers label{margin:1px 0;font-weight:400;line-height:1.35;white-space:nowrap;display:flex;align-items:center}
+.leaflet-control-layers label>span{display:flex;align-items:center}
+.leaflet-control-layers-selector{accent-color:#A57E2C;margin:0 6px 0 0;width:13px;height:13px}
+.leaflet-control-layers-separator{margin:7px 0;border-top-color:#e6e6e6}
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:-1px;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 .map-count{margin-top:14px;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
 .map-count b{color:var(--gold-300);font-family:var(--display);font-weight:400}
@@ -342,9 +354,14 @@ function bootPetaAnalisa(){
   document.getElementById("stSedang").textContent=counts["3"];
   document.getElementById("stBerat").textContent=counts["4"];
 
-  /* ============ PETA ============ */
-  var osm=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"});
-  var map=L.map("map",{layers:[osm],zoomControl:false,scrollWheelZoom:true}).setView([-7.53,108.99],10);
+  /* ============ PETA: LAPIS DASAR ============ */
+  var _gt="&x={x}&y={y}&z={z}",_go={maxZoom:20,subdomains:["0","1","2","3"],attribution:"&copy; Google"};
+  var baseGmap    =L.tileLayer("https://mt{s}.google.com/vt/lyrs=m"+_gt,_go),
+      baseOsm     =L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}),
+      baseGhybrid =L.tileLayer("https://mt{s}.google.com/vt/lyrs=y"+_gt,_go),
+      baseGsat    =L.tileLayer("https://mt{s}.google.com/vt/lyrs=s"+_gt,_go),
+      baseGterrain=L.tileLayer("https://mt{s}.google.com/vt/lyrs=p"+_gt,_go);
+  var map=L.map("map",{layers:[baseGmap],zoomControl:false,scrollWheelZoom:true}).setView([-7.53,108.99],10);
   // Kontrol zoom dipindah ke bawah supaya tidak tertutup panel filter
   // yang kini melayang penuh di sisi atas peta.
   L.control.zoom({position:"bottomright"}).addTo(map);
@@ -361,8 +378,9 @@ function bootPetaAnalisa(){
     var c=kecColorMap[nm];
     return{color:c,weight:1.6,opacity:.9,fillColor:c,fillOpacity:.28};
   }
+  var kecLayer=null;
   if(window.gisKecamatan&&gisKecamatan.features){
-    L.geoJSON(gisKecamatan,{
+    kecLayer=L.geoJSON(gisKecamatan,{
       style:kecStyle,
       onEachFeature:function(f,l){
         var nm=f.properties&&f.properties.namaKecamatan;
@@ -372,6 +390,20 @@ function bootPetaAnalisa(){
       }
     }).addTo(map);
   }
+
+  /* ============ LAPIS REFERENSI WILAYAH (dari gis-data.js) ============ */
+  var kabLayer=(window.gisKabupaten&&gisKabupaten.features)
+    ? L.geoJSON(gisKabupaten,{style:{color:"#C9A24B",weight:2.2,dashArray:"7 6",fill:false}}).bindTooltip("Batas Kabupaten Cilacap",{sticky:true})
+    : null;
+  var desaLayer=(window.gisDesa&&gisDesa.features)
+    ? L.geoJSON(gisDesa,{style:{color:"#8FD3E8",weight:.8,opacity:.55,fillColor:"#8FD3E8",fillOpacity:.03},
+        onEachFeature:function(f,l){var nm=f.properties&&f.properties.namaDesa;if(nm)l.bindTooltip(nm,{sticky:true});}})
+    : null;
+  var jalanLayer=(window.gisJalan&&gisJalan.features)
+    ? L.geoJSON(gisJalan,{style:{color:"#E8B84B",weight:1.3,opacity:.6},
+        onEachFeature:function(f,l){var nm=f.properties&&f.properties.namaJalan;if(nm)l.bindTooltip(nm,{sticky:true});}})
+    : null;
+  if(kabLayer)kabLayer.addTo(map);
 
   var legend=L.control({position:"bottomright"});
   legend.onAdd=function(){
@@ -387,6 +419,16 @@ function bootPetaAnalisa(){
 
   var group=L.layerGroup().addTo(map);
   var markerById={};
+
+  /* ============ KONTROL LAPISAN ============ */
+  var _base={"Google Maps":baseGmap,"OpenStreetMap":baseOsm,"Google Hybrid":baseGhybrid,"Google Satelit":baseGsat,"Google Terrain":baseGterrain};
+  var _ovl={"Bangunan":group};
+  if(kabLayer)  _ovl["Batas Kabupaten"]=kabLayer;
+  if(kecLayer)  _ovl["Batas Kecamatan"]=kecLayer;
+  if(desaLayer) _ovl["Batas Desa"]=desaLayer;
+  if(jalanLayer)_ovl["Jaringan Jalan"]=jalanLayer;
+  L.control.layers(_base,_ovl,{position:"topright",collapsed:false}).addTo(map);
+
   var URL_DETAIL="<?php echo base_url('bangunan'); ?>";
   function esc(s){ return String(s==null?"":s).replace(/[&<>\"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
   function popupHTML(d){

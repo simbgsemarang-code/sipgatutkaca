@@ -65,6 +65,14 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem)
 .map-card{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 12px 34px var(--shadow)}
 #bmap{height:430px;width:100%;background:#e9efe9;z-index:1}
 .map-actions{padding:14px;display:flex;gap:10px;flex-wrap:wrap;background:var(--surface);border-top:1px solid var(--line)}
+.leaflet-control-layers{border-radius:4px;box-shadow:0 2px 10px rgba(0,0,0,.28);color:#223}
+.leaflet-control-layers-expanded{padding:10px 12px;min-width:164px;font-size:.78rem}
+.leaflet-control-layers-list{line-height:1.35;padding:0;margin:0}
+.leaflet-control-layers-base,.leaflet-control-layers-overlays{padding:0;margin:0}
+.leaflet-control-layers label{margin:1px 0;font-weight:400;line-height:1.35;white-space:nowrap;display:flex;align-items:center}
+.leaflet-control-layers label>span{display:flex;align-items:center}
+.leaflet-control-layers-selector{accent-color:#A57E2C;margin:0 6px 0 0;width:13px;height:13px}
+.leaflet-control-layers-separator{border-top-color:#e6e6e6}
 
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 34px var(--shadow);overflow:hidden}
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);padding:6px 14px 0;overflow-x:auto}
@@ -230,11 +238,21 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
 <script>
 (function(){
   var lat=<?php echo json_encode($lat); ?>, lng=<?php echo json_encode($lng); ?>;
-  var map=L.map("bmap",{scrollWheelZoom:true}).setView([lat,lng],17);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}).addTo(map);
-  L.circleMarker([lat,lng],{radius:8,color:"#fff",weight:2,fillColor:"#2563eb",fillOpacity:1})
+  var _gt="&x={x}&y={y}&z={z}",_go={maxZoom:20,subdomains:["0","1","2","3"],attribution:"&copy; Google"};
+  var baseGmap    =L.tileLayer("https://mt{s}.google.com/vt/lyrs=m"+_gt,_go),
+      baseOsm     =L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}),
+      baseGhybrid =L.tileLayer("https://mt{s}.google.com/vt/lyrs=y"+_gt,_go),
+      baseGsat    =L.tileLayer("https://mt{s}.google.com/vt/lyrs=s"+_gt,_go),
+      baseGterrain=L.tileLayer("https://mt{s}.google.com/vt/lyrs=p"+_gt,_go);
+  var map=L.map("bmap",{layers:[baseGmap],scrollWheelZoom:true}).setView([lat,lng],17);
+  var titik=L.circleMarker([lat,lng],{radius:8,color:"#fff",weight:2,fillColor:"#2563eb",fillOpacity:1})
     .addTo(map).bindPopup(<?php echo json_encode($judul); ?>);
   L.control.scale({imperial:false}).addTo(map);
+  L.control.layers(
+    {"Google Maps":baseGmap,"OpenStreetMap":baseOsm,"Google Hybrid":baseGhybrid,"Google Satelit":baseGsat,"Google Terrain":baseGterrain},
+    {"Titik Bangunan":titik},
+    {position:"topright",collapsed:false}
+  ).addTo(map);
   setTimeout(function(){ map.invalidateSize(); }, 250);
 
   // tabs
