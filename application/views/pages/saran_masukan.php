@@ -81,6 +81,15 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6re
 .list-key{font-family:var(--display);color:var(--gold-300);letter-spacing:.06em;min-width:150px;font-size:.95rem;flex:0 0 auto}
 .list-val{color:var(--muted);font-size:.92rem}
 
+.faq{margin-top:14px;border-top:1px solid var(--line)}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;padding:18px 0;display:flex;align-items:flex-start;gap:14px;font-family:var(--display);color:var(--gold-300);letter-spacing:.02em;font-size:1rem;line-height:1.45}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::before{content:"+";flex:0 0 auto;font-family:var(--body);font-weight:600;color:var(--gold-500);width:16px;text-align:center;line-height:1.45}
+.faq details[open] summary{padding-bottom:8px}
+.faq details[open] summary::before{content:"\2013"}
+.faq .faq-a{color:var(--muted);font-size:.92rem;padding:0 0 20px 30px;max-width:58ch}
+
 .form-card{background:var(--surface);border:1px solid var(--line);padding:46px}
 .field{margin-bottom:22px}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -181,10 +190,28 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <p class="eyebrow">Kami Mendengarkan</p>
       <h2>Saran dan Masukan</h2>
       <p class="section-lead">Sampaikan saran, kritik, atau masukan Anda terkait layanan SIP Gatutkaca maupun penataan bangunan di Kabupaten Cilacap. Setiap masukan akan ditinjau oleh tim DPUPR Kabupaten Cilacap.</p>
-      <div class="list">
-        <div class="list-item"><span class="list-key">Respons</span><span class="list-val">Masukan ditinjau pada hari kerja, Senin–Jumat pukul 08.00–15.30 WIB.</span></div>
-        <div class="list-item"><span class="list-key">Kerahasiaan</span><span class="list-val">Data kontak Anda hanya digunakan untuk menindaklanjuti masukan, tidak dipublikasikan.</span></div>
-        <div class="list-item"><span class="list-key">Pengaduan Teknis</span><span class="list-val">Untuk permohonan PBG/SLF, gunakan menu Konsultasi agar diproses oleh tim yang sesuai.</span></div>
+      <p class="eyebrow" style="margin-top:40px">Pertanyaan Umum</p>
+      <div class="faq">
+        <details>
+          <summary>Kapan masukan saya ditinjau?</summary>
+          <p class="faq-a">Masukan ditinjau pada hari kerja, Senin&ndash;Jumat pukul 08.00&ndash;15.30 WIB.</p>
+        </details>
+        <details>
+          <summary>Apakah data kontak saya dipublikasikan?</summary>
+          <p class="faq-a">Tidak. Data kontak Anda hanya digunakan untuk menindaklanjuti masukan dan tidak dipublikasikan.</p>
+        </details>
+        <details>
+          <summary>Saya punya pengaduan teknis soal permohonan PBG/SLF, ke mana?</summary>
+          <p class="faq-a">Gunakan menu <a href="<?php echo base_url('konsultasi'); ?>" style="color:var(--gold-300);text-decoration:underline">Konsultasi</a> agar permohonan PBG/SLF Anda diproses oleh tim yang sesuai.</p>
+        </details>
+        <details>
+          <summary>Apakah nama, email, dan nomor HP wajib diisi?</summary>
+          <p class="faq-a">Hanya <em>Nama</em> dan <em>Saran / Masukan</em> yang wajib. <em>Email</em> serta <em>No. HP / WhatsApp</em> bersifat opsional, namun membantu tim menghubungi Anda bila perlu klarifikasi.</p>
+        </details>
+        <details>
+          <summary>Apakah saya akan mendapat balasan?</summary>
+          <p class="faq-a">Tim DPUPR Kabupaten Cilacap menindaklanjuti masukan yang memerlukan tanggapan melalui kontak yang Anda berikan.</p>
+        </details>
       </div>
     </div>
 
