@@ -607,4 +607,212 @@ class Admin extends CI_Controller {
 		$this->session->set_flashdata('sukses', 'Bangunan "' . $row['nama_bangunan'] . '" berhasil dihapus dari peta.');
 		redirect('admin/bangunan');
 	}
+
+	/* =====================================================================
+	 *  KELOLA CAGAR BUDAYA (tabel `cagar_budaya`, tampil di /cagar-budaya)
+	 * ===================================================================== */
+
+	private $cb_kategori = array('Benda', 'Bangunan', 'Struktur', 'Situs', 'Kawasan');
+	private $cb_status   = array('Ditetapkan', 'Terdaftar Register Nasional', 'Dalam Kajian', 'Diusulkan', 'Objek Diduga Cagar Budaya');
+
+	/** Daftar cagar budaya — cari + saring kategori/status + halaman. */
+	public function cagar_budaya()
+	{
+		$q   = trim((string) $this->input->get('q'));
+		$kat = trim((string) $this->input->get('kategori'));
+		$st  = trim((string) $this->input->get('status'));
+		// Param halaman 'hal', BUKAN 'page' (WAF host memblokir ?page=...).
+		$page = max(1, (int) $this->input->get('hal'));
+		$per  = 25;
+
+		$filter = function () use ($q, $kat, $st) {
+			if ($q !== '')
+			{
+				$this->db->group_start()
+					->like('nama', $q)
+					->or_like('kecamatan', $q)
+					->or_like('kelurahan', $q)
+					->or_like('alamat', $q)
+					->group_end();
+			}
+			if (in_array($kat, $this->cb_kategori, TRUE)) $this->db->where('kategori', $kat);
+			if (in_array($st, $this->cb_status, TRUE))     $this->db->where('status', $st);
+		};
+
+		$filter();
+		$total = $this->db->count_all_results('cagar_budaya');
+
+		$filter();
+		$data['daftar'] = $this->db
+			->order_by('id', 'DESC')
+			->limit($per, ($page - 1) * $per)
+			->get('cagar_budaya')->result_array();
+
+		$data['total']      = $total;
+		$data['page']       = $page;
+		$data['per']        = $per;
+		$data['total_page'] = max(1, (int) ceil($total / $per));
+		$data['q']          = $q;
+		$data['kategori']   = $kat;
+		$data['status']     = $st;
+		$data['cb_kategori'] = $this->cb_kategori;
+		$data['cb_status']   = $this->cb_status;
+		$data['sukses']     = $this->session->flashdata('sukses');
+		$data['error']      = $this->session->flashdata('error');
+		$data['nama_admin'] = $this->session->userdata('nama');
+
+		$this->load->view('pages/admin_cagar_budaya', $data);
+	}
+
+	public function cagar_budaya_tambah()
+	{
+		$this->_cagar_budaya_form(NULL);
+	}
+
+	public function cagar_budaya_ubah($id = null)
+	{
+		$row = $this->db->where('id', (int) $id)->get('cagar_budaya')->row_array();
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+		$this->_cagar_budaya_form($row);
+	}
+
+	private function _cagar_budaya_form($row)
+	{
+		$data['row']        = $row;
+		$data['cb_kategori'] = $this->cb_kategori;
+		$data['cb_status']   = $this->cb_status;
+		$data['error']      = $this->session->flashdata('error');
+		$data['old']        = $this->session->flashdata('old');
+		$data['nama_admin'] = $this->session->userdata('nama');
+		$this->load->view('pages/admin_cagar_budaya_form', $data);
+	}
+
+	/** Simpan (POST). $id NULL = tambah. */
+	public function cagar_budaya_simpan($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('cagar_budaya')->row_array() : NULL;
+		if ($id > 0 && $row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$p = function ($nama) {
+			$v = trim((string) $this->input->post($nama));
+			return $v !== '' ? $v : NULL;
+		};
+
+		$nama    = trim((string) $this->input->post('nama'));
+		$kat     = (string) $this->input->post('kategori');
+		$st      = (string) $this->input->post('status');
+		$lat_in  = trim((string) $this->input->post('latitude'));
+		$lng_in  = trim((string) $this->input->post('longitude'));
+
+		$tujuan = $id > 0 ? 'admin/cagar-budaya-ubah/' . $id : 'admin/cagar-budaya-tambah';
+
+		$kosong = array();
+		if ($nama === '')                              $kosong[] = 'Nama objek';
+		if (! in_array($kat, $this->cb_kategori, TRUE)) $kosong[] = 'Kategori';
+		if (! in_array($st, $this->cb_status, TRUE))    $kosong[] = 'Status';
+		// Koordinat opsional; jika diisi harus valid (dan keduanya terisi).
+		$isi_lat = ($lat_in !== ''); $isi_lng = ($lng_in !== '');
+		if ($isi_lat xor $isi_lng)                                      $kosong[] = 'Latitude & Longitude (isi keduanya atau kosongkan keduanya)';
+		if ($isi_lat && (! is_numeric($lat_in) || abs((float) $lat_in) > 90))  $kosong[] = 'Latitude (angka -90..90)';
+		if ($isi_lng && (! is_numeric($lng_in) || abs((float) $lng_in) > 180)) $kosong[] = 'Longitude (angka -180..180)';
+
+		if (! empty($kosong))
+		{
+			$this->session->set_flashdata('error', 'Periksa lagi: ' . implode(', ', $kosong) . '.');
+			$this->session->set_flashdata('old', $this->input->post());
+			redirect($tujuan);
+			return;
+		}
+
+		// ---- Foto: unggah ke assets/foto-cagar-budaya/ ----
+		$dir_foto = FCPATH . 'assets/foto-cagar-budaya/';
+		$foto     = ($id > 0 && ! empty($row['foto'])) ? $row['foto'] : NULL;
+
+		if ($this->input->post('hapus_foto') === '1' && $foto !== NULL)
+		{
+			@unlink($dir_foto . basename($foto));
+			$foto = NULL;
+		}
+
+		if (! empty($_FILES['foto_file']['name']))
+		{
+			if (! is_dir($dir_foto)) @mkdir($dir_foto, 0755, TRUE);
+			$this->load->library('upload');
+			$this->upload->initialize(array(
+				'upload_path'   => $dir_foto,
+				'allowed_types' => 'jpg|jpeg|png|webp',
+				'max_size'      => 5120,
+				'encrypt_name'  => TRUE,
+			));
+			if ($this->upload->do_upload('foto_file'))
+			{
+				if ($foto !== NULL) @unlink($dir_foto . basename($foto));
+				$hasil = $this->upload->data();
+				$foto  = $hasil['file_name'];
+			}
+			else
+			{
+				$this->session->set_flashdata('error', 'Foto gagal diunggah: ' . strip_tags($this->upload->display_errors('', '')));
+				$this->session->set_flashdata('old', $this->input->post());
+				redirect($tujuan);
+				return;
+			}
+		}
+
+		$simpan = array(
+			'nama'      => $nama,
+			'kategori'  => $kat,
+			'kecamatan' => $p('kecamatan'),
+			'kelurahan' => $p('kelurahan'),
+			'alamat'    => $p('alamat'),
+			'tahun'     => $p('tahun'),
+			'status'    => $st,
+			'no_sk'     => $p('no_sk'),
+			'latitude'  => $isi_lat ? round((float) $lat_in, 8) : NULL,
+			'longitude' => $isi_lng ? round((float) $lng_in, 8) : NULL,
+			'deskripsi' => $p('deskripsi'),
+			'sumber'    => $p('sumber'),
+			'foto'      => $foto,
+		);
+
+		if ($id > 0)
+		{
+			$this->db->where('id', $id)->update('cagar_budaya', $simpan);
+			$this->session->set_flashdata('sukses', 'Data cagar budaya "' . $nama . '" berhasil diperbarui.');
+		}
+		else
+		{
+			$this->db->insert('cagar_budaya', $simpan);
+			$this->session->set_flashdata('sukses', 'Cagar budaya "' . $nama . '" berhasil ditambahkan.');
+		}
+		redirect('admin/cagar-budaya');
+	}
+
+	public function cagar_budaya_hapus($id = null)
+	{
+		$id  = (int) $id;
+		$row = $this->db->where('id', $id)->get('cagar_budaya')->row_array();
+		if ($row === NULL)
+		{
+			$this->session->set_flashdata('error', 'Data cagar budaya tidak ditemukan.');
+			redirect('admin/cagar-budaya');
+			return;
+		}
+		if (! empty($row['foto']))
+		{
+			@unlink(FCPATH . 'assets/foto-cagar-budaya/' . basename($row['foto']));
+		}
+		$this->db->where('id', $id)->delete('cagar_budaya');
+		$this->session->set_flashdata('sukses', 'Cagar budaya "' . $row['nama'] . '" berhasil dihapus.');
+		redirect('admin/cagar-budaya');
+	}
 }

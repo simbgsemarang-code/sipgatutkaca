@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 :root{
   --gold-500:#C9A24B;--gold-300:#E4C87B;--gold-100:#F3E3B8;
@@ -113,6 +114,39 @@ td{padding:16px 14px;border-bottom:1px solid var(--line);color:var(--muted);vert
 td:first-child{color:var(--text);font-weight:500}
 .tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-300)}
 .note{font-size:.78rem;color:var(--muted);margin-top:16px}
+td .tag{white-space:nowrap}
+
+/* ===== PETA CAGAR BUDAYA (pola sama halaman Analisa Kerusakan) ===== */
+.cb-map-shell{position:relative;margin-top:44px;border:1px solid var(--line);box-shadow:0 18px 50px var(--shadow);border-radius:18px;overflow:hidden}
+#cbMap{height:560px;width:100%;background:#dfeee2;z-index:1}
+@media(max-width:560px){#cbMap{height:440px}}
+.legend{background:#fff;color:#223;padding:12px 15px;font-size:.78rem;line-height:2;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.legend b{display:block;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.68rem;margin-bottom:4px;color:#8a6a1c}
+.legend .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:-1px;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.leaflet-popup-content{font-family:var(--body);font-size:.85rem;line-height:1.6;color:#223;min-width:230px}
+.leaflet-popup-content h6{font-family:var(--display);font-weight:400;font-size:1rem;letter-spacing:.04em;color:#8a6a1c;margin:0 0 6px}
+.leaflet-popup-content .pp-row{display:flex;gap:8px}
+.leaflet-popup-content .pp-row span:first-child{min-width:82px;color:#889;flex:0 0 auto}
+.leaflet-popup-content .pp-status{display:inline-block;margin-top:8px;padding:2px 12px;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;border:1px solid}
+.leaflet-popup-content .pp-act{display:flex;gap:8px;margin-top:12px}
+.leaflet-popup-content .pp-btn{flex:1;text-align:center;padding:8px 10px;font-size:.72rem;font-weight:600;border:1px solid #c9a24b;border-radius:7px;color:#8a6a1c;text-decoration:none;white-space:nowrap}
+.leaflet-popup-content .pp-btn:hover{background:#f5ecd6}
+.leaflet-control-layers{border-radius:4px;box-shadow:0 2px 10px rgba(0,0,0,.28);color:#223}
+.leaflet-control-layers-expanded{padding:10px 12px;min-width:172px;font-size:.76rem}
+.leaflet-control-layers-list{line-height:1.35;padding:0;margin:0}
+.leaflet-control-layers-base,.leaflet-control-layers-overlays{padding:0;margin:0}
+.leaflet-control-layers label{margin:1px 0;font-weight:400;line-height:1.35;white-space:nowrap;display:flex;align-items:center}
+.leaflet-control-layers label>span{display:flex;align-items:center}
+.leaflet-control-layers-selector{accent-color:#A57E2C;margin:0 6px 0 0;width:13px;height:13px}
+.leaflet-control-layers-separator{margin:7px 0;border-top-color:#e6e6e6}
+html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) saturate(.85)}
+.cb-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:34px}
+.cb-toolbar input,.cb-toolbar select{background:var(--input);border:1px solid var(--line);color:var(--text);padding:10px 14px;font-family:var(--body);font-size:.85rem}
+.cb-toolbar input:focus,.cb-toolbar select:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+.cb-count{margin-top:18px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+td a.map-link{color:var(--gold-300);text-decoration:underline}
+td .go-map{color:var(--gold-300);cursor:pointer;text-decoration:underline;font-size:.82rem}
+@media(max-width:980px){table.cb-table{display:block;overflow-x:auto;white-space:nowrap}}
 
 .steps{margin-top:60px;display:grid;gap:0}
 .step{display:grid;grid-template-columns:90px 1fr;gap:30px;padding:34px 0;border-bottom:1px solid var(--line);align-items:start}
@@ -278,25 +312,266 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   </div>
 </section>
 
+<?php
+$daftar     = isset($daftar) ? $daftar : array();
+$total      = isset($total) ? (int) $total : count($daftar);
+$total_peta = isset($total_peta) ? (int) $total_peta : 0;
+$KAT_WARNA  = array(
+  'Benda'    => '#8E6FCE',
+  'Bangunan' => '#3E7CB1',
+  'Struktur' => '#C0392B',
+  'Situs'    => '#2EA84F',
+  'Kawasan'  => '#D9822B',
+);
+?>
 <section class="alt">
   <div class="wrap">
     <div class="reveal">
-      <p class="eyebrow">Perlindungan &amp; Perizinan</p>
-      <h2>Contoh Objek Diduga Cagar Budaya</h2>
-      <p class="section-lead">Setiap rencana renovasi, pembongkaran, atau alih fungsi pada objek berikut memerlukan kajian dan izin khusus sebelum PBG dapat diproses.</p>
+      <p class="eyebrow">Sebaran &amp; Daftar</p>
+      <h2>Cagar Budaya Kabupaten Cilacap</h2>
+      <p class="section-lead">Peta dan daftar objek cagar budaya serta objek diduga cagar budaya (ODCB) di Kabupaten Cilacap. Setiap rencana renovasi, pembongkaran, atau alih fungsi pada objek berikut memerlukan kajian Tim Ahli Cagar Budaya (TACB) dan izin khusus sebelum PBG diterbitkan.</p>
     </div>
-    <table class="reveal">
-      <thead><tr><th>Objek</th><th>Kategori</th><th>Lokasi</th><th>Status</th></tr></thead>
+
+    <div class="cb-map-shell">
+      <div id="cbMap" role="application" aria-label="Peta sebaran cagar budaya Kabupaten Cilacap"></div>
+    </div>
+
+    <form class="cb-toolbar reveal" onsubmit="return false">
+      <input type="search" id="cbCari" placeholder="Cari nama / kecamatan / alamat…" style="flex:1 1 240px">
+      <select id="cbKategori">
+        <option value="">— Semua kategori —</option>
+        <option>Benda</option><option>Bangunan</option><option>Struktur</option><option>Situs</option><option>Kawasan</option>
+      </select>
+      <select id="cbStatus">
+        <option value="">— Semua status —</option>
+        <option>Ditetapkan</option>
+        <option>Terdaftar Register Nasional</option>
+        <option>Dalam Kajian</option>
+        <option>Diusulkan</option>
+        <option>Objek Diduga Cagar Budaya</option>
+      </select>
+    </form>
+    <p class="cb-count reveal"><b id="cbShown"><?php echo $total; ?></b> objek ditampilkan · <?php echo $total_peta; ?> bertitik di peta · total <?php echo $total; ?> tercatat</p>
+
+    <table class="cb-table reveal" id="cbTable">
+      <thead><tr><th>Objek</th><th>Kategori</th><th>Kecamatan / Kelurahan</th><th>Tahun</th><th>Status</th><th>Peta</th></tr></thead>
       <tbody>
-        <tr><td>Benteng Pendem</td><td>Struktur Cagar Budaya</td><td>Cilacap Selatan</td><td><span class="tag">Terdaftar</span></td></tr>
-        <tr><td>Stasiun Kereta Api Cilacap</td><td>Bangunan Cagar Budaya</td><td>Cilacap Tengah</td><td><span class="tag">Dalam Kajian</span></td></tr>
-        <tr><td>Rumah Dinas Karesidenan Lama</td><td>Bangunan Cagar Budaya</td><td>Cilacap Tengah</td><td><span class="tag">Dalam Kajian</span></td></tr>
-        <tr><td>Kawasan Pecinan Cilacap</td><td>Kawasan Cagar Budaya</td><td>Cilacap Selatan</td><td><span class="tag">Diusulkan</span></td></tr>
+        <?php if (empty($daftar)): ?>
+          <tr><td colspan="6">Belum ada data cagar budaya.</td></tr>
+        <?php else: foreach ($daftar as $r):
+          $warna = isset($KAT_WARNA[$r['kategori']]) ? $KAT_WARNA[$r['kategori']] : '#8A94A6';
+          $lokasi = trim(($r['kecamatan'] ?: '—') . ' / ' . ($r['kelurahan'] ?: '—'), ' /');
+          $ada_titik = ($r['latitude'] !== NULL && $r['longitude'] !== NULL);
+        ?>
+          <tr data-kategori="<?php echo htmlspecialchars($r['kategori'], ENT_QUOTES, 'UTF-8'); ?>"
+              data-status="<?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?>"
+              data-cari="<?php echo htmlspecialchars(mb_strtolower($r['nama'].' '.$r['kecamatan'].' '.$r['kelurahan'].' '.$r['alamat'], 'UTF-8'), ENT_QUOTES, 'UTF-8'); ?>"
+              data-id="<?php echo (int) $r['id']; ?>">
+            <td>
+              <?php echo htmlspecialchars($r['nama'], ENT_QUOTES, 'UTF-8'); ?>
+              <?php if (!empty($r['no_sk'])): ?><br><span class="note" style="margin:0;font-size:.72rem"><?php echo htmlspecialchars($r['no_sk'], ENT_QUOTES, 'UTF-8'); ?></span><?php endif; ?>
+            </td>
+            <td><span class="tag" style="color:<?php echo $warna; ?>;border-color:<?php echo $warna; ?>"><?php echo htmlspecialchars($r['kategori'], ENT_QUOTES, 'UTF-8'); ?></span></td>
+            <td style="font-size:.84rem"><?php echo htmlspecialchars($lokasi, ENT_QUOTES, 'UTF-8'); ?></td>
+            <td style="font-size:.84rem"><?php echo htmlspecialchars($r['tahun'] ?: '—', ENT_QUOTES, 'UTF-8'); ?></td>
+            <td><span class="tag"><?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?></span></td>
+            <td>
+              <?php if ($ada_titik): ?>
+                <span class="go-map" data-id="<?php echo (int) $r['id']; ?>">Lihat di peta &rarr;</span>
+              <?php else: ?>
+                <span style="color:var(--muted);font-size:.82rem">—</span>
+              <?php endif; ?>
+            </td>
+          </tr>
+        <?php endforeach; endif; ?>
       </tbody>
     </table>
-    <p class="note">Daftar bersifat contoh tampilan untuk ilustrasi alur layanan; rujuk Tim Ahli Cagar Budaya (TACB) dan Register Nasional Cagar Budaya untuk data resmi dan termutakhir.</p>
+    <p class="note">Data dihimpun dari sumber publik: Registrasi Nasional Cagar Budaya (Kemdikbud), BPCB Jawa Tengah, Wikipedia, dan pemberitaan resmi Pemkab Cilacap. Sebagian koordinat masih perkiraan dan status sebagian objek masih dalam kajian. Data resmi dan termutakhir mengikuti penetapan Tim Ahli Cagar Budaya (TACB) dan SK Bupati Kabupaten Cilacap.</p>
   </div>
 </section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="<?php echo base_url('assets/js/Leaflet.VectorGrid.bundled.js'); ?>?v=<?php echo @filemtime(FCPATH.'assets/js/Leaflet.VectorGrid.bundled.js'); ?>"></script>
+<script src="<?php echo base_url('gis-data.js'); ?>?v=<?php echo @filemtime(FCPATH.'gis-data.js'); ?>"></script>
+<script>
+(function(){
+  var DATA = <?php echo json_encode(array_map(function($r){
+    return array(
+      'id'        => (int) $r['id'],
+      'nama'      => $r['nama'],
+      'kategori'  => $r['kategori'],
+      'kecamatan' => $r['kecamatan'] ?: '',
+      'kelurahan' => $r['kelurahan'] ?: '',
+      'alamat'    => $r['alamat'] ?: '',
+      'tahun'     => $r['tahun'] ?: '',
+      'status'    => $r['status'],
+      'deskripsi' => $r['deskripsi'] ?: '',
+      'lat'       => $r['latitude']  !== null ? (float) $r['latitude']  : null,
+      'lng'       => $r['longitude'] !== null ? (float) $r['longitude'] : null,
+    );
+  }, $daftar), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES); ?>;
+
+  var KAT_WARNA = <?php echo json_encode($KAT_WARNA); ?>;
+  function warnaKat(k){ return KAT_WARNA[k] || "#8A94A6"; }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>\"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+
+  /* ---- Peta: lapis dasar (sama dgn Analisa Kerusakan) ---- */
+  var _G="https://{s}.google.com/vt/lyrs=",_Gt="&x={x}&y={y}&z={z}",
+      _Go={maxZoom:20,subdomains:["mt0","mt1","mt2","mt3"]},
+      _at="&copy; <b>A.S - Kab. Cilacap</b>";
+  var baseGmap    =L.tileLayer(_G+"m"+_Gt,{maxZoom:20,subdomains:_Go.subdomains,attribution:"&copy; Google Maps | "+_at}),
+      baseOsm     =L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap | "+_at}),
+      baseGhybrid =L.tileLayer(_G+"y"+_Gt,_Go),
+      baseGsat    =L.tileLayer(_G+"s"+_Gt,_Go),
+      baseGterrain=L.tileLayer(_G+"p"+_Gt,_Go);
+
+  var map=L.map("cbMap",{layers:[baseGmap],zoomControl:false,scrollWheelZoom:true}).setView([-7.47356,108.985062],10);
+  L.control.zoom({position:"bottomright"}).addTo(map);
+  L.control.scale({imperial:false,position:"bottomleft"}).addTo(map);
+  map.createPane("paneRTRW");     map.getPane("paneRTRW").style.zIndex=350;
+  map.createPane("paneCagar");    map.getPane("paneCagar").style.zIndex=400;
+
+  function _has(v){ return v&&v.features&&v.features.length; }
+  function _warnaW(w){ return ({"1":"#FF1D1D","2":"#000CFF","3":"#FFB557","4":"#00B418"})[String(w)] || "#3388ff"; }
+  function _polyOnly(f){
+    var t=f.geometry&&f.geometry.type;
+    return t==="Polygon"||t==="MultiPolygon"||(t==="GeometryCollection"&&f.geometry.geometries.some(function(g){return g.type==="Polygon"||g.type==="MultiPolygon";}));
+  }
+
+  var layerKabupaten=_has(window.gisKabupaten)?L.geoJSON(gisKabupaten,{
+    onEachFeature:function(f,l){
+      if(!(f.properties&&f.properties.idKabupaten))return;
+      l.setStyle({color:"#1B2631",weight:1,dashArray:"5, 3"});
+      l.bindTooltip("<b><i> Batas Adm. Kabupaten "+f.properties.namaKabupaten+"</i></b>");
+    }
+  }):L.layerGroup();
+  var layerKecamatan=_has(window.gisKecamatan)?L.geoJSON(gisKecamatan,{
+    filter:_polyOnly,
+    style:function(f){return{color:_warnaW(f.properties.warna),weight:1,opacity:.7,fillOpacity:.08,dashArray:"5,3"};},
+    onEachFeature:function(f,l){ if(f.properties&&f.properties.idKecamatan)l.bindPopup("Kec. "+f.properties.namaKecamatan); }
+  }):L.layerGroup();
+  var layerDesa=_has(window.gisDesa)?L.geoJSON(gisDesa,{
+    filter:_polyOnly,
+    style:function(f){return{color:_warnaW(f.properties.warna),weight:1,opacity:.6,fillOpacity:.04,dashArray:"5,3"};},
+    onEachFeature:function(f,l){ if(f.properties&&f.properties.idDesa)l.bindPopup("Desa. "+f.properties.namaDesa); }
+  }):L.layerGroup();
+
+  var layerRTRW=L.layerGroup();
+  if(L.vectorGrid&&L.vectorGrid.protobuf){
+    var _rk={1:"#ffffff",2:"#9a99ff",3:"#e5d9ff",4:"#b3e6e7",5:"#9af2cc",6:"#cb9998",7:"#fee6fe",8:"#73b2ff",9:"#72dffe",10:"#ccff80",11:"#99ff99",12:"#ffd37f",13:"#ffaa00",14:"#e74cff",15:"#e6e6b2",16:"#b8ffc7",17:"#ffffbe",18:"#c02f1a",19:"#cdffcc",20:"#c3ffcc",21:"#e699ff"};
+    L.vectorGrid.protobuf("https://api.maptiler.com/tiles/019714d6-e798-7829-a293-06f529070ecd/{z}/{x}/{y}.pbf?key=pP7Y0XrqMfIZ58PvGQHX",{
+      pane:"paneRTRW",
+      bounds:L.latLngBounds([[-7.784859999999999,108.55585],[-7.138700000000017,109.39394000000001]]),
+      minZoom:0,maxZoom:20,minNativeZoom:10,maxNativeZoom:17,
+      vectorTileLayerStyles:{ layerrtrw:function(p){ var c=(p&&_rk[p.KODE])||"#CCCCCC"; return {fill:true,fillColor:c,fillOpacity:.32,color:c,weight:1,opacity:.75}; } },
+      interactive:true,getFeatureId:function(f){return f.properties.ID;}
+    }).on("click",function(e){
+      if(e.originalEvent)L.DomEvent.stopPropagation(e.originalEvent);
+      var p=e.layer&&e.layer.properties;
+      if(p&&p.NAMOBJ)L.popup().setLatLng(e.latlng).setContent("<b>Nama:</b> "+p.NAMOBJ+"<br><b>Kec:</b> "+(p.KEC||"-")).openOn(map);
+    }).addTo(layerRTRW);
+  }
+
+  layerKabupaten.addTo(map);
+  layerKecamatan.addTo(map);
+
+  /* ---- Marker cagar budaya ---- */
+  var group=L.layerGroup().addTo(map);
+  var markerById={};
+  function popupHTML(d){
+    var w=warnaKat(d.kategori);
+    var dir = (d.lat!=null&&d.lng!=null) ? "https://www.google.com/maps/dir/?api=1&destination="+d.lat+","+d.lng : null;
+    var h="<h6>"+esc(d.nama)+"</h6>"+
+      "<div class='pp-row'><span>Kategori</span><span>"+esc(d.kategori)+"</span></div>"+
+      "<div class='pp-row'><span>Kecamatan</span><span>"+esc(d.kecamatan||"-")+"</span></div>"+
+      "<div class='pp-row'><span>Kelurahan</span><span>"+esc(d.kelurahan||"-")+"</span></div>"+
+      (d.tahun?"<div class='pp-row'><span>Tahun</span><span>"+esc(d.tahun)+"</span></div>":"")+
+      "<span class='pp-status' style='color:"+w+";border-color:"+w+"'>"+esc(d.status)+"</span>";
+    if(d.deskripsi) h+="<p style='margin:10px 0 0;font-size:.8rem;color:#556'>"+esc(d.deskripsi)+"</p>";
+    if(dir) h+="<div class='pp-act'><a class='pp-btn' target='_blank' rel='noopener' href='"+dir+"'>Menuju Lokasi</a></div>";
+    return h;
+  }
+  function makeMarker(d){
+    var m=L.circleMarker([d.lat,d.lng],{pane:"paneCagar",radius:7,color:"#fff",weight:1.6,fillColor:warnaKat(d.kategori),fillOpacity:.95});
+    m.bindPopup(popupHTML(d));
+    markerById[d.id]=m;
+    return m;
+  }
+
+  /* ---- Legenda ---- */
+  var legend=L.control({position:"bottomright"});
+  legend.onAdd=function(){
+    var el=L.DomUtil.create("div","legend");
+    var html="<b>Kategori Cagar Budaya</b>";
+    Object.keys(KAT_WARNA).forEach(function(k){
+      html+="<span class='dot' style='background:"+KAT_WARNA[k]+"'></span>"+k+"<br>";
+    });
+    el.innerHTML=html;
+    return el;
+  };
+  legend.addTo(map);
+
+  /* ---- Kontrol lapisan (pojok kiri-bawah, kuncup) ---- */
+  L.control.layers(
+    {"Google Maps":baseGmap,"OpenStreetMap":baseOsm,"Google Hybrid":baseGhybrid,"Google Satelite":baseGsat,"Google Terrain":baseGterrain},
+    {"Cagar Budaya":group,"Adm. Kabupaten":layerKabupaten,"Adm. Kecamatan":layerKecamatan,"Adm. Desa":layerDesa,"RTRW":layerRTRW},
+    {position:"bottomleft",collapsed:true}
+  ).addTo(map);
+
+  /* ---- Filter tabel + peta ---- */
+  var elCari=document.getElementById("cbCari"),
+      elKat=document.getElementById("cbKategori"),
+      elStat=document.getElementById("cbStatus"),
+      elShown=document.getElementById("cbShown"),
+      rows=[].slice.call(document.querySelectorAll("#cbTable tbody tr[data-id]"));
+
+  function lolos(d){
+    var q=elCari.value.trim().toLowerCase(), k=elKat.value, s=elStat.value;
+    if(k && d.kategori!==k) return false;
+    if(s && d.status!==s) return false;
+    if(q && (d.nama+" "+d.kecamatan+" "+d.kelurahan+" "+d.alamat).toLowerCase().indexOf(q)<0) return false;
+    return true;
+  }
+  function terapkan(){
+    var tampil=0, bounds=[];
+    group.clearLayers();
+    DATA.forEach(function(d){
+      var ok=lolos(d);
+      var tr=document.querySelector('#cbTable tbody tr[data-id="'+d.id+'"]');
+      if(tr) tr.style.display = ok ? "" : "none";
+      if(ok){
+        tampil++;
+        if(d.lat!=null && d.lng!=null){ group.addLayer(makeMarker(d)); bounds.push([d.lat,d.lng]); }
+      }
+    });
+    elShown.textContent=tampil;
+    if(bounds.length) map.fitBounds(bounds,{padding:[45,45],maxZoom:14});
+  }
+  elCari.addEventListener("input",terapkan);
+  elKat.addEventListener("change",terapkan);
+  elStat.addEventListener("change",terapkan);
+
+  document.querySelectorAll("#cbTable .go-map").forEach(function(el){
+    el.addEventListener("click",function(){
+      var m=markerById[el.dataset.id];
+      if(!m){ terapkan(); m=markerById[el.dataset.id]; }
+      if(!m) return;
+      document.getElementById("cbMap").scrollIntoView({behavior:"smooth",block:"center"});
+      map.setView(m.getLatLng(),16);
+      setTimeout(function(){ m.openPopup(); },400);
+    });
+  });
+
+  function bingkai(){
+    map.invalidateSize();
+    var b=DATA.filter(function(d){return d.lat!=null&&d.lng!=null;}).map(function(d){return [d.lat,d.lng];});
+    if(b.length) map.fitBounds(b,{padding:[45,45],maxZoom:14});
+  }
+  terapkan();
+  map.whenReady(bingkai);
+  setTimeout(bingkai,600);
+})();
+</script>
 
 <footer>
   <div class="wrap">
