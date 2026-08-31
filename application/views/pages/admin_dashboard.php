@@ -175,60 +175,13 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
       </a>
     </div>
 
-    <?php
-    $dist_max = max(1, max(array_map('intval', $distribusi)));
-    // Waktu relatif ringkas: "x menit/jam/hari lalu"
-    $lalu = function ($dt) {
-      $ts = strtotime($dt);
-      if (! $ts) return '';
-      $d = time() - $ts;
-      if ($d < 60)    return 'baru saja';
-      if ($d < 3600)  return floor($d / 60) . ' menit lalu';
-      if ($d < 86400) return floor($d / 3600) . ' jam lalu';
-      if ($d < 2592000) return floor($d / 86400) . ' hari lalu';
-      return date('d M Y', $ts);
-    };
-    ?>
-    <div class="two-col">
-      <div class="panel">
-        <h3>Distribusi Status</h3>
-        <p style="color:var(--muted);font-size:.82rem;margin-bottom:6px">Permohonan PBG &amp; SLF berdasarkan status.</p>
-        <div class="dist">
-          <?php foreach ($status_label as $k => $lbl): $n = (int) $distribusi[$k]; ?>
-            <div class="dist-row">
-              <div class="dist-top">
-                <span class="k"><?php echo htmlspecialchars($lbl, ENT_QUOTES, 'UTF-8'); ?></span>
-                <span class="v"><?php echo $n; ?></span>
-              </div>
-              <div class="dist-bar"><i style="width:<?php echo $n === 0 ? 0 : round($n / $dist_max * 100); ?>%"></i></div>
-            </div>
-          <?php endforeach; ?>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head">
-          <h3>Aktivitas Terkini</h3>
-          <a class="more" href="<?php echo base_url('admin/pengajuan'); ?>">Lihat Semua</a>
-        </div>
-        <?php if (empty($aktivitas)): ?>
-          <p style="color:var(--muted);padding:14px 0">Belum ada aktivitas permohonan.</p>
-        <?php else: foreach ($aktivitas as $a):
-          $reg = $a['no_registrasi'] ?: ($a['jenis'] . ' (draf)');
-          $slbl = isset($status_label[$a['status']]) ? $status_label[$a['status']] : $a['status'];
-          $moved = ($a['updated_at'] !== $a['created_at']);
-        ?>
-          <div class="act-row">
-            <div class="act-av"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($a['nama_pemohon'], 0, 1)), ENT_QUOTES, 'UTF-8'); ?></div>
-            <div class="act-body">
-              <div class="act-name"><?php echo htmlspecialchars($a['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?> <span class="reg">(<?php echo htmlspecialchars($reg, ENT_QUOTES, 'UTF-8'); ?>)</span></div>
-              <div class="act-line"><?php echo $moved ? 'Status permohonan:' : 'Permohonan baru diajukan —'; ?> <span class="act-badge"><?php echo htmlspecialchars($slbl, ENT_QUOTES, 'UTF-8'); ?></span></div>
-              <div class="act-time"><?php echo htmlspecialchars($lalu($a['updated_at']), ENT_QUOTES, 'UTF-8'); ?> · Permohonan <?php echo htmlspecialchars($a['jenis'], ENT_QUOTES, 'UTF-8'); ?></div>
-            </div>
-          </div>
-        <?php endforeach; endif; ?>
-      </div>
-    </div>
+    <?php $this->load->view('partials/dashboard_status_aktivitas', array(
+      'status_label'         => $status_label,
+      'distribusi'           => $distribusi,
+      'aktivitas'            => $aktivitas,
+      'aktivitas_more_url'   => base_url('admin/pengajuan'),
+      'aktivitas_kosong_teks'=> 'Belum ada aktivitas permohonan.',
+    )); ?>
 
     <div class="panel">
       <h3>Masukan Terbaru</h3>

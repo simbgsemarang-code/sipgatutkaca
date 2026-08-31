@@ -210,8 +210,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-wrap">
     <div class="reveal">
       <p class="eyebrow">Portal TPA — Tim Profesi Ahli</p>
-      <h2>Tinjau Saran &amp; Masukan Warga</h2>
-      <p class="section-lead">Sebagai Tim Profesi Ahli, Anda membantu menindaklanjuti saran dan masukan yang masuk dari warga terkait penilaian kelayakan bangunan gedung. Perbarui status tiap masukan setelah ditinjau atau selesai ditangani.</p>
+      <h2>Dashboard</h2>
     </div>
 
     <?php if (!empty($sukses)): ?>
@@ -221,9 +220,22 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="alert alert-err reveal" style="margin-top:36px"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
-    <div class="reveal">
-      <p class="eyebrow" style="margin-bottom:8px">Kotak Masuk</p>
+    <div class="reveal" style="margin-top:40px">
+      <p class="eyebrow" style="margin-bottom:8px">Pantauan Permohonan</p>
+      <h2 style="font-size:1.3rem"><?php echo (int) $perlu_ditinjau; ?> permohonan menunggu verifikasi dokumen</h2>
+      <?php $this->load->view('partials/dashboard_status_aktivitas', array(
+        'status_label'         => $status_label,
+        'distribusi'           => $distribusi,
+        'aktivitas'            => $aktivitas,
+        'aktivitas_more_url'   => base_url('tpa-pengajuan-pbg'),
+        'aktivitas_kosong_teks'=> 'Belum ada keputusan peninjauan TPA.',
+      )); ?>
+    </div>
+
+    <div class="reveal" style="margin-top:60px">
+      <p class="eyebrow" style="margin-bottom:8px">Saran &amp; Masukan Warga</p>
       <h2 style="font-size:1.3rem">Total: <?php echo count($daftar_masukan); ?> masukan</h2>
+      <p class="section-lead">Sebagai Tim Profesi Ahli, Anda membantu menindaklanjuti saran dan masukan yang masuk dari warga. Perbarui status tiap masukan setelah ditinjau atau selesai ditangani.</p>
       <table>
         <thead><tr><th>Nama</th><th>Topik</th><th>Pesan</th><th>Status</th><th>Tanggal</th><th>Perbarui Status</th></tr></thead>
         <tbody>

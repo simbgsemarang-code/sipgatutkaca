@@ -35,6 +35,18 @@ class Tpa extends CI_Controller {
 		$data['sukses']         = $this->session->flashdata('sukses');
 		$data['error']          = $this->session->flashdata('error');
 		$data['nama_pengguna']  = $this->session->userdata('nama');
+
+		/* ---- Distribusi status + aktivitas peninjauan TPA ----
+		 * Akun spesialisasi hanya lihat keputusan bidangnya sendiri;
+		 * akun 'tpa' generik lihat semua bidang. */
+		$role   = (string) $this->session->userdata('role');
+		$bidang = in_array($role, array('tpa_arsitek', 'tpa_struktur', 'tpa_mep'), TRUE) ? $role : NULL;
+
+		$data['status_label']   = dashboard_status_label();
+		$data['distribusi']     = dashboard_distribusi();
+		$data['aktivitas']      = dashboard_aktivitas_tpa($bidang, 6);
+		$data['perlu_ditinjau'] = (int) $data['distribusi']['verifikasi_dokumen'];
+
 		$this->load->view('pages/tpa_dashboard', $data);
 	}
 

@@ -59,40 +59,10 @@ class Admin extends CI_Controller {
 			? $this->db->order_by('id', 'DESC')->limit(5)->get('saran_masukan')->result_array()
 			: array();
 
-		/* ---- Distribusi status permohonan (PBG + SLF digabung) ---- */
-		$data['status_label'] = array(
-			'draf'                         => 'Draf',
-			'verifikasi_dokumen'           => 'Verifikasi Dokumen',
-			'perbaikan_dokumen'            => 'Perbaikan Dokumen',
-			'perbaikan_dokumen_konsultasi' => 'Perbaikan Dok. Konsultasi',
-			'menunggu_jadwal_konsultasi'   => 'Menunggu Jadwal Konsultasi',
-			'disetujui_tpa'                => 'Disetujui Semua TPA',
-		);
-		$dist = array_fill_keys(array_keys($data['status_label']), 0);
-		foreach (array('pengajuan_pbg', 'pengajuan_slf') as $t)
-		{
-			if (! $this->db->table_exists($t)) continue;
-			foreach ($this->db->select('status, COUNT(*) AS n')->group_by('status')->get($t)->result_array() as $r)
-			{
-				if (isset($dist[$r['status']])) $dist[$r['status']] += (int) $r['n'];
-			}
-		}
-		$data['distribusi'] = $dist;
-
-		/* ---- Aktivitas terkini: permohonan PBG/SLF menurut updated_at ---- */
-		$akt = array();
-		foreach (array(array('pengajuan_pbg', 'PBG'), array('pengajuan_slf', 'SLF')) as $t)
-		{
-			if (! $this->db->table_exists($t[0])) continue;
-			foreach ($this->db->select('no_registrasi, status, nama_pemohon, updated_at, created_at')
-				->order_by('updated_at', 'DESC')->limit(6)->get($t[0])->result_array() as $r)
-			{
-				$r['jenis'] = $t[1];
-				$akt[] = $r;
-			}
-		}
-		usort($akt, function ($a, $b) { return strcmp($b['updated_at'], $a['updated_at']); });
-		$data['aktivitas'] = array_slice($akt, 0, 6);
+		/* ---- Distribusi status + aktivitas terkini (lihat dashboard_helper) ---- */
+		$data['status_label'] = dashboard_status_label();
+		$data['distribusi']   = dashboard_distribusi();
+		$data['aktivitas']    = dashboard_aktivitas(6);
 
 		$data['nama_admin'] = $this->session->userdata('nama');
 		$this->load->view('pages/admin_dashboard', $data);

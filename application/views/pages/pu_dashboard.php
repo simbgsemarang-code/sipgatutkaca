@@ -242,6 +242,18 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <a href="<?php echo base_url('pengajuan-slf'); ?>" style="display:inline-block;margin-top:16px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300);text-decoration:underline">Lihat Daftar Permohonan →</a>
     </div>
 
+    <div class="reveal" style="margin-top:52px">
+      <p class="eyebrow" style="margin-bottom:8px">Pantauan</p>
+      <h2 style="font-size:1.3rem">Distribusi Status &amp; Aktivitas</h2>
+      <?php $this->load->view('partials/dashboard_status_aktivitas', array(
+        'status_label'         => $status_label,
+        'distribusi'           => $distribusi,
+        'aktivitas'            => $aktivitas,
+        'aktivitas_more_url'   => base_url('pengajuan-pbg'),
+        'aktivitas_kosong_teks'=> 'Belum ada aktivitas permohonan.',
+      )); ?>
+    </div>
+
     <div class="reveal" style="margin-top:60px">
       <p class="eyebrow">Saran &amp; Masukan Warga</p>
       <h2 style="font-size:1.3rem">Tinjau Saran &amp; Masukan Warga</h2>

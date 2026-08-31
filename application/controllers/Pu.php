@@ -73,6 +73,11 @@ class Pu extends CI_Controller {
 			$data['terkirim_slf'] = $data['total_slf'] - $data['draf_slf'];
 		}
 
+		/* ---- Distribusi status + aktivitas terkini (lihat dashboard_helper) ---- */
+		$data['status_label'] = dashboard_status_label();
+		$data['distribusi']   = dashboard_distribusi();
+		$data['aktivitas']    = dashboard_aktivitas(6);
+
 		$this->load->view('pages/pu_dashboard', $data);
 	}
 
