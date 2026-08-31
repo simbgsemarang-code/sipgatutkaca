@@ -282,7 +282,7 @@ class Login extends CI_Controller {
 	private function _tujuan_setelah_login($role)
 	{
 		$peta_tujuan = array(
-			'admin'        => 'admin/pengguna',
+			'admin'        => 'admin',
 			'pu'           => 'pu',
 			'tpa'          => 'tpa',
 			'tpa_arsitek'  => 'tpa',

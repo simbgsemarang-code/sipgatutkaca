@@ -126,6 +126,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
 <div class="dash-layout">
   <aside class="dash-sidebar">
     <nav>
+      <a href="<?php echo base_url('admin'); ?>">Dashboard</a>
       <a href="<?php echo base_url('admin/pengguna'); ?>">Kelola Pengguna</a>
       <a href="<?php echo base_url('admin/pengajuan'); ?>">Pengajuan PBG</a>
       <a href="<?php echo base_url('admin/pengajuan-slf'); ?>">Pengajuan SLF</a>

@@ -16,7 +16,7 @@ function info_sesi_navbar()
 	$ci->load->library('session');
 
 	$peta_dashboard = array(
-		'admin'        => 'admin/pengguna',
+		'admin'        => 'admin',
 		'pu'           => 'pu',
 		'tpa'          => 'tpa',
 		'tpa_arsitek'  => 'tpa',

@@ -37,6 +37,32 @@ class Admin extends CI_Controller {
 		}
 	}
 
+	/** Dashboard ringkas panel admin. */
+	public function index()
+	{
+		$hitung = function ($tabel) {
+			return $this->db->table_exists($tabel) ? (int) $this->db->count_all_results($tabel) : 0;
+		};
+
+		$data['stat'] = array(
+			'pengguna'      => $hitung('users'),
+			'pengajuan_pbg' => $hitung('pengajuan_pbg'),
+			'pengajuan_slf' => $hitung('pengajuan_slf'),
+			'bangunan'      => $hitung('bangunan_gis'),
+			'cagar_budaya'  => $hitung('cagar_budaya'),
+			'saran'         => $hitung('saran_masukan'),
+		);
+		$data['saran_baru'] = $this->db->table_exists('saran_masukan')
+			? (int) $this->db->where('status', 'baru')->count_all_results('saran_masukan')
+			: 0;
+		$data['saran_terbaru'] = $this->db->table_exists('saran_masukan')
+			? $this->db->order_by('id', 'DESC')->limit(5)->get('saran_masukan')->result_array()
+			: array();
+
+		$data['nama_admin'] = $this->session->userdata('nama');
+		$this->load->view('pages/admin_dashboard', $data);
+	}
+
 	public function pengguna()
 	{
 		$data['daftar_user'] = $this->db->order_by('created_at', 'DESC')->get('users')->result_array();
