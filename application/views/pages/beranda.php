@@ -333,6 +333,29 @@
         max-width: 82vw
       }
 
+      .emblem-diamond-wrap::before,
+      .emblem-diamond-wrap::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 62%;
+        aspect-ratio: 1;
+        border: 1px solid rgba(243, 227, 184, .5);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        opacity: .75;
+      }
+
+      .emblem-diamond-wrap::before { animation: mascotHalo 3.8s ease-out infinite; }
+      .emblem-diamond-wrap::after { animation: mascotHalo 3.8s 1.9s ease-out infinite; }
+
+      @keyframes mascotHalo {
+        0% { transform: translate(-50%, -50%) scale(.72); opacity: .72; }
+        72%, 100% { transform: translate(-50%, -50%) scale(1.7); opacity: 0; }
+      }
+
       .emblem-diamond {
         width: 100%;
         height: 190px;
@@ -363,6 +386,16 @@
         filter: drop-shadow(0 12px 20px var(--shadow));
         animation: mascotFloat 4.5s ease-in-out infinite, mascotColorPlay 7s ease-in-out infinite
       }
+
+      .emblem-diamond-wrap.is-greeting::before,
+      .emblem-diamond-wrap.is-greeting::after { animation-duration: 1.05s; }
+
+      .emblem-diamond-wrap.is-greeting .emblem-diamond {
+        animation: diamondPulse .85s ease-in-out 2;
+      }
+
+      .emblem-diamond-wrap[role="button"] { cursor: pointer; }
+      .emblem-diamond-wrap[role="button"]:focus-visible { outline: 3px solid #F3E3B8; outline-offset: 10px; border-radius: 50%; }
 
       @keyframes mascotFloat {
         0%, 100% {
@@ -696,7 +729,7 @@
       <div class="hero-bg" style="background-image:url('hero-kantor-dpupr.jpg')" role="img" aria-label="Gedung Kantor DPUPR Kabupaten Cilacap"></div>
       <div class="wrap">
         <div class="emblem reveal">
-          <div class="emblem-diamond-wrap">
+          <div class="emblem-diamond-wrap" id="mascotStage" role="button" tabindex="0" aria-label="Sapa maskot Gatutkaca untuk memainkan animasi">
             <div class="emblem-diamond"></div>
             <img class="emblem-mascot" src="<?php echo base_url('assets/img/gatutkaca-transparent.png'); ?>" alt="Maskot Gatutkaca">
           </div>
@@ -850,6 +883,24 @@
       // ===== Topbar saat scroll =====
       var bar = document.getElementById('topbar');
       addEventListener('scroll', function () {bar.classList.toggle('scrolled', scrollY > 40)}, {passive: true});
+
+      // Maskot menyapa pengunjung: klik atau tekan Enter/Spasi untuk mengulang
+      // riak cahaya, tanpa aset animasi berat.
+      var mascotStage = document.getElementById('mascotStage');
+      if (mascotStage) {
+        function greetMascot() {
+          mascotStage.classList.remove('is-greeting');
+          void mascotStage.offsetWidth;
+          mascotStage.classList.add('is-greeting');
+        }
+        mascotStage.addEventListener('click', greetMascot);
+        mascotStage.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); greetMascot(); }
+        });
+        mascotStage.addEventListener('animationend', function (event) {
+          if (event.animationName === 'diamondPulse') mascotStage.classList.remove('is-greeting');
+        });
+      }
 
       // ===== Animasi muncul =====
       var io = new IntersectionObserver(function (es) {
