@@ -67,6 +67,31 @@ h3{font-family:var(--display);font-weight:400;font-size:1.4rem;color:var(--gold-
 .tag.st-ditinjau{color:#F0A048;border-color:#B4573B}
 .tag.st-selesai{color:#6FCF97;border-color:#2EA84F}
 .panel .more{display:inline-block;margin:16px 0;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300)}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:6px}
+.panel-head .more{margin:0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px}
+.two-col .panel{margin-top:0}
+@media(max-width:1080px){.two-col{grid-template-columns:1fr}}
+
+.dist{margin-top:14px}
+.dist-row{padding:14px 0}
+.dist-row:not(:last-child){border-bottom:1px solid var(--line)}
+.dist-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.dist-top .k{color:var(--text);font-size:.92rem}
+.dist-top .v{font-family:var(--display);font-size:1.1rem;color:var(--text)}
+.dist-bar{margin-top:8px;height:8px;border-radius:999px;background:var(--surface-hi);overflow:hidden}
+.dist-bar i{display:block;height:100%;border-radius:999px;background:var(--gold-500);transition:width .3s}
+
+.act{margin-top:8px}
+.act-row{display:flex;gap:14px;padding:16px 0;align-items:flex-start}
+.act-row:not(:last-child){border-bottom:1px solid var(--line)}
+.act-av{flex:0 0 auto;width:40px;height:40px;border-radius:50%;background:var(--surface-hi);border:1px solid var(--line);display:grid;place-items:center;font-family:var(--display);color:var(--gold-300);font-size:1rem}
+.act-body{min-width:0;flex:1}
+.act-name{color:var(--text);font-weight:500;font-size:.9rem}
+.act-name .reg{color:var(--muted);font-weight:300}
+.act-line{margin-top:3px;font-size:.85rem;color:var(--muted)}
+.act-badge{display:inline-block;background:var(--surface-hi);border:1px solid var(--line);color:var(--gold-300);font-size:.66rem;font-weight:600;letter-spacing:.06em;padding:2px 9px;border-radius:999px;text-transform:uppercase}
+.act-time{margin-top:4px;font-size:.74rem;color:var(--muted)}
 
 footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px solid var(--line);margin-top:40px}
 .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:50px}
@@ -148,6 +173,61 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
         <div class="num"><?php echo number_format($stat['saran'], 0, ',', '.'); ?><?php if ($saran_baru > 0): ?><span class="badge-baru"><?php echo (int) $saran_baru; ?> baru</span><?php endif; ?></div>
         <div class="lbl">Saran &amp; Masukan</div><div class="go">Kelola →</div>
       </a>
+    </div>
+
+    <?php
+    $dist_max = max(1, max(array_map('intval', $distribusi)));
+    // Waktu relatif ringkas: "x menit/jam/hari lalu"
+    $lalu = function ($dt) {
+      $ts = strtotime($dt);
+      if (! $ts) return '';
+      $d = time() - $ts;
+      if ($d < 60)    return 'baru saja';
+      if ($d < 3600)  return floor($d / 60) . ' menit lalu';
+      if ($d < 86400) return floor($d / 3600) . ' jam lalu';
+      if ($d < 2592000) return floor($d / 86400) . ' hari lalu';
+      return date('d M Y', $ts);
+    };
+    ?>
+    <div class="two-col">
+      <div class="panel">
+        <h3>Distribusi Status</h3>
+        <p style="color:var(--muted);font-size:.82rem;margin-bottom:6px">Permohonan PBG &amp; SLF berdasarkan status.</p>
+        <div class="dist">
+          <?php foreach ($status_label as $k => $lbl): $n = (int) $distribusi[$k]; ?>
+            <div class="dist-row">
+              <div class="dist-top">
+                <span class="k"><?php echo htmlspecialchars($lbl, ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="v"><?php echo $n; ?></span>
+              </div>
+              <div class="dist-bar"><i style="width:<?php echo $n === 0 ? 0 : round($n / $dist_max * 100); ?>%"></i></div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Aktivitas Terkini</h3>
+          <a class="more" href="<?php echo base_url('admin/pengajuan'); ?>">Lihat Semua</a>
+        </div>
+        <?php if (empty($aktivitas)): ?>
+          <p style="color:var(--muted);padding:14px 0">Belum ada aktivitas permohonan.</p>
+        <?php else: foreach ($aktivitas as $a):
+          $reg = $a['no_registrasi'] ?: ($a['jenis'] . ' (draf)');
+          $slbl = isset($status_label[$a['status']]) ? $status_label[$a['status']] : $a['status'];
+          $moved = ($a['updated_at'] !== $a['created_at']);
+        ?>
+          <div class="act-row">
+            <div class="act-av"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($a['nama_pemohon'], 0, 1)), ENT_QUOTES, 'UTF-8'); ?></div>
+            <div class="act-body">
+              <div class="act-name"><?php echo htmlspecialchars($a['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?> <span class="reg">(<?php echo htmlspecialchars($reg, ENT_QUOTES, 'UTF-8'); ?>)</span></div>
+              <div class="act-line"><?php echo $moved ? 'Status permohonan:' : 'Permohonan baru diajukan —'; ?> <span class="act-badge"><?php echo htmlspecialchars($slbl, ENT_QUOTES, 'UTF-8'); ?></span></div>
+              <div class="act-time"><?php echo htmlspecialchars($lalu($a['updated_at']), ENT_QUOTES, 'UTF-8'); ?> · Permohonan <?php echo htmlspecialchars($a['jenis'], ENT_QUOTES, 'UTF-8'); ?></div>
+            </div>
+          </div>
+        <?php endforeach; endif; ?>
+      </div>
     </div>
 
     <div class="panel">
