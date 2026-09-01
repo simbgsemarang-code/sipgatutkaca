@@ -102,14 +102,14 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6re
 .list-key{font-family:var(--display);color:var(--gold-300);letter-spacing:.06em;min-width:180px;font-size:.95rem;flex:0 0 auto}
 .list-val{color:var(--muted);font-size:.92rem}
 .requirement-list .list-item{align-items:flex-start;padding:18px 0}
-.requirement-list .list-key{padding-top:3px;min-width:260px}
-.check-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 22px;list-style:none;width:100%}
-.check-list li{position:relative;padding-left:28px;color:var(--muted);font-size:.88rem;line-height:1.55}
-.check-list li::before{content:"✓";position:absolute;left:0;top:.05em;width:19px;height:19px;display:grid;place-items:center;border-radius:50%;background:rgba(30,134,163,.12);color:#18758e;font-size:.72rem;font-weight:700}
+.requirement-list .list-key{padding-top:2px;min-width:250px;color:#946b17;font-size:1rem;font-weight:500;line-height:1.5}
+.check-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 24px;list-style:none;flex:1;min-width:0}
+.check-list li{position:relative;min-width:0;padding-left:31px;color:var(--text);font-size:.94rem;font-weight:500;line-height:1.55;overflow-wrap:anywhere}
+.check-list li::before{content:"✓";position:absolute;left:0;top:.08em;width:21px;height:21px;display:grid;place-items:center;border-radius:50%;background:#dceff4;color:#087a98;font-size:.78rem;font-weight:800;box-shadow:inset 0 0 0 1px rgba(8,122,152,.08)}
 @media(max-width:760px){
   .requirement-list .list-item{display:block}
   .requirement-list .list-key{display:block;min-width:0;margin-bottom:12px}
-  .check-list{grid-template-columns:1fr}
+  .check-list{grid-template-columns:1fr;width:100%}
 }
 
 /* ===== TABEL & FORM ===== */
