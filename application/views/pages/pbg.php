@@ -78,7 +78,7 @@ h1 em{font-style:normal;color:#E4C87B}
 .btn-gold:hover{filter:brightness(1.08);transform:translateY(-2px)}
 
 /* ===== BAGAN ALUR PERMOHONAN PBG ===== */
-.pbg-flow-figure{margin:30px auto 0;max-width:1180px}
+.pbg-flow-figure{margin:0 auto;max-width:1180px}
 .pbg-flow-image{width:100%;height:auto;border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 44px rgba(21,42,59,.12)}
 .pbg-flow-figure figcaption{margin-top:12px;color:var(--muted);font-size:.72rem;text-align:center}
 .pbg-flow-figure figcaption a{color:var(--gold-300);font-weight:600}
@@ -241,9 +241,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </div>
 
     <div class="reveal" style="text-align:center">
-      <p class="eyebrow">Panduan Permohonan PBG</p>
-      <h2 style="font-size:clamp(1.55rem,2.6vw,2.2rem);margin:0 auto">Bagan Alur Permohonan PBG</h2>
-      <p class="section-lead" style="margin:12px auto 0">Alur pelayanan dari pengajuan pemohon hingga penerbitan dan penyerahan Surat Keputusan PBG.</p>
       <figure class="pbg-flow-figure">
         <img class="pbg-flow-image" src="<?php echo base_url('assets/img/bagan-alur-pbg.jpg'); ?>?v=<?php echo @filemtime(FCPATH.'assets/img/bagan-alur-pbg.jpg'); ?>" alt="Bagan alur permohonan PBG dari pengajuan di SIMBG hingga penerbitan dan penyerahan SK PBG" loading="eager">
         <figcaption>Sumber: Panduan Permohonan PBG Kementerian Pekerjaan Umum · <a href="https://simbg.pu.go.id" target="_blank" rel="noopener noreferrer">simbg.pu.go.id</a></figcaption>
