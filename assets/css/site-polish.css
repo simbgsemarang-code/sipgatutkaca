@@ -17,17 +17,21 @@ body {
 
 /* Bright, layered canvas for every service and dashboard page (not Beranda). */
 html[data-theme="light"] body.is-inner-page {
-  --bg: #f7f5f0;
-  --bg-alt: #eee9df;
-  --surface: rgba(255,255,255,.92);
-  --surface-hi: #fffaf0;
-  --input: #fffdfa;
-  --line: rgba(152,112,43,.22);
-  background-color: #f7f5f0;
+  --bg: #f9fbfd;
+  --bg-alt: #f1f6f8;
+  --surface: rgba(255,255,255,.96);
+  --surface-hi: #f5f9fb;
+  --input: #ffffff;
+  --text: #173247;
+  --muted: #587083;
+  --line: rgba(35,91,116,.15);
+  --head-bg: rgba(255,255,255,.93);
+  --head-grad: rgba(255,255,255,.88);
+  background-color: #f9fbfd;
   background-image:
-    radial-gradient(ellipse 52rem 31rem at -8% -12%, rgba(223,184,104,.25), transparent 66%),
-    radial-gradient(ellipse 48rem 32rem at 108% 5%, rgba(82,157,180,.16), transparent 63%),
-    linear-gradient(135deg, #faf9f5 0%, #f5f0e7 48%, #eef3f3 100%);
+    radial-gradient(ellipse 48rem 25rem at -8% -10%, rgba(228,200,123,.16), transparent 66%),
+    radial-gradient(ellipse 46rem 28rem at 108% 2%, rgba(80,165,193,.13), transparent 63%),
+    linear-gradient(135deg, #ffffff 0%, #f9fbfd 48%, #f1f7f9 100%);
   background-attachment: fixed;
 }
 html[data-theme="light"] .is-inner-page .dash-main,
@@ -50,12 +54,46 @@ html[data-theme="light"] .is-inner-page .form-card,
 html[data-theme="light"] .is-inner-page .card,
 html[data-theme="light"] .is-inner-page .user-menu-panel,
 html[data-theme="light"] .is-inner-page .theme-panel {
-  background: rgba(255,255,255,.88);
+  background: rgba(255,255,255,.94);
   backdrop-filter: blur(12px);
 }
 html[data-theme="light"] .is-inner-page .dash-sidebar {
-  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,244,235,.95));
+  background: linear-gradient(180deg, rgba(255,255,255,.99), rgba(244,249,251,.97));
 }
+
+/* Compact inner-page rhythm. The homepage keeps its cinematic spacing. */
+.is-inner-page .nav { height: 74px; }
+.is-inner-page .brand img { height: 44px; }
+.is-inner-page .brand-name { font-size: 1.08rem; }
+.is-inner-page .brand-sub { letter-spacing: .24em; }
+.is-inner-page .wrap { max-width: 1240px; }
+.is-inner-page section { padding-top: 66px; padding-bottom: 66px; }
+.is-inner-page section[style*="padding-top"] { padding-top: 98px !important; }
+.is-inner-page .page-breadcrumb { margin-bottom: 14px; }
+.is-inner-page .eyebrow { margin-bottom: 9px; }
+.is-inner-page h1,
+.is-inner-page h2 { letter-spacing: -.018em; }
+.is-inner-page .section-lead { margin-top: 12px; line-height: 1.65; }
+.is-inner-page .cards,
+.is-inner-page .stats,
+.is-inner-page .steps,
+.is-inner-page .gallery { margin-top: 36px; }
+.is-inner-page .card { padding: 28px 24px; }
+.is-inner-page .card svg { margin-bottom: 15px; }
+.is-inner-page .card h3 { margin-bottom: 8px; }
+.is-inner-page .reg-list { margin-top: 30px; }
+.is-inner-page .reg-list li { gap: 16px; padding: 14px; }
+.is-inner-page .reg-list li:hover { background: rgba(62,145,174,.055); }
+.is-inner-page .list { margin-top: 22px; }
+.is-inner-page .list-item { padding: 14px 0; }
+.is-inner-page .step { padding: 24px 0; }
+.is-inner-page table { margin-top: 30px; }
+.is-inner-page th,
+.is-inner-page td { padding: 12px 13px; }
+.is-inner-page .form-card { padding: 30px; }
+.is-inner-page .field { margin-bottom: 16px; }
+.is-inner-page footer { padding-top: 46px; padding-bottom: 24px; }
+.is-inner-page .credit { margin-top: 34px; }
 
 /* Framed map — give the Leaflet canvas a clear picture frame (mat + line +
    depth) so it reads as a deliberate panel, matching the filter card above.
@@ -123,7 +161,7 @@ header.scrolled {
 .dash-sidebar a { transition: background .2s ease, color .2s ease, transform .2s ease; }
 .dash-sidebar a:hover { transform: translateX(4px); }
 .info-card, .form-card {
-  border: 1px solid rgba(201,162,75,.12);
+  border: 1px solid rgba(35,91,116,.12);
 }
 thead th {
   letter-spacing: .05em;
@@ -161,6 +199,19 @@ input:focus, select:focus, textarea:focus {
   .dash-sidebar { box-shadow: 0 8px 18px rgba(21,42,59,.04); }
   .dash-sidebar a { border-radius: 0; margin-right: 0; }
   .card:hover { transform: none; }
+  .is-inner-page section { padding-top: 52px; padding-bottom: 52px; }
+  .is-inner-page section[style*="padding-top"] { padding-top: 90px !important; }
+}
+
+@media (max-width: 560px) {
+  .is-inner-page .wrap { padding-left: 20px; padding-right: 20px; }
+  .is-inner-page .nav { height: 68px; }
+  .is-inner-page .brand img { height: 39px; }
+  .is-inner-page .brand-name { font-size: .94rem; }
+  .is-inner-page section { padding-top: 42px; padding-bottom: 42px; }
+  .is-inner-page section[style*="padding-top"] { padding-top: 82px !important; }
+  .is-inner-page .form-card { padding: 24px 20px; }
+  .is-inner-page .reg-list li { padding: 12px 8px; }
 }
 
 /* Footer sits on a permanently dark panel, so its brand block must stay
