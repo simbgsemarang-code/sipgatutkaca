@@ -96,9 +96,9 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6re
 
 /* ===== DAFTAR / LIST BERNOMOR ===== */
 .reg-list{margin-top:44px;list-style:none}
-.reg-list li{display:flex;gap:22px;padding:20px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.reg-list li{display:flex;gap:16px;padding:20px 0;border-bottom:1px solid var(--line);align-items:center}
 .reg-list li:first-child{border-top:1px solid var(--line)}
-.reg-num{font-family:var(--display);color:var(--gold-300);font-size:1rem;min-width:32px;flex:0 0 auto}
+.reg-num{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:#dceff4;color:#087a98;font-size:.8rem;font-weight:800;line-height:1;flex:0 0 24px;box-shadow:inset 0 0 0 1px rgba(8,122,152,.08)}
 .reg-text{color:var(--text);font-size:.95rem;line-height:1.6}
 
 /* ===== KATEGORI PERSYARATAN SLF ===== */
@@ -259,22 +259,22 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <div class="pbg-cat pbg-cat-a reveal">
       <h3>Bangunan Hunian / Rumah Tinggal</h3>
       <ol class="reg-list">
-        <li><span class="reg-num">01</span><span class="reg-text">Data Identitas Pemilik Bangunan (KTP/KITAS)</span></li>
-        <li><span class="reg-num">02</span><span class="reg-text">Data Intensitas Bangunan (KKPR/KRK)/Informasi Tata Ruang (ITR)</span></li>
-        <li><span class="reg-num">03</span><span class="reg-text">Bukti Kepemilikan Tanah (Sertifikat Tanah/Girik/Latter C) dan SPPT / Keterangan NOP</span></li>
-        <li><span class="reg-num">04</span><span class="reg-text">Data Penyedia Jasa Perencana Konstruksi atau Arsitek berlisensi (SKK/STRA/STRI)</span></li>
+        <li><span class="reg-num" aria-hidden="true">✓</span><span class="reg-text">Data Identitas Pemilik Bangunan (KTP/KITAS)</span></li>
+        <li><span class="reg-num" aria-hidden="true">✓</span><span class="reg-text">Data Intensitas Bangunan (KKPR/KRK)/Informasi Tata Ruang (ITR)</span></li>
+        <li><span class="reg-num" aria-hidden="true">✓</span><span class="reg-text">Bukti Kepemilikan Tanah (Sertifikat Tanah/Girik/Latter C) dan SPPT / Keterangan NOP</span></li>
+        <li><span class="reg-num" aria-hidden="true">✓</span><span class="reg-text">Data Penyedia Jasa Perencana Konstruksi atau Arsitek berlisensi (SKK/STRA/STRI)</span></li>
       </ol>
     </div>
 
     <div class="pbg-cat pbg-cat-b reveal">
       <h3>Bangunan Umum Non Hunian &amp; Campuran</h3>
       <ol class="reg-list">
-        <li><span class="reg-num">01</span><span class="reg-text">Data Identitas Pemilik Bangunan (KTP/KITAS) dan NIB</span></li>
-        <li><span class="reg-num">02</span><span class="reg-text">Data Intensitas Bangunan (KKPR/KRK)/Informasi Tata Ruang (ITR)</span></li>
-        <li><span class="reg-num">03</span><span class="reg-text">Dokumen lingkungan sesuai peraturan perundangan (AMDAL, UKL/UPL, SPPL) sesuai dengan penapisan amdalnet</span></li>
-        <li><span class="reg-num">04</span><span class="reg-text">Bukti Kepemilikan Tanah (Sertifikat Tanah/Girik/Latter C) dan SPPT / Keterangan NOP</span></li>
-        <li><span class="reg-num">05</span><span class="reg-text">Data Penyedia Jasa Perencana Konstruksi atau Arsitek berlisensi (SKK/STRA/STRI)</span></li>
-        <li><span class="reg-num">06</span><span class="reg-text">Surat Kerukunan Umat Beragama (SKUB) — khusus bangunan agama</span></li>
+        <li><span class="reg-num" aria-hidden="true">✓</span><span class="reg-text">Data Identitas Pemilik Bangunan (KTP/KITAS) dan NIB</span></li>
+        <li><span class="reg-num" aria-hidden="true">✓</span><span class="reg-text">Data Intensitas Bangunan (KKPR/KRK)/Informasi Tata Ruang (ITR)</span></li>
+        <li><span class="reg-num" aria-hidden="true">✓</span><span class="reg-text">Dokumen lingkungan sesuai peraturan perundangan (AMDAL, UKL/UPL, SPPL) sesuai dengan penapisan amdalnet</span></li>
+        <li><span class="reg-num" aria-hidden="true">✓</span><span class="reg-text">Bukti Kepemilikan Tanah (Sertifikat Tanah/Girik/Latter C) dan SPPT / Keterangan NOP</span></li>
+        <li><span class="reg-num" aria-hidden="true">✓</span><span class="reg-text">Data Penyedia Jasa Perencana Konstruksi atau Arsitek berlisensi (SKK/STRA/STRI)</span></li>
+        <li><span class="reg-num" aria-hidden="true">✓</span><span class="reg-text">Surat Kerukunan Umat Beragama (SKUB) — khusus bangunan agama</span></li>
       </ol>
     </div>
 
