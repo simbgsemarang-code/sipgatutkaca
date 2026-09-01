@@ -77,14 +77,10 @@ h1 em{font-style:normal;color:#E4C87B}
 .btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
 .btn-gold:hover{filter:brightness(1.08);transform:translateY(-2px)}
 
-/* ===== PORTAL TIM PENELAAH (TPA/PU) ===== */
-.tim-row{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;margin-top:36px}
-.tim-btn{display:flex;flex-direction:column;align-items:center;text-align:center;transition:.3s}
-.tim-icon-box{width:150px;height:150px;display:grid;place-items:center;background:linear-gradient(160deg,#1E86A3,#145E75);border:5px solid #F8F4EA;position:relative;z-index:2;box-shadow:0 10px 20px var(--shadow);transition:transform .3s,box-shadow .3s}
-.tim-icon-box svg{width:112px;height:112px}
-.tim-btn:hover .tim-icon-box{transform:translateY(-4px) scale(1.04);box-shadow:0 14px 26px var(--shadow)}
-.tim-label-box{display:flex;align-items:center;justify-content:center;min-height:88px;margin:-16px auto 0;background:#E9EEF1;border:1px solid #C7D2D8;padding:16px 10px;width:88%;max-width:190px;text-align:center}
-.tim-btn .tim-label-box b{font-family:var(--display);font-weight:400;font-size:1.15rem;letter-spacing:.06em;color:#223842;display:block;margin:0}
+/* ===== BAGAN ALUR PERMOHONAN SLF ===== */
+.slf-flow-figure{margin:0 auto;max-width:1180px}
+.slf-flow-image{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 44px rgba(21,42,59,.12)}
+.slf-flow-figure figcaption{margin-top:12px;color:var(--muted);font-size:.72rem;text-align:center}
 .btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
 /* Tombol Dashboard/Masuk di kop transparan di atas hero sebelum discroll - kasih latar solid (sama seperti header.scrolled) supaya tetap kelihatan. */
@@ -112,18 +108,11 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6re
 .pbg-cat-b h3{background:linear-gradient(160deg,#1E86A3,#3BAFC9);color:#F8F4EA}
 .pbg-cat .reg-list{margin-top:16px}
 
-/* ===== TIMELINE TATA CARA / DATA TEKNIS ===== */
-.steps{margin-top:46px;display:grid;gap:0}
-.step{display:grid;grid-template-columns:90px 1fr;gap:30px;padding:34px 0;border-bottom:1px solid var(--line);align-items:start}
-.step:first-child{border-top:1px solid var(--line)}
-.step-num{font-family:var(--display);font-size:2.4rem;color:var(--gold-300);line-height:1}
-.step h3{font-family:var(--display);font-weight:400;font-size:1.25rem;color:var(--text);margin-bottom:8px;letter-spacing:.04em}
-.step p{color:var(--muted);font-size:.93rem;max-width:70ch}
-.step .tag{margin-top:12px}
-
-.pbg-sub{list-style:none;margin-top:12px}
-.pbg-sub li{display:flex;gap:14px;padding:7px 0;color:var(--muted);font-size:.9rem}
-.pbg-letter{font-family:var(--display);color:var(--gold-300);min-width:20px;flex:0 0 auto}
+/* ===== CHECKLIST DOKUMEN AKHIR SLF ===== */
+.slf-checklist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:34px;list-style:none}
+.slf-checklist li{position:relative;min-width:0;padding:22px 24px 22px 62px;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:0 10px 26px rgba(21,42,59,.07);color:var(--text);font-size:.96rem;font-weight:500;line-height:1.55}
+.slf-checklist li::before{content:"✓";position:absolute;left:22px;top:21px;width:25px;height:25px;display:grid;place-items:center;border-radius:50%;background:#dceff4;color:#087a98;font-size:.84rem;font-weight:800;box-shadow:inset 0 0 0 1px rgba(8,122,152,.08)}
+.slf-checklist small{display:block;margin-top:5px;color:var(--muted);font-size:.78rem;font-weight:400}
 
 /* ===== TABEL & FORM ===== */
 table{width:100%;border-collapse:collapse;margin-top:44px;font-size:.9rem}
@@ -187,10 +176,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 }
 @media(max-width:560px){
   section{padding:76px 0}
-  .step{grid-template-columns:56px 1fr;gap:18px}
-  .step-num{font-size:1.7rem}
-  .tim-icon-box{width:120px;height:120px}
-  .tim-icon-box svg{width:88px;height:88px}
+  .slf-checklist{grid-template-columns:1fr}
 }
 .auth-actions{display:flex;align-items:center;gap:14px}
 .user-menu{position:relative}
@@ -253,29 +239,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <a href="<?php echo base_url(); ?>">Beranda</a><span class="sep">/</span>SLF
     </div>
 
-    <div class="reveal" style="text-align:center">
-      <p class="eyebrow">Untuk Petugas</p>
-      <h2 style="font-size:clamp(1.3rem,2.2vw,1.7rem);margin:0 auto">Portal Tim Penelaah SLF</h2>
-      <div class="tim-row">
-        <a class="tim-btn" href="<?php echo base_url('login?from=tpa'); ?>">
-          <span class="tim-icon-box">
-            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-              <path d="M8 36V22l14-10 14 10v14" stroke="#F8F4EA" stroke-width="2" />
-              <path d="M17 36v-9h10v9M8 36h28" stroke="#F8F4EA" stroke-width="2" />
-            </svg>
-          </span>
-          <span class="tim-label-box"><b>TPA</b></span>
-        </a>
-        <a class="tim-btn" href="<?php echo base_url('login?from=pu'); ?>">
-          <span class="tim-icon-box">
-            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-              <path d="M10 34l10-10m4-4l10-10M24 20l-4 4" stroke="#F8F4EA" stroke-width="2" />
-              <path d="M30 6l8 8-5 5-8-8zM6 33l5-5 5 5-5 5z" stroke="#F8F4EA" stroke-width="2" />
-            </svg>
-          </span>
-          <span class="tim-label-box"><b>PU</b></span>
-        </a>
-      </div>
+    <div class="reveal">
+      <figure class="slf-flow-figure">
+        <img class="slf-flow-image" src="<?php echo base_url('assets/img/bagan-alur-slf.jpg'); ?>?v=<?php echo @filemtime(FCPATH.'assets/img/bagan-alur-slf.jpg'); ?>" alt="Bagan alur permohonan SLF bangunan baru pada aplikasi SIMBG" loading="eager">
+        <figcaption>Sumber: Panduan Permohonan SLF Bangunan Baru, Kementerian Pekerjaan Umum.</figcaption>
+      </figure>
     </div>
 
     <div class="reveal" style="margin-top:64px">
@@ -311,53 +279,14 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </div>
 
     <div class="reveal" style="margin-top:70px">
-      <p class="eyebrow" style="margin-bottom:0">Data Teknis</p>
-      <h2 style="font-size:clamp(1.5rem,2.6vw,2rem);margin-top:14px">Kelengkapan Dokumen Rencana Teknis</h2>
+      <p class="eyebrow" style="margin-bottom:0">Dokumen Akhir</p>
+      <h2 style="font-size:clamp(1.5rem,2.6vw,2rem);margin-top:14px">Kelengkapan Dokumen Akhir SLF</h2>
     </div>
 
-    <div class="steps reveal">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div>
-          <h3>Data Teknis Arsitektur</h3>
-          <ol class="pbg-sub">
-            <li><span class="pbg-letter">a.</span><span>Gambar As Build Drawing Arsitektur</span></li>
-            <li><span class="pbg-letter">b.</span><span>Spesifikasi Teknis Arsitektur Bangunan</span></li>
-          </ol>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div>
-          <h3>Data Teknis Struktur</h3>
-          <ol class="pbg-sub">
-            <li><span class="pbg-letter">a.</span><span>Gambar As Build Drawing Struktur</span></li>
-            <li><span class="pbg-letter">b.</span><span>Spesifikasi Teknis Struktur Bangunan</span></li>
-            <li><span class="pbg-letter">c.</span><span>Perhitungan Teknis Struktur</span></li>
-          </ol>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div>
-          <h3>Data Teknis MEP</h3>
-          <ol class="pbg-sub">
-            <li><span class="pbg-letter">a.</span><span>Gambar As Build Drawing Mekanikal, Elektrikal, dan Plambing</span></li>
-            <li><span class="pbg-letter">b.</span><span>Spesifikasi Teknis Mekanikal, Elektrikal, dan Plambing</span></li>
-          </ol>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div>
-          <h3>Dokumen Bangunan Eksisting</h3>
-          <ol class="pbg-sub">
-            <li><span class="pbg-letter">a.</span><span>Laporan Pemeriksaan Kelaikan Fungsi Bangunan</span></li>
-            <li><span class="pbg-letter">b.</span><span>Surat Pernyataan Kelaikan Fungsi</span></li>
-          </ol>
-        </div>
-      </div>
-    </div>
+    <ul class="slf-checklist reveal" aria-label="Checklist dokumen akhir permohonan SLF">
+      <li>As Built Drawing<small>Dokumen gambar bangunan terbangun.</small></li>
+      <li>Surat Pernyataan Kelaikan Fungsi<small>Surat pernyataan sebagai kelengkapan dokumen akhir SLF.</small></li>
+    </ul>
 
   </div>
 </section>
