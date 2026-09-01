@@ -77,14 +77,25 @@ h1 em{font-style:normal;color:#E4C87B}
 .btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
 .btn-gold:hover{filter:brightness(1.08);transform:translateY(-2px)}
 
-/* ===== PORTAL TIM PENELAAH (TPA/PU) ===== */
-.tim-row{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;margin-top:36px}
-.tim-btn{display:flex;flex-direction:column;align-items:center;text-align:center;transition:.3s}
-.tim-icon-box{width:150px;height:150px;display:grid;place-items:center;background:linear-gradient(160deg,#1E86A3,#145E75);border:5px solid #F8F4EA;position:relative;z-index:2;box-shadow:0 10px 20px var(--shadow);transition:transform .3s,box-shadow .3s}
-.tim-icon-box svg{width:112px;height:112px}
-.tim-btn:hover .tim-icon-box{transform:translateY(-4px) scale(1.04);box-shadow:0 14px 26px var(--shadow)}
-.tim-label-box{display:flex;align-items:center;justify-content:center;min-height:88px;margin:-16px auto 0;background:#E9EEF1;border:1px solid #C7D2D8;padding:16px 10px;width:88%;max-width:190px;text-align:center}
-.tim-btn .tim-label-box b{font-family:var(--display);font-weight:400;font-size:1.15rem;letter-spacing:.06em;color:#223842;display:block;margin:0}
+/* ===== BAGAN ALUR PERMOHONAN PBG ===== */
+.pbg-flow{margin-top:34px;position:relative}
+.flow-track{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:20px;align-items:stretch;list-style:none}
+.flow-step{position:relative;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:19px 14px 17px;text-align:left;box-shadow:0 12px 30px rgba(21,42,59,.08);transition:transform .25s,box-shadow .25s,border-color .25s}
+.flow-step:hover{transform:translateY(-4px);box-shadow:0 18px 38px rgba(21,42,59,.13);border-color:rgba(201,162,75,.55)}
+.flow-step:not(:last-child)::after{content:"";position:absolute;top:50%;right:-18px;width:12px;height:12px;border-top:2px solid #C9A24B;border-right:2px solid #C9A24B;transform:translateY(-50%) rotate(45deg)}
+.flow-role{display:inline-flex;align-items:center;min-height:24px;padding:4px 8px;border-radius:999px;background:rgba(30,134,163,.11);color:#176c85;font-size:.58rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;line-height:1.25}
+.flow-step[data-role="tim"] .flow-role{background:rgba(201,162,75,.16);color:#8d681b}
+.flow-step[data-role="izin"] .flow-role{background:rgba(37,119,90,.12);color:#25775a}
+.flow-num{display:block;margin:16px 0 7px;font-family:var(--display);font-size:1.55rem;line-height:1;color:var(--gold-300)}
+.flow-step h3{font-family:var(--body);font-size:.79rem;line-height:1.55;font-weight:600;color:var(--text)}
+.flow-source{margin:18px auto 0;color:var(--muted);font-size:.72rem;text-align:center}
+.flow-source a{color:var(--gold-300);font-weight:600}
+@media(max-width:1000px){
+  .flow-track{grid-template-columns:1fr;gap:14px;max-width:680px;margin:0 auto}
+  .flow-step{padding:17px 20px 17px 74px;min-height:82px}
+  .flow-num{position:absolute;left:20px;top:50%;margin:0;transform:translateY(-50%)}
+  .flow-step:not(:last-child)::after{top:auto;right:auto;left:35px;bottom:-11px;transform:rotate(135deg)}
+}
 .btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
 /* Tombol Dashboard/Masuk di kop transparan di atas hero sebelum discroll - kasih latar solid (sama seperti header.scrolled) supaya tetap kelihatan. */
@@ -234,27 +245,21 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     </div>
 
     <div class="reveal" style="text-align:center">
-      <p class="eyebrow">Untuk Petugas</p>
-      <h2 style="font-size:clamp(1.3rem,2.2vw,1.7rem);margin:0 auto">Portal Tim Penelaah PBG</h2>
-      <div class="tim-row">
-        <a class="tim-btn" href="<?php echo base_url('login?from=tpa'); ?>">
-          <span class="tim-icon-box">
-            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-              <path d="M8 36V22l14-10 14 10v14" stroke="#F8F4EA" stroke-width="2" />
-              <path d="M17 36v-9h10v9M8 36h28" stroke="#F8F4EA" stroke-width="2" />
-            </svg>
-          </span>
-          <span class="tim-label-box"><b>TPA</b></span>
-        </a>
-        <a class="tim-btn" href="<?php echo base_url('login?from=pu'); ?>">
-          <span class="tim-icon-box">
-            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-              <path d="M10 34l10-10m4-4l10-10M24 20l-4 4" stroke="#F8F4EA" stroke-width="2" />
-              <path d="M30 6l8 8-5 5-8-8zM6 33l5-5 5 5-5 5z" stroke="#F8F4EA" stroke-width="2" />
-            </svg>
-          </span>
-          <span class="tim-label-box"><b>PU</b></span>
-        </a>
+      <p class="eyebrow">Panduan Permohonan PBG</p>
+      <h2 style="font-size:clamp(1.55rem,2.6vw,2.2rem);margin:0 auto">Bagan Alur Permohonan PBG</h2>
+      <p class="section-lead" style="margin:12px auto 0">Alur pelayanan dari pengajuan pemohon hingga penerbitan dan penyerahan Surat Keputusan PBG.</p>
+      <div class="pbg-flow" aria-label="Alur permohonan PBG">
+        <ol class="flow-track">
+          <li class="flow-step" data-role="pemohon"><span class="flow-role">Pemohon</span><span class="flow-num">01</span><h3>Masuk ke situs SIMBG</h3></li>
+          <li class="flow-step" data-role="pemohon"><span class="flow-role">Pemohon</span><span class="flow-num">02</span><h3>Ajukan permohonan dan pembayaran retribusi</h3></li>
+          <li class="flow-step" data-role="teknis"><span class="flow-role">Dinas Teknis</span><span class="flow-num">03</span><h3>Pemeriksaan persyaratan teknis dan dokumen administratif</h3></li>
+          <li class="flow-step" data-role="teknis"><span class="flow-role">Dinas Teknis</span><span class="flow-num">04</span><h3>Penugasan tim penilai, penjadwalan, dan penginputan hasil konsultasi</h3></li>
+          <li class="flow-step" data-role="tim"><span class="flow-role">Tim Penilai</span><span class="flow-num">05</span><h3>Pelaksanaan konsultasi</h3></li>
+          <li class="flow-step" data-role="teknis"><span class="flow-role">Dinas Teknis</span><span class="flow-num">06</span><h3>Perhitungan retribusi PBG</h3></li>
+          <li class="flow-step" data-role="izin"><span class="flow-role">Dinas Perizinan</span><span class="flow-num">07</span><h3>Penerbitan SKRD dan verifikasi pembayaran retribusi</h3></li>
+          <li class="flow-step" data-role="izin"><span class="flow-role">Dinas Perizinan</span><span class="flow-num">08</span><h3>Penerbitan dan penyerahan SK PBG</h3></li>
+        </ol>
+        <p class="flow-source">Sumber: Panduan Permohonan PBG Kementerian Pekerjaan Umum · <a href="https://simbg.pu.go.id" target="_blank" rel="noopener noreferrer">simbg.pu.go.id</a></p>
       </div>
     </div>
 
@@ -265,15 +270,18 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <p class="section-lead" style="margin-top:14px">Telusuri pengajuan PBG Anda melalui menu <a href="<?php echo base_url('konsultasi'); ?>" style="color:var(--gold-300)">Konsultasi</a>, atau ajukan <a href="<?php echo base_url('itr'); ?>" style="color:var(--gold-300)">PBG dan SLF</a> untuk keterangan resmi tertulis mengenai persetujuan PBG.</p>
     </div>
 
-    <div class="reveal" style="margin-top:64px;max-width:680px;margin-left:auto;margin-right:auto">
+    <div class="reveal" style="margin-top:56px;max-width:1040px;margin-left:auto;margin-right:auto">
       <p class="eyebrow" style="text-align:center">Persyaratan</p>
       <h2 style="font-size:clamp(1.3rem,2.2vw,1.7rem);margin:0 auto;text-align:center">Persyaratan Dokumen PBG</h2>
+      <p class="section-lead" style="margin:12px auto 0;text-align:center">Siapkan data tanah bangunan serta dokumen teknis berikut sebelum mengirim permohonan melalui SIMBG.</p>
       <div class="list">
-        <div class="list-item"><span class="list-key">Identitas Pemohon</span><span class="list-val">Scan KTP atau KITAS.</span></div>
-        <div class="list-item"><span class="list-key">Data Tanah</span><span class="list-val">Bukti kepemilikan tanah (SHM, HGB, atau AJB).</span></div>
-        <div class="list-item"><span class="list-key">Legalitas Tata Ruang</span><span class="list-val">Dokumen Kesesuaian Kegiatan Pemanfaatan Ruang (KKPR) atau Surat Keterangan Rencana Kota (SKRK/KRK).</span></div>
-        <div class="list-item"><span class="list-key">Dokumen Teknis</span><span class="list-val">Gambar rencana arsitektur, struktur, serta mekanikal, elektrikal, dan plumbing (MEP).</span></div>
-        <div class="list-item"><span class="list-key">Dokumen Pendukung</span><span class="list-val">Dokumen lingkungan (seperti SPPL/UKL-UPL) dan foto lokasi beserta titik koordinat.</span></div>
+        <div class="list-item"><span class="list-key">Data Umum</span><span class="list-val">Data identitas pemilik bangunan (KTP/KITAS) dan data penyedia jasa perencana.</span></div>
+        <div class="list-item"><span class="list-key">Dokumen Tanah Bangunan</span><span class="list-val">Jenis dan nomor dokumen kepemilikan, tanggal terbit, luas tanah, hak kepemilikan, nama pemilik hak, serta lampiran dokumen kepemilikan tanah.</span></div>
+        <div class="list-item"><span class="list-key">Lokasi &amp; Pemanfaatan Tanah</span><span class="list-val">Alamat lengkap dan lokasi tanah, data pemilik tanah, serta nomor, tanggal, dan lampiran izin pemanfaatan tanah apabila diperlukan.</span></div>
+        <div class="list-item"><span class="list-key">Arsitektur &amp; Tata Kota</span><span class="list-val">Dokumen KKPR/KRK, gambar situasi, rencana tapak, denah, potongan, tampak bangunan, serta dokumen lingkungan (SPPL/UKL-UPL/AMDAL).</span></div>
+        <div class="list-item"><span class="list-key">Struktur &amp; Sipil</span><span class="list-val">Gambar dan perhitungan struktur serta analisis beban dan ketahanan gempa.</span></div>
+        <div class="list-item"><span class="list-key">Mekanikal, Elektrikal &amp; Perpipaan</span><span class="list-val">Gambar instalasi elektrikal, instalasi perpipaan (plumbing), dan sistem proteksi kebakaran.</span></div>
+        <div class="list-item"><span class="list-key">Dokumen Opsional</span><span class="list-val">Hasil penyelidikan tanah, gambar sederhana batas tanah, data KKOP, atau dokumen pendukung lain sesuai karakteristik bangunan.</span></div>
       </div>
     </div>
 
