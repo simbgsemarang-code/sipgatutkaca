@@ -78,24 +78,10 @@ h1 em{font-style:normal;color:#E4C87B}
 .btn-gold:hover{filter:brightness(1.08);transform:translateY(-2px)}
 
 /* ===== BAGAN ALUR PERMOHONAN PBG ===== */
-.pbg-flow{margin-top:34px;position:relative}
-.flow-track{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:20px;align-items:stretch;list-style:none}
-.flow-step{position:relative;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:19px 14px 17px;text-align:left;box-shadow:0 12px 30px rgba(21,42,59,.08);transition:transform .25s,box-shadow .25s,border-color .25s}
-.flow-step:hover{transform:translateY(-4px);box-shadow:0 18px 38px rgba(21,42,59,.13);border-color:rgba(201,162,75,.55)}
-.flow-step:not(:last-child)::after{content:"";position:absolute;top:50%;right:-18px;width:12px;height:12px;border-top:2px solid #C9A24B;border-right:2px solid #C9A24B;transform:translateY(-50%) rotate(45deg)}
-.flow-role{display:inline-flex;align-items:center;min-height:24px;padding:4px 8px;border-radius:999px;background:rgba(30,134,163,.11);color:#176c85;font-size:.58rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;line-height:1.25}
-.flow-step[data-role="tim"] .flow-role{background:rgba(201,162,75,.16);color:#8d681b}
-.flow-step[data-role="izin"] .flow-role{background:rgba(37,119,90,.12);color:#25775a}
-.flow-num{display:block;margin:16px 0 7px;font-family:var(--display);font-size:1.55rem;line-height:1;color:var(--gold-300)}
-.flow-step h3{font-family:var(--body);font-size:.79rem;line-height:1.55;font-weight:600;color:var(--text)}
-.flow-source{margin:18px auto 0;color:var(--muted);font-size:.72rem;text-align:center}
-.flow-source a{color:var(--gold-300);font-weight:600}
-@media(max-width:1000px){
-  .flow-track{grid-template-columns:1fr;gap:14px;max-width:680px;margin:0 auto}
-  .flow-step{padding:17px 20px 17px 74px;min-height:82px}
-  .flow-num{position:absolute;left:20px;top:50%;margin:0;transform:translateY(-50%)}
-  .flow-step:not(:last-child)::after{top:auto;right:auto;left:35px;bottom:-11px;transform:rotate(135deg)}
-}
+.pbg-flow-figure{margin:30px auto 0;max-width:1180px}
+.pbg-flow-image{width:100%;height:auto;border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 44px rgba(21,42,59,.12)}
+.pbg-flow-figure figcaption{margin-top:12px;color:var(--muted);font-size:.72rem;text-align:center}
+.pbg-flow-figure figcaption a{color:var(--gold-300);font-weight:600}
 .btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
 .btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
 /* Tombol Dashboard/Masuk di kop transparan di atas hero sebelum discroll - kasih latar solid (sama seperti header.scrolled) supaya tetap kelihatan. */
@@ -248,19 +234,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <p class="eyebrow">Panduan Permohonan PBG</p>
       <h2 style="font-size:clamp(1.55rem,2.6vw,2.2rem);margin:0 auto">Bagan Alur Permohonan PBG</h2>
       <p class="section-lead" style="margin:12px auto 0">Alur pelayanan dari pengajuan pemohon hingga penerbitan dan penyerahan Surat Keputusan PBG.</p>
-      <div class="pbg-flow" aria-label="Alur permohonan PBG">
-        <ol class="flow-track">
-          <li class="flow-step" data-role="pemohon"><span class="flow-role">Pemohon</span><span class="flow-num">01</span><h3>Masuk ke situs SIMBG</h3></li>
-          <li class="flow-step" data-role="pemohon"><span class="flow-role">Pemohon</span><span class="flow-num">02</span><h3>Ajukan permohonan dan pembayaran retribusi</h3></li>
-          <li class="flow-step" data-role="teknis"><span class="flow-role">Dinas Teknis</span><span class="flow-num">03</span><h3>Pemeriksaan persyaratan teknis dan dokumen administratif</h3></li>
-          <li class="flow-step" data-role="teknis"><span class="flow-role">Dinas Teknis</span><span class="flow-num">04</span><h3>Penugasan tim penilai, penjadwalan, dan penginputan hasil konsultasi</h3></li>
-          <li class="flow-step" data-role="tim"><span class="flow-role">Tim Penilai</span><span class="flow-num">05</span><h3>Pelaksanaan konsultasi</h3></li>
-          <li class="flow-step" data-role="teknis"><span class="flow-role">Dinas Teknis</span><span class="flow-num">06</span><h3>Perhitungan retribusi PBG</h3></li>
-          <li class="flow-step" data-role="izin"><span class="flow-role">Dinas Perizinan</span><span class="flow-num">07</span><h3>Penerbitan SKRD dan verifikasi pembayaran retribusi</h3></li>
-          <li class="flow-step" data-role="izin"><span class="flow-role">Dinas Perizinan</span><span class="flow-num">08</span><h3>Penerbitan dan penyerahan SK PBG</h3></li>
-        </ol>
-        <p class="flow-source">Sumber: Panduan Permohonan PBG Kementerian Pekerjaan Umum · <a href="https://simbg.pu.go.id" target="_blank" rel="noopener noreferrer">simbg.pu.go.id</a></p>
-      </div>
+      <figure class="pbg-flow-figure">
+        <img class="pbg-flow-image" src="<?php echo base_url('assets/img/bagan-alur-pbg.jpg'); ?>?v=<?php echo @filemtime(FCPATH.'assets/img/bagan-alur-pbg.jpg'); ?>" alt="Bagan alur permohonan PBG dari pengajuan di SIMBG hingga penerbitan dan penyerahan SK PBG" loading="eager">
+        <figcaption>Sumber: Panduan Permohonan PBG Kementerian Pekerjaan Umum · <a href="https://simbg.pu.go.id" target="_blank" rel="noopener noreferrer">simbg.pu.go.id</a></figcaption>
+      </figure>
     </div>
 
     <div class="reveal" style="margin-top:64px;text-align:center;max-width:680px;margin-left:auto;margin-right:auto">
