@@ -101,6 +101,16 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6re
 .list-item:first-child{border-top:1px solid var(--line)}
 .list-key{font-family:var(--display);color:var(--gold-300);letter-spacing:.06em;min-width:180px;font-size:.95rem;flex:0 0 auto}
 .list-val{color:var(--muted);font-size:.92rem}
+.requirement-list .list-item{align-items:flex-start;padding:18px 0}
+.requirement-list .list-key{padding-top:3px;min-width:260px}
+.check-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 22px;list-style:none;width:100%}
+.check-list li{position:relative;padding-left:28px;color:var(--muted);font-size:.88rem;line-height:1.55}
+.check-list li::before{content:"✓";position:absolute;left:0;top:.05em;width:19px;height:19px;display:grid;place-items:center;border-radius:50%;background:rgba(30,134,163,.12);color:#18758e;font-size:.72rem;font-weight:700}
+@media(max-width:760px){
+  .requirement-list .list-item{display:block}
+  .requirement-list .list-key{display:block;min-width:0;margin-bottom:12px}
+  .check-list{grid-template-columns:1fr}
+}
 
 /* ===== TABEL & FORM ===== */
 table{width:100%;border-collapse:collapse;margin-top:44px;font-size:.9rem}
@@ -251,14 +261,14 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <p class="eyebrow" style="text-align:center">Persyaratan</p>
       <h2 style="font-size:clamp(1.3rem,2.2vw,1.7rem);margin:0 auto;text-align:center">Persyaratan Dokumen PBG</h2>
       <p class="section-lead" style="margin:12px auto 0;text-align:center">Siapkan data tanah bangunan serta dokumen teknis berikut sebelum mengirim permohonan melalui SIMBG.</p>
-      <div class="list">
-        <div class="list-item"><span class="list-key">Data Umum</span><span class="list-val">Data identitas pemilik bangunan (KTP/KITAS) dan data penyedia jasa perencana.</span></div>
-        <div class="list-item"><span class="list-key">Dokumen Tanah Bangunan</span><span class="list-val">Jenis dan nomor dokumen kepemilikan, tanggal terbit, luas tanah, hak kepemilikan, nama pemilik hak, serta lampiran dokumen kepemilikan tanah.</span></div>
-        <div class="list-item"><span class="list-key">Lokasi &amp; Pemanfaatan Tanah</span><span class="list-val">Alamat lengkap dan lokasi tanah, data pemilik tanah, serta nomor, tanggal, dan lampiran izin pemanfaatan tanah apabila diperlukan.</span></div>
-        <div class="list-item"><span class="list-key">Arsitektur &amp; Tata Kota</span><span class="list-val">Dokumen KKPR/KRK, gambar situasi, rencana tapak, denah, potongan, tampak bangunan, serta dokumen lingkungan (SPPL/UKL-UPL/AMDAL).</span></div>
-        <div class="list-item"><span class="list-key">Struktur &amp; Sipil</span><span class="list-val">Gambar dan perhitungan struktur serta analisis beban dan ketahanan gempa.</span></div>
-        <div class="list-item"><span class="list-key">Mekanikal, Elektrikal &amp; Perpipaan</span><span class="list-val">Gambar instalasi elektrikal, instalasi perpipaan (plumbing), dan sistem proteksi kebakaran.</span></div>
-        <div class="list-item"><span class="list-key">Dokumen Opsional</span><span class="list-val">Hasil penyelidikan tanah, gambar sederhana batas tanah, data KKOP, atau dokumen pendukung lain sesuai karakteristik bangunan.</span></div>
+      <div class="list requirement-list">
+        <div class="list-item"><span class="list-key">Data Umum</span><ul class="check-list"><li>Identitas pemilik bangunan (KTP/KITAS)</li><li>Data penyedia jasa perencana</li></ul></div>
+        <div class="list-item"><span class="list-key">Dokumen Tanah Bangunan</span><ul class="check-list"><li>Jenis dan nomor dokumen kepemilikan</li><li>Tanggal terbit dan luas tanah</li><li>Hak kepemilikan dan nama pemilik hak</li><li>Lampiran dokumen kepemilikan tanah</li></ul></div>
+        <div class="list-item"><span class="list-key">Lokasi &amp; Pemanfaatan Tanah</span><ul class="check-list"><li>Alamat lengkap dan lokasi tanah</li><li>Data pemilik tanah</li><li>Nomor dan tanggal izin pemanfaatan tanah</li><li>Lampiran izin apabila diperlukan</li></ul></div>
+        <div class="list-item"><span class="list-key">Arsitektur &amp; Tata Kota</span><ul class="check-list"><li>Dokumen KKPR/KRK</li><li>Gambar situasi dan rencana tapak</li><li>Denah, potongan, dan tampak bangunan</li><li>Dokumen lingkungan (SPPL/UKL-UPL/AMDAL)</li></ul></div>
+        <div class="list-item"><span class="list-key">Struktur &amp; Sipil</span><ul class="check-list"><li>Gambar dan perhitungan struktur</li><li>Analisis beban dan ketahanan gempa</li></ul></div>
+        <div class="list-item"><span class="list-key">Mekanikal, Elektrikal &amp; Perpipaan</span><ul class="check-list"><li>Gambar instalasi elektrikal</li><li>Gambar instalasi perpipaan (plumbing)</li><li>Sistem proteksi kebakaran</li></ul></div>
+        <div class="list-item"><span class="list-key">Dokumen Opsional</span><ul class="check-list"><li>Hasil penyelidikan tanah</li><li>Gambar sederhana batas tanah</li><li>Data KKOP</li><li>Dokumen pendukung sesuai karakteristik bangunan</li></ul></div>
       </div>
     </div>
 
