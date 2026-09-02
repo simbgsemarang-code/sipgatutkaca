@@ -61,3 +61,12 @@ $route['konsultasi/(:any)'] = 'konsultasi/index/$1';
 
 /* Detail bangunan publik: /bangunan/720 -> Bangunan::index(720) */
 $route['bangunan/(:num)'] = 'bangunan/index/$1';
+
+/* Modul PBG seragam dengan SI DAI TERBANG; input dan kendali tahap oleh PU. */
+$route['pengajuan-pbg'] = 'pbg_pu/index';
+$route['pengajuan-pbg/tambah'] = 'pbg_pu/tambah';
+$route['pengajuan-pbg/edit/(:num)'] = 'pbg_pu/edit/$1';
+$route['pengajuan-pbg/tahap/(:num)'] = 'pbg_pu/tahap/$1';
+$route['pengajuan-pbg/tahap/(:num)/(:num)'] = 'pbg_pu/tahap/$1/$2';
+$route['pengajuan-pbg/ubah-tahap/(:num)'] = 'pbg_pu/ubah_tahap/$1';
+$route['pengajuan-pbg/hapus/(:num)'] = 'pbg_pu/hapus/$1';
