@@ -80,6 +80,8 @@ class Pbg_pu extends CI_Controller
 			$data['tpa_per_bidang'][$bidang]=$this->db->where('role',$role)->order_by('nama','ASC')->get('users')->result_array();
 		}
 		$data['konsultasi']=$this->db->select('k.*,u.nama AS nama_tpa,u.email AS email_tpa')->from('konsultasi_pbg k')->join('users u','u.id=k.tpa_user_id','left')->where('k.permohonan_id',$id)->order_by('k.putaran','DESC')->order_by('k.bidang','ASC')->get()->result_array();
+		$latest=$this->db->select_max('putaran','maks')->where('permohonan_id',$id)->get('konsultasi_pbg')->row_array();$putaran=(int)$latest['maks'];
+		$data['konsultasi_selesai']=$putaran>0&&$this->db->where('permohonan_id',$id)->where('putaran',$putaran)->where('status','direkomendasikan')->count_all_results('konsultasi_pbg')===3;
 		$this->load->view('pbg_pu/tahap',$data);
 	}
 
@@ -106,6 +108,10 @@ class Pbg_pu extends CI_Controller
 		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
 		$t=(int)$this->input->post('tahap'); $status=$this->input->post('status');
 		if($t<1||$t>4||!in_array($status,array('diajukan','diverifikasi','disetujui','ditolak'),TRUE)) show_error('Tahap/status tidak valid.',422);
+		if($t===4&&$status==='disetujui'){
+			$latest=$this->db->select_max('putaran','maks')->where('permohonan_id',$id)->get('konsultasi_pbg')->row_array();$putaran=(int)$latest['maks'];
+			if($putaran<1||$this->db->where('permohonan_id',$id)->where('putaran',$putaran)->where('status','direkomendasikan')->count_all_results('konsultasi_pbg')!==3) show_error('Proses belum dapat diselesaikan sebelum ketiga bidang TPA memberikan rekomendasi.',422);
+		}
 		$catatan=trim($this->input->post('catatan')); if($status==='ditolak'&&$catatan==='') show_error('Catatan penolakan wajib diisi.',422);
 		$this->pbg->update_owned($id,$this->pu_id(),array('tahap'=>$t,'status'=>$status,'catatan_admin'=>$catatan?:null,'catatan_admin_at'=>date('Y-m-d H:i:s'),'updated_at'=>date('Y-m-d H:i:s')));
 		$this->db->insert('aktivitas_pbg',array('permohonan_id'=>$id,'no_permohonan'=>$row['no_permohonan'],'nama_pemohon'=>$row['nama_pemohon'],'tahap'=>$t,'status'=>$status,'keterangan'=>$catatan?:'Tahap diperbarui oleh PU','actor_id'=>$this->pu_id(),'actor'=>$this->session->userdata('nama'),'created_at'=>date('Y-m-d H:i:s')));

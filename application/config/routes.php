@@ -70,4 +70,6 @@ $route['pengajuan-pbg/tahap/(:num)'] = 'pbg_pu/tahap/$1';
 $route['pengajuan-pbg/tahap/(:num)/(:num)'] = 'pbg_pu/tahap/$1/$2';
 $route['pengajuan-pbg/ubah-tahap/(:num)'] = 'pbg_pu/ubah_tahap/$1';
 $route['pengajuan-pbg/konsultasi/(:num)'] = 'pbg_pu/ajukan_konsultasi/$1';
+$route['tpa-pengajuan-pbg'] = 'pbg_tpa/index';
+$route['tpa-pengajuan-pbg/review/(:num)'] = 'pbg_tpa/review/$1';
 $route['pengajuan-pbg/hapus/(:num)'] = 'pbg_pu/hapus/$1';
