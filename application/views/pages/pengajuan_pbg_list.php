@@ -241,8 +241,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <td class="no-reg"><?php echo !empty($r['no_registrasi']) ? htmlspecialchars($r['no_registrasi'], ENT_QUOTES, 'UTF-8') : 'Belum Terdefinisi'; ?></td>
               <td><?php echo !empty($r['lokasi_alamat']) ? htmlspecialchars(mb_strimwidth($r['lokasi_alamat'], 0, 60, '…'), ENT_QUOTES, 'UTF-8') : '—'; ?></td>
               <td>
-                <?php $label_status = array('draf' => 'Draf', 'verifikasi_dokumen' => 'Verifikasi Kelengkapan Dokumen', 'perbaikan_dokumen' => 'Perbaikan Dokumen', 'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi', 'menunggu_jadwal_konsultasi' => 'Menunggu Jadwal Konsultasi', 'disetujui_tpa' => 'Disetujui Semua TPA'); ?>
-                <span class="tag tag-<?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$r['status']]) ? $label_status[$r['status']] : $r['status'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="tag tag-<?php echo htmlspecialchars($r['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(pbg_label_status($r['status']), ENT_QUOTES, 'UTF-8'); ?></span>
+                <div class="bidang-progres">Tahap <?php echo (int) pbg_tahap_dari_status($r['status']); ?> dari 4</div>
                 <?php if (in_array($r['status'], array('verifikasi_dokumen', 'perbaikan_dokumen'), TRUE)): ?>
                   <?php
                   $singkat_bidang  = array('tpa_arsitek' => 'Arsitek', 'tpa_struktur' => 'Struktur', 'tpa_mep' => 'MEP');

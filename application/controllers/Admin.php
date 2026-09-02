@@ -16,6 +16,7 @@ class Admin extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->library('session');
+		$this->load->helper('pbg_alur');
 		$this->_wajib_admin();
 	}
 
@@ -217,6 +218,9 @@ class Admin extends CI_Controller {
 		$data['error']         = NULL;
 		$data['nama_pengguna'] = $this->session->userdata('nama');
 		$data['admin_mode']    = TRUE;
+		$data['riwayat']       = $this->db->table_exists('pengajuan_pbg_riwayat')
+			? $this->db->select('pengajuan_pbg_riwayat.*, users.nama AS nama_pengubah')->from('pengajuan_pbg_riwayat')->join('users', 'users.id = pengajuan_pbg_riwayat.diubah_oleh', 'left')->where('id_pengajuan', $id)->order_by('diubah_pada', 'DESC')->get()->result_array()
+			: array();
 
 		$this->load->view('pages/pengajuan_pbg_detail', $data);
 	}

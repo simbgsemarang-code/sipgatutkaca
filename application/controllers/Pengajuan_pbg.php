@@ -174,6 +174,7 @@ class Pengajuan_pbg extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->library('session');
+		$this->load->helper('pbg_alur');
 		$this->_wajib_pu();
 	}
 
@@ -292,8 +293,70 @@ class Pengajuan_pbg extends CI_Controller {
 		$data['sukses']           = $this->session->flashdata('sukses');
 		$data['error']            = $this->session->flashdata('error');
 		$data['nama_pengguna']    = $this->session->userdata('nama');
+		$data['riwayat']          = $this->db->table_exists('pengajuan_pbg_riwayat')
+			? $this->db->select('pengajuan_pbg_riwayat.*, users.nama AS nama_pengubah')->from('pengajuan_pbg_riwayat')->join('users', 'users.id = pengajuan_pbg_riwayat.diubah_oleh', 'left')->where('id_pengajuan', $id)->order_by('diubah_pada', 'DESC')->get()->result_array()
+			: array();
 
 		$this->load->view('pages/pengajuan_pbg_detail', $data);
+	}
+
+	/** PU mengendalikan tahap proses; TPA hanya memberi hasil review per bidang. */
+	public function ubah_tahap($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('pengajuan_pbg')->row_array() : NULL;
+		if ($row === NULL || ! $this->_milik_saya($row) || $row['status'] === 'draf')
+		{
+			show_404();
+			return;
+		}
+
+		$status_baru = (string) $this->input->post('status_baru');
+		$catatan     = trim((string) $this->input->post('catatan_tahap'));
+		$valid       = array('verifikasi_dokumen', 'perbaikan_dokumen', 'menunggu_jadwal_konsultasi', 'disetujui_tpa', 'ditolak');
+		if (! in_array($status_baru, $valid, TRUE))
+		{
+			$this->session->set_flashdata('error', 'Tahap yang dipilih tidak valid.');
+			redirect('pengajuan-pbg/lihat/' . $id);
+			return;
+		}
+		if (in_array($status_baru, array('perbaikan_dokumen', 'ditolak'), TRUE) && $catatan === '')
+		{
+			$this->session->set_flashdata('error', 'Catatan wajib diisi untuk permintaan perbaikan atau penolakan.');
+			redirect('pengajuan-pbg/lihat/' . $id);
+			return;
+		}
+		if ($status_baru === 'disetujui_tpa')
+		{
+			$jumlah_setuju = $this->db->where('id_pengajuan', $id)->where('status', 'disetujui')->count_all_results('pengajuan_pbg_persetujuan_tpa');
+			if ($jumlah_setuju < count($this->peran_bidang))
+			{
+				$this->session->set_flashdata('error', 'Pemeriksaan belum dapat diselesaikan karena seluruh bidang TPA belum menyetujui.');
+				redirect('pengajuan-pbg/lihat/' . $id);
+				return;
+			}
+		}
+
+		$perubahan = array('status' => $status_baru);
+		if ($this->db->field_exists('catatan_admin', 'pengajuan_pbg')) $perubahan['catatan_admin'] = $catatan !== '' ? $catatan : NULL;
+		if ($this->db->field_exists('updated_at', 'pengajuan_pbg')) $perubahan['updated_at'] = date('Y-m-d H:i:s');
+		$this->db->where('id', $id)->update('pengajuan_pbg', $perubahan);
+
+		if ($this->db->table_exists('pengajuan_pbg_riwayat'))
+		{
+			$this->db->insert('pengajuan_pbg_riwayat', array(
+				'id_pengajuan' => $id,
+				'status_lama'  => $row['status'],
+				'status_baru'  => $status_baru,
+				'tahap'        => pbg_tahap_dari_status($status_baru),
+				'keterangan'   => $catatan !== '' ? $catatan : pbg_label_status($status_baru),
+				'diubah_oleh'  => (int) $this->session->userdata('user_id'),
+				'diubah_pada'  => date('Y-m-d H:i:s'),
+			));
+		}
+
+		$this->session->set_flashdata('sukses', 'Tahap permohonan diperbarui menjadi ' . pbg_label_status($status_baru) . '.');
+		redirect('pengajuan-pbg/lihat/' . $id);
 	}
 
 	/** Halaman checklist kelengkapan tersendiri - dihubungkan lewat tombol "Checklist" di kolom Aksi pada daftar permohonan. */
@@ -827,9 +890,9 @@ class Pengajuan_pbg extends CI_Controller {
 	/**
 	 * Permohonan yang datanya/dokumennya boleh diedit lewat
 	 * perbaiki()/kirim_perbaikan() - baik karena TPA menandai perlu
-	 * perbaikan (perbaikan_dokumen/perbaikan_dokumen_konsultasi) MAUPUN
-	 * PU/pemohon mau mengedit sendiri tanpa diminta selama masih
-	 * verifikasi_dokumen. TIDAK termasuk 'draf' (pakai tambah() -
+	 * perbaikan (perbaikan_dokumen/perbaikan_dokumen_konsultasi).
+	 * Sesuai mekanisme SI DAI TERBANG, permohonan yang sudah masuk
+	 * pemeriksaan tidak dapat diedit sukarela. TIDAK termasuk 'draf' (pakai tambah() -
 	 * wizard penuh), 'menunggu_jadwal_konsultasi', atau 'disetujui_tpa'
 	 * (sudah lewat tahap dokumen/terkunci). Dibatasi ke milik akun PU
 	 * yang login sendiri - lihat _milik_saya().
@@ -842,7 +905,7 @@ class Pengajuan_pbg extends CI_Controller {
 		}
 		return $this->db->where('id', $id)
 			->where('dibuat_oleh', (int) $this->session->userdata('user_id'))
-			->where_in('status', array('verifikasi_dokumen', 'perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'))
+			->where_in('status', array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'))
 			->get('pengajuan_pbg')->row_array();
 	}
 

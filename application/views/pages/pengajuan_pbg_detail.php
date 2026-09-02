@@ -14,14 +14,7 @@ $tgl = function ($v) {
 $tgl_jam = function ($v) {
 	return ($v === null || $v === '') ? '—' : htmlspecialchars(date('d M Y H:i', strtotime($v)), ENT_QUOTES, 'UTF-8');
 };
-$label_status = array(
-	'draf'                         => 'Draf',
-	'verifikasi_dokumen'           => 'Verifikasi Kelengkapan Dokumen',
-	'perbaikan_dokumen'            => 'Perbaikan Dokumen',
-	'perbaikan_dokumen_konsultasi' => 'Perbaikan Dokumen Konsultasi',
-	'menunggu_jadwal_konsultasi'   => 'Menunggu Jadwal Konsultasi',
-	'disetujui_tpa'                => 'Disetujui Semua TPA',
-);
+$label_status = array();
 $perlu_perbaikan = in_array($row['status'], array('perbaikan_dokumen', 'perbaikan_dokumen_konsultasi'), TRUE);
 $label_bidang = array(
 	'tpa_arsitek'  => 'Bidang Arsitektur & Tata Kota',
@@ -134,6 +127,14 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem)
 .tag-ditolak{color:#E0526B;border-color:#E0526B;margin-top:0}
 
 .card{background:var(--surface);border:1px solid var(--line);padding:32px 36px;margin-top:26px}
+.pbg-process{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:26px;padding:24px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 30px var(--shadow)}
+.pbg-process-item{position:relative;display:flex;gap:12px;align-items:flex-start;padding-right:18px;color:var(--muted)}
+.pbg-process-item:not(:last-child)::after{content:"";position:absolute;top:16px;left:35px;right:0;height:1px;background:var(--line)}
+.pbg-process-dot{position:relative;z-index:1;width:32px;height:32px;display:grid;place-items:center;flex:0 0 32px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:.76rem;font-weight:700}
+.pbg-process-item.done .pbg-process-dot,.pbg-process-item.current .pbg-process-dot{border-color:#1E86A3;background:#dceff4;color:#087a98}
+.pbg-process-item.rejected .pbg-process-dot{border-color:#E0526B;background:rgba(224,82,107,.1);color:#E0526B}
+.pbg-process-item b{display:block;color:var(--text);font-size:.78rem;line-height:1.45}.pbg-process-item small{display:block;margin-top:5px;font-size:.68rem;line-height:1.45}
+@media(max-width:760px){.pbg-process{grid-template-columns:1fr;gap:16px}.pbg-process-item:not(:last-child)::after{display:none}}
 .card h4{font-family:var(--display);font-weight:400;font-size:1.05rem;color:var(--gold-300);margin-bottom:20px;letter-spacing:.04em}
 .kv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px 30px}
 .kv{border-bottom:1px solid var(--line);padding-bottom:12px}
@@ -234,14 +235,13 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-wrap">
     <p class="eyebrow"><a href="<?php echo base_url($admin_mode ? 'admin/pengajuan' : 'pengajuan-pbg'); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Daftar <?php echo $admin_mode ? 'Pengajuan' : 'Permohonan'; ?></a></p>
     <h2><?php echo $t($row['nama_pemohon']); ?></h2>
-    <span class="tag tag-<?php echo htmlspecialchars($row['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(isset($label_status[$row['status']]) ? $label_status[$row['status']] : $row['status'], ENT_QUOTES, 'UTF-8'); ?></span>
+    <span class="tag tag-<?php echo htmlspecialchars($row['status'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(pbg_label_status($row['status']), ENT_QUOTES, 'UTF-8'); ?></span>
+    <?php echo pbg_render_timeline($row['status']); ?>
     <?php if (! $admin_mode): ?>
       <?php if ($row['status'] === 'draf'): ?>
         <a href="<?php echo base_url('pengajuan-pbg/tambah/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Lanjutkan Permohonan</a>
       <?php elseif ($perlu_perbaikan): ?>
         <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-gold btn-sm" style="margin-top:20px">Perbaiki Permohonan</a>
-      <?php elseif ($row['status'] === 'verifikasi_dokumen'): ?>
-        <a href="<?php echo base_url('pengajuan-pbg/perbaiki/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Edit Permohonan</a>
       <?php endif; ?>
       <?php if ($row['status'] !== 'draf'): ?>
         <a href="<?php echo base_url('pengajuan-pbg/reviewer/' . (int) $row['id']); ?>" class="btn btn-ghost btn-sm" style="margin-top:20px">Atur Reviewer TPA</a>
@@ -257,6 +257,39 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
     <?php if (! $admin_mode): ?>
     <p style="margin-top:16px"><a href="<?php echo base_url('pengajuan-pbg/checklist/' . (int) $row['id']); ?>" style="color:var(--gold-300);text-decoration:underline;font-size:.85rem">Lihat Checklist Kelengkapan Persyaratan →</a></p>
+    <?php if ($row['status'] !== 'draf'): ?>
+      <div class="card">
+        <h4>Kendali Tahap oleh PU</h4>
+        <p style="color:var(--muted);font-size:.82rem;margin-top:-10px;margin-bottom:18px">Pilih tahap berikutnya setelah pemeriksaan atau hasil review TPA diterima.</p>
+        <form action="<?php echo base_url('pengajuan-pbg/ubah-tahap/' . (int) $row['id']); ?>" method="post">
+          <label for="status_baru" style="display:block;font-size:.78rem;margin-bottom:7px">Tahap / Status</label>
+          <select id="status_baru" name="status_baru" required style="width:100%;padding:13px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-family:var(--body)">
+            <option value="verifikasi_dokumen">Pemeriksaan Kelengkapan Data</option>
+            <option value="perbaikan_dokumen">Minta Perbaikan Kelengkapan Data</option>
+            <option value="menunggu_jadwal_konsultasi">Verifikasi dan Konsultasi TPA</option>
+            <option value="disetujui_tpa">Pemeriksaan Selesai</option>
+            <option value="ditolak">Ditolak</option>
+          </select>
+          <label for="catatan_tahap" style="display:block;font-size:.78rem;margin:16px 0 7px">Catatan PU</label>
+          <textarea id="catatan_tahap" name="catatan_tahap" rows="3" placeholder="Wajib untuk perbaikan atau penolakan" style="width:100%;padding:13px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-family:var(--body);resize:vertical"></textarea>
+          <button type="submit" class="btn btn-gold btn-sm" style="margin-top:14px">Simpan Tahap</button>
+        </form>
+      </div>
+    <?php endif; ?>
+    <?php endif; ?>
+
+    <?php if (!empty($riwayat)): ?>
+      <div class="card">
+        <h4>Riwayat Proses</h4>
+        <div class="kv-grid">
+          <?php foreach ($riwayat as $item): ?>
+            <div class="kv full">
+              <span>Tahap <?php echo (int) $item['tahap']; ?> · <?php echo $tgl_jam($item['diubah_pada']); ?></span>
+              <b><?php echo htmlspecialchars(pbg_label_status($item['status_baru']), ENT_QUOTES, 'UTF-8'); ?><small style="display:block;margin-top:5px;color:var(--muted);font-weight:400"><?php echo $t($item['keterangan']); ?> · oleh <?php echo $t($item['nama_pengubah']); ?></small></b>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
     <?php endif; ?>
 
     <?php if (!empty($persetujuan) || $perlu_perbaikan || $row['status'] === 'disetujui_tpa'): ?>
