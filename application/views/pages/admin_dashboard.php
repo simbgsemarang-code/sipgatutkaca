@@ -132,7 +132,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
       <a href="<?php echo base_url('admin'); ?>" class="active">Dashboard</a>
       <a href="<?php echo base_url('admin/pengguna'); ?>">Kelola Pengguna</a>
       <a href="<?php echo base_url('admin/pengajuan'); ?>">Pengajuan PBG</a>
-      <a href="<?php echo base_url('admin/pengajuan-slf'); ?>">Pengajuan SLF</a>
       <a href="<?php echo base_url('admin/bangunan'); ?>">Sebaran Bangunan</a>
       <a href="<?php echo base_url('admin/cagar-budaya'); ?>">Kelola Cagar Budaya</a>
       <a href="<?php echo base_url('admin/saran'); ?>">Saran &amp; FAQ</a>
@@ -156,10 +155,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
       <a class="stat" href="<?php echo base_url('admin/pengajuan'); ?>">
         <div class="num"><?php echo number_format($stat['pengajuan_pbg'], 0, ',', '.'); ?></div>
         <div class="lbl">Pengajuan PBG</div><div class="go">Lihat →</div>
-      </a>
-      <a class="stat" href="<?php echo base_url('admin/pengajuan-slf'); ?>">
-        <div class="num"><?php echo number_format($stat['pengajuan_slf'], 0, ',', '.'); ?></div>
-        <div class="lbl">Pengajuan SLF</div><div class="go">Lihat →</div>
       </a>
       <a class="stat" href="<?php echo base_url('admin/bangunan'); ?>">
         <div class="num"><?php echo number_format($stat['bangunan'], 0, ',', '.'); ?></div>

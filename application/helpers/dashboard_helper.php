@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
  * Data ringkas untuk seksi "Distribusi Status" & "Aktivitas Terkini"
- * pada dashboard Admin / PU / TPA. Sumber: pengajuan_pbg + pengajuan_slf
+ * pada dashboard Admin / PU / TPA. Sumber: pengajuan_pbg
  * (dan tabel persetujuan TPA per-bidang untuk aktivitas TPA).
  */
 
@@ -30,7 +30,7 @@ if (! function_exists('dashboard_distribusi'))
 		$ci   =& get_instance();
 		$dist = array_fill_keys(array_keys(dashboard_status_label()), 0);
 
-		foreach (array('pengajuan_pbg', 'pengajuan_slf') as $t)
+		foreach (array('pengajuan_pbg') as $t)
 		{
 			if (! $ci->db->table_exists($t)) continue;
 			foreach ($ci->db->select('status, COUNT(*) AS n')->group_by('status')->get($t)->result_array() as $r)
@@ -63,7 +63,7 @@ if (! function_exists('dashboard_aktivitas'))
 		$label  = dashboard_status_label();
 		$mentah = array();
 
-		foreach (array(array('pengajuan_pbg', 'PBG'), array('pengajuan_slf', 'SLF')) as $t)
+		foreach (array(array('pengajuan_pbg', 'PBG')) as $t)
 		{
 			if (! $ci->db->table_exists($t[0])) continue;
 			foreach ($ci->db->select('no_registrasi, status, nama_pemohon, updated_at, created_at')
@@ -105,7 +105,6 @@ if (! function_exists('dashboard_aktivitas_tpa'))
 
 		$peta = array(
 			array('pengajuan_pbg_persetujuan_tpa', 'pengajuan_pbg', 'PBG'),
-			array('pengajuan_slf_persetujuan_tpa', 'pengajuan_slf', 'SLF'),
 		);
 		$bidang_label = array('tpa_arsitek' => 'Arsitektur', 'tpa_struktur' => 'Struktur', 'tpa_mep' => 'MEP');
 

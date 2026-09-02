@@ -47,7 +47,6 @@ class Admin extends CI_Controller {
 		$data['stat'] = array(
 			'pengguna'      => $hitung('users'),
 			'pengajuan_pbg' => $hitung('pengajuan_pbg'),
-			'pengajuan_slf' => $hitung('pengajuan_slf'),
 			'bangunan'      => $hitung('bangunan_gis'),
 			'cagar_budaya'  => $hitung('cagar_budaya'),
 			'saran'         => $hitung('saran_masukan'),
@@ -283,6 +282,9 @@ class Admin extends CI_Controller {
 	 */
 	public function pengajuan_slf()
 	{
+		show_404();
+		return;
+
 		$persetujuan_per_id = array();
 		foreach ($this->db->get('pengajuan_slf_persetujuan_tpa')->result_array() as $p)
 		{
@@ -309,6 +311,9 @@ class Admin extends CI_Controller {
 	 */
 	public function pengajuan_slf_lihat($id = null)
 	{
+		show_404();
+		return;
+
 		$id  = (int) $id;
 		$row = $id > 0
 			? $this->db->select('pengajuan_slf.*, peninjau.nama AS nama_peninjau, ra.nama AS nama_reviewer_arsitek, rs.nama AS nama_reviewer_struktur, rm.nama AS nama_reviewer_mep, pembuat.nama AS nama_pembuat')
@@ -363,6 +368,9 @@ class Admin extends CI_Controller {
 	/** Sajikan berkas permohonan SLF mana pun - salinan berkas() versi PBG dengan tabel/direktori pengajuan_slf. */
 	public function berkas_slf($tipe = null, $id = null)
 	{
+		show_404();
+		return;
+
 		$id          = (int) $id;
 		$kolom_valid = array('prototipe_peta', 'bangunan_peta', 'tanah_lampiran');
 

@@ -200,11 +200,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Pengajuan PBG
       </a>
-      <a href="<?php echo base_url('pengajuan-slf'); ?>">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 2.5h8L14.5 5.5V15a.5.5 0 01-.5.5H3.5a.5.5 0 01-.5-.5V3a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 8.6l1.7 1.7L11 6.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Pengajuan SLF
-      </a>
-    </nav>
+      </nav>
     <nav>
       <a href="<?php echo base_url('login/keluar'); ?>" class="logout">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 12.5L15 9l-4-3.5M15 9H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -229,17 +225,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div class="stat-card"><b><?php echo (int) $terkirim_pbg; ?></b><span>Verifikasi Kelengkapan Dokumen</span></div>
       </div>
       <a href="<?php echo base_url('pengajuan-pbg'); ?>" style="display:inline-block;margin-top:16px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300);text-decoration:underline">Lihat Daftar Permohonan →</a>
-    </div>
-
-    <div class="reveal" style="margin-top:44px">
-      <p class="eyebrow" style="margin-bottom:8px">Ringkasan</p>
-      <h2 style="font-size:1.3rem">Pengajuan SLF</h2>
-      <div class="stat-row">
-        <div class="stat-card"><b><?php echo (int) $total_slf; ?></b><span>Total Permohonan</span></div>
-        <div class="stat-card"><b><?php echo (int) $draf_slf; ?></b><span>Draf</span></div>
-        <div class="stat-card"><b><?php echo (int) $terkirim_slf; ?></b><span>Verifikasi Kelengkapan Dokumen</span></div>
-      </div>
-      <a href="<?php echo base_url('pengajuan-slf'); ?>" style="display:inline-block;margin-top:16px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300);text-decoration:underline">Lihat Daftar Permohonan →</a>
     </div>
 
     <div class="reveal" style="margin-top:52px">
