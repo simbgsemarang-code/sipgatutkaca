@@ -75,7 +75,30 @@ class Pbg_pu extends CI_Controller
 		$tahap=$tahap?(int)$tahap:(int)$row['tahap']; if($tahap<1||$tahap>4) show_404();
 		$data=$this->common()+array('row'=>$row,'tahap'=>$tahap,'files'=>$this->files);
 		$data['riwayat']=$this->db->where('permohonan_id',$id)->order_by('created_at','ASC')->get('aktivitas_pbg')->result_array();
+		$data['tpa_per_bidang']=array();
+		foreach(array('arsitektur'=>'tpa_arsitek','struktur'=>'tpa_struktur','mep'=>'tpa_mep') as $bidang=>$role){
+			$data['tpa_per_bidang'][$bidang]=$this->db->where('role',$role)->order_by('nama','ASC')->get('users')->result_array();
+		}
+		$data['konsultasi']=$this->db->select('k.*,u.nama AS nama_tpa,u.email AS email_tpa')->from('konsultasi_pbg k')->join('users u','u.id=k.tpa_user_id','left')->where('k.permohonan_id',$id)->order_by('k.putaran','DESC')->order_by('k.bidang','ASC')->get()->result_array();
 		$this->load->view('pbg_pu/tahap',$data);
+	}
+
+	public function ajukan_konsultasi($id)
+	{
+		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
+		$pilihan=array('arsitektur'=>(int)$this->input->post('tpa_arsitektur'),'struktur'=>(int)$this->input->post('tpa_struktur'),'mep'=>(int)$this->input->post('tpa_mep'));
+		$roles=array('arsitektur'=>'tpa_arsitek','struktur'=>'tpa_struktur','mep'=>'tpa_mep');
+		foreach($pilihan as $bidang=>$uid){if(!$uid||!$this->db->where('id',$uid)->where('role',$roles[$bidang])->count_all_results('users')) show_error('Pilihan TPA '.$bidang.' tidak valid.',422);}
+		$file=null;
+		if(!empty($_FILES['file_konsultasi']['name'])){
+			$dir=FCPATH.'assets/uploads/konsultasi_pbg/'; if(!is_dir($dir)) mkdir($dir,0755,true);
+			$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf|doc|docx|jpg|jpeg|png','max_size'=>10240,'encrypt_name'=>TRUE),TRUE);
+			if(!$this->upload->do_upload('file_konsultasi')){ $this->session->set_flashdata('error',strip_tags($this->upload->display_errors('',''))); redirect('pengajuan-pbg/tahap/'.$id.'/3'); return; }
+			$file=$this->upload->data('file_name');
+		}
+		$max=$this->db->select_max('putaran','maks')->where('permohonan_id',$id)->get('konsultasi_pbg')->row_array(); $putaran=((int)$max['maks'])+1;
+		$this->db->trans_start(); foreach($pilihan as $bidang=>$uid){$this->db->insert('konsultasi_pbg',array('permohonan_id'=>$id,'tpa_user_id'=>$uid,'bidang'=>$bidang,'putaran'=>$putaran,'status'=>'ditugaskan','komentar_pu'=>trim($this->input->post('komentar_pu'))?:null,'pernyataan_pu'=>trim($this->input->post('pernyataan_pu'))?:null,'file_pu'=>$file,'assigned_by'=>$this->pu_id(),'assigned_at'=>date('Y-m-d H:i:s')));} $this->pbg->update_owned($id,$this->pu_id(),array('tahap'=>3,'status'=>'diverifikasi','updated_at'=>date('Y-m-d H:i:s'))); $this->db->trans_complete();
+		$this->session->set_flashdata('sukses','Konsultasi putaran '.$putaran.' berhasil ditugaskan kepada tiga TPA.'); redirect('pengajuan-pbg/tahap/'.$id.'/3');
 	}
 
 	public function ubah_tahap($id)

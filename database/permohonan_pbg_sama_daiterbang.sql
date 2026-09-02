@@ -52,6 +52,26 @@ CREATE TABLE IF NOT EXISTS `aktivitas_pbg` (
   PRIMARY KEY (`id`), KEY `permohonan` (`permohonan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `konsultasi_pbg` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `permohonan_id` INT UNSIGNED NOT NULL,
+  `tpa_user_id` INT UNSIGNED NOT NULL,
+  `bidang` ENUM('arsitektur','struktur','mep') NOT NULL,
+  `putaran` SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+  `status` ENUM('ditugaskan','perlu_perbaikan','direkomendasikan') NOT NULL DEFAULT 'ditugaskan',
+  `komentar_pu` TEXT DEFAULT NULL,
+  `pernyataan_pu` TEXT DEFAULT NULL,
+  `file_pu` VARCHAR(255) DEFAULT NULL,
+  `rekomendasi_tpa` TEXT DEFAULT NULL,
+  `file_rekomendasi` VARCHAR(255) DEFAULT NULL,
+  `assigned_by` INT UNSIGNED NOT NULL,
+  `assigned_at` DATETIME NOT NULL,
+  `reviewed_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `putaran_bidang` (`permohonan_id`,`putaran`,`bidang`),
+  KEY `tpa_status` (`tpa_user_id`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Salin ringkasan data lama satu kali. Detail lama tetap utuh di tabel asal.
 INSERT IGNORE INTO `permohonan_pbg`
 (`id`,`user_id`,`no_permohonan`,`nama_pemohon`,`nik`,`no_hp`,`alamat_bangunan`,`jenis_bangunan`,`kategori_bangunan`,`luas_bangunan`,`keterangan`,`status`,`tahap`,`created_at`,`updated_at`)
