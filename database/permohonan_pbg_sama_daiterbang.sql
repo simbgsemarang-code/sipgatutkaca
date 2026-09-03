@@ -64,6 +64,8 @@ CREATE TABLE IF NOT EXISTS `konsultasi_pbg` (
   `file_pu` VARCHAR(255) DEFAULT NULL,
   `rekomendasi_tpa` TEXT DEFAULT NULL,
   `file_rekomendasi` VARCHAR(255) DEFAULT NULL,
+  `catatan_perbaikan` TEXT DEFAULT NULL,
+  `perbaikan_dikirim_at` DATETIME DEFAULT NULL,
   `assigned_by` INT UNSIGNED NOT NULL,
   `assigned_at` DATETIME NOT NULL,
   `reviewed_at` DATETIME DEFAULT NULL,
@@ -71,6 +73,10 @@ CREATE TABLE IF NOT EXISTS `konsultasi_pbg` (
   UNIQUE KEY `putaran_bidang` (`permohonan_id`,`putaran`,`bidang`),
   KEY `tpa_status` (`tpa_user_id`,`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `konsultasi_pbg`
+  ADD COLUMN IF NOT EXISTS `catatan_perbaikan` TEXT DEFAULT NULL AFTER `file_rekomendasi`,
+  ADD COLUMN IF NOT EXISTS `perbaikan_dikirim_at` DATETIME DEFAULT NULL AFTER `catatan_perbaikan`;
 
 -- Salin ringkasan data lama satu kali. Detail lama tetap utuh di tabel asal.
 INSERT IGNORE INTO `permohonan_pbg`
