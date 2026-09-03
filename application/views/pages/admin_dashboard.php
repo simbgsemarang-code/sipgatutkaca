@@ -134,6 +134,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
       <a href="<?php echo base_url('admin/pengajuan'); ?>">Pengajuan PBG</a>
       <a href="<?php echo base_url('admin/bangunan'); ?>">Sebaran Bangunan</a>
       <a href="<?php echo base_url('admin/cagar-budaya'); ?>">Kelola Cagar Budaya</a>
+      <a href="<?php echo base_url('admin/aturan'); ?>">Kelola Aturan</a>
       <a href="<?php echo base_url('admin/saran'); ?>">Saran &amp; FAQ</a>
     </nav>
     <nav>
@@ -163,6 +164,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
       <a class="stat" href="<?php echo base_url('admin/cagar-budaya'); ?>">
         <div class="num"><?php echo number_format($stat['cagar_budaya'], 0, ',', '.'); ?></div>
         <div class="lbl">Cagar Budaya</div><div class="go">Kelola →</div>
+      </a>
+      <a class="stat" href="<?php echo base_url('admin/aturan'); ?>">
+        <div class="num"><?php echo number_format($stat['regulasi'], 0, ',', '.'); ?></div>
+        <div class="lbl">Pustaka Regulasi</div><div class="go">Kelola →</div>
       </a>
       <a class="stat <?php echo $saran_baru > 0 ? 'hi' : ''; ?>" href="<?php echo base_url('admin/saran'); ?>">
         <div class="num"><?php echo number_format($stat['saran'], 0, ',', '.'); ?><?php if ($saran_baru > 0): ?><span class="badge-baru"><?php echo (int) $saran_baru; ?> baru</span><?php endif; ?></div>

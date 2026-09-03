@@ -117,10 +117,13 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6re
 
 /* ===== DAFTAR REGULASI ===== */
 .reg-list{margin-top:44px;list-style:none}
-.reg-list li{display:flex;gap:22px;padding:20px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.reg-list li{display:flex;gap:22px;padding:20px 0;border-bottom:1px solid var(--line);align-items:center}
 .reg-list li:first-child{border-top:1px solid var(--line)}
 .reg-num{font-family:var(--display);color:var(--gold-300);font-size:1rem;min-width:32px;flex:0 0 auto}
-.reg-text{color:var(--text);font-size:.95rem;line-height:1.6}
+.reg-text{color:var(--text);font-size:.95rem;line-height:1.6;flex:1}
+.reg-download{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;padding:9px 15px;border:1px solid var(--gold-500);color:var(--gold-300);font-size:.67rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;transition:.25s}
+.reg-download:hover{background:var(--gold-500);color:#fff}.reg-unavailable{flex:0 0 auto;font-size:.68rem;color:var(--muted);font-style:italic}
+@media(max-width:620px){.reg-list li{align-items:flex-start;flex-wrap:wrap}.reg-text{flex-basis:calc(100% - 56px)}.reg-download,.reg-unavailable{margin-left:54px}}
 
 /* ===== STATISTIK ===== */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;margin-top:60px;text-align:center}
@@ -280,26 +283,19 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <p class="section-lead">Seluruh produk hukum penataan ruang tersaji utuh — dapat dibaca, diunduh, dan dirujuk kapan pun. Tidak ada aturan yang tersembunyi; hukum yang baik adalah hukum yang diketahui.</p>
     </div>
     <ol class="reg-list reveal">
-      <li><span class="reg-num">01</span><span class="reg-text">Undang-undang Nomor 28 Tahun 2002 tentang Bangunan Gedung</span></li>
-      <li><span class="reg-num">02</span><span class="reg-text">Undang-undang Nomor 11 Tahun 2010 tentang Cagar Budaya</span></li>
-      <li><span class="reg-num">03</span><span class="reg-text">Undang-undang Nomor 11 Tahun 2020 tentang Cipta Kerja</span></li>
-      <li><span class="reg-num">04</span><span class="reg-text">Peraturan Pemerintah Nomor 16 Tahun 2021 tentang Peraturan Pelaksanaan Undang-undang Nomor 28 Tahun 2002 tentang Bangunan Gedung</span></li>
-      <li><span class="reg-num">05</span><span class="reg-text">Peraturan Pemerintah Nomor 1 Tahun 2022 tentang Register Nasional dan Pelestarian Cagar Budaya</span></li>
-      <li><span class="reg-num">06</span><span class="reg-text">Peraturan Menteri Pekerjaan Umum Nomor 24/PRT/M/2008 tentang Pedoman Pemeliharaan dan Perawatan Bangunan Gedung</span></li>
-      <li><span class="reg-num">07</span><span class="reg-text">Peraturan Menteri Pekerjaan Umum dan Perumahan Rakyat Nomor 16/PRT/M/2010 Tahun 2010 tentang Pedoman Teknis Pemeriksaan Berkala Bangunan Gedung</span></li>
-      <li><span class="reg-num">08</span><span class="reg-text">Peraturan Menteri Pekerjaan Umum dan Perumahan Rakyat Nomor 22/PRT/M/2018 tentang Pembangunan Bangunan Gedung Negara</span></li>
-      <li><span class="reg-num">09</span><span class="reg-text">Peraturan Menteri Pekerjaan Umum dan Perumahan Rakyat Nomor 27/PRT/M/2018 Tahun 2018 tentang Sertifikat Laik Fungsi Bangunan Gedung</span></li>
-      <li><span class="reg-num">10</span><span class="reg-text">Peraturan Menteri Pekerjaan Umum dan Perumahan Rakyat Nomor 8 Tahun 2021 tentang Penilai Ahli, Kegagalan Bangunan dan Penilaian Kegagalan Bangunan</span></li>
-      <li><span class="reg-num">11</span><span class="reg-text">Peraturan Menteri Pekerjaan Umum dan Perumahan Rakyat Nomor 19 Tahun 2021 tentang Pedoman Teknis Penyelenggaraan Bangunan Gedung Cagar Budaya yang Dilestarikan</span></li>
-      <li><span class="reg-num">12</span><span class="reg-text">Peraturan Menteri Pekerjaan Umum dan Perumahan Rakyat Nomor 21 Tahun 2021 tentang Penilaian Kinerja Bangunan Gedung Hijau</span></li>
-      <li><span class="reg-num">13</span><span class="reg-text">Keputusan Bersama Menteri Perumahan dan Kawasan Permukimaan, Menteri Pekerjaan Umum dan Menteri Dalam Negeri Nomor 03.HK/KPTS/Mn/2024, Nomor 3015/KPTS/M/2024, Nomor 600.10-4849 Tahun 2024 tentang Dukungan Percepatan Pelaksanaan Program Pembangunan Tiga Juta Rumah</span></li>
-      <li><span class="reg-num">14</span><span class="reg-text">Perda Kabupaten Cilacap Nomor 17 Tahun 2008 tentang Urusan Pemerintahan Kabupaten Cilacap</span></li>
-      <li><span class="reg-num">15</span><span class="reg-text">Peraturan Daerah Kabupaten Cilacap Nomor 11 Tahun 2011 tentang Bangunan Gedung</span></li>
-      <li><span class="reg-num">16</span><span class="reg-text">Peraturan Daerah Kabupaten Cilacap Nomor 1 Tahun 2024 tentang Pajak Daerah dan Retribusi Daerah</span></li>
-      <li><span class="reg-num">17</span><span class="reg-text">Peraturan Bupati Cilacap Nomor 34 Tahun 2023 tentang Kedudukan, Susunan Organisasi, Tugas dan Fungsi serta Tata Kerja Dinas Daerah</span></li>
-      <li><span class="reg-num">18</span><span class="reg-text">Peraturan Bupati Cilacap Nomor 52 Tahun 2023 tentang Tata Cara Penyelenggaraan Persetujuan Bangunan Gedung dan Sertifikat Laik Fungsi</span></li>
-      <li><span class="reg-num">19</span><span class="reg-text">Peraturan Bupati Cilacap Nomor 61 Tahun 2024 tentang Pembebasan Retribusi Persetujuan Bangunan Gedung bagi Masyarakat Berpenghasilan Rendah</span></li>
-      <li><span class="reg-num">20</span><span class="reg-text">Peraturan Bupati Cilacap Nomor 50 Tahun 2025 tentang Petunjuk Pelaksanaan Pemungutan Retribusi Persetujuan Bangunan Gedung</span></li>
+      <?php if (empty($daftar)): ?>
+        <li><span class="reg-text">Belum ada regulasi yang ditampilkan.</span></li>
+      <?php else: foreach ($daftar as $i => $aturan): ?>
+        <li>
+          <span class="reg-num"><?php echo str_pad($i + 1, 2, '0', STR_PAD_LEFT); ?></span>
+          <span class="reg-text"><?php echo htmlspecialchars($aturan['judul'], ENT_QUOTES, 'UTF-8'); ?></span>
+          <?php if (!empty($aturan['file_pdf'])): ?>
+            <a class="reg-download" href="<?php echo base_url('regulasi/unduh/' . (int) $aturan['id']); ?>">↓ Unduh PDF</a>
+          <?php else: ?>
+            <span class="reg-unavailable">PDF belum tersedia</span>
+          <?php endif; ?>
+        </li>
+      <?php endforeach; endif; ?>
     </ol>
     <div class="reveal" style="margin-top:56px;text-align:center">
       <a class="btn btn-gold" href="<?php echo base_url(); ?>">← Kembali ke Beranda</a>

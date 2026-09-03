@@ -50,6 +50,7 @@ class Admin extends CI_Controller {
 			'pengajuan_pbg' => $hitung('pengajuan_pbg'),
 			'bangunan'      => $hitung('bangunan_gis'),
 			'cagar_budaya'  => $hitung('cagar_budaya'),
+			'regulasi'       => $hitung('regulasi'),
 			'saran'         => $hitung('saran_masukan'),
 		);
 		$data['saran_baru'] = $this->db->table_exists('saran_masukan')
@@ -66,6 +67,96 @@ class Admin extends CI_Controller {
 
 		$data['nama_admin'] = $this->session->userdata('nama');
 		$this->load->view('pages/admin_dashboard', $data);
+	}
+
+	/* =====================================================================
+	 *  KELOLA PUSTAKA REGULASI + DOKUMEN PDF
+	 * ===================================================================== */
+
+	public function aturan()
+	{
+		$data['daftar'] = $this->db->table_exists('regulasi')
+			? $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('regulasi')->result_array()
+			: array();
+		$data['sukses'] = $this->session->flashdata('sukses');
+		$data['error'] = $this->session->flashdata('error');
+		$data['nama_admin'] = $this->session->userdata('nama');
+		$this->load->view('pages/admin_aturan', $data);
+	}
+
+	public function aturan_tambah()
+	{
+		$this->_aturan_form(NULL);
+	}
+
+	public function aturan_ubah($id = null)
+	{
+		$row = $this->db->where('id', (int) $id)->get('regulasi')->row_array();
+		if ($row === NULL) { show_404(); return; }
+		$this->_aturan_form($row);
+	}
+
+	private function _aturan_form($row)
+	{
+		$data['row'] = $row;
+		$data['old'] = $this->session->flashdata('old');
+		$data['error'] = $this->session->flashdata('error');
+		$data['nama_admin'] = $this->session->userdata('nama');
+		$this->load->view('pages/admin_aturan_form', $data);
+	}
+
+	public function aturan_simpan($id = null)
+	{
+		$id = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('regulasi')->row_array() : NULL;
+		if ($id > 0 && $row === NULL) { show_404(); return; }
+		$judul = trim((string) $this->input->post('judul'));
+		$urutan = max(0, (int) $this->input->post('urutan'));
+		$tujuan = $id > 0 ? 'admin/aturan-ubah/' . $id : 'admin/aturan-tambah';
+		if ($judul === '')
+		{
+			$this->session->set_flashdata('error', 'Judul aturan wajib diisi.');
+			$this->session->set_flashdata('old', $this->input->post());
+			redirect($tujuan); return;
+		}
+
+		$dir = FCPATH . 'assets/dokumen-regulasi/';
+		$file = $row && ! empty($row['file_pdf']) ? $row['file_pdf'] : NULL;
+		if ($this->input->post('hapus_pdf') === '1' && $file)
+		{
+			@unlink($dir . basename($file));
+			$file = NULL;
+		}
+		if (! empty($_FILES['file_pdf']['name']))
+		{
+			if (! is_dir($dir)) @mkdir($dir, 0755, TRUE);
+			$this->load->library('upload');
+			$this->upload->initialize(array('upload_path'=>$dir, 'allowed_types'=>'pdf', 'max_size'=>20480, 'encrypt_name'=>TRUE));
+			if (! $this->upload->do_upload('file_pdf'))
+			{
+				$this->session->set_flashdata('error', 'PDF gagal diunggah: ' . strip_tags($this->upload->display_errors('', '')));
+				$this->session->set_flashdata('old', $this->input->post());
+				redirect($tujuan); return;
+			}
+			if ($file) @unlink($dir . basename($file));
+			$file = $this->upload->data('file_name');
+		}
+
+		$simpan = array('judul'=>$judul, 'urutan'=>$urutan, 'aktif'=>$this->input->post('aktif') === '1' ? 1 : 0, 'file_pdf'=>$file);
+		if ($id > 0) $this->db->where('id', $id)->update('regulasi', $simpan);
+		else $this->db->insert('regulasi', $simpan);
+		$this->session->set_flashdata('sukses', 'Aturan berhasil ' . ($id > 0 ? 'diperbarui.' : 'ditambahkan.'));
+		redirect('admin/aturan');
+	}
+
+	public function aturan_hapus($id = null)
+	{
+		$row = $this->db->where('id', (int) $id)->get('regulasi')->row_array();
+		if ($row === NULL) { show_404(); return; }
+		if (! empty($row['file_pdf'])) @unlink(FCPATH . 'assets/dokumen-regulasi/' . basename($row['file_pdf']));
+		$this->db->where('id', (int) $id)->delete('regulasi');
+		$this->session->set_flashdata('sukses', 'Aturan berhasil dihapus.');
+		redirect('admin/aturan');
 	}
 
 	public function pengguna()
