@@ -76,7 +76,7 @@ class Admin extends CI_Controller {
 	public function aturan()
 	{
 		$data['daftar'] = $this->db->table_exists('regulasi')
-			? $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('regulasi')->result_array()
+			? $this->db->order_by('id', 'ASC')->get('regulasi')->result_array()
 			: array();
 		$data['sukses'] = $this->session->flashdata('sukses');
 		$data['error'] = $this->session->flashdata('error');
@@ -111,7 +111,6 @@ class Admin extends CI_Controller {
 		$row = $id > 0 ? $this->db->where('id', $id)->get('regulasi')->row_array() : NULL;
 		if ($id > 0 && $row === NULL) { show_404(); return; }
 		$judul = trim((string) $this->input->post('judul'));
-		$urutan = max(0, (int) $this->input->post('urutan'));
 		$tujuan = $id > 0 ? 'admin/aturan-ubah/' . $id : 'admin/aturan-tambah';
 		if ($judul === '')
 		{
@@ -142,7 +141,7 @@ class Admin extends CI_Controller {
 			$file = $this->upload->data('file_name');
 		}
 
-		$simpan = array('judul'=>$judul, 'urutan'=>$urutan, 'aktif'=>$this->input->post('aktif') === '1' ? 1 : 0, 'file_pdf'=>$file);
+		$simpan = array('judul'=>$judul, 'aktif'=>$this->input->post('aktif') === '1' ? 1 : 0, 'file_pdf'=>$file);
 		if ($id > 0) $this->db->where('id', $id)->update('regulasi', $simpan);
 		else $this->db->insert('regulasi', $simpan);
 		$this->session->set_flashdata('sukses', 'Aturan berhasil ' . ($id > 0 ? 'diperbarui.' : 'ditambahkan.'));

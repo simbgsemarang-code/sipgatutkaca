@@ -122,7 +122,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6re
 .reg-num{font-family:var(--display);color:var(--gold-300);font-size:1rem;min-width:32px;flex:0 0 auto}
 .reg-text{color:var(--text);font-size:.95rem;line-height:1.6;flex:1}
 .reg-download{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;padding:9px 15px;border:1px solid var(--gold-500);color:var(--gold-300);font-size:.67rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;transition:.25s}
-.reg-download:hover{background:var(--gold-500);color:#fff}.reg-unavailable{flex:0 0 auto;font-size:.68rem;color:var(--muted);font-style:italic}
+.reg-download:hover{background:var(--gold-500);color:#fff}.reg-download.unavailable{opacity:.48;cursor:not-allowed}.reg-download.unavailable:hover{background:transparent;color:var(--gold-300)}
 @media(max-width:620px){.reg-list li{align-items:flex-start;flex-wrap:wrap}.reg-text{flex-basis:calc(100% - 56px)}.reg-download,.reg-unavailable{margin-left:54px}}
 
 /* ===== STATISTIK ===== */
@@ -292,7 +292,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
           <?php if (!empty($aturan['file_pdf'])): ?>
             <a class="reg-download" href="<?php echo base_url('regulasi/unduh/' . (int) $aturan['id']); ?>">↓ Unduh PDF</a>
           <?php else: ?>
-            <span class="reg-unavailable">PDF belum tersedia</span>
+            <span class="reg-download unavailable" aria-disabled="true">↓ Unduh</span>
           <?php endif; ?>
         </li>
       <?php endforeach; endif; ?>

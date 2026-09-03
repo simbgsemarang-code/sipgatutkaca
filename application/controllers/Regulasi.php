@@ -6,7 +6,7 @@ class Regulasi extends CI_Controller {
 	public function index()
 	{
 		$data['daftar'] = $this->db->table_exists('regulasi')
-			? $this->db->where('aktif', 1)->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('regulasi')->result_array()
+			? $this->db->where('aktif', 1)->order_by('id', 'ASC')->get('regulasi')->result_array()
 			: array();
 		$this->load->view('pages/regulasi', $data);
 	}
