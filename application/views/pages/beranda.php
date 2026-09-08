@@ -454,7 +454,7 @@
       /* ===== GRID MENU ===== */
       .menu-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 44px 30px;
         max-width: 940px;
         margin: 64px auto 0;
@@ -760,6 +760,28 @@
               </svg>
             </span>
             <span class="menu-label-box"><span>Analisa Kerusakan</span></span>
+          </a>
+          <a class="menu-card" href="<?php echo base_url('spasial'); ?>">
+            <span class="menu-icon-box">
+              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+                <path d="M5 10l9-4 12 4 9-4v25l-9 4-12-4-9 4V10z" fill="#F8F4EA" stroke="#123249" stroke-width="1.6" stroke-linejoin="round" />
+                <path d="M14 6v25M26 10v25" stroke="#123249" stroke-width="1.4" />
+                <path d="M8 24l6-5 6 3 6-7 6 4" fill="none" stroke="#E0673B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="26" cy="15" r="2.2" fill="#F0A048" stroke="#123249" stroke-width="1" />
+              </svg>
+            </span>
+            <span class="menu-label-box"><span>Pola Ruang</span></span>
+          </a>
+          <a class="menu-card" href="<?php echo base_url('itr'); ?>">
+            <span class="menu-icon-box">
+              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+                <rect x="7" y="5" width="26" height="30" rx="2" fill="#F8F4EA" stroke="#123249" stroke-width="1.6" />
+                <path d="M12 12h16M12 17h11M12 22h9" stroke="#123249" stroke-width="1.5" stroke-linecap="round" />
+                <circle cx="27" cy="27" r="5.5" fill="#F0A048" stroke="#123249" stroke-width="1.3" />
+                <path d="M24.6 27l1.6 1.7 3.3-3.6" fill="none" stroke="#F8F4EA" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span class="menu-label-box"><span>ITR</span></span>
           </a>
           <a class="menu-card" href="<?php echo base_url('pbg'); ?>">
             <span class="menu-icon-box">
