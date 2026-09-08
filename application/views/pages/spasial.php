@@ -347,7 +347,7 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
     <div class="list reveal" style="max-width:820px">
       <div class="list-item"><span class="list-key">Saring &amp; Cari</span><span class="list-val">Gabungkan pencarian teks dengan saringan kecamatan dan kelurahan; peta menyesuaikan seketika.</span></div>
       <div class="list-item"><span class="list-key">Lompat Koordinat</span><span class="list-val">Tempel koordinat lintang-bujur pada kotak pencarian peta untuk menuju titik mana pun.</span></div>
-      <div class="list-item"><span class="list-key">Ganti Lapisan</span><span class="list-val">Beralih antara peta jalan dan citra satelit melalui kontrol lapisan di pojok kanan atas peta.</span></div>
+      <div class="list-item"><span class="list-key">Ganti Lapisan</span><span class="list-val">Tampilkan Pola Ruang, kawasan LP2B, batas administrasi, jalan, atau citra satelit melalui kontrol lapisan.</span></div>
       <div class="list-item"><span class="list-key">Rincian Titik</span><span class="list-val">Klik penanda untuk melihat nama bangunan, OPD pengelola, fungsi, dan alamatnya.</span></div>
     </div>
   </div>
@@ -411,6 +411,44 @@ function bootPetaSpasial(){
   var map=L.map("map",{layers:[osm],zoomControl:true,scrollWheelZoom:true}).setView([-7.53,108.99],10);
   L.control.scale({imperial:false,position:"bottomleft"}).addTo(map);
 
+  /* Pola Ruang & LP2B — hasil konversi SHP resmi ke GeoJSON web */
+  function popupPolaRuang(p){
+    return "<h6>"+esc(p.NAMOBJ||"Pola Ruang")+"</h6>"+
+      "<div class='pp-row'><span>Diizinkan</span><span>"+esc(p.Di_Izinkan||"-")+"</span></div>"+
+      "<div class='pp-row'><span>Bersyarat</span><span>"+esc(p.Bersyarat||"-")+"</span></div>"+
+      "<div class='pp-row'><span>Tidak diizinkan</span><span>"+esc(p.Tdk_Izinka||"-")+"</span></div>";
+  }
+  var polaRuangLayer=L.geoJSON(null,{
+    style:function(f){
+      var color=(f.properties&&f.properties.Warna)||"#C9A24B";
+      return{color:color,weight:1,opacity:.9,fillColor:color,fillOpacity:.42};
+    },
+    onEachFeature:function(f,l){
+      var p=f.properties||{};
+      l.bindTooltip(p.NAMOBJ||"Pola Ruang",{sticky:true});
+      l.bindPopup(popupPolaRuang(p),{maxWidth:430});
+    }
+  }).addTo(map);
+  var lp2bLayer=L.geoJSON(null,{
+    style:function(f){
+      var color=(f.properties&&f.properties.Warna)||"#22A447";
+      return{color:"#176B35",weight:1.5,opacity:1,fillColor:color,fillOpacity:.62};
+    },
+    onEachFeature:function(f,l){
+      var p=f.properties||{};
+      l.bindTooltip(p.LP2B||"Kawasan LP2B",{sticky:true});
+      l.bindPopup("<h6>"+esc(p.LP2B||"Kawasan LP2B")+"</h6>");
+    }
+  });
+  function muatLayer(url,layer,label){
+    fetch(url,{headers:{"Accept":"application/geo+json,application/json"}})
+      .then(function(r){if(!r.ok)throw new Error(label);return r.json();})
+      .then(function(data){layer.addData(data);})
+      .catch(function(){console.warn("Layer "+label+" tidak dapat dimuat.");});
+  }
+  muatLayer("<?php echo base_url('assets/data/spatial/pola-ruang.geojson'); ?>",polaRuangLayer,"Pola Ruang");
+  muatLayer("<?php echo base_url('assets/data/spatial/lp2b.geojson'); ?>",lp2bLayer,"LP2B");
+
   /* Kontrol ukur jarak (polyline) — tampil di bawah tombol zoom out */
   if(L.control.ruler)L.control.ruler({position:"topleft"}).addTo(map);
 
@@ -468,6 +506,8 @@ function bootPetaSpasial(){
     var d=L.DomUtil.create("div","layerctl");
     d.innerHTML=
       "<h6>Peta</h6>"+
+      "<label class='row'><input type='checkbox' id='lc-pola' checked> Pola Ruang</label>"+
+      "<label class='row'><input type='checkbox' id='lc-lp2b'> LP2B</label>"+
       "<label class='row'><input type='checkbox' id='lc-kab' checked> Batas Kabupaten</label>"+
       "<label class='row'><input type='checkbox' id='lc-kec' checked> Batas Kecamatan</label>"+
       "<label class='row'><input type='checkbox' id='lc-desa'> Batas Desa/Kelurahan</label>"+
@@ -492,6 +532,8 @@ function bootPetaSpasial(){
       if(e.target.checked)layer.addTo(map);else map.removeLayer(layer);
     });
   }
+  toggleLayer("lc-pola",polaRuangLayer);
+  toggleLayer("lc-lp2b",lp2bLayer);
   toggleLayer("lc-kab",kabLayer);
   toggleLayer("lc-kec",kecLayer);
   toggleLayer("lc-desa",desaLayer);
