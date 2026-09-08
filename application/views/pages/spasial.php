@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spasial — SIP Gatutkaca · Kabupaten Cilacap</title>
+<title>Pola Ruang — SIP Gatutkaca · Kabupaten Cilacap</title>
 <link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -262,11 +262,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-locatecontrol/0.85.1/L.Control.Locate.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gokertanrisever/leaflet-ruler@master/src/leaflet-ruler.css">
 <style>
-/* ===== Panel filter peta ===== */
-.map-filter{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:20px;align-items:end;margin-bottom:22px;width:94vw;margin-left:calc(50% - 47vw);margin-right:calc(50% - 47vw)}
-.map-filter .field{margin:0}
-.map-filter label{color:var(--gold-300)}
-#btnReset{padding:13px 30px}
 .map-shell{position:relative;width:94vw;margin-left:calc(50% - 47vw);margin-right:calc(50% - 47vw);border:1px solid var(--line);box-shadow:0 18px 50px var(--shadow);border-radius:22px;overflow:hidden}
 #map{height:620px;width:100%;background:#dfeee2;z-index:1}
 /* Kotak cari alamat/koordinat mengambang di atas peta */
@@ -276,8 +271,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .map-geo button{border:none;background:#fff;color:#667;padding:0 14px;cursor:pointer;font-size:1rem}
 .map-geo button:hover{color:#C9A24B}
 /* Legenda & kontrol */
-.legend{background:#fff;color:#223;padding:12px 16px;font-size:.78rem;line-height:2;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.legend{background:#fff;color:#223;padding:12px 14px;font-size:.72rem;line-height:1.45;box-shadow:0 2px 10px rgba(0,0,0,.25);max-height:300px;max-width:280px;overflow-y:auto}
 .legend b{display:block;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.68rem;margin-bottom:4px;color:#8a6a1c}
+.legend-row{display:flex;align-items:flex-start;gap:7px;padding:3px 0}
+.legend-swatch{width:13px;height:13px;flex:0 0 13px;margin-top:2px;border:1px solid rgba(0,0,0,.25)}
 .layerctl{background:#fff;color:#223;padding:14px 16px;font-size:.8rem;box-shadow:0 2px 10px rgba(0,0,0,.25);min-width:190px;border-radius:2px}
 .layerctl h6{margin:0 0 8px;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.7rem;color:#8a6a1c;border-bottom:1px solid #eee;padding-bottom:6px}
 .layerctl h6.sep{margin-top:12px}
@@ -285,8 +282,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .layerctl .row input{accent-color:#A57E2C;width:14px;height:14px;cursor:pointer;margin:0}
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:-1px;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 .dot-g{background:#2EA84F}.dot-y{background:#F2C230}
-.map-count{margin-top:14px;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-.map-count b{color:var(--gold-300);font-family:var(--display);font-weight:400}
 /* Popup */
 .leaflet-popup-content{font-family:var(--body);font-size:.85rem;line-height:1.6;color:#223;min-width:248px}
 .leaflet-popup-content h6{font-family:var(--display);font-weight:400;font-size:1rem;letter-spacing:.05em;color:#8a6a1c;margin:0 0 6px}
@@ -300,41 +295,23 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .pp-g{color:#1d7a38;border-color:#2EA84F}.pp-y{color:#9c7a10;border-color:#F2C230}
 /* Tile sedikit diredupkan pada tema gelap */
 html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) saturate(.85)}
-@media(max-width:980px){.map-filter{grid-template-columns:1fr 1fr}#btnReset{width:100%}}
-@media(max-width:560px){.map-filter{grid-template-columns:1fr}#map{height:480px}}
+@media(max-width:560px){#map{height:480px}.legend{max-height:210px;max-width:220px}}
 </style>
 
 <section style="padding-top:calc(84px + 30px)">
   <div class="wrap">
     <div class="reveal" style="margin-bottom:40px;text-align:center">
       <p class="eyebrow">Peta Interaktif</p>
-      <h2 style="margin:0 auto;max-width:none">Sebaran Bangunan Kabupaten Cilacap</h2>
-    </div>
-
-    <div class="map-filter reveal" style="margin-top:48px">
-      <div class="field">
-        <label for="f-cari">Cari Bangunan (Nama / Alamat / OPD)</label>
-        <input id="f-cari" type="text" placeholder="Ketik nama, OPD, atau alamat" autocomplete="off">
-      </div>
-      <div class="field">
-        <label for="f-kec">Kecamatan</label>
-        <select id="f-kec"><option value="">— Semua —</option></select>
-      </div>
-      <div class="field">
-        <label for="f-kel">Kelurahan / Desa</label>
-        <select id="f-kel"><option value="">— Semua —</option></select>
-      </div>
-      <button class="btn btn-gold" id="btnReset" type="button">Reset</button>
+      <h2 style="margin:0 auto;max-width:none">Peta Pola Ruang Kabupaten Cilacap</h2>
     </div>
 
     <div class="map-shell reveal">
       <div class="map-geo">
-        <input id="geoInput" type="text" placeholder="Cari Alamat / Koordinat (mis. -7.7267, 109.0154)" autocomplete="off">
+        <input id="geoInput" type="text" placeholder="Masukkan koordinat (mis. -7.7267, 109.0154)" autocomplete="off">
         <button id="geoClear" title="Bersihkan" aria-label="Bersihkan pencarian">&times;</button>
       </div>
-      <div id="map" role="application" aria-label="Peta sebaran bangunan Kabupaten Cilacap"></div>
+      <div id="map" role="application" aria-label="Peta pola ruang Kabupaten Cilacap"></div>
     </div>
-    <p class="map-count reveal">Menampilkan <b id="countShown">0</b> dari <b id="countAll">0</b> bangunan</p>
   </div>
 </section>
 
@@ -345,10 +322,10 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
       <h2>Apa yang Dapat Anda Lakukan</h2>
     </div>
     <div class="list reveal" style="max-width:820px">
-      <div class="list-item"><span class="list-key">Saring &amp; Cari</span><span class="list-val">Gabungkan pencarian teks dengan saringan kecamatan dan kelurahan; peta menyesuaikan seketika.</span></div>
+      <div class="list-item"><span class="list-key">Kenali Zonasi</span><span class="list-val">Klik bidang berwarna untuk melihat kategori pola ruang serta ketentuan kegiatan yang diizinkan, bersyarat, dan tidak diizinkan.</span></div>
       <div class="list-item"><span class="list-key">Lompat Koordinat</span><span class="list-val">Tempel koordinat lintang-bujur pada kotak pencarian peta untuk menuju titik mana pun.</span></div>
       <div class="list-item"><span class="list-key">Ganti Lapisan</span><span class="list-val">Tampilkan Pola Ruang, kawasan LP2B, batas administrasi, jalan, atau citra satelit melalui kontrol lapisan.</span></div>
-      <div class="list-item"><span class="list-key">Rincian Titik</span><span class="list-val">Klik penanda untuk melihat nama bangunan, OPD pengelola, fungsi, dan alamatnya.</span></div>
+      <div class="list-item"><span class="list-key">Baca Legenda</span><span class="list-val">Cocokkan warna bidang pada peta dengan kategori Pola Ruang yang tercantum pada legenda.</span></div>
     </div>
   </div>
 </section>
@@ -358,52 +335,11 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
 <script src="https://cdn.jsdelivr.net/gh/gokertanrisever/leaflet-ruler@master/src/leaflet-ruler.js"></script>
 <script src="gis-data.js"></script>
 <script>
-// Titik bangunan diambil dari endpoint yang dikelola admin
-// (Admin::bangunan* -> tabel bangunan_gis). gis-data.js tetap dipakai
-// untuk layer referensi (batas kabupaten/kecamatan/jalan). Kalau
-// endpoint gagal, jatuh ke gisBangunan bawaan gis-data.js.
-fetch("<?php echo base_url('gis/bangunan'); ?>", {headers:{"Accept":"application/json"}})
-  .then(function(r){ return r.ok ? r.json() : null; })
-  .then(function(gj){ if(gj && gj.features && gj.features.length) window.gisBangunan = gj; })
-  .catch(function(){})
-  .then(bootPetaSpasial);
+bootPetaSpasial();
 
 function bootPetaSpasial(){
 (function(){
-  /* ============ KATEGORI FUNGSI BANGUNAN & WARNA ============ */
-  var FUNGSI_WARNA={
-    "Perkantoran":"#3E7CB1",
-    "Pendidikan":"#2EA84F",
-    "Sarana Pendukung":"#C9A24B",
-    "Hunian":"#8E6FCE",
-    "Keagamaan":"#D9822B",
-    "Kesehatan":"#E0526B",
-    "Sosial Budaya":"#4FB0C6",
-    "Usaha":"#B5B53C"
-  };
-  var WARNA_LAIN="#8A94A6";
-  function warnaFungsi(f){
-    if(!f)return WARNA_LAIN;
-    for(var k in FUNGSI_WARNA){if(f.indexOf(k)>=0)return FUNGSI_WARNA[k];}
-    return WARNA_LAIN;
-  }
-
-  /* ============ DATA BANGUNAN (dari gisBangunan) ============ */
-  var DATA=(gisBangunan.features||[]).map(function(f,i){
-    var p=f.properties||{},c=(f.geometry&&f.geometry.coordinates)||[null,null];
-    return{
-      id:p.idBangunan||(i+1),
-      nama:p.namaBangunan||"(Tanpa nama)",
-      opd:p.opd||p.institusi||p.unit||"-",
-      alamat:p.alamat||"-",
-      kec:p.kecamatan||"-",
-      kel:p.kelurahan||"-",
-      fungsi:p.fungsi||"-",
-      kondisi:p.kondisi||"",
-      lantai:p.jumlahLantai,
-      lat:c[1],lng:c[0]
-    };
-  }).filter(function(d){return typeof d.lat==="number"&&typeof d.lng==="number";});
+  function esc(s){ return String(s==null?"":s).replace(/[&<>\"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
 
   /* ============ PETA ============ */
   var osm=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"});
@@ -443,11 +379,12 @@ function bootPetaSpasial(){
   function muatLayer(url,layer,label){
     fetch(url,{headers:{"Accept":"application/geo+json,application/json"}})
       .then(function(r){if(!r.ok)throw new Error(label);return r.json();})
-      .then(function(data){layer.addData(data);})
+      .then(function(data){
+        layer.addData(data);
+        if(label==="Pola Ruang")renderLegendaPolaRuang(data);
+      })
       .catch(function(){console.warn("Layer "+label+" tidak dapat dimuat.");});
   }
-  muatLayer("<?php echo base_url('assets/data/spatial/pola-ruang.geojson'); ?>",polaRuangLayer,"Pola Ruang");
-  muatLayer("<?php echo base_url('assets/data/spatial/lp2b.geojson'); ?>",lp2bLayer,"LP2B");
 
   /* Kontrol ukur jarak (polyline) — tampil di bawah tombol zoom out */
   if(L.control.ruler)L.control.ruler({position:"topleft"}).addTo(map);
@@ -466,14 +403,14 @@ function bootPetaSpasial(){
     var nm=(f.properties&&f.properties.namaKecamatan)||"?";
     if(!(nm in kecColorMap))kecColorMap[nm]=PALET_KEC[Object.keys(kecColorMap).length%PALET_KEC.length];
     var c=kecColorMap[nm];
-    return{color:c,weight:1.6,opacity:.95,fillColor:c,fillOpacity:.5};
+    return{color:c,weight:1.25,opacity:.8,fillColor:c,fillOpacity:0};
   }
   var kecLayer=L.geoJSON(gisKecamatan,{
     style:kecStyle,
     onEachFeature:function(f,l){
       var nm=f.properties&&f.properties.namaKecamatan;
       if(nm)l.bindTooltip("Kecamatan "+nm,{sticky:true});
-      l.on("mouseover",function(){ l.setStyle({fillOpacity:.68,weight:2.4}); l.bringToFront(); });
+      l.on("mouseover",function(){ l.setStyle({fillOpacity:.08,weight:2.2}); l.bringToFront(); });
       l.on("mouseout",function(){ l.setStyle(kecStyle(f)); });
     }
   });
@@ -542,95 +479,31 @@ function bootPetaSpasial(){
   document.getElementById("lc-esri").addEventListener("change",function(){if(this.checked){map.removeLayer(osm);map.addLayer(esri);}});
 
   /* Legenda */
+  var legendNode=null;
   var legend=L.control({position:"bottomleft"});
   legend.onAdd=function(){
     var d=L.DomUtil.create("div","legend");
-    var html="<b>Fungsi Bangunan</b>";
-    Object.keys(FUNGSI_WARNA).forEach(function(k){
-      html+="<span class='dot' style='background:"+FUNGSI_WARNA[k]+"'></span>"+k+"<br>";
-    });
-    html+="<span class='dot' style='background:"+WARNA_LAIN+"'></span>Lainnya";
-    d.innerHTML=html;
+    d.innerHTML="<b>Legenda Pola Ruang</b><span>Memuat kategori…</span>";
+    legendNode=d;
+    L.DomEvent.disableClickPropagation(d);
     return d;
   };
   legend.addTo(map);
-
-  /* Marker Bangunan */
-  var group=L.layerGroup().addTo(map);
-  var KONDISI={"1":{label:"Baik",color:"#2EA84F"},"2":{label:"Rusak Ringan",color:"#F2C230"},"3":{label:"Rusak Sedang",color:"#D9822B"},"4":{label:"Rusak Berat",color:"#C0392B"}};
-  var URL_DETAIL="<?php echo base_url('bangunan'); ?>";
-  function esc(s){ return String(s==null?"":s).replace(/[&<>\"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
-  function popupHTML(d){
-    var warna=warnaFungsi(d.fungsi);
-    var kon=KONDISI[d.kondisi];
-    var dir="https://www.google.com/maps/dir/?api=1&destination="+d.lat+","+d.lng;
-    var h="<h6>("+d.id+") "+esc(d.nama)+"</h6>"+
-      "<div class='pp-row'><span>OPD</span><span>"+esc(d.opd)+"</span></div>"+
-      "<div class='pp-row'><span>Fungsi</span><span>"+esc(d.fungsi)+"</span></div>"+
-      "<div class='pp-row'><span>Desa / Kelurahan</span><span>"+esc(d.kel)+"</span></div>"+
-      "<div class='pp-row'><span>Kecamatan</span><span>"+esc(d.kec)+"</span></div>"+
-      "<div class='pp-row'><span>Alamat</span><span>"+esc(d.alamat)+"</span></div>";
-    if(kon) h+="<span class='pp-status' style='color:"+kon.color+";border-color:"+kon.color+"'>"+kon.label+"</span>";
-    h+="<div class='pp-act'>"+
-        "<a class='pp-btn pp-btn-solid' target='_blank' rel='noopener' href='"+URL_DETAIL+"/"+d.id+"'>Detail Bangunan</a>"+
-        "<a class='pp-btn' target='_blank' rel='noopener' href='"+dir+"'>Menuju Lokasi</a>"+
-      "</div>";
-    return h;
-  }
-  function makeMarker(d){
-    var c=warnaFungsi(d.fungsi);
-    var m=L.circleMarker([d.lat,d.lng],{radius:6,color:"#ffffff",weight:1.4,fillColor:c,fillOpacity:.9});
-    m.bindPopup(popupHTML(d));
-    m._data=d;
-    return m;
-  }
-
-  /* ============ FILTER ============ */
-  var elCari=document.getElementById("f-cari"),
-      elKec=document.getElementById("f-kec"),
-      elKel=document.getElementById("f-kel"),
-      elReset=document.getElementById("btnReset"),
-      elShown=document.getElementById("countShown"),
-      elAll=document.getElementById("countAll");
-  elAll.textContent=DATA.length;
-
-  var KEC_NAMES=(gisKecamatan.features||[]).map(function(f){return f.properties&&f.properties.namaKecamatan;}).filter(Boolean).sort();
-  KEC_NAMES.forEach(function(nm){
-    var o=document.createElement("option");o.value=nm;o.textContent=nm;elKec.appendChild(o);
-  });
-  function fillKel(){
-    var kec=elKec.value;elKel.innerHTML="<option value=''>— Semua —</option>";
-    var kels=[];
-    DATA.forEach(function(d){
-      if(kec&&d.kec!==kec)return;
-      if(d.kel&&kels.indexOf(d.kel)<0)kels.push(d.kel);
+  function renderLegendaPolaRuang(data){
+    if(!legendNode)return;
+    var kategori={};
+    (data.features||[]).forEach(function(f){
+      var p=f.properties||{},nama=p.NAMOBJ||"Pola Ruang";
+      kategori[nama]=p.Warna||"#C9A24B";
     });
-    kels.sort().forEach(function(x){var o=document.createElement("option");o.value=x;o.textContent=x;elKel.appendChild(o);});
-  }
-  fillKel();
-
-  function render(fit){
-    var q=elCari.value.trim().toLowerCase(),kec=elKec.value,kel=elKel.value;
-    group.clearLayers();
-    var shown=[],bounds=[];
-    DATA.forEach(function(d){
-      if(kec&&d.kec!==kec)return;
-      if(kel&&d.kel!==kel)return;
-      if(q&&(d.nama+" "+d.opd+" "+d.alamat).toLowerCase().indexOf(q)<0)return;
-      var m=makeMarker(d);group.addLayer(m);shown.push(m);bounds.push([d.lat,d.lng]);
+    var html="<b>Legenda Pola Ruang</b>";
+    Object.keys(kategori).sort().forEach(function(nama){
+      html+="<div class='legend-row'><span class='legend-swatch' style='background:"+esc(kategori[nama])+"'></span><span>"+esc(nama)+"</span></div>";
     });
-    elShown.textContent=shown.length;
-    if(fit&&bounds.length)map.fitBounds(bounds,{padding:[46,46],maxZoom:14});
-    return shown;
+    legendNode.innerHTML=html;
   }
-  elCari.addEventListener("input",function(){render(false)});
-  elKec.addEventListener("change",function(){fillKel();render(true)});
-  elKel.addEventListener("change",function(){render(true)});
-  elReset.addEventListener("click",function(){
-    elCari.value="";elKec.value="";fillKel();elKel.value="";
-    render(false);map.setView([-7.53,108.99],10);geoClearFn();
-  });
-  render(false);
+  muatLayer("<?php echo base_url('assets/data/spatial/pola-ruang.geojson'); ?>",polaRuangLayer,"Pola Ruang");
+  muatLayer("<?php echo base_url('assets/data/spatial/lp2b.geojson'); ?>",lp2bLayer,"LP2B");
 
   /* ============ CARI ALAMAT / KOORDINAT ============ */
   var geoInput=document.getElementById("geoInput"),geoBtn=document.getElementById("geoClear"),geoMarker=null;
@@ -646,13 +519,12 @@ function bootPetaSpasial(){
       if(geoMarker)map.removeLayer(geoMarker);
       geoMarker=L.marker([lat,lng]).addTo(map).bindPopup("Titik: "+lat.toFixed(5)+", "+lng.toFixed(5)).openPopup();
       map.setView([lat,lng],15);
-    }else{ /* cari nama pada data */
-      var q=v.toLowerCase(),hit=null;
-      group.eachLayer(function(l){if(!hit&&l._data&&(l._data.nama+" "+l._data.alamat).toLowerCase().indexOf(q)>=0)hit=l;});
-      if(!hit){elCari.value=v;var s=render(true);if(s.length===1)s[0].openPopup();}
-      else{map.setView(hit.getLatLng(),15);hit.openPopup();}
+    }else{
+      geoInput.setCustomValidity("Masukkan koordinat lintang dan bujur, misalnya -7.7267, 109.0154");
+      geoInput.reportValidity();
     }
   });
+  geoInput.addEventListener("input",function(){geoInput.setCustomValidity("");});
 })();
 }
 </script>
