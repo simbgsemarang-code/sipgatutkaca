@@ -276,14 +276,20 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .legend b{display:block;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.68rem;margin-bottom:4px;color:#8a6a1c}
 .legend-row{display:flex;align-items:flex-start;gap:7px;padding:3px 0}
 .legend-swatch{width:13px;height:13px;flex:0 0 13px;margin-top:2px;border:1px solid rgba(0,0,0,.25)}
-.analysis-panel{position:absolute;z-index:700;top:72px;left:18px;width:min(560px,calc(100% - 36px));max-height:420px;overflow:auto;background:rgba(255,255,255,.94);color:#172738;border:1px solid rgba(21,42,59,.2);box-shadow:0 10px 32px rgba(0,0,0,.28);backdrop-filter:blur(8px);padding:18px 22px 22px;display:none}
-.analysis-panel.open{display:block}
-.analysis-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
-.analysis-head h3{font-family:var(--display);font-weight:400;font-size:1.25rem;letter-spacing:.04em}
-.analysis-close{border:0;background:transparent;color:#65717b;font-size:1.7rem;line-height:1;cursor:pointer;padding:0 3px}
-.analysis-table{width:100%;margin:0;font-size:.82rem}
-.analysis-table th{padding:10px 12px;color:#172738;background:#fff;border-bottom:1px solid #d7dde1;font-family:var(--body);font-size:.75rem;font-weight:700;letter-spacing:0;text-transform:none}
-.analysis-table td{padding:10px 12px;color:#172738;border-bottom:1px solid #d7dde1;background:rgba(244,246,247,.9)}
+.analysis-panel{position:absolute;z-index:700;top:50%;left:50%;width:min(650px,calc(100% - 48px));max-height:78%;overflow:auto;background:rgba(255,255,255,.97);color:#172738;border:1px solid rgba(165,126,44,.34);border-radius:20px;box-shadow:0 24px 70px rgba(8,24,38,.34);backdrop-filter:blur(12px);padding:0 26px 26px;display:none;transform:translate(-50%,-46%) scale(.97);opacity:0}
+.analysis-panel.open{display:block;animation:analysisIn .24s ease forwards}
+@keyframes analysisIn{to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.analysis-panel::before{content:"";position:sticky;display:block;top:0;height:4px;margin:0 -26px;background:linear-gradient(90deg,#A57E2C,#E4C87B,#1E849C);z-index:2}
+.analysis-head{position:sticky;top:4px;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 -6px 18px;padding:20px 6px 14px;background:rgba(255,255,255,.96);border-bottom:1px solid #e5e8ea}
+.analysis-title-wrap small{display:block;margin-bottom:3px;color:#A57E2C;font-size:.62rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase}
+.analysis-head h3{font-family:var(--display);font-weight:400;font-size:1.42rem;letter-spacing:.04em}
+.analysis-close{display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;border:1px solid #d8dde0;border-radius:50%;background:#f7f8f8;color:#65717b;font-size:1.45rem;line-height:1;cursor:pointer;transition:.2s}
+.analysis-close:hover{color:#A57E2C;border-color:#C9A24B;background:#fff8e8;transform:rotate(8deg)}
+.analysis-table{width:100%;margin:0;border:1px solid #e0e4e7;border-radius:13px;overflow:hidden;border-collapse:separate;border-spacing:0;font-size:.82rem}
+.analysis-table th{padding:12px 14px;color:#172738;background:#f6f2e8;border-bottom:1px solid #d7dde1;font-family:var(--body);font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.analysis-table td{padding:12px 14px;color:#172738;border-bottom:1px solid #e1e5e7;background:rgba(249,250,250,.96)}
+.analysis-table tr:nth-child(even) td{background:#f1f4f5}
+.analysis-table tbody tr:last-child td{border-bottom:0}
 .analysis-table td:last-child,.analysis-table th:last-child{text-align:right;white-space:nowrap}
 .analysis-empty{padding:18px 4px;color:#65717b;font-size:.86rem}
 .leaflet-draw-toolbar a{background-color:#fff}
@@ -307,7 +313,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .pp-g{color:#1d7a38;border-color:#2EA84F}.pp-y{color:#9c7a10;border-color:#F2C230}
 /* Tile sedikit diredupkan pada tema gelap */
 html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) saturate(.85)}
-@media(max-width:560px){#map{height:480px}.legend{max-height:210px;max-width:220px}.analysis-panel{top:66px;left:10px;width:calc(100% - 20px);padding:14px}.analysis-table{font-size:.72rem}}
+@media(max-width:560px){#map{height:480px}.legend{max-height:210px;max-width:220px}.analysis-panel{width:calc(100% - 20px);max-height:82%;padding:0 14px 16px;border-radius:15px}.analysis-panel::before{margin:0 -14px}.analysis-head{padding-top:15px}.analysis-head h3{font-size:1.15rem}.analysis-table{font-size:.7rem}.analysis-table th,.analysis-table td{padding:9px 8px}}
 </style>
 
 <section style="padding-top:calc(84px + 30px)">
@@ -325,7 +331,10 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
       <div id="map" role="application" aria-label="Peta pola ruang Kabupaten Cilacap"></div>
       <aside class="analysis-panel" id="analysisPanel" role="dialog" aria-modal="false" aria-labelledby="analysisTitle">
         <div class="analysis-head">
-          <h3 id="analysisTitle">Ringkasan Tata Ruang</h3>
+          <div class="analysis-title-wrap">
+            <small>Hasil Analisis Polygon</small>
+            <h3 id="analysisTitle">Ringkasan Tata Ruang</h3>
+          </div>
           <button class="analysis-close" id="analysisClose" type="button" aria-label="Tutup ringkasan">&times;</button>
         </div>
         <div id="analysisResult" aria-live="polite"></div>
@@ -538,6 +547,8 @@ function bootPetaSpasial(){
   var analysisPanel=document.getElementById("analysisPanel");
   var analysisResult=document.getElementById("analysisResult");
   var analysisClose=document.getElementById("analysisClose");
+  L.DomEvent.disableClickPropagation(analysisPanel);
+  L.DomEvent.disableScrollPropagation(analysisPanel);
   if(L.drawLocal&&L.drawLocal.draw&&L.drawLocal.draw.toolbar){
     L.drawLocal.draw.toolbar.buttons.polygon="Gambar polygon analisis";
     L.drawLocal.draw.handlers.polygon.tooltip.start="Klik untuk mulai menggambar.";
@@ -545,7 +556,7 @@ function bootPetaSpasial(){
     L.drawLocal.draw.handlers.polygon.tooltip.end="Klik titik awal untuk menyelesaikan.";
   }
   var drawControl=new L.Control.Draw({
-    position:"bottomright",
+    position:"topright",
     draw:{
       polygon:{
         allowIntersection:false,
