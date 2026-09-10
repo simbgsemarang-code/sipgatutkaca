@@ -260,6 +260,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-locatecontrol/0.85.1/L.Control.Locate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gokertanrisever/leaflet-ruler@master/src/leaflet-ruler.css">
 <style>
 .map-shell{position:relative;width:94vw;margin-left:calc(50% - 47vw);margin-right:calc(50% - 47vw);border:1px solid var(--line);box-shadow:0 18px 50px var(--shadow);border-radius:22px;overflow:hidden}
@@ -275,6 +276,17 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .legend b{display:block;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.68rem;margin-bottom:4px;color:#8a6a1c}
 .legend-row{display:flex;align-items:flex-start;gap:7px;padding:3px 0}
 .legend-swatch{width:13px;height:13px;flex:0 0 13px;margin-top:2px;border:1px solid rgba(0,0,0,.25)}
+.analysis-panel{position:absolute;z-index:700;top:72px;left:18px;width:min(560px,calc(100% - 36px));max-height:420px;overflow:auto;background:rgba(255,255,255,.94);color:#172738;border:1px solid rgba(21,42,59,.2);box-shadow:0 10px 32px rgba(0,0,0,.28);backdrop-filter:blur(8px);padding:18px 22px 22px;display:none}
+.analysis-panel.open{display:block}
+.analysis-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+.analysis-head h3{font-family:var(--display);font-weight:400;font-size:1.25rem;letter-spacing:.04em}
+.analysis-close{border:0;background:transparent;color:#65717b;font-size:1.7rem;line-height:1;cursor:pointer;padding:0 3px}
+.analysis-table{width:100%;margin:0;font-size:.82rem}
+.analysis-table th{padding:10px 12px;color:#172738;background:#fff;border-bottom:1px solid #d7dde1;font-family:var(--body);font-size:.75rem;font-weight:700;letter-spacing:0;text-transform:none}
+.analysis-table td{padding:10px 12px;color:#172738;border-bottom:1px solid #d7dde1;background:rgba(244,246,247,.9)}
+.analysis-table td:last-child,.analysis-table th:last-child{text-align:right;white-space:nowrap}
+.analysis-empty{padding:18px 4px;color:#65717b;font-size:.86rem}
+.leaflet-draw-toolbar a{background-color:#fff}
 .layerctl{background:#fff;color:#223;padding:14px 16px;font-size:.8rem;box-shadow:0 2px 10px rgba(0,0,0,.25);min-width:190px;border-radius:2px}
 .layerctl h6{margin:0 0 8px;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.7rem;color:#8a6a1c;border-bottom:1px solid #eee;padding-bottom:6px}
 .layerctl h6.sep{margin-top:12px}
@@ -295,7 +307,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .pp-g{color:#1d7a38;border-color:#2EA84F}.pp-y{color:#9c7a10;border-color:#F2C230}
 /* Tile sedikit diredupkan pada tema gelap */
 html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) saturate(.85)}
-@media(max-width:560px){#map{height:480px}.legend{max-height:210px;max-width:220px}}
+@media(max-width:560px){#map{height:480px}.legend{max-height:210px;max-width:220px}.analysis-panel{top:66px;left:10px;width:calc(100% - 20px);padding:14px}.analysis-table{font-size:.72rem}}
 </style>
 
 <section style="padding-top:calc(84px + 30px)">
@@ -311,6 +323,13 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
         <button id="geoClear" title="Bersihkan" aria-label="Bersihkan pencarian">&times;</button>
       </div>
       <div id="map" role="application" aria-label="Peta pola ruang Kabupaten Cilacap"></div>
+      <aside class="analysis-panel" id="analysisPanel" role="dialog" aria-modal="false" aria-labelledby="analysisTitle">
+        <div class="analysis-head">
+          <h3 id="analysisTitle">Ringkasan Tata Ruang</h3>
+          <button class="analysis-close" id="analysisClose" type="button" aria-label="Tutup ringkasan">&times;</button>
+        </div>
+        <div id="analysisResult" aria-live="polite"></div>
+      </aside>
     </div>
   </div>
 </section>
@@ -323,6 +342,7 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
     </div>
     <div class="list reveal" style="max-width:820px">
       <div class="list-item"><span class="list-key">Kenali Zonasi</span><span class="list-val">Klik bidang berwarna untuk melihat kategori pola ruang serta ketentuan kegiatan yang diizinkan, bersyarat, dan tidak diizinkan.</span></div>
+      <div class="list-item"><span class="list-key">Analisis Polygon</span><span class="list-val">Gambar polygon di atas peta untuk memperoleh ringkasan zona peruntukan dan luas area yang beririsan.</span></div>
       <div class="list-item"><span class="list-key">Lompat Koordinat</span><span class="list-val">Tempel koordinat lintang-bujur pada kotak pencarian peta untuk menuju titik mana pun.</span></div>
       <div class="list-item"><span class="list-key">Ganti Lapisan</span><span class="list-val">Tampilkan Pola Ruang, kawasan LP2B, batas administrasi, jalan, atau citra satelit melalui kontrol lapisan.</span></div>
       <div class="list-item"><span class="list-key">Baca Legenda</span><span class="list-val">Cocokkan warna bidang pada peta dengan kategori Pola Ruang yang tercantum pada legenda.</span></div>
@@ -332,6 +352,8 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-locatecontrol/0.85.1/L.Control.Locate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/gokertanrisever/leaflet-ruler@master/src/leaflet-ruler.js"></script>
 <script src="gis-data.js"></script>
 <script>
@@ -348,6 +370,7 @@ function bootPetaSpasial(){
   L.control.scale({imperial:false,position:"bottomleft"}).addTo(map);
 
   /* Pola Ruang & LP2B — hasil konversi SHP resmi ke GeoJSON web */
+  var polaRuangFeatures=[];
   function popupPolaRuang(p){
     return "<h6>"+esc(p.NAMOBJ||"Pola Ruang")+"</h6>"+
       "<div class='pp-row'><span>Diizinkan</span><span>"+esc(p.Di_Izinkan||"-")+"</span></div>"+
@@ -381,7 +404,12 @@ function bootPetaSpasial(){
       .then(function(r){if(!r.ok)throw new Error(label);return r.json();})
       .then(function(data){
         layer.addData(data);
-        if(label==="Pola Ruang")renderLegendaPolaRuang(data);
+        if(label==="Pola Ruang"){
+          polaRuangFeatures=(data.features||[]).map(function(feature){
+            return{feature:feature,bbox:turf.bbox(feature)};
+          });
+          renderLegendaPolaRuang(data);
+        }
       })
       .catch(function(){console.warn("Layer "+label+" tidak dapat dimuat.");});
   }
@@ -504,6 +532,76 @@ function bootPetaSpasial(){
   }
   muatLayer("<?php echo base_url('assets/data/spatial/pola-ruang.geojson'); ?>",polaRuangLayer,"Pola Ruang");
   muatLayer("<?php echo base_url('assets/data/spatial/lp2b.geojson'); ?>",lp2bLayer,"LP2B");
+
+  /* ============ ANALISIS POLYGON ============ */
+  var drawnItems=new L.FeatureGroup().addTo(map);
+  var analysisPanel=document.getElementById("analysisPanel");
+  var analysisResult=document.getElementById("analysisResult");
+  var analysisClose=document.getElementById("analysisClose");
+  if(L.drawLocal&&L.drawLocal.draw&&L.drawLocal.draw.toolbar){
+    L.drawLocal.draw.toolbar.buttons.polygon="Gambar polygon analisis";
+    L.drawLocal.draw.handlers.polygon.tooltip.start="Klik untuk mulai menggambar.";
+    L.drawLocal.draw.handlers.polygon.tooltip.cont="Klik untuk menambah titik.";
+    L.drawLocal.draw.handlers.polygon.tooltip.end="Klik titik awal untuk menyelesaikan.";
+  }
+  var drawControl=new L.Control.Draw({
+    position:"bottomright",
+    draw:{
+      polygon:{
+        allowIntersection:false,
+        showArea:true,
+        shapeOptions:{color:"#FFD21F",weight:3,fillColor:"#FFE85C",fillOpacity:.25}
+      },
+      polyline:false,rectangle:false,circle:false,marker:false,circlemarker:false
+    },
+    edit:false
+  });
+  map.addControl(drawControl);
+
+  function bboxBeririsan(a,b){
+    return a[0]<=b[2]&&a[2]>=b[0]&&a[1]<=b[3]&&a[3]>=b[1];
+  }
+  function tampilkanRingkasan(polygon){
+    analysisPanel.classList.add("open");
+    if(!polaRuangFeatures.length){
+      analysisResult.innerHTML="<p class='analysis-empty'>Data Pola Ruang masih dimuat. Silakan gambar ulang sesaat lagi.</p>";
+      return;
+    }
+    var hasil={},polygonBbox=turf.bbox(polygon);
+    polaRuangFeatures.forEach(function(item){
+      if(!bboxBeririsan(polygonBbox,item.bbox))return;
+      try{
+        var irisan=turf.intersect(polygon,item.feature);
+        if(!irisan)return;
+        var luas=turf.area(irisan);
+        if(luas<=.01)return;
+        var nama=(item.feature.properties&&item.feature.properties.NAMOBJ)||"Pola Ruang";
+        hasil[nama]=(hasil[nama]||0)+luas;
+      }catch(err){console.warn("Irisan polygon dilewati",err);}
+    });
+    var baris=Object.keys(hasil).map(function(nama){return{nama:nama,luas:hasil[nama]};})
+      .sort(function(a,b){return b.luas-a.luas;});
+    if(!baris.length){
+      analysisResult.innerHTML="<p class='analysis-empty'>Polygon tidak beririsan dengan data Pola Ruang.</p>";
+      return;
+    }
+    var angka=new Intl.NumberFormat("id-ID",{minimumFractionDigits:2,maximumFractionDigits:2});
+    var html="<table class='analysis-table'><thead><tr><th>Zona Peruntukan</th><th>Luas Area</th></tr></thead><tbody>";
+    baris.forEach(function(item){
+      html+="<tr><td>"+esc(item.nama)+"</td><td>"+angka.format(item.luas)+" m<sup>2</sup></td></tr>";
+    });
+    analysisResult.innerHTML=html+"</tbody></table>";
+  }
+  map.on(L.Draw.Event.CREATED,function(event){
+    drawnItems.clearLayers();
+    drawnItems.addLayer(event.layer);
+    tampilkanRingkasan(event.layer.toGeoJSON());
+  });
+  map.on(L.Draw.Event.DRAWSTART,function(){analysisPanel.classList.remove("open");});
+  analysisClose.addEventListener("click",function(){
+    analysisPanel.classList.remove("open");
+    drawnItems.clearLayers();
+  });
 
   /* ============ CARI ALAMAT / KOORDINAT ============ */
   var geoInput=document.getElementById("geoInput"),geoBtn=document.getElementById("geoClear"),geoMarker=null;
