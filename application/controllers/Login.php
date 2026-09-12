@@ -37,8 +37,11 @@ class Login extends CI_Controller {
 		array('grup' => 'pu',    'label' => 'PU',           'nama' => 'Ahmad Wijaya',      'email' => 'ahmad.wijaya@sipgatutkaca.local',      'password' => 'b596c84a9d7a'),
 		array('grup' => 'pu',    'label' => 'PU',           'nama' => 'Siti Rahmawati',    'email' => 'siti.rahmawati@sipgatutkaca.local',    'password' => 'e2160c77feb5'),
 		array('grup' => 'tpa',   'label' => 'TPA Arsitek',  'nama' => 'Rudi Hartono',      'email' => 'rudi.hartono@sipgatutkaca.local',      'password' => '191b9dc53b2d'),
+		array('grup' => 'tpa',   'label' => 'TPA Arsitek',  'nama' => 'Raka Pratama',      'email' => 'raka.pratama@sipgatutkaca.local',      'password' => 'Arsitek#2026B'),
 		array('grup' => 'tpa',   'label' => 'TPA Struktur', 'nama' => 'Yulia Permatasari', 'email' => 'yulia.permatasari@sipgatutkaca.local', 'password' => 'b59981e87fad'),
+		array('grup' => 'tpa',   'label' => 'TPA Struktur', 'nama' => 'Dimas Saputra',      'email' => 'dimas.saputra@sipgatutkaca.local',      'password' => 'Struktur#2026B'),
 		array('grup' => 'tpa',   'label' => 'TPA MEP',      'nama' => 'Hendra Kusnadi',    'email' => 'hendra.kusnadi@sipgatutkaca.local',    'password' => '6f21a582f9ec'),
+		array('grup' => 'tpa',   'label' => 'TPA MEP',      'nama' => 'Maya Lestari',       'email' => 'maya.lestari@sipgatutkaca.local',       'password' => 'MEP#2026B'),
 	);
 
 	/**

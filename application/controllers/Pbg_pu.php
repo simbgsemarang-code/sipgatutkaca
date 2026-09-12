@@ -89,6 +89,27 @@ class Pbg_pu extends CI_Controller
 		$this->load->view('pbg_pu/tahap',$data);
 	}
 
+	public function unggah_dokumen($id)
+	{
+		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
+		$tahap=(int)$this->input->post('tahap'); if($tahap<1||$tahap>2)$tahap=(int)$row['tahap'];
+		$kembali='pengajuan-pbg/tahap/'.$id.'/'.$tahap;
+		$field=(string)$this->input->post('field');
+		if(!array_key_exists($field,$this->files)) show_error('Jenis dokumen tidak valid.',422);
+		if(in_array($row['status'],array('disetujui','ditolak'),TRUE)) show_error('Dokumen permohonan yang telah selesai tidak dapat diubah.',422);
+		if(!empty($row[$field])) show_error('Dokumen ini sudah diunggah. Muat ulang halaman untuk melihat berkas.',409);
+		if(empty($_FILES['dokumen']['name'])){
+			$this->session->set_flashdata('error','Silakan pilih berkas yang akan diunggah.'); redirect($kembali); return;
+		}
+		$dir=FCPATH.'assets/uploads/pbg/'; if(!is_dir($dir)) mkdir($dir,0755,true);
+		$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'jpg|jpeg|png|pdf','max_size'=>5120,'encrypt_name'=>TRUE),TRUE);
+		if(!$this->upload->do_upload('dokumen')){
+			$this->session->set_flashdata('error',$this->files[$field].': '.strip_tags($this->upload->display_errors('',''))); redirect($kembali); return;
+		}
+		$this->pbg->update_owned($id,$this->pu_id(),array($field=>$this->upload->data('file_name'),'updated_at'=>date('Y-m-d H:i:s')));
+		$this->session->set_flashdata('sukses',$this->files[$field].' berhasil diunggah.'); redirect($kembali);
+	}
+
 	public function ajukan_konsultasi($id)
 	{
 		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
