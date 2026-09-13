@@ -271,9 +271,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <p class="eyebrow" style="margin-bottom:20px">Formulir Permohonan</p>
         <p class="note" style="margin-top:0">Unduh formulir permohonan ITR, isi dan tanda tangani, lalu unggah kembali berkasnya di sini.</p>
         <a class="btn btn-ghost" href="formulir_pengajuan_itr.pdf" download style="width:100%;text-align:center;margin:18px 0">Unduh Formulir ITR ↓</a>
-        <div class="field" style="margin-top:10px"><label for="i-upload">Unggah Formulir yang Telah Diisi</label><input id="i-upload" type="file" accept=".pdf,.doc,.docx"></div>
-        <button class="btn btn-gold" type="button" style="width:100%">Unggah Formulir</button>
-        <p class="note">Format PDF/DOC/DOCX, maksimum 5 MB.</p>
+        <button class="btn btn-gold" id="itrApplyButton" type="button" style="width:100%" aria-haspopup="dialog" aria-controls="itrAuthModal">PENGAJUAN IRT</button>
+        <p class="note">Masuk atau daftar sebagai pemohon untuk mengakses dashboard pengajuan ITR.</p>
       </div>
 
       <div>
@@ -296,6 +295,19 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <section>
   <div class="wrap">
     <div class="reveal">
+      <div class="itr-requirements" aria-labelledby="itrRequirementsTitle">
+        <p class="eyebrow">Kelengkapan Berkas</p>
+        <h2 id="itrRequirementsTitle">Persyaratan Pengajuan ITR</h2>
+        <p class="section-lead">Siapkan dokumen dan data berikut sebelum mengajukan Informasi Tata Ruang.</p>
+        <ul class="itr-requirements-list">
+          <li><span aria-hidden="true">✓</span><div><h3>Surat / Formulir Permohonan</h3><p>Formulir yang telah diisi lengkap dan ditandatangani oleh pemohon.</p></div></li>
+          <li><span aria-hidden="true">✓</span><div><h3>Identitas Pemohon</h3><p>Fotokopi atau scan KTP pemohon yang terbaca dengan jelas.</p></div></li>
+          <li><span aria-hidden="true">✓</span><div><h3>Sertifikat Tanah / Lahan</h3><p>Fotokopi atau scan sertifikat tanah/lahan yang dimohonkan.</p></div></li>
+          <li><span aria-hidden="true">✓</span><div><h3>Gambar Rencana Tapak (Site Plan)</h3><p>Gambar yang memperlihatkan lokasi persil dan rencana pemanfaatan lahan.</p></div></li>
+          <li><span aria-hidden="true">✓</span><div><h3>Data Lokasi dan Rencana Kegiatan</h3><p>Alamat lokasi, luas lahan, uraian rencana kegiatan, serta koordinat lokasi.</p></div></li>
+        </ul>
+        <p class="note">Persyaratan terbaru dan dokumen tambahan untuk pemohon perusahaan atau yang diwakilkan perlu dikonfirmasi kepada DPUPR Kabupaten Cilacap.</p>
+      </div>
       <p class="eyebrow">Alur Singkat</p>
       <h2>Tiga Langkah Memperoleh ITR</h2>
     </div>
@@ -308,6 +320,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 </section>
 
 
+<style>
+.itr-requirements{margin-bottom:56px}.itr-requirements-list{list-style:none;padding:0;margin:28px 0;display:grid;grid-template-columns:1fr 1fr;gap:0 32px}.itr-requirements-list li{display:flex;align-items:flex-start;gap:16px;padding:22px 0;border-bottom:1px solid var(--line)}.itr-requirements-list li>span{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:50%;background:rgba(165,126,44,.12);color:var(--gold-500,#a57e2c);font-weight:600}.itr-requirements-list h3{margin:0 0 6px;font:400 20px var(--display);color:var(--text)}.itr-requirements-list p{margin:0;font-size:15px;line-height:1.7;color:var(--muted)}@media(max-width:700px){.itr-requirements-list{grid-template-columns:1fr}.itr-requirements{margin-bottom:40px}}
+</style>
+<?php $this->load->view('partials/itr_auth_modal'); ?>
 <footer>
   <div class="wrap">
     <div class="foot-grid">

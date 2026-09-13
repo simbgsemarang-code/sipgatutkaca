@@ -6,6 +6,7 @@ class Login extends CI_Controller {
 	/** Sapaan kartu login disesuaikan dengan halaman/tombol asal. */
 	private $peta_sapaan = array(
 		'pbg'   => 'Selamat Datang PBG',
+		'itr'   => 'Selamat Datang ITR',
 		'slf'   => 'Selamat Datang SLF',
 		'tpa'   => 'Selamat Datang TPA',
 		'pu'    => 'Selamat Datang PU',
@@ -67,6 +68,7 @@ class Login extends CI_Controller {
 		'tpa'   => array('admin', 'pu', 'tpa'),
 		'pbg'   => array('pemohon'),
 		'slf'   => array('pemohon'),
+		'itr'   => array('pemohon'),
 	);
 
 	public function __construct()
@@ -94,7 +96,7 @@ class Login extends CI_Controller {
 		$data['akun_uji'] = $this->_akun_uji_untuk($from);
 		// Cuma pemohon (lewat halaman PBG/SLF) yang bisa daftar sendiri -
 		// akun PU/TPA/Admin tetap dibuatkan admin lewat /admin/pengguna.
-		$data['tampilkan_daftar'] = in_array($from, array('pbg', 'slf'), TRUE);
+		$data['tampilkan_daftar'] = in_array($from, array('pbg', 'slf', 'itr'), TRUE);
 		$this->load->view('pages/login', $data);
 	}
 
@@ -119,7 +121,7 @@ class Login extends CI_Controller {
 		$this->db->where('email', $email);
 		$row = $this->db->get('users')->row_array();
 
-		if ($row === NULL || ! password_verify($password, $row['password']))
+		if ($row === NULL || ! password_verify($password, $row['password']) || ($from === 'itr' && $row['role'] !== 'pemohon'))
 		{
 			$this->session->set_flashdata('error', 'Email atau kata sandi salah.');
 			$this->session->set_flashdata('old', array('email' => $email));
@@ -140,7 +142,7 @@ class Login extends CI_Controller {
 			// PBG"/"Portal Pemohon SLF" sesuai tombol yang dipakai buat
 			// masuk. Kosong kalau bukan lewat salah satu dari keduanya
 			// (mis. login langsung, atau peran selain pemohon).
-			'asal_layanan' => in_array($from, array('pbg', 'slf'), TRUE) ? $from : '',
+			'asal_layanan' => in_array($from, array('pbg', 'slf', 'itr'), TRUE) ? $from : '',
 		));
 
 		redirect($this->_tujuan_setelah_login($row['role']));

@@ -112,6 +112,7 @@ class Daftar extends CI_Controller {
 			'nama'      => $nama,
 			'email'     => $email,
 			'role'      => 'pemohon',
+			'asal_layanan' => $this->input->post('from') === 'itr' ? 'itr' : '',
 		));
 
 		redirect('pemohon');

@@ -6,6 +6,7 @@ class Pemohon extends CI_Controller {
 	/** Label portal di dashboard, mengikuti tombol asal saat login (lihat Login::proses()). */
 	private $peta_label_portal = array(
 		'pbg' => 'Portal Pemohon PBG',
+		'itr' => 'Portal Pemohon ITR',
 		'slf' => 'Portal Pemohon SLF',
 	);
 
