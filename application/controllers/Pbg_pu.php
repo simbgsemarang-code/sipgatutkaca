@@ -79,6 +79,7 @@ class Pbg_pu extends CI_Controller
 		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
 		$tahap=$tahap?(int)$tahap:(int)$row['tahap']; if($tahap<1||$tahap>4) show_404();
 		$data=$this->common()+array('row'=>$row,'tahap'=>$tahap,'files'=>$this->files);
+		$data['penilaian_dokumen']=$this->pbg->penilaian_dokumen($id);
 		$data['riwayat']=$this->db->where('permohonan_id',$id)->order_by('created_at','ASC')->get('aktivitas_pbg')->result_array();
 		$data['tpa_per_bidang']=array();
 		foreach(array('arsitektur'=>'tpa_arsitek','struktur'=>'tpa_struktur','mep'=>'tpa_mep') as $bidang=>$role){
@@ -87,6 +88,24 @@ class Pbg_pu extends CI_Controller
 		$data['konsultasi']=$this->db->select('k.*,u.nama AS nama_tpa,u.email AS email_tpa')->from('konsultasi_pbg k')->join('users u','u.id=k.tpa_user_id','left')->where('k.permohonan_id',$id)->order_by('k.putaran','DESC')->order_by('k.bidang','ASC')->get()->result_array();
 		$data['konsultasi_terakhir']=$this->konsultasi_terakhir_per_bidang($id); $data['konsultasi_selesai']=count($data['konsultasi_terakhir'])===3; foreach($data['konsultasi_terakhir'] as $k){if($k['status']!=='direkomendasikan')$data['konsultasi_selesai']=false;}
 		$this->load->view('pbg_pu/tahap',$data);
+	}
+
+	public function nilai_dokumen($id)
+	{
+		if($this->input->method(TRUE)!=='POST') show_404();
+		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
+		$field=(string)$this->input->post('field'); $nilai=(string)$this->input->post('nilai');
+		$tahap=(int)$this->input->post('tahap'); if(!in_array($tahap,array(1,2),TRUE)) show_error('Tahap tidak valid.',422);
+		if(!isset($this->files[$field])||empty($row[$field])||!in_array($nilai,array('sesuai','tidak_sesuai'),TRUE)) show_error('Penilaian dokumen tidak valid.',422);
+		if(in_array($row['status'],array('disetujui','ditolak'),TRUE)) show_error('Permohonan telah selesai dan tidak dapat dinilai ulang.',422);
+		if((string)$this->input->post('nama_file')!==$row[$field]) {
+			$this->session->set_flashdata('error','Berkas telah berubah. Silakan periksa berkas terbaru sebelum menilai.');
+		} elseif($this->pbg->simpan_penilaian($id,$field,$row[$field],$nilai,$this->pu_id())) {
+			$this->session->set_flashdata('sukses','Penilaian '.$this->files[$field].' berhasil disimpan.');
+		} else {
+			$this->session->set_flashdata('error','Penilaian belum tersimpan. Pastikan migrasi pbg_penilaian_dokumen.sql sudah dijalankan.');
+		}
+		redirect('pengajuan-pbg/tahap/'.$id.'/'.$tahap);
 	}
 
 	public function unggah_dokumen($id)
