@@ -29,9 +29,10 @@
   frame.addEventListener('load',function(){
     try {var doc=frame.contentDocument,path=new URL(frame.contentWindow.location.href).pathname;if(path.indexOf('/pemohon')!==-1){window.location.assign(dashboard);return;}if(path.indexOf('/login')===-1&&path.indexOf('/daftar')===-1)return;
       var mode=path.indexOf('/daftar')!==-1?'daftar':path.indexOf('lupa')!==-1||path.indexOf('atur-ulang')!==-1?'lupa':'login';setMode(mode,false);
-      var style=doc.createElement('style');style.textContent='header,footer,.theme-toggle,.theme-panel,.page-breadcrumb{display:none!important}body{background:transparent!important;margin:0!important}main,section,.wrap{padding:0!important;margin:0!important;width:100%!important;max-width:none!important}.form-card,.login-card{padding:20px!important;box-shadow:none!important}h1,h2,.eyebrow{display:none!important}';doc.head.appendChild(style);
+      var style=doc.createElement('style');style.textContent='header,footer,.theme-fab,.theme-toggle,.theme-panel,.page-breadcrumb{display:none!important}html,body{min-height:0!important;height:auto!important;background:transparent!important;margin:0!important;padding:0!important}main,section,.wrap{padding:0!important;margin:0!important;width:100%!important;max-width:none!important}.form-card,.login-card{padding:20px!important;box-shadow:none!important}h1,h2,.eyebrow{display:none!important}';doc.head.appendChild(style);
       doc.querySelectorAll('form').forEach(function(form){if(mode==='daftar'||mode==='login'){var origin=form.querySelector("input[name=from]");if(!origin){origin=doc.createElement('input');origin.type='hidden';origin.name='from';form.appendChild(origin);}origin.value='itr';}});
-      frame.style.height=Math.min(580,Math.max(300,doc.documentElement.scrollHeight))+'px';
+      function fitFrame(){frame.style.height='1px';frame.style.height=Math.min(580,Math.max(240,Math.ceil(doc.body.getBoundingClientRect().height)+4))+'px';}
+      fitFrame();if(doc.fonts&&doc.fonts.ready)doc.fonts.ready.then(fitFrame);
     } catch(error){/* Authentication remains usable in the frame if enhancement fails. */}
   });
   modal.querySelectorAll('[data-itr-email]').forEach(function(button){button.addEventListener('click',function(){var doc=frame.contentDocument,email=doc&&doc.querySelector('input[name=email]'),password=doc&&doc.querySelector('input[name=password]');if(email&&password){email.value=button.dataset.itrEmail;password.value=button.dataset.itrPassword;password.focus();}});});
