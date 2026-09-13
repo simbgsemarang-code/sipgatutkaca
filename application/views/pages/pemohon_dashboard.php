@@ -185,7 +185,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
-      <a href="<?= base_url('pemohon/pengajuan_itr') ?>" class="<?= !empty($aktif_itr)?'active':'' ?>">▤ &nbsp; Pengajuan IRT</a>
+      <a href="<?= base_url('pemohon/pengajuan_itr') ?>" class="<?= !empty($aktif_itr)?'active':'' ?>">▤ &nbsp; PENGAJUAN ITR</a>
     </nav>
     <nav>
       <a href="<?php echo base_url('login/keluar'); ?>" class="logout">

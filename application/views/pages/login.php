@@ -271,7 +271,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <form action="<?php echo base_url('login/proses'); ?>" method="post" style="margin:0;flex:0 0 auto">
                 <input type="hidden" name="email" value="<?php echo htmlspecialchars($a['email'], ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="password" value="<?php echo htmlspecialchars($a['password'], ENT_QUOTES, 'UTF-8'); ?>">
-                <input type="hidden" name="from" value="<?php echo isset($from) ? htmlspecialchars($from, ENT_QUOTES, 'UTF-8') : ''; ?>">
+                <input type="hidden" name="from" value="<?php echo htmlspecialchars(isset($a['from']) ? $a['from'] : (isset($from) ? $from : ''), ENT_QUOTES, 'UTF-8'); ?>">
                 <button type="submit" class="btn btn-ghost btn-sm" style="cursor:pointer">Masuk</button>
               </form>
             </div>

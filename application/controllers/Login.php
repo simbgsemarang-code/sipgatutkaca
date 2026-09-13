@@ -27,13 +27,12 @@ class Login extends CI_Controller {
 	 * Semua akun anggota grup yang sama ditampilkan sekaligus (mis.
 	 * grup 'pu' menampilkan Ahmad Wijaya DAN Siti Rahmawati).
 	 *
-	 * Sengaja TIDAK ada akun uji coba untuk peran pemohon - beda dari
-	 * admin/pu/tpa (dibuatkan admin lewat /admin/pengguna), pemohon
-	 * sendiri yang mendaftar (lihat tampilkan_daftar di index()), jadi
-	 * cara uji yang lebih apa adanya adalah daftar akun baru lewat
-	 * halaman PBG/SLF, bukan lewat kredensial bersama yang dipajang.
+	 * Akun dummy pemohon ITR hanya untuk demonstrasi dan tidak memberi
+	 * akses staf. Kredensial tidak ditampilkan di mode production.
 	 */
 	private $akun_uji = array(
+		array('grup'=>'itr','label'=>'Pemohon ITR','nama'=>'Budi Santoso','email'=>'budi.santoso.itr@sipgatutkaca.local','password'=>'ItrDemo#2026A','from'=>'itr'),
+		array('grup'=>'itr','label'=>'Pemohon ITR','nama'=>'Dewi Anggraini','email'=>'dewi.anggraini.itr@sipgatutkaca.local','password'=>'ItrDemo#2026B','from'=>'itr'),
 		array('grup' => 'admin', 'label' => 'Admin',       'nama' => 'Administrator',     'email' => 'admin@sipgatutkaca.local',             'password' => 'f0250dc5621e'),
 		array('grup' => 'pu',    'label' => 'PU',           'nama' => 'Ahmad Wijaya',      'email' => 'ahmad.wijaya@sipgatutkaca.local',      'password' => 'b596c84a9d7a'),
 		array('grup' => 'pu',    'label' => 'PU',           'nama' => 'Siti Rahmawati',    'email' => 'siti.rahmawati@sipgatutkaca.local',    'password' => 'e2160c77feb5'),
@@ -63,12 +62,12 @@ class Login extends CI_Controller {
 	 * atas.
 	 */
 	private $peta_tombol_uji = array(
-		'admin' => array('admin', 'pu', 'tpa'),
-		'pu'    => array('admin', 'pu', 'tpa'),
-		'tpa'   => array('admin', 'pu', 'tpa'),
+		'admin' => array('admin', 'pu', 'tpa', 'itr'),
+		'pu'    => array('admin', 'pu', 'tpa', 'itr'),
+		'tpa'   => array('admin', 'pu', 'tpa', 'itr'),
 		'pbg'   => array('pemohon'),
 		'slf'   => array('pemohon'),
-		'itr'   => array('pemohon'),
+		'itr'   => array('itr'),
 	);
 
 	public function __construct()
@@ -142,7 +141,7 @@ class Login extends CI_Controller {
 			// PBG"/"Portal Pemohon SLF" sesuai tombol yang dipakai buat
 			// masuk. Kosong kalau bukan lewat salah satu dari keduanya
 			// (mis. login langsung, atau peran selain pemohon).
-			'asal_layanan' => in_array($from, array('pbg', 'slf', 'itr'), TRUE) ? $from : '',
+			'asal_layanan' => in_array($from, array('pbg', 'slf', 'itr'), TRUE) ? $from : ($row['role'] === 'pemohon' ? 'itr' : ''),
 		));
 
 		redirect($this->_tujuan_setelah_login($row['role']));

@@ -271,7 +271,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <p class="eyebrow" style="margin-bottom:20px">Formulir Permohonan</p>
         <p class="note" style="margin-top:0">Unduh formulir permohonan ITR, isi dan tanda tangani, lalu unggah kembali berkasnya di sini.</p>
         <a class="btn btn-ghost" href="formulir_pengajuan_itr.pdf" download style="width:100%;text-align:center;margin:18px 0">Unduh Formulir ITR ↓</a>
-        <button class="btn btn-gold" id="itrApplyButton" type="button" style="width:100%" aria-haspopup="dialog" aria-controls="itrAuthModal">PENGAJUAN IRT</button>
+        <button class="btn btn-gold" id="itrApplyButton" type="button" style="width:100%" aria-haspopup="dialog" aria-controls="itrAuthModal">PENGAJUAN ITR</button>
         <p class="note">Masuk atau daftar sebagai pemohon untuk mengakses dashboard pengajuan ITR.</p>
       </div>
 
