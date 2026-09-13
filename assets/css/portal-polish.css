@@ -1,0 +1,70 @@
+/* Shared portal refinement. Preserve Marcellus / Plus Jakarta Sans and theme tokens. */
+body { font-size:16px; font-weight:400; line-height:1.65; }
+.brandbar { height:84px; box-shadow:0 3px 22px rgba(21,47,69,.05); }
+.brandbar .brand-name { font-size:21px; }
+.brandbar .brand-sub { font-size:11px; }
+.brandbar .user-menu-btn { font-size:15px; letter-spacing:.02em; }
+.brandbar .user-menu-panel { border-radius:14px; padding:8px; }
+.brandbar .user-menu-panel a { font-size:14px; border-radius:8px; }
+.side,.dash-sidebar { width:250px; flex-basis:250px; padding-top:28px; }
+.side a,.dash-sidebar a { font-size:14px; font-weight:500; letter-spacing:.04em; padding:16px 24px; }
+.side a.active,.dash-sidebar a.active { border-radius:0 14px 14px 0; margin-right:14px; }
+.main,.dash-main { min-width:0; }
+.main>.top { padding-top:38px; }
+.top h1 { font-size:clamp(34px,3.5vw,46px); line-height:1.2; }
+.eyebrow { font-size:12px; letter-spacing:.22em; }
+.card,.panel,.stat,.stat-card,.timeline-card { border-radius:18px; box-shadow:0 8px 28px rgba(21,47,69,.045); }
+.card { padding:28px; }
+.panel { padding:26px; }
+.stat,.stat-card { padding:26px; }
+.stat .lbl,.stat-card span,.act-time,.panel .more,.mini .tag { font-size:13px; letter-spacing:.06em; }
+.stat .num,.stat-card b { font-size:40px; line-height:1.2; }
+.mini .who,.mini .txt,.act-name,.act-line,.dist-top .k { font-size:15px; }
+.btn,.btn-sm { min-height:44px; padding:11px 22px; font-size:13px; letter-spacing:.08em; border-radius:24px; }
+.btn-primary { box-shadow:0 7px 18px rgba(165,126,44,.18); }
+.btn:hover { transform:translateY(-1px); }
+.btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:2px solid var(--gold,var(--gold-500,#a57e2c)); outline-offset:3px; }
+.table-wrap { border-radius:14px; }
+table { font-size:15px; }
+th { font:500 13px var(--body); letter-spacing:.05em; padding:18px 16px; background:var(--surface-hi,#f1f6f7); }
+td { padding:20px 16px; line-height:1.65; font-weight:400; overflow-wrap:normal; word-break:normal; }
+tbody tr:hover { background:rgba(112,135,154,.045); }
+.badge,.tag,.act-badge { font-size:12px; font-weight:500; letter-spacing:.04em; border-radius:8px; padding:6px 10px; white-space:normal; word-break:normal; }
+.badge.diajukan { background:#fff5e8; color:#9e5c1f; border-color:#eccca5; }
+.badge.diverifikasi { background:#edf7fc; color:#247a9b; border-color:#b8dcec; }
+.badge.disetujui { background:#edf8f1; color:#267549; border-color:#b5dcc5; }
+.badge.ditolak { background:#fff0f3; color:#ad4054; border-color:#eebdca; }
+td:first-child .badge { white-space:nowrap; }
+.actions { gap:8px; align-items:center; }
+.search,input,select,textarea { font-size:15px; font-weight:400; border-radius:10px; }
+label { font-size:17px; }
+.detail-grid small { font-size:12px; margin-bottom:5px; }
+.document-groups h3,.tpa-grid>div>label { font-size:20px; }
+.doc-list b { font-size:15px; }
+.doc-list small { font-size:11px; }
+.doc-list li { padding:16px 0; }
+.view-file,.quick-upload-trigger { font-size:12px; }
+.document-review-select { font-size:13px!important; width:145px!important; min-height:38px; }
+.tpa-grid>div { border-radius:14px; }
+.tpa-picker-toggle,.tpa-picker-menu label { font-size:14px!important; }
+.tpa-picker-option-text small { font-size:12px; }
+.proses-body b { font-size:17px; }
+.proses-body small,.timeline-top .proses-body small { font-size:12px; }
+.notice,.alert { border-radius:12px; font-size:15px; }
+/* Standalone admin CRUD pages use the sidebar / field shell. */
+.sidebar { width:250px; flex-basis:250px; }
+.sidebar a { font-size:14px; font-weight:500; padding:16px 24px; letter-spacing:.04em; }
+.field label { font-size:13px; letter-spacing:.06em; }
+.field input,.field textarea,.field select { font-size:15px; }
+.field input[type=checkbox],.field input[type=radio] { width:auto; }
+.hint { font-size:13px; }
+.user-btn,.user-panel a { font-size:14px; }
+.user-panel { border-radius:12px; }
+.pbg-list-table th,.pbg-list-table td { font-size:15px!important; overflow-wrap:normal!important; }
+.pbg-list-table th { font-size:13px!important; }
+.pbg-list-table .actions .btn { font-size:12px; min-height:40px; padding:0 16px; }
+@media(min-width:821px) { .pbg-list-table { min-width:1050px; } }
+@media(max-width:1200px) { .main>.content { padding-left:28px; padding-right:28px; } .main>.top { padding-left:28px; padding-right:28px; } }
+@media(max-width:860px) { .side,.dash-sidebar { width:100%;flex-basis:auto;padding:0; } .side a,.dash-sidebar a { padding:12px 16px;font-size:13px; } .side a.active,.dash-sidebar a.active { margin-right:0;border-radius:0; } .brandbar .brand-name { font-size:17px; } .brandbar .brand-sub { font-size:9px; } .brandbar .brand-actions { gap:12px; } .brandbar .btn { padding:9px 14px; } .card,.panel { padding:20px; } .content,.top { padding-left:20px;padding-right:20px; } }
+@media(prefers-reduced-motion:reduce) { .btn:hover { transform:none; } }
+@media(max-width:860px) { .sidebar { width:100%; flex-basis:auto; } .sidebar a { padding:12px 16px; font-size:13px; } }

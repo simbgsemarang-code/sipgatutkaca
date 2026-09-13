@@ -30,6 +30,16 @@ class MY_Output extends CI_Output
 			$output = preg_replace('/<\/head>/i', $stylesheet.'</head>', $output, 1);
 		}
 
+		// Portal-only styling: public pages retain their existing typography.
+		if (is_string($output) && stripos($output, '</head>') !== FALSE
+			&& (strpos($output, 'dash-sidebar') !== FALSE || strpos($output, 'class="side"') !== FALSE || strpos($output, 'class="sidebar"') !== FALSE))
+		{
+			$portal_css = FCPATH.'assets/css/portal-polish.css';
+			$portal_version = is_file($portal_css) ? filemtime($portal_css) : 1;
+			$portal_link = '<link rel="stylesheet" href="'.htmlspecialchars(config_item('base_url').'assets/css/portal-polish.css?v='.$portal_version, ENT_QUOTES, 'UTF-8').'">';
+			$output = preg_replace('/<\/head>/i', $portal_link.'</head>', $output, 1);
+		}
+
 		// Beranda retains its photographic hero treatment; the remaining pages
 		// receive the brighter application-shell background from the shared CSS.
 		if (is_string($output) && stripos($output, '<title>Beranda') === FALSE)
