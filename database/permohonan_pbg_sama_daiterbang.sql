@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `konsultasi_pbg` (
   `assigned_at` DATETIME NOT NULL,
   `reviewed_at` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `putaran_bidang` (`permohonan_id`,`putaran`,`bidang`),
+  UNIQUE KEY `putaran_bidang` (`permohonan_id`,`putaran`,`bidang`,`tpa_user_id`),
   KEY `tpa_status` (`tpa_user_id`,`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
