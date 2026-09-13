@@ -23,6 +23,17 @@ class Pbg_pu extends CI_Controller
 
 	private function pu_id(){ return (int) $this->session->userdata('user_id'); }
 	private function common(){ return array('nama_pengguna'=>$this->session->userdata('nama')); }
+	private function dokumen_semua_sesuai($row)
+	{
+		$wajib=array('file_ktp','file_kepemilikan_tanah','file_data_perencana','file_pkkpr','file_rencana_teknis','file_teknis_struktur','file_checklist_mep','file_pernyataan_tataruang');
+		foreach($wajib as $field){if(empty($row[$field]))return FALSE;}
+		$penilaian=$this->pbg->penilaian_dokumen($row['id']);
+		foreach($this->files as $field=>$label){
+			if(empty($row[$field]))continue;
+			if(!isset($penilaian[$field])||$penilaian[$field]['nama_file']!==$row[$field]||$penilaian[$field]['status']!=='sesuai')return FALSE;
+		}
+		return TRUE;
+	}
 	private function konsultasi_terakhir_per_bidang($id)
 	{
 		$hasil=array(); foreach($this->db->where('permohonan_id',(int)$id)->order_by('putaran','DESC')->order_by('id','DESC')->get('konsultasi_pbg')->result_array() as $r){if(!isset($hasil[$r['bidang']]))$hasil[$r['bidang']]=$r;} return $hasil;
@@ -80,6 +91,7 @@ class Pbg_pu extends CI_Controller
 		$tahap=$tahap?(int)$tahap:(int)$row['tahap']; if($tahap<1||$tahap>4) show_404();
 		$data=$this->common()+array('row'=>$row,'tahap'=>$tahap,'files'=>$this->files);
 		$data['penilaian_dokumen']=$this->pbg->penilaian_dokumen($id);
+		$data['semua_sesuai']=$this->dokumen_semua_sesuai($row);
 		$data['riwayat']=$this->db->where('permohonan_id',$id)->order_by('created_at','ASC')->get('aktivitas_pbg')->result_array();
 		$data['tpa_per_bidang']=array();
 		foreach(array('arsitektur'=>'tpa_arsitek','struktur'=>'tpa_struktur','mep'=>'tpa_mep') as $bidang=>$role){
@@ -152,6 +164,10 @@ class Pbg_pu extends CI_Controller
 		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
 		$t=(int)$this->input->post('tahap'); $status=$this->input->post('status');
 		if($t<1||$t>4||!in_array($status,array('diajukan','diverifikasi','disetujui','ditolak'),TRUE)) show_error('Tahap/status tidak valid.',422);
+		if($t===3&&!$this->dokumen_semua_sesuai($row)){
+			$this->session->set_flashdata('error','Lengkapi dokumen wajib dan tandai seluruh berkas yang diunggah sebagai Sesuai sebelum melanjutkan.');
+			redirect('pengajuan-pbg/tahap/'.$id.'/2'); return;
+		}
 		if($t===4&&$status==='disetujui'){
 			$akhir=$this->konsultasi_terakhir_per_bidang($id);$selesai=count($akhir)===3;foreach($akhir as $k){if($k['status']!=='direkomendasikan')$selesai=false;}if(!$selesai)show_error('Proses belum dapat diselesaikan sebelum ketiga bidang TPA memberikan rekomendasi.',422);
 		}
