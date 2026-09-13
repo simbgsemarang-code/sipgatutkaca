@@ -181,10 +181,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <div class="dash-layout">
   <aside class="dash-sidebar">
     <nav>
-      <a href="<?php echo base_url('pemohon'); ?>" class="active">
+      <a href="<?php echo base_url('pemohon'); ?>" class="<?= empty($aktif_itr)?'active':'' ?>">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
         Dashboard
       </a>
+      <a href="<?= base_url('pemohon/pengajuan_itr') ?>" class="<?= !empty($aktif_itr)?'active':'' ?>">▤ &nbsp; Pengajuan IRT</a>
     </nav>
     <nav>
       <a href="<?php echo base_url('login/keluar'); ?>" class="logout">
@@ -196,6 +197,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-main">
 <section style="padding-top:100px">
   <div class="dash-wrap">
+    <?php if(!empty($portal_content)): $this->load->view($portal_content); else: ?>
     <div class="reveal">
       <p class="eyebrow"><?php echo isset($label_portal) ? htmlspecialchars($label_portal, ENT_QUOTES, 'UTF-8') : 'Portal Pemohon'; ?></p>
       <h2>Selamat Datang, <?php echo htmlspecialchars($nama_pengguna, ENT_QUOTES, 'UTF-8'); ?></h2>
@@ -253,6 +255,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <p>Fitur pelacakan status pengajuan online untuk akun pemohon belum tersedia pada versi ini — daftar riwayat pengajuan Anda akan tampil di sini pada pembaruan berikutnya.</p>
       <p>Untuk saat ini, silakan hubungi admin/petugas terkait secara langsung untuk menanyakan status pengajuan PBG atau SLF Anda.</p>
     </div>
+    <?php endif; ?>
   </div>
 </section>
   </div>
