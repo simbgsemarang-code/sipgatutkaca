@@ -1,0 +1,11 @@
+CONTOH BERKAS PENGAJUAN ITR — DATA DUMMY
+
+Nomor: ITR-DEMO-0001
+Pemohon: Budi Santoso (akun uji coba)
+Lokasi ilustrasi: Kelurahan Lomanis, Cilacap Tengah, Kabupaten Cilacap
+Luas ilustrasi: 250 m2
+Kegiatan ilustrasi: Pembangunan rumah tinggal
+
+Berkas ini merupakan placeholder untuk surat permohonan, KTP, sertifikat,
+dan site plan pada satu pengajuan demonstrasi. Bukan identitas, sertifikat,
+atau dokumen resmi. Seluruh data bersifat sintetis dan tidak untuk pelayanan nyata.

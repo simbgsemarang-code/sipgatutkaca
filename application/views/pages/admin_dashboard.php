@@ -132,6 +132,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
       <a href="<?php echo base_url('admin'); ?>" class="active">Dashboard</a>
       <a href="<?php echo base_url('admin/pengguna'); ?>">Kelola Pengguna</a>
       <a href="<?php echo base_url('admin/pengajuan'); ?>">Pengajuan PBG</a>
+      <a href="<?= base_url('admin_itr') ?>">Pengajuan ITR</a>
       <a href="<?php echo base_url('admin/bangunan'); ?>">Sebaran Bangunan</a>
       <a href="<?php echo base_url('admin/cagar-budaya'); ?>">Kelola Cagar Budaya</a>
       <a href="<?php echo base_url('admin/aturan'); ?>">Kelola Aturan</a>

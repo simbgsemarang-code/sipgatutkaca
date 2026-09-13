@@ -32,6 +32,8 @@ class Pemohon extends CI_Controller {
 
 	public function index()
 	{
+		if(!$this->session->userdata('itr_message_token')) $this->session->set_userdata('itr_message_token',bin2hex(random_bytes(32)));
+		$data['pesan_itr']=$this->db->table_exists('pesan_itr')?$this->db->select('p.*,i.no_permohonan,u.nama AS nama_admin')->from('pesan_itr p')->join('pengajuan_itr i','i.id=p.pengajuan_id')->join('users u','u.id=p.admin_id','left')->where('p.user_id',(int)$this->session->userdata('user_id'))->order_by('p.id','DESC')->get()->result_array():array();
 		$data['pengajuan_itr'] = $this->db->table_exists('pengajuan_itr') ? $this->db->where('user_id', (int)$this->session->userdata('user_id'))->order_by('id','DESC')->get('pengajuan_itr')->result_array() : array();
 		$data['aktivitas_itr'] = $this->db->table_exists('aktivitas_itr') ? $this->db->where('user_id', (int)$this->session->userdata('user_id'))->order_by('id','DESC')->limit(30)->get('aktivitas_itr')->result_array() : array();
 		$this->render_portal('partials/pemohon_itr_dashboard', $data);
@@ -54,6 +56,16 @@ class Pemohon extends CI_Controller {
 	{
 		if (!$this->session->userdata('itr_form_token')) $this->session->set_userdata('itr_form_token', bin2hex(random_bytes(32)));
 		$this->render_portal('partials/pemohon_itr_form', array('error'=>'','old'=>array()));
+	}
+
+	public function baca_pesan_itr($id=0)
+	{
+		if($this->input->method()!=='post'){show_404();return;}
+		$token=(string)$this->session->userdata('itr_message_token');
+		if(!$token||!hash_equals($token,(string)$this->input->post('itr_token'))){show_error('Formulir tidak valid.',403);return;}
+		if(!$this->db->table_exists('pesan_itr')){show_404();return;}
+		$this->db->where('id',(int)$id)->where('user_id',(int)$this->session->userdata('user_id'))->where('dibaca_pada',NULL)->update('pesan_itr',array('dibaca_pada'=>date('Y-m-d H:i:s')));
+		redirect('pemohon');
 	}
 
 	public function simpan_itr()
