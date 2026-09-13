@@ -15,7 +15,7 @@ class Pbg_pu extends CI_Controller
 	{
 		parent::__construct();
 		$this->load->library(array('session','form_validation','upload'));
-		$this->load->helper(array('url','form'));
+		$this->load->helper(array('url','form','pbg_status'));
 		$this->load->model('Permohonan_pbg_model','pbg');
 		if (!$this->session->userdata('logged_in')) redirect('login');
 		if ($this->session->userdata('role') !== 'pu') show_error('Halaman ini khusus PU.',403);
