@@ -90,11 +90,10 @@ class Pbg_pu extends CI_Controller
 				else $data['errors'][]=$label.': '.strip_tags($this->upload->display_errors('',''));
 			}
 			if(!$terunggah&&empty($data['errors']))$data['errors'][]='Pilih minimal satu berkas untuk diunggah.';
-			if($boleh_perbaiki&&trim((string)$this->input->post('catatan_perbaikan'))==='')$data['errors'][]='Catatan perbaikan wajib diisi.';
 			if(empty($data['errors'])){
 				$this->pbg->update_owned($id,$this->pu_id(),$payload);
-				if($boleh_perbaiki)$this->db->where('permohonan_id',$id)->where('status','perlu_perbaikan')->where('perbaikan_dikirim_at IS NULL',NULL,FALSE)->update('konsultasi_pbg',array('catatan_perbaikan'=>trim($this->input->post('catatan_perbaikan')),'perbaikan_dikirim_at'=>date('Y-m-d H:i:s')));
-				$this->session->set_flashdata('sukses',$boleh_perbaiki?'Perbaikan berkas berhasil dikirim.':'Berkas berhasil diunggah.'); redirect('pengajuan-pbg'); return;
+				if($boleh_perbaiki)$this->db->where('permohonan_id',$id)->where('status','perlu_perbaikan')->where('perbaikan_dikirim_at IS NULL',NULL,FALSE)->update('konsultasi_pbg',array('catatan_perbaikan'=>'Berkas diperbarui oleh PU.','perbaikan_dikirim_at'=>date('Y-m-d H:i:s')));
+				$this->session->set_flashdata('sukses',$boleh_perbaiki?'Perbaikan berkas berhasil dikirim.':'Berkas berhasil diunggah.'); redirect('pengajuan-pbg/upload-berkas/'.$id); return;
 			}
 		}
 		$this->load->view('pbg_pu/upload_berkas',$data);
