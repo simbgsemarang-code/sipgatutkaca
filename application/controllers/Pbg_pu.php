@@ -129,7 +129,7 @@ class Pbg_pu extends CI_Controller
 		$field=(string)$this->input->post('field');
 		if(!array_key_exists($field,$this->files)) show_error('Jenis dokumen tidak valid.',422);
 		if(in_array($row['status'],array('disetujui','ditolak'),TRUE)) show_error('Dokumen permohonan yang telah selesai tidak dapat diubah.',422);
-		if(!empty($row[$field])&&($tahap!==1||(int)$row['tahap']!==1)) show_error('Penggantian dokumen melalui unggah langsung hanya tersedia pada tahap pendaftaran.',409);
+		if(!empty($row[$field])&&(!in_array($tahap,array(1,2),TRUE)||!in_array((int)$row['tahap'],array(1,2),TRUE))) show_error('Penggantian dokumen melalui unggah langsung hanya tersedia pada tahap pendaftaran dan pemeriksaan kelengkapan.',409);
 		if(empty($_FILES['dokumen']['name'])){
 			$this->session->set_flashdata('error','Silakan pilih berkas yang akan diunggah.'); redirect($kembali); return;
 		}
@@ -180,8 +180,10 @@ class Pbg_pu extends CI_Controller
 		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
 		$t=(int)$this->input->post('tahap'); $status=$this->input->post('status');
 		if($t<1||$t>4||!in_array($status,array('diajukan','diverifikasi','disetujui','ditolak'),TRUE)) show_error('Tahap/status tidak valid.',422);
-		if($t===3&&!$this->dokumen_semua_sesuai($row)){
-			$this->session->set_flashdata('error','Lengkapi dokumen wajib dan tandai seluruh berkas yang diunggah sebagai Sesuai sebelum melanjutkan.');
+		$wajib=array('file_ktp','file_kepemilikan_tanah','file_data_perencana','file_pkkpr','file_rencana_teknis','file_teknis_struktur','file_checklist_mep','file_pernyataan_tataruang');
+		$lengkap=true; foreach($wajib as $field){if(empty($row[$field]))$lengkap=false;}
+		if($t===3&&!$lengkap){
+			$this->session->set_flashdata('error','Lengkapi seluruh dokumen wajib sebelum melanjutkan.');
 			redirect('pengajuan-pbg/tahap/'.$id.'/2'); return;
 		}
 		if($t===4&&$status==='disetujui'){
