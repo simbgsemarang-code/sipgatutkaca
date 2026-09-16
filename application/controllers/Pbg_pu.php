@@ -129,7 +129,7 @@ class Pbg_pu extends CI_Controller
 		$field=(string)$this->input->post('field');
 		if(!array_key_exists($field,$this->files)) show_error('Jenis dokumen tidak valid.',422);
 		if(in_array($row['status'],array('disetujui','ditolak'),TRUE)) show_error('Dokumen permohonan yang telah selesai tidak dapat diubah.',422);
-		if(!empty($row[$field])) show_error('Dokumen ini sudah diunggah. Muat ulang halaman untuk melihat berkas.',409);
+		if(!empty($row[$field])&&($tahap!==1||(int)$row['tahap']!==1)) show_error('Penggantian dokumen melalui unggah langsung hanya tersedia pada tahap pendaftaran.',409);
 		if(empty($_FILES['dokumen']['name'])){
 			$this->session->set_flashdata('error','Silakan pilih berkas yang akan diunggah.'); redirect($kembali); return;
 		}
