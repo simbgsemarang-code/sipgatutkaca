@@ -64,21 +64,40 @@ class Pbg_pu extends CI_Controller
 					'updated_at'=>date('Y-m-d H:i:s')
 				);
 				if(!$row) $payload+=array('no_hp'=>'','email'=>null,'alamat_bangunan'=>'','jenis_bangunan'=>'','kategori_bangunan'=>'sederhana','luas_bangunan'=>null);
-				foreach($this->files as $field=>$label){
-					if(!empty($_FILES[$field]['name'])){
-						$dir=FCPATH.'assets/uploads/pbg/'; if(!is_dir($dir)) mkdir($dir,0755,true);
-						$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'jpg|jpeg|png|pdf','max_size'=>5120,'encrypt_name'=>TRUE),TRUE);
-						if($this->upload->do_upload($field)) $payload[$field]=$this->upload->data('file_name'); else $data['errors'][]=$label.': '.strip_tags($this->upload->display_errors('',''));
-					}
-				}
 				if(empty($data['errors'])){
-					if($row){ $this->pbg->update_owned($row['id'],$this->pu_id(),$payload); if($boleh_perbaiki)$this->db->where('permohonan_id',$row['id'])->where('status','perlu_perbaikan')->where('perbaikan_dikirim_at IS NULL',NULL,FALSE)->update('konsultasi_pbg',array('catatan_perbaikan'=>trim($this->input->post('catatan_perbaikan'))?:'Data dan berkas telah diperbaiki oleh PU.','perbaikan_dikirim_at'=>date('Y-m-d H:i:s'))); }
+					if($row){ $this->pbg->update_owned($row['id'],$this->pu_id(),$payload); }
 					else { $payload+=array('no_permohonan'=>$this->pbg->generate_no(),'status'=>'diajukan','tahap'=>1,'created_at'=>date('Y-m-d H:i:s')); $this->pbg->insert($payload); }
-					$this->session->set_flashdata('sukses',$boleh_perbaiki?'Perbaikan data dan berkas berhasil dikirim. Silakan ajukan konsultasi berikutnya.':'Pengajuan PBG berhasil disimpan.'); redirect($boleh_perbaiki?'pengajuan-pbg/tahap/'.$row['id'].'/3':'pengajuan-pbg'); return;
+					$this->session->set_flashdata('sukses','Data pengajuan PBG berhasil disimpan. Gunakan tombol Upload Berkas untuk melengkapi dokumen.'); redirect('pengajuan-pbg'); return;
 				}
 			}
 		}
 		$this->load->view('pbg_pu/form',$data);
+	}
+
+	public function dokumen($id)
+	{
+		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
+		if(in_array($row['status'],array('disetujui','ditolak'),TRUE)) show_error('Berkas permohonan yang telah selesai tidak dapat diubah.',422);
+		$perbaikan=$this->konsultasi_terakhir_per_bidang($id); $boleh_perbaiki=false; foreach($perbaikan as $k){if($k['status']==='perlu_perbaikan'&&empty($k['perbaikan_dikirim_at']))$boleh_perbaiki=true;}
+		$data=$this->common()+array('row'=>$row,'files'=>$this->files,'errors'=>array(),'mode_perbaikan'=>$boleh_perbaiki);
+		if($this->input->method(TRUE)==='POST'){
+			$payload=array('updated_at'=>date('Y-m-d H:i:s')); $terunggah=0;
+			foreach($this->files as $field=>$label){
+				if(empty($_FILES[$field]['name']))continue;
+				$dir=FCPATH.'assets/uploads/pbg/'; if(!is_dir($dir))mkdir($dir,0755,true);
+				$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'jpg|jpeg|png|pdf','max_size'=>5120,'encrypt_name'=>TRUE),TRUE);
+				if($this->upload->do_upload($field)){$payload[$field]=$this->upload->data('file_name');$terunggah++;}
+				else $data['errors'][]=$label.': '.strip_tags($this->upload->display_errors('',''));
+			}
+			if(!$terunggah&&empty($data['errors']))$data['errors'][]='Pilih minimal satu berkas untuk diunggah.';
+			if($boleh_perbaiki&&trim((string)$this->input->post('catatan_perbaikan'))==='')$data['errors'][]='Catatan perbaikan wajib diisi.';
+			if(empty($data['errors'])){
+				$this->pbg->update_owned($id,$this->pu_id(),$payload);
+				if($boleh_perbaiki)$this->db->where('permohonan_id',$id)->where('status','perlu_perbaikan')->where('perbaikan_dikirim_at IS NULL',NULL,FALSE)->update('konsultasi_pbg',array('catatan_perbaikan'=>trim($this->input->post('catatan_perbaikan')),'perbaikan_dikirim_at'=>date('Y-m-d H:i:s')));
+				$this->session->set_flashdata('sukses',$boleh_perbaiki?'Perbaikan berkas berhasil dikirim.':'Berkas berhasil diunggah.'); redirect('pengajuan-pbg'); return;
+			}
+		}
+		$this->load->view('pbg_pu/upload_berkas',$data);
 	}
 
 	public function tahap($id,$tahap=null)

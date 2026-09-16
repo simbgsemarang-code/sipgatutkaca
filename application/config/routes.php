@@ -66,6 +66,7 @@ $route['bangunan/(:num)'] = 'bangunan/index/$1';
 $route['pengajuan-pbg'] = 'pbg_pu/index';
 $route['pengajuan-pbg/tambah'] = 'pbg_pu/tambah';
 $route['pengajuan-pbg/edit/(:num)'] = 'pbg_pu/edit/$1';
+$route['pengajuan-pbg/upload-berkas/(:num)'] = 'pbg_pu/dokumen/$1';
 $route['pengajuan-pbg/tahap/(:num)'] = 'pbg_pu/tahap/$1';
 $route['pengajuan-pbg/tahap/(:num)/(:num)'] = 'pbg_pu/tahap/$1/$2';
 $route['pengajuan-pbg/ubah-tahap/(:num)'] = 'pbg_pu/ubah_tahap/$1';
