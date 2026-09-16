@@ -4,11 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Pbg_pu extends CI_Controller
 {
 	private $files = array(
-		'file_ktp'=>'KTP/KITAS','file_kepemilikan_tanah'=>'Dokumen kepemilikan tanah',
-		'file_data_perencana'=>'Data penyedia jasa perencana','file_pkkpr'=>'Dokumen PKKPR/KRK',
-		'file_rencana_teknis'=>'Dokumen teknis arsitektur','file_teknis_struktur'=>'Dokumen teknis struktur',
-		'file_checklist_mep'=>'Dokumen mekanikal, elektrikal dan perpipaan',
-		'file_pernyataan_tataruang'=>'Surat pernyataan tata ruang','file_dokumen_lingkungan'=>'Dokumen lingkungan',
+		'file_rencana_teknis'=>'Dokumen Arsitektur',
+		'file_teknis_struktur'=>'Dokumen Struktur',
+		'file_checklist_mep'=>'Dokumen MEP',
 	);
 
 	public function __construct()
@@ -25,7 +23,7 @@ class Pbg_pu extends CI_Controller
 	private function common(){ return array('nama_pengguna'=>$this->session->userdata('nama')); }
 	private function dokumen_semua_sesuai($row)
 	{
-		$wajib=array('file_ktp','file_kepemilikan_tanah','file_data_perencana','file_pkkpr','file_rencana_teknis','file_teknis_struktur','file_checklist_mep','file_pernyataan_tataruang');
+		$wajib=array('file_rencana_teknis','file_teknis_struktur','file_checklist_mep');
 		foreach($wajib as $field){if(empty($row[$field]))return FALSE;}
 		$penilaian=$this->pbg->penilaian_dokumen($row['id']);
 		foreach($this->files as $field=>$label){
@@ -177,7 +175,7 @@ class Pbg_pu extends CI_Controller
 		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
 		$t=(int)$this->input->post('tahap'); $status=$this->input->post('status');
 		if($t<1||$t>4||!in_array($status,array('diajukan','diverifikasi','disetujui','ditolak'),TRUE)) show_error('Tahap/status tidak valid.',422);
-		$wajib=array('file_ktp','file_kepemilikan_tanah','file_data_perencana','file_pkkpr','file_rencana_teknis','file_teknis_struktur','file_checklist_mep','file_pernyataan_tataruang');
+		$wajib=array('file_rencana_teknis','file_teknis_struktur','file_checklist_mep');
 		$lengkap=true; foreach($wajib as $field){if(empty($row[$field]))$lengkap=false;}
 		if($t===3&&!$lengkap){
 			$this->session->set_flashdata('error','Lengkapi seluruh dokumen wajib sebelum melanjutkan.');
