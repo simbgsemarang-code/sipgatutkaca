@@ -55,7 +55,7 @@ class Pbg_pu extends CI_Controller
 		$data=$this->common()+array('row'=>$row,'files'=>$this->files,'errors'=>array(),'mode_perbaikan'=>$boleh_perbaiki);
 		if ($this->input->method(TRUE)==='POST') {
 			$this->form_validation->set_rules('nama_pemohon','Nama pemohon','required|trim');
-			$this->form_validation->set_rules('nik','NIK','trim|numeric');
+			$this->form_validation->set_rules('nik','Nomor Registrasi','trim|max_length[50]');
 			if ($this->form_validation->run()) {
 				$payload=array(
 					'user_id'=>$this->pu_id(),'nama_pemohon'=>trim($this->input->post('nama_pemohon')),
