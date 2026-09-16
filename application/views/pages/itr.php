@@ -260,6 +260,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
 <section class="alt" style="padding-top:calc(84px + 30px)">
   <div class="wrap">
+    <a class="btn btn-ghost" href="<?php echo base_url(); ?>" style="margin-bottom:24px"><span aria-hidden="true">←</span> Kembali ke Beranda</a>
     <div class="reveal">
       <p class="eyebrow">Pengajuan ITR</p>
       <h2>Unduh Formulir, Unggah Berkas, Pantau Pemohon</h2>

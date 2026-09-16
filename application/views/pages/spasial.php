@@ -318,6 +318,7 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
 
 <section style="padding-top:calc(84px + 30px)">
   <div class="wrap">
+    <a class="btn btn-ghost" href="<?php echo base_url(); ?>" style="margin-bottom:24px"><span aria-hidden="true">←</span> Kembali ke Beranda</a>
     <div class="reveal" style="margin-bottom:40px;text-align:center">
       <p class="eyebrow">Peta Interaktif</p>
       <h2 style="margin:0 auto;max-width:none">Peta Pola Ruang Kabupaten Cilacap</h2>
