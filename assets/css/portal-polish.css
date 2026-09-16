@@ -40,6 +40,9 @@ td:first-child .badge { white-space:nowrap; }
 label { font-size:17px; }
 .detail-grid small { font-size:12px; margin-bottom:5px; }
 .document-groups h3,.tpa-grid>div>label { font-size:20px; }
+.stage-card .document-groups { row-gap:24px; align-items:start; }
+.stage-card .document-groups > section { padding:0; margin:0; min-height:0; }
+.stage-card .document-groups h3 { margin:0 0 12px; }
 .doc-list b { font-size:15px; }
 .doc-list small { font-size:11px; }
 .doc-list li { padding:16px 0; }

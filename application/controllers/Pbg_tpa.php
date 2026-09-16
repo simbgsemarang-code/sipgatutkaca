@@ -8,7 +8,7 @@ class Pbg_tpa extends CI_Controller
 	private function uid(){return (int)$this->session->userdata('user_id');}
 	public function index(){
 		$data['nama_pengguna']=$this->session->userdata('nama');$data['bidang']=$this->roles[$this->session->userdata('role')];
-		$data['daftar']=$this->db->select('k.*,p.no_permohonan,p.nama_pemohon,p.alamat_bangunan,p.jenis_bangunan')->from('konsultasi_pbg k')->join('permohonan_pbg p','p.id=k.permohonan_id')->where('k.tpa_user_id',$this->uid())->order_by('k.assigned_at','DESC')->get()->result_array();
+		$data['daftar']=$this->db->select('k.*,p.no_permohonan,p.nama_pemohon,p.nik,p.keterangan')->from('konsultasi_pbg k')->join('permohonan_pbg p','p.id=k.permohonan_id')->where('k.tpa_user_id',$this->uid())->order_by('k.assigned_at','DESC')->get()->result_array();
 		$this->load->view('pbg_tpa/index',$data);
 	}
 	public function review($id){

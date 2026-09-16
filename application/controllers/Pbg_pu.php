@@ -56,19 +56,16 @@ class Pbg_pu extends CI_Controller
 		if ($id && (!$row || ($row['status']!=='diajukan'&&!$boleh_perbaiki))) show_404();
 		$data=$this->common()+array('row'=>$row,'files'=>$this->files,'errors'=>array(),'mode_perbaikan'=>$boleh_perbaiki);
 		if ($this->input->method(TRUE)==='POST') {
-			foreach(array('nama_pemohon'=>'Nama pemohon','no_hp'=>'Nomor HP','alamat_bangunan'=>'Alamat bangunan','jenis_bangunan'=>'Jenis bangunan') as $f=>$l) $this->form_validation->set_rules($f,$l,'required|trim');
+			$this->form_validation->set_rules('nama_pemohon','Nama pemohon','required|trim');
 			$this->form_validation->set_rules('nik','NIK','trim|numeric');
-			$this->form_validation->set_rules('email','Email','trim|valid_email');
 			if ($this->form_validation->run()) {
 				$payload=array(
 					'user_id'=>$this->pu_id(),'nama_pemohon'=>trim($this->input->post('nama_pemohon')),
-					'nik'=>trim($this->input->post('nik'))?:null,'no_hp'=>trim($this->input->post('no_hp')),
-					'email'=>trim($this->input->post('email'))?:null,'alamat_bangunan'=>trim($this->input->post('alamat_bangunan')),
-					'jenis_bangunan'=>trim($this->input->post('jenis_bangunan')),
-					'kategori_bangunan'=>$this->input->post('kategori_bangunan')?:'sederhana',
-					'luas_bangunan'=>$this->input->post('luas_bangunan')?:null,'keterangan'=>trim($this->input->post('keterangan'))?:null,
+					'nik'=>trim($this->input->post('nik'))?:null,
+					'keterangan'=>trim($this->input->post('keterangan'))?:null,
 					'updated_at'=>date('Y-m-d H:i:s')
 				);
+				if(!$row) $payload+=array('no_hp'=>'','email'=>null,'alamat_bangunan'=>'','jenis_bangunan'=>'','kategori_bangunan'=>'sederhana','luas_bangunan'=>null);
 				foreach($this->files as $field=>$label){
 					if(!empty($_FILES[$field]['name'])){
 						$dir=FCPATH.'assets/uploads/pbg/'; if(!is_dir($dir)) mkdir($dir,0755,true);
