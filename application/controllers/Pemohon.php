@@ -91,7 +91,7 @@ class Pemohon extends CI_Controller {
 		$uploaded=array();$error='';
 		foreach(array('file_permohonan','file_ktp','file_sertifikat','file_siteplan') as $field) {
 			if (empty($_FILES[$field]['name'])) { $error='Seluruh lampiran wajib diunggah.'; break; }
-			$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf|jpg|jpeg|png','max_size'=>5120,'encrypt_name'=>TRUE),TRUE);
+			$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf|jpg|jpeg|png','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
 			if (!$this->upload->do_upload($field)) { $error=strip_tags($this->upload->display_errors()); break; }
 			$uploaded[$field]=$this->upload->data('file_name');
 		}

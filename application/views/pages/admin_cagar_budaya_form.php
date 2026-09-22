@@ -175,7 +175,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.7rem,3vw,2.3rem)
         <div class="field full">
           <label for="f-foto">Foto Objek</label>
           <input type="file" id="f-foto" name="foto_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-          <p class="hint">JPG / PNG / WebP, maksimal 5 MB.</p>
+          <p class="hint">JPG / PNG / WebP, maksimal 100 MB.</p>
           <?php if ($foto_url): ?>
             <div class="foto-prev">
               <img src="<?php echo htmlspecialchars($foto_url, ENT_QUOTES, 'UTF-8'); ?>" alt="Foto saat ini">

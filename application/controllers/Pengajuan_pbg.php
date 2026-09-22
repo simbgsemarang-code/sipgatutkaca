@@ -151,7 +151,7 @@ class Pengajuan_pbg extends CI_Controller {
 	);
 
 	private $upload_tipe_izin = 'jpg|jpeg|png|pdf';
-	private $upload_maks_kb   = 5120;
+	private $upload_maks_kb   = 102400;
 
 	/** Sama persis dengan Tpa_pengajuan_pbg::$peran_bidang - disalin, bukan dibagi lewat library. Dipakai _hitung_status_keseluruhan() di bawah. */
 	private $peran_bidang = array('tpa_arsitek', 'tpa_struktur', 'tpa_mep');

@@ -91,7 +91,7 @@ class Pbg_pu extends CI_Controller
 			foreach($this->files as $field=>$label){
 				if(empty($_FILES[$field]['name']))continue;
 				$dir=FCPATH.'assets/uploads/pbg/'; if(!is_dir($dir))mkdir($dir,0755,true);
-				$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'jpg|jpeg|png|pdf','max_size'=>5120,'encrypt_name'=>TRUE),TRUE);
+				$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'jpg|jpeg|png|pdf','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
 				if($this->upload->do_upload($field)){$payload[$field]=berkas_simpan($this->upload->data());$terunggah++;}
 				else $data['errors'][]=$label.': '.strip_tags($this->upload->display_errors('',''));
 			}
@@ -153,7 +153,7 @@ class Pbg_pu extends CI_Controller
 			$this->session->set_flashdata('error','Silakan pilih berkas yang akan diunggah.'); redirect($kembali); return;
 		}
 		$dir=FCPATH.'assets/uploads/pbg/'; if(!is_dir($dir)) mkdir($dir,0755,true);
-		$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'jpg|jpeg|png|pdf','max_size'=>5120,'encrypt_name'=>TRUE),TRUE);
+		$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'jpg|jpeg|png|pdf','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
 		if(!$this->upload->do_upload('dokumen')){
 			$this->session->set_flashdata('error',$this->files[$field].': '.strip_tags($this->upload->display_errors('',''))); redirect($kembali); return;
 		}
@@ -190,7 +190,7 @@ class Pbg_pu extends CI_Controller
 		$file=null;
 		if(!empty($_FILES['file_konsultasi']['name'])){
 			$dir=FCPATH.'assets/uploads/konsultasi_pbg/'; if(!is_dir($dir)) mkdir($dir,0755,true);
-			$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf|doc|docx|jpg|jpeg|png','max_size'=>10240,'encrypt_name'=>TRUE),TRUE);
+			$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf|doc|docx|jpg|jpeg|png','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
 			if(!$this->upload->do_upload('file_konsultasi')){ $this->session->set_flashdata('error',strip_tags($this->upload->display_errors('',''))); redirect('pengajuan-pbg/tahap/'.$id.'/3'); return; }
 			$file=berkas_simpan($this->upload->data());
 		}

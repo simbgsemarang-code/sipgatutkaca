@@ -319,7 +319,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
           <input id="f-tn-pemilik" name="tanah_nama_pemilik" type="text" value="<?php echo $val('tanah_nama_pemilik'); ?>">
         </div>
         <div class="field">
-          <label>Lampiran Dokumen Kepemilikan Tanah (jpg/png/pdf, maks 5MB)</label>
+          <label>Lampiran Dokumen Kepemilikan Tanah (jpg/png/pdf, maks 100MB)</label>
           <?php if (!empty($row['tanah_lampiran'])): ?><p style="font-size:.8rem;color:var(--muted);margin-bottom:8px">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/tanah_lampiran/' . (int) $row['id']); ?>" target="_blank" rel="noopener noreferrer" style="color:var(--gold-300);text-decoration:underline">lihat</a></p><?php endif; ?>
           <input type="file" name="tanah_lampiran" accept=".jpg,.jpeg,.png,.pdf">
         </div>

@@ -130,7 +130,7 @@ class Admin extends CI_Controller {
 		{
 			if (! is_dir($dir)) @mkdir($dir, 0755, TRUE);
 			$this->load->library('upload');
-			$this->upload->initialize(array('upload_path'=>$dir, 'allowed_types'=>'pdf', 'max_size'=>20480, 'encrypt_name'=>TRUE));
+			$this->upload->initialize(array('upload_path'=>$dir, 'allowed_types'=>'pdf', 'max_size'=>102400, 'encrypt_name'=>TRUE));
 			if (! $this->upload->do_upload('file_pdf'))
 			{
 				$this->session->set_flashdata('error', 'PDF gagal diunggah: ' . strip_tags($this->upload->display_errors('', '')));
@@ -674,7 +674,7 @@ class Admin extends CI_Controller {
 			$this->upload->initialize(array(
 				'upload_path'   => $dir_foto,
 				'allowed_types' => 'jpg|jpeg|png|webp',
-				'max_size'      => 5120,
+				'max_size'      => 102400,
 				'encrypt_name'  => TRUE,
 			));
 			if ($this->upload->do_upload('foto_file'))
@@ -882,7 +882,7 @@ class Admin extends CI_Controller {
 			$this->upload->initialize(array(
 				'upload_path'   => $dir_foto,
 				'allowed_types' => 'jpg|jpeg|png|webp',
-				'max_size'      => 5120,
+				'max_size'      => 102400,
 				'encrypt_name'  => TRUE,
 			));
 			if ($this->upload->do_upload('foto_file'))

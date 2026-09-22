@@ -293,7 +293,7 @@ $lng0 = $v('longitude', '108.99');
           </div>
         <?php endif; ?>
         <input type="file" name="foto_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-        <p style="font-size:.72rem;color:var(--muted);margin-top:6px">JPG / PNG / WebP, maksimal 5 MB.<?php echo $foto_src !== '' ? ' Biarkan kosong kalau tidak ingin mengganti.' : ''; ?></p>
+        <p style="font-size:.72rem;color:var(--muted);margin-top:6px">JPG / PNG / WebP, maksimal 100 MB.<?php echo $foto_src !== '' ? ' Biarkan kosong kalau tidak ingin mengganti.' : ''; ?></p>
       </div>
 
       <div class="grid2">

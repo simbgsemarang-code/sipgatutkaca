@@ -366,7 +366,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <div class="field"><label for="f-pr-lng">Titik Koordinat Longitude Bangunan</label><input id="f-pr-lng" name="prototipe_longitude" type="text" value="<?php echo $val('prototipe_longitude'); ?>"></div>
             </div>
             <div class="file-row">
-              <span class="fr-label">Gambar Peta Lokasi Bangunan (jpg/png/pdf, maks 5MB)</span>
+              <span class="fr-label">Gambar Peta Lokasi Bangunan (jpg/png/pdf, maks 100MB)</span>
               <?php if ($berkas_ada('prototipe_peta')): ?><span class="fr-status">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/prototipe_peta/' . (int) $lama['id']); ?>" target="_blank" rel="noopener noreferrer">lihat</a></span><?php endif; ?>
               <input type="file" name="prototipe_peta" accept=".jpg,.jpeg,.png,.pdf">
             </div>
@@ -438,7 +438,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
             <div class="field"><label for="f-bg-lng">Titik Koordinat Longitude Bangunan</label><input id="f-bg-lng" name="bangunan_longitude" type="text" value="<?php echo $val('bangunan_longitude'); ?>"></div>
           </div>
           <div class="file-row">
-            <span class="fr-label">Gambar Peta Lokasi Bangunan (jpg/png/pdf, maks 5MB)</span>
+            <span class="fr-label">Gambar Peta Lokasi Bangunan (jpg/png/pdf, maks 100MB)</span>
             <?php if ($berkas_ada('bangunan_peta')): ?><span class="fr-status">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/bangunan_peta/' . (int) $lama['id']); ?>" target="_blank" rel="noopener noreferrer">lihat</a></span><?php endif; ?>
             <input type="file" name="bangunan_peta" accept=".jpg,.jpeg,.png,.pdf">
           </div>
@@ -469,7 +469,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
             <input id="f-tn-pemilik" name="tanah_nama_pemilik" type="text" value="<?php echo $val('tanah_nama_pemilik'); ?>">
           </div>
           <div class="file-row">
-            <span class="fr-label">Lampiran Dokumen Kepemilikan Tanah (jpg/png/pdf, maks 5MB)</span>
+            <span class="fr-label">Lampiran Dokumen Kepemilikan Tanah (jpg/png/pdf, maks 100MB)</span>
             <?php if ($berkas_ada('tanah_lampiran')): ?><span class="fr-status">Sudah diunggah — <a href="<?php echo base_url('pengajuan-pbg/berkas/tanah_lampiran/' . (int) $lama['id']); ?>" target="_blank" rel="noopener noreferrer">lihat</a></span><?php endif; ?>
             <input type="file" name="tanah_lampiran" accept=".jpg,.jpeg,.png,.pdf">
           </div>
@@ -506,7 +506,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <!-- LANGKAH 9: UNGGAH DOKUMEN TEKNIS -->
         <div class="wiz-step" data-step="8">
           <h3>Unggah Dokumen Teknis</h3>
-          <p class="wiz-desc">Lengkapi data dengan mengunggah dokumen berikut (jpg/png/pdf, maks 5MB per berkas).</p>
+          <p class="wiz-desc">Lengkapi data dengan mengunggah dokumen berikut (jpg/png/pdf, maks 100MB per berkas).</p>
           <?php foreach ($peta_dokumen as $judul_grup => $grup): ?>
             <p class="doc-group-title"><?php echo htmlspecialchars($judul_grup, ENT_QUOTES, 'UTF-8'); ?></p>
             <?php foreach ($grup['dokumen'] as $slug => $label): ?>
