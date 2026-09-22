@@ -13,7 +13,7 @@ class Pbg_pu extends CI_Controller
 	{
 		parent::__construct();
 		$this->load->library(array('session','form_validation','upload'));
-		$this->load->helper(array('url','form','pbg_status','pbg_konsultasi'));
+		$this->load->helper(array('url','form','pbg_status','pbg_konsultasi','berkas'));
 		$this->load->model('Permohonan_pbg_model','pbg');
 		if (!$this->session->userdata('logged_in')) redirect('login');
 		if ($this->session->userdata('role') !== 'pu') show_error('Halaman ini khusus PU.',403);
@@ -92,7 +92,7 @@ class Pbg_pu extends CI_Controller
 				if(empty($_FILES[$field]['name']))continue;
 				$dir=FCPATH.'assets/uploads/pbg/'; if(!is_dir($dir))mkdir($dir,0755,true);
 				$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'jpg|jpeg|png|pdf','max_size'=>5120,'encrypt_name'=>TRUE),TRUE);
-				if($this->upload->do_upload($field)){$payload[$field]=$this->upload->data('file_name');$terunggah++;}
+				if($this->upload->do_upload($field)){$payload[$field]=berkas_simpan($this->upload->data());$terunggah++;}
 				else $data['errors'][]=$label.': '.strip_tags($this->upload->display_errors('',''));
 			}
 			if(!$terunggah&&empty($data['errors']))$data['errors'][]='Pilih minimal satu berkas untuk diunggah.';
@@ -157,7 +157,7 @@ class Pbg_pu extends CI_Controller
 		if(!$this->upload->do_upload('dokumen')){
 			$this->session->set_flashdata('error',$this->files[$field].': '.strip_tags($this->upload->display_errors('',''))); redirect($kembali); return;
 		}
-		$this->pbg->update_owned($id,$this->pu_id(),array($field=>$this->upload->data('file_name'),'updated_at'=>date('Y-m-d H:i:s')));
+		$this->pbg->update_owned($id,$this->pu_id(),array($field=>berkas_simpan($this->upload->data()),'updated_at'=>date('Y-m-d H:i:s')));
 		$this->session->set_flashdata('sukses',$this->files[$field].' berhasil diunggah.'); redirect($kembali);
 	}
 
@@ -192,7 +192,7 @@ class Pbg_pu extends CI_Controller
 			$dir=FCPATH.'assets/uploads/konsultasi_pbg/'; if(!is_dir($dir)) mkdir($dir,0755,true);
 			$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf|doc|docx|jpg|jpeg|png','max_size'=>10240,'encrypt_name'=>TRUE),TRUE);
 			if(!$this->upload->do_upload('file_konsultasi')){ $this->session->set_flashdata('error',strip_tags($this->upload->display_errors('',''))); redirect('pengajuan-pbg/tahap/'.$id.'/3'); return; }
-			$file=$this->upload->data('file_name');
+			$file=berkas_simpan($this->upload->data());
 		}
 		$max=$this->db->select_max('putaran','maks')->where('permohonan_id',$id)->get('konsultasi_pbg')->row_array(); $putaran=((int)$max['maks'])+1;
 		$this->db->trans_start(); foreach($pilihan as $bidang=>$uids){foreach($uids as $uid){$this->db->insert('konsultasi_pbg',array('permohonan_id'=>$id,'tpa_user_id'=>$uid,'bidang'=>$bidang,'putaran'=>$putaran,'status'=>'ditugaskan','komentar_pu'=>trim($this->input->post('komentar_pu'))?:null,'pernyataan_pu'=>trim($this->input->post('pernyataan_pu'))?:null,'file_pu'=>$file,'assigned_by'=>$this->pu_id(),'assigned_at'=>date('Y-m-d H:i:s')));}} $this->pbg->update_owned($id,$this->pu_id(),array('tahap'=>3,'status'=>'diverifikasi','updated_at'=>date('Y-m-d H:i:s'))); $this->db->trans_complete();

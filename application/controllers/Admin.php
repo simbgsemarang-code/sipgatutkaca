@@ -16,7 +16,7 @@ class Admin extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->library('session');
-		$this->load->helper('pbg_alur');
+		$this->load->helper(array('pbg_alur','berkas'));
 		$this->_wajib_admin();
 	}
 
@@ -137,8 +137,8 @@ class Admin extends CI_Controller {
 				$this->session->set_flashdata('old', $this->input->post());
 				redirect($tujuan); return;
 			}
-			if ($file) @unlink($dir . basename($file));
-			$file = $this->upload->data('file_name');
+			if ($file && stripos($file, 'http') !== 0) @unlink($dir . basename($file));
+			$file = berkas_simpan($this->upload->data());
 		}
 
 		$simpan = array('judul'=>$judul, 'aktif'=>$this->input->post('aktif') === '1' ? 1 : 0, 'file_pdf'=>$file);
@@ -152,7 +152,7 @@ class Admin extends CI_Controller {
 	{
 		$row = $this->db->where('id', (int) $id)->get('regulasi')->row_array();
 		if ($row === NULL) { show_404(); return; }
-		if (! empty($row['file_pdf'])) @unlink(FCPATH . 'assets/dokumen-regulasi/' . basename($row['file_pdf']));
+		if (! empty($row['file_pdf']) && stripos($row['file_pdf'], 'http') !== 0) @unlink(FCPATH . 'assets/dokumen-regulasi/' . basename($row['file_pdf']));
 		$this->db->where('id', (int) $id)->delete('regulasi');
 		$this->session->set_flashdata('sukses', 'Aturan berhasil dihapus.');
 		redirect('admin/aturan');
@@ -663,7 +663,7 @@ class Admin extends CI_Controller {
 
 		if ($this->input->post('hapus_foto') === '1' && $foto !== NULL)
 		{
-			@unlink($dir_foto . basename($foto));
+			if (stripos($foto, 'http') !== 0) @unlink($dir_foto . basename($foto));
 			$foto = NULL;
 		}
 
@@ -679,9 +679,8 @@ class Admin extends CI_Controller {
 			));
 			if ($this->upload->do_upload('foto_file'))
 			{
-				if ($foto !== NULL) @unlink($dir_foto . basename($foto));
-				$hasil = $this->upload->data();
-				$foto  = $hasil['file_name'];
+				if ($foto !== NULL && stripos($foto, 'http') !== 0) @unlink($dir_foto . basename($foto));
+				$foto = berkas_simpan($this->upload->data());
 			}
 			else
 			{
@@ -732,7 +731,7 @@ class Admin extends CI_Controller {
 			redirect('admin/bangunan');
 			return;
 		}
-		if (! empty($row['foto']))
+		if (! empty($row['foto']) && stripos($row['foto'], 'http') !== 0)
 		{
 			@unlink(FCPATH . 'assets/foto-bangunan/' . basename($row['foto']));
 		}
@@ -872,7 +871,7 @@ class Admin extends CI_Controller {
 
 		if ($this->input->post('hapus_foto') === '1' && $foto !== NULL)
 		{
-			@unlink($dir_foto . basename($foto));
+			if (stripos($foto, 'http') !== 0) @unlink($dir_foto . basename($foto));
 			$foto = NULL;
 		}
 
@@ -888,9 +887,8 @@ class Admin extends CI_Controller {
 			));
 			if ($this->upload->do_upload('foto_file'))
 			{
-				if ($foto !== NULL) @unlink($dir_foto . basename($foto));
-				$hasil = $this->upload->data();
-				$foto  = $hasil['file_name'];
+				if ($foto !== NULL && stripos($foto, 'http') !== 0) @unlink($dir_foto . basename($foto));
+				$foto = berkas_simpan($this->upload->data());
 			}
 			else
 			{
@@ -940,7 +938,7 @@ class Admin extends CI_Controller {
 			redirect('admin/cagar-budaya');
 			return;
 		}
-		if (! empty($row['foto']))
+		if (! empty($row['foto']) && stripos($row['foto'], 'http') !== 0)
 		{
 			@unlink(FCPATH . 'assets/foto-cagar-budaya/' . basename($row['foto']));
 		}

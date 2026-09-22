@@ -8,6 +8,10 @@ application/logs/*.log
 # Local database credentials
 application/config/database.php
 
+# Kunci service account Google Drive - rahasia asli, jangan pernah
+# dicommit. Lihat docs/google-drive-setup.md untuk cara membuatnya.
+application/gdrive/credentials.json
+
 # Berkas unggahan pemohon (dokumen PBG/SLF) - data pengguna, bukan
 # source code. Folder tetap ditrack lewat index.html placeholder-nya.
 application/uploads/pengajuan_pbg/*

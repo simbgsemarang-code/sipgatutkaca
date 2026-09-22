@@ -18,6 +18,7 @@ class Regulasi extends CI_Controller {
 			? $this->db->where('id', $id)->where('aktif', 1)->get('regulasi')->row_array()
 			: NULL;
 		if ($row === NULL || empty($row['file_pdf'])) show_404();
+		if (stripos($row['file_pdf'], 'http') === 0) { redirect($row['file_pdf']); return; }
 		$path = FCPATH . 'assets/dokumen-regulasi/' . basename($row['file_pdf']);
 		if (! is_file($path)) show_404();
 		$this->load->helper('download');
