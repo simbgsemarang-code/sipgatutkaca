@@ -12,8 +12,19 @@ class Admin_itr extends CI_Controller {
   }
   unset($r);
   $data['daftar']=$daftar;
-  $data['pesan']=$this->db->table_exists('pesan_itr')?$this->db->select('p.*,u.nama AS nama_admin')->from('pesan_itr p')->join('users u','u.id=p.admin_id','left')->order_by('p.id','DESC')->get()->result_array():array();
   $this->load->view('pages/admin_itr',$data);
+ }
+
+ public function detail($id=0){
+  $id=(int)$id;
+  $row=$this->db->where('id',$id)->get('pengajuan_itr')->row_array();
+  if(!$row){show_404();return;}
+  $row['_status_berkas']=itr_status_berkas($id);
+  $row['_semua_diterima']=itr_semua_diterima($row);
+  $data['nama_pengguna']=$this->session->userdata('nama');
+  $data['r']=$row;
+  $data['pesan']=$this->db->table_exists('pesan_itr')?$this->db->select('p.*,u.nama AS nama_admin')->from('pesan_itr p')->join('users u','u.id=p.admin_id','left')->where('p.pengajuan_id',$id)->order_by('p.id','DESC')->get()->result_array():array();
+  $this->load->view('pages/admin_itr_detail',$data);
  }
 
  public function simpan($id=0){
@@ -24,11 +35,11 @@ class Admin_itr extends CI_Controller {
   $status=(string)$this->input->post('status');$isi=trim((string)$this->input->post('informasi'));
   if(!in_array($status,array('diajukan','sedang_diverifikasi','perlu_perbaikan','disetujui','ditolak'),TRUE)||strlen($isi)>10000){show_error('Status atau informasi tidak valid.',400);return;}
   if($status!==$row['status']&&$isi==='')$isi='Status pengajuan diperbarui menjadi '.ucwords(str_replace('_',' ',$status)).'.';
-  if($isi===''){redirect('admin_itr');return;}
+  if($isi===''){redirect('admin_itr/detail/'.$id);return;}
   $this->db->trans_begin();$this->db->where('id',(int)$id)->update('pengajuan_itr',array('status'=>$status));
   $this->db->insert('pesan_itr',array('pengajuan_id'=>(int)$id,'user_id'=>$row['user_id'],'admin_id'=>(int)$this->session->userdata('user_id'),'isi'=>$isi));
   $this->db->insert('aktivitas_itr',array('user_id'=>$row['user_id'],'pengajuan_id'=>(int)$id,'keterangan'=>'Admin mengirim informasi untuk '.$row['no_permohonan'].'. Status: '.ucwords(str_replace('_',' ',$status))));
-  if(!$this->db->trans_status()){$this->db->trans_rollback();show_error('Informasi gagal disimpan.',500);return;}$this->db->trans_commit();$this->session->set_flashdata('sukses','Status dan informasi berhasil dikirim kepada pemohon.');redirect('admin_itr');
+  if(!$this->db->trans_status()){$this->db->trans_rollback();show_error('Informasi gagal disimpan.',500);return;}$this->db->trans_commit();$this->session->set_flashdata('sukses','Status dan informasi berhasil dikirim kepada pemohon.');redirect('admin_itr/detail/'.$id);
  }
 
  /** Admin menerima/menolak satu berkas. Menolak wajib disertai alasan; pemohon lihat & unggah ulang lewat pemohon/upload-berkas-itr. */
@@ -43,7 +54,7 @@ class Admin_itr extends CI_Controller {
   $keputusan=(string)$this->input->post('keputusan');
   $catatan=trim((string)$this->input->post('catatan'));
   if(!in_array($keputusan,array('diterima','ditolak'),TRUE)){show_error('Keputusan tidak valid.',422);return;}
-  if($keputusan==='ditolak'&&$catatan===''){$this->session->set_flashdata('error','Alasan penolakan berkas '.$files[$field].' wajib diisi.');redirect('admin_itr');return;}
+  if($keputusan==='ditolak'&&$catatan===''){$this->session->set_flashdata('error','Alasan penolakan berkas '.$files[$field].' wajib diisi.');redirect('admin_itr/detail/'.$id);return;}
 
   $this->db->where('pengajuan_id',$id)->where('field',$field)->delete('pengajuan_itr_berkas_status');
   $this->db->insert('pengajuan_itr_berkas_status',array('pengajuan_id'=>$id,'field'=>$field,'status'=>$keputusan,'catatan'=>$catatan?:null,'ditinjau_oleh'=>(int)$this->session->userdata('user_id'),'ditinjau_pada'=>date('Y-m-d H:i:s')));
@@ -51,7 +62,7 @@ class Admin_itr extends CI_Controller {
   $status_baru=$this->_perbarui_status_otomatis($id);
   $ket=$keputusan==='diterima' ? ('Admin menerima berkas '.$files[$field].'.') : ('Admin menolak berkas '.$files[$field].': '.$catatan.' Silakan unggah ulang.');
   $this->db->insert('aktivitas_itr',array('user_id'=>$row['user_id'],'pengajuan_id'=>$id,'keterangan'=>$ket,'created_at'=>date('Y-m-d H:i:s')));
-  $this->session->set_flashdata('sukses','Hasil tinjauan berkas '.$files[$field].' tersimpan.'); redirect('admin_itr');
+  $this->session->set_flashdata('sukses','Hasil tinjauan berkas '.$files[$field].' tersimpan.'); redirect('admin_itr/detail/'.$id);
  }
 
  /** Setelah SEMUA berkas diterima, admin mengunggah dokumen hasil ITR resmi (PDF) yang bisa diunduh pemohon. */
@@ -60,18 +71,18 @@ class Admin_itr extends CI_Controller {
   if(!hash_equals((string)$this->session->userdata('admin_itr_token'),(string)$this->input->post('itr_token'))){show_error('Formulir tidak valid.',403);return;}
   $id=(int)$id;
   $row=$this->db->where('id',$id)->get('pengajuan_itr')->row_array(); if(!$row){show_404();return;}
-  if(!itr_semua_diterima($row)){$this->session->set_flashdata('error','Semua berkas wajib diterima dahulu sebelum mengunggah hasil ITR.');redirect('admin_itr');return;}
-  if(empty($_FILES['file_hasil_itr']['name'])){$this->session->set_flashdata('error','Pilih berkas PDF hasil ITR terlebih dahulu.');redirect('admin_itr');return;}
+  if(!itr_semua_diterima($row)){$this->session->set_flashdata('error','Semua berkas wajib diterima dahulu sebelum mengunggah hasil ITR.');redirect('admin_itr/detail/'.$id);return;}
+  if(empty($_FILES['file_hasil_itr']['name'])){$this->session->set_flashdata('error','Pilih berkas PDF hasil ITR terlebih dahulu.');redirect('admin_itr/detail/'.$id);return;}
   $this->load->library('upload'); $dir=APPPATH.'uploads/itr/';
   if(!is_dir($dir)&&!mkdir($dir,0750,TRUE)){show_error('Penyimpanan berkas tidak tersedia.',503);return;}
   $this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
-  if(!$this->upload->do_upload('file_hasil_itr')){$this->session->set_flashdata('error',strip_tags($this->upload->display_errors('','')));redirect('admin_itr');return;}
+  if(!$this->upload->do_upload('file_hasil_itr')){$this->session->set_flashdata('error',strip_tags($this->upload->display_errors('','')));redirect('admin_itr/detail/'.$id);return;}
   $lama=$row['file_hasil_itr'];
   $nilai=berkas_simpan($this->upload->data());
   $this->db->where('id',$id)->update('pengajuan_itr',array('file_hasil_itr'=>$nilai,'hasil_diunggah_pada'=>date('Y-m-d H:i:s'),'status'=>'disetujui'));
   if($lama&&stripos($lama,'http')!==0) @unlink($dir.$lama);
   $this->db->insert('aktivitas_itr',array('user_id'=>$row['user_id'],'pengajuan_id'=>$id,'keterangan'=>'Dokumen hasil ITR resmi telah diterbitkan dan dapat diunduh.','created_at'=>date('Y-m-d H:i:s')));
-  $this->session->set_flashdata('sukses','Dokumen hasil ITR berhasil diunggah dan dapat diunduh pemohon.'); redirect('admin_itr');
+  $this->session->set_flashdata('sukses','Dokumen hasil ITR berhasil diunggah dan dapat diunduh pemohon.'); redirect('admin_itr/detail/'.$id);
  }
 
  /** status pengajuan_itr.status dihitung otomatis dari status seluruh baris pengajuan_itr_berkas_status, bukan ditulis manual. */
