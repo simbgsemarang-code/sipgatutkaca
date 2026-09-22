@@ -19,7 +19,7 @@ $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_ar
 </div>
 
 <h3>Data Pemohon</h3><div class="itr-form-grid">
-<div><label for="itr-nama" id="itr-label-nama">Nama Pemohon *</label><input id="itr-nama" name="nama_pemohon" type="text" value="<?= $v('nama_pemohon',$nama_pengguna) ?>" required></div>
+<div><label for="itr-nama" id="itr-label-nama">Nama Pemilik *</label><input id="itr-nama" name="nama_pemohon" type="text" value="<?= $v('nama_pemohon',$nama_pengguna) ?>" required></div>
 <div class="itr-perorangan"><label for="itr-nik">NIK *</label><input id="itr-nik" name="nik" type="text" pattern="[0-9]{16}" maxlength="16" inputmode="numeric" value="<?= $v('nik') ?>"></div>
 <div class="itr-perorangan"><label for="itr-pekerjaan">Pekerjaan *</label><input id="itr-pekerjaan" name="pekerjaan" type="text" value="<?= $v('pekerjaan') ?>"></div>
 <div class="itr-perusahaan"><label for="itr-nib">NIB *</label><input id="itr-nib" name="nib" type="text" value="<?= $v('nib') ?>"></div>
@@ -108,7 +108,7 @@ $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_ar
     form.classList.toggle('mode-perorangan', !perusahaan);
     form.querySelectorAll('.itr-perorangan input,.itr-perorangan textarea').forEach(function(el){ el.required=!perusahaan; el.disabled=perusahaan; });
     form.querySelectorAll('.itr-perusahaan input,.itr-perusahaan textarea').forEach(function(el){ el.required=perusahaan; el.disabled=!perusahaan; });
-    labelNama.textContent = perusahaan ? 'Nama Direktur *' : 'Nama Pemohon *';
+    labelNama.textContent = perusahaan ? 'Nama Direktur *' : 'Nama Pemilik *';
     labelAlamat.textContent = perusahaan ? 'Alamat Perusahaan *' : 'Alamat *';
     labelKtp.textContent = perusahaan ? 'KTP Direktur *' : 'KTP Pemohon *';
   }
