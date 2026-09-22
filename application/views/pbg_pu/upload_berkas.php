@@ -38,7 +38,15 @@ document.querySelectorAll('.instant-upload').forEach(function(input){
       fill.style.width='100%'; fill.classList.add('indeterminate');
       label.textContent='Menyimpan...'; status.textContent='Menyimpan ke Google Drive…';
     });
-    xhr.onload=function(){ location.href = xhr.responseURL || location.href; };
+    xhr.onload=function(){
+      // xhr sudah otomatis mengikuti redirect sukses dari server, jadi
+      // responseText di sini SELALU halaman akhir yang benar (sukses
+      // ATAU form dengan pesan error kalau upload gagal di server) -
+      // dipakai langsung, tanpa request GET kedua yang bisa kehilangan
+      // pesan error (errornya cuma ada di respons POST ini, tidak
+      // disimpan lewat flashdata).
+      document.open(); document.write(xhr.responseText); document.close();
+    };
     xhr.onerror=function(){
       label.textContent='Gagal, coba lagi'; status.textContent='';
       form.classList.remove('is-uploading'); button.classList.remove('is-uploading');
