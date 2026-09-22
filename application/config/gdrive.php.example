@@ -2,6 +2,12 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
+ * INI FILE CONTOH - disalin SEKALI ke application/config/gdrive.php
+ * (nama file itu, tanpa ".example") lalu diedit isinya di sana. File
+ * gdrive.php TIDAK dilacak Git (sama seperti config/database.php) -
+ * supaya nilai gdrive_enabled/folder_id yang kamu set di server TIDAK
+ * ikut tertimpa balik ke default tiap kali deploy commit baru.
+ *
  * Penyimpanan berkas di Google Drive (bukan disk server) - antisipasi
  * kalau nanti domain/hosting berpindah, berkas lama tidak ikut hilang.
  *

@@ -8,6 +8,12 @@ application/logs/*.log
 # Local database credentials
 application/config/database.php
 
+# Konfigurasi Google Drive (gdrive_enabled/folder_id per-server) - lihat
+# application/config/gdrive.php.example untuk templatenya. Dikecualikan
+# supaya nilai yang diset di server tidak tertimpa balik ke default
+# tiap deploy (sama seperti database.php di atas).
+application/config/gdrive.php
+
 # Kredensial Google Drive - rahasia asli, jangan pernah dicommit.
 # Lihat docs/google-drive-setup.md untuk cara membuatnya.
 application/gdrive/credentials.json

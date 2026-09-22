@@ -11,6 +11,23 @@ akun baru dan timpa file kredensial + folder ID di
 `application/config/gdrive.php` - tidak perlu mengubah satu baris
 kode pun.
 
+## 0. Sekali saja: siapkan application/config/gdrive.php
+
+File `gdrive.php` **tidak ikut Git** (sama seperti `database.php`) -
+supaya nilai `gdrive_enabled`/`gdrive_folder_id` yang kamu isi di
+server tidak tertimpa balik ke default tiap kali deploy commit baru.
+Karena itu, file ini harus disiapkan **manual, sekali saja, di setiap
+server** (lokal dan live terpisah):
+
+1. Lewat cPanel File Manager, salin `application/config/gdrive.php.example` jadi `application/config/gdrive.php` (di folder yang sama).
+2. Edit isinya sesuai Cara A atau Cara B di bawah.
+
+Kalau langkah ini belum dilakukan, `gdrive.php` akan otomatis dibuat
+ulang oleh Git dengan `gdrive_enabled = false` setiap deploy, dan
+berkas akan terus tersimpan di server, bukan Drive - **ini penyebab
+paling umum kalau upload masih ke server padahal sudah pernah
+diaktifkan sebelumnya.**
+
 ## Pilih salah satu cara
 
 - **Akun Gmail biasa** (`@gmail.com`, bukan dari instansi) → pakai
