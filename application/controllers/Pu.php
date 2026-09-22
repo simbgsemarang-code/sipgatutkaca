@@ -58,6 +58,18 @@ class Pu extends CI_Controller {
 		$data['distribusi']   = dashboard_distribusi();
 		$data['aktivitas']    = dashboard_aktivitas(6);
 
+		/* ---- Berita Acara terbaru milik PU ini (lihat Berita_acara::pbg) ---- */
+		$data['ba_terbaru'] = array();
+		if ($this->db->table_exists('berita_acara_pbg'))
+		{
+			$data['ba_terbaru'] = $this->db->select('b.*, p.nama_pemohon, p.no_permohonan, k.bidang')
+				->from('berita_acara_pbg b')
+				->join('permohonan_pbg p', 'p.id = b.permohonan_id')
+				->join('konsultasi_pbg k', 'k.id = b.konsultasi_id')
+				->where('p.user_id', (int) $this->session->userdata('user_id'))
+				->order_by('b.diterbitkan_at', 'DESC')->limit(5)->get()->result_array();
+		}
+
 		$this->load->view('pages/pu_dashboard', $data);
 	}
 

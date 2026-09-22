@@ -239,6 +239,29 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       )); ?>
     </div>
 
+    <div class="reveal" style="margin-top:52px">
+      <p class="eyebrow" style="margin-bottom:8px">Dokumen</p>
+      <h2 style="font-size:1.3rem">Berita Acara Terbaru</h2>
+      <?php if (empty($ba_terbaru)): ?>
+        <p class="section-lead">Belum ada Berita Acara Konsultasi TPA yang terbit untuk permohonan Anda.</p>
+      <?php else: ?>
+        <table>
+          <thead><tr><th>Nomor BA</th><th>Pemohon</th><th>Bidang</th><th>Diterbitkan</th><th></th></tr></thead>
+          <tbody>
+            <?php foreach ($ba_terbaru as $b): ?>
+              <tr>
+                <td><?php echo htmlspecialchars($b['nomor'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td><?php echo htmlspecialchars($b['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?><br><small><?php echo htmlspecialchars($b['no_permohonan'], ENT_QUOTES, 'UTF-8'); ?></small></td>
+                <td><?php echo ucfirst($b['bidang']); ?></td>
+                <td><?php echo date('d/m/Y H:i', strtotime($b['diterbitkan_at'])); ?></td>
+                <td><a class="btn btn-ghost btn-sm" target="_blank" href="<?php echo base_url('pengajuan-pbg/berita-acara/' . (int) $b['konsultasi_id']); ?>">Unduh</a></td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      <?php endif; ?>
+    </div>
+
     <div class="reveal" style="margin-top:60px">
       <p class="eyebrow">Saran &amp; Masukan Warga</p>
       <h2 style="font-size:1.3rem">Tinjau Saran &amp; Masukan Warga</h2>
