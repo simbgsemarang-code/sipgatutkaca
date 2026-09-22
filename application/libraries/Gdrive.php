@@ -7,15 +7,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * yang diunggah PU/TPA/pemohon/admin tidak bergantung pada disk
  * server, jadi aman kalau nanti domain/hosting berpindah.
  *
- * Kredensial & folder tujuan sepenuhnya dari application/config/gdrive.php
- * - ganti akun Google Drive kapan pun cukup ganti file JSON + folder ID
- *   di config itu, tanpa menyentuh kode di sini atau di controller manapun.
+ * Dua mode autentikasi (lihat application/config/gdrive.php):
+ * - 'oauth'           : identitas akun Gmail biasa (wajib untuk akun
+ *                       non-Workspace, lihat catatan di config).
+ * - 'service_account' : untuk akun Google Workspace dengan Shared Drive.
+ *
+ * Kredensial & folder tujuan sepenuhnya dari config - ganti akun
+ * Google Drive kapan pun cukup ganti file JSON + folder ID di config
+ * itu, tanpa menyentuh kode di sini atau di controller manapun.
  */
 class Gdrive
 {
 	private $enabled;
+	private $mode;
 	private $folder_id;
-	private $creds;
+	private $creds;       // service_account: isi credentials.json
+	private $oauth_client; // oauth: isi oauth-client.json
+	private $oauth_token_path;
 	private $token;
 
 	public function __construct()
@@ -24,12 +32,38 @@ class Gdrive
 		$ci->config->load('gdrive', TRUE);
 
 		$this->enabled   = (bool) $ci->config->item('gdrive_enabled', 'gdrive');
+		$this->mode      = (string) $ci->config->item('gdrive_auth_mode', 'gdrive');
 		$this->folder_id = (string) $ci->config->item('gdrive_folder_id', 'gdrive');
-		$path            = (string) $ci->config->item('gdrive_credentials_path', 'gdrive');
 
-		if ($this->enabled && $this->folder_id !== '' && is_readable($path))
+		if (! $this->enabled || $this->folder_id === '')
 		{
-			$json = json_decode(file_get_contents($path), TRUE);
+			$this->enabled = FALSE;
+			return;
+		}
+
+		if ($this->mode === 'oauth')
+		{
+			$client_path = (string) $ci->config->item('gdrive_oauth_client_path', 'gdrive');
+			$this->oauth_token_path = (string) $ci->config->item('gdrive_oauth_token_path', 'gdrive');
+
+			$client = is_readable($client_path) ? json_decode(file_get_contents($client_path), TRUE) : NULL;
+			$token  = is_readable($this->oauth_token_path) ? json_decode(file_get_contents($this->oauth_token_path), TRUE) : NULL;
+
+			if (is_array($client) && ! empty($client['client_id']) && ! empty($client['client_secret'])
+				&& is_array($token) && ! empty($token['refresh_token']))
+			{
+				$this->oauth_client = $client + array('refresh_token' => $token['refresh_token']);
+			}
+			else
+			{
+				$this->enabled = FALSE;
+				log_message('error', 'Gdrive: kredensial OAuth belum lengkap. Jalankan admin/gdrive-oauth dulu.');
+			}
+		}
+		elseif ($this->mode === 'service_account')
+		{
+			$path = (string) $ci->config->item('gdrive_credentials_path', 'gdrive');
+			$json = is_readable($path) ? json_decode(file_get_contents($path), TRUE) : NULL;
 			if (is_array($json) && ! empty($json['client_email']) && ! empty($json['private_key']))
 			{
 				$this->creds = $json;
@@ -37,16 +71,17 @@ class Gdrive
 			else
 			{
 				$this->enabled = FALSE;
-				log_message('error', 'Gdrive: file kredensial tidak valid di ' . $path);
+				log_message('error', 'Gdrive: file credentials.json tidak valid.');
 			}
 		}
 		else
 		{
 			$this->enabled = FALSE;
+			log_message('error', 'Gdrive: gdrive_auth_mode tidak dikenal - isi "oauth" atau "service_account".');
 		}
 	}
 
-	/** Aktif hanya jika enabled=TRUE, folder_id terisi, dan file kredensial valid. */
+	/** Aktif hanya jika enabled=TRUE, folder_id terisi, dan kredensial mode yang dipilih valid. */
 	public function aktif()
 	{
 		return $this->enabled;
@@ -90,31 +125,77 @@ class Gdrive
 		return TRUE;
 	}
 
+	/** Langkah 1 alur OAuth: URL consent Google yang harus dikunjungi admin. */
+	public function oauth_url($client_id, $redirect_uri)
+	{
+		$params = array(
+			'client_id'     => $client_id,
+			'redirect_uri'  => $redirect_uri,
+			'response_type' => 'code',
+			'scope'         => 'https://www.googleapis.com/auth/drive.file',
+			'access_type'   => 'offline',
+			'prompt'        => 'consent',
+		);
+		return 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query($params);
+	}
+
+	/** Langkah 2 alur OAuth: tukar authorization code dari Google jadi refresh token, lalu simpan. */
+	public function oauth_tukar_kode($client_id, $client_secret, $redirect_uri, $code)
+	{
+		$resp = $this->kirim_permintaan('POST', 'https://oauth2.googleapis.com/token', NULL, array(
+			'client_id'     => $client_id,
+			'client_secret' => $client_secret,
+			'redirect_uri'  => $redirect_uri,
+			'grant_type'    => 'authorization_code',
+			'code'          => $code,
+		), 'form');
+
+		$data = json_decode($resp, TRUE);
+		if (empty($data['refresh_token']))
+		{
+			log_message('error', 'Gdrive: tukar kode OAuth gagal - ' . $resp);
+			return FALSE;
+		}
+		return $data['refresh_token'];
+	}
+
 	private function access_token()
 	{
 		if ($this->token && $this->token['exp'] > time() + 30) return $this->token['nilai'];
 
-		$now   = time();
-		$head  = $this->base64url(json_encode(array('alg' => 'RS256', 'typ' => 'JWT')));
-		$claim = $this->base64url(json_encode(array(
-			'iss'   => $this->creds['client_email'],
-			'scope' => 'https://www.googleapis.com/auth/drive.file',
-			'aud'   => 'https://oauth2.googleapis.com/token',
-			'iat'   => $now,
-			'exp'   => $now + 3600,
-		)));
-		$unsigned = $head . '.' . $claim;
+		if ($this->mode === 'oauth')
+		{
+			$resp = $this->kirim_permintaan('POST', 'https://oauth2.googleapis.com/token', NULL, array(
+				'client_id'     => $this->oauth_client['client_id'],
+				'client_secret' => $this->oauth_client['client_secret'],
+				'refresh_token' => $this->oauth_client['refresh_token'],
+				'grant_type'    => 'refresh_token',
+			), 'form');
+		}
+		else
+		{
+			$now   = time();
+			$head  = $this->base64url(json_encode(array('alg' => 'RS256', 'typ' => 'JWT')));
+			$claim = $this->base64url(json_encode(array(
+				'iss'   => $this->creds['client_email'],
+				'scope' => 'https://www.googleapis.com/auth/drive.file',
+				'aud'   => 'https://oauth2.googleapis.com/token',
+				'iat'   => $now,
+				'exp'   => $now + 3600,
+			)));
+			$unsigned = $head . '.' . $claim;
 
-		$signature = '';
-		$ok = openssl_sign($unsigned, $signature, $this->creds['private_key'], 'sha256WithRSAEncryption');
-		if (! $ok) { log_message('error', 'Gdrive: gagal menandatangani JWT.'); return NULL; }
+			$signature = '';
+			$ok = openssl_sign($unsigned, $signature, $this->creds['private_key'], 'sha256WithRSAEncryption');
+			if (! $ok) { log_message('error', 'Gdrive: gagal menandatangani JWT.'); return NULL; }
 
-		$jwt = $unsigned . '.' . $this->base64url($signature);
+			$jwt = $unsigned . '.' . $this->base64url($signature);
 
-		$resp = $this->kirim_permintaan('POST', 'https://oauth2.googleapis.com/token', NULL, array(
-			'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-			'assertion'  => $jwt,
-		), 'form');
+			$resp = $this->kirim_permintaan('POST', 'https://oauth2.googleapis.com/token', NULL, array(
+				'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+				'assertion'  => $jwt,
+			), 'form');
+		}
 
 		$data = json_decode($resp, TRUE);
 		if (empty($data['access_token']))
@@ -123,7 +204,7 @@ class Gdrive
 			return NULL;
 		}
 
-		$this->token = array('nilai' => $data['access_token'], 'exp' => $now + (int) ($data['expires_in'] ?? 3000));
+		$this->token = array('nilai' => $data['access_token'], 'exp' => time() + (int) ($data['expires_in'] ?? 3000));
 		return $this->token['nilai'];
 	}
 

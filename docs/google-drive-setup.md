@@ -1,69 +1,127 @@
 # Setup Google Drive untuk penyimpanan berkas
 
-Tujuannya: berkas yang diunggah (dokumen PBG, KTP, lampiran konsultasi
-TPA, foto cagar budaya, dsb.) tersimpan di Google Drive, bukan di disk
-server - jadi kalau nanti domain/hosting berpindah, berkas lama tetap
-aman dan bisa diakses.
+Tujuannya: berkas yang diunggah (dokumen PBG, lampiran konsultasi TPA,
+foto cagar budaya/bangunan, PDF regulasi) tersimpan di Google Drive,
+bukan di disk server - jadi kalau nanti domain/hosting berpindah,
+berkas lama tetap aman dan bisa diakses.
 
 Kredensial di sini sepenuhnya terpisah dari kode. Kalau nanti akun
-Google Drive-nya perlu diganti (misalnya pindah ke akun instansi yang
-baru), cukup ulangi langkah di bawah dengan akun baru dan ganti dua
-nilai di `application/config/gdrive.php` - tidak perlu mengubah satu
-baris kode pun.
+Google Drive-nya perlu diganti, cukup ulangi langkah di bawah dengan
+akun baru dan timpa file kredensial + folder ID di
+`application/config/gdrive.php` - tidak perlu mengubah satu baris
+kode pun.
 
-## 1. Buat Google Cloud Project
+## Pilih salah satu cara
+
+- **Akun Gmail biasa** (`@gmail.com`, bukan dari instansi) → pakai
+  **Cara A (OAuth)** di bawah. Ini kasus paling umum.
+- **Akun Google Workspace instansi** (dengan fitur Shared Drive) →
+  boleh pakai **Cara B (Service Account)**, setupnya lebih sederhana.
+
+Google **tidak mengizinkan** Service Account menulis berkas ke folder
+milik akun Gmail biasa (error `storageQuotaExceeded`) - itu sebabnya
+akun Gmail biasa wajib pakai Cara A.
+
+---
+
+## Cara A: OAuth (akun Gmail biasa)
+
+### A1. Buat Google Cloud Project & aktifkan Drive API
 
 1. Buka https://console.cloud.google.com/
-2. Klik dropdown project di kiri atas → **New Project**.
-3. Beri nama bebas, misalnya `sipgatutkaca-storage` → **Create**.
-4. Pastikan project itu terpilih (cek dropdown di kiri atas).
+2. Dropdown project di kiri atas → **New Project** → beri nama bebas (mis. `sipgatutkaca-storage`) → **Create**. Pastikan project itu terpilih.
+3. Kotak pencarian atas → ketik **Google Drive API** → buka hasilnya → **Enable**.
 
-## 2. Aktifkan Google Drive API
+### A2. Atur OAuth consent screen
 
-1. Di kotak pencarian atas, ketik **Google Drive API** → buka hasilnya.
-2. Klik **Enable**.
+1. Menu ☰ → **APIs & Services** → **OAuth consent screen**.
+2. User Type: **External** → **Create**.
+3. Isi App name bebas (mis. "SIP Gatutkaca Storage"), User support email dan Developer contact diisi email Gmail-mu → **Save and Continue** terus sampai selesai (bagian Scopes dan Test users boleh dilewati dulu).
+4. Di halaman **Audience** (atau "Test users" tergantung versi Console), klik **Add users** → tambahkan alamat Gmail yang jadi pemilik folder Drive nanti. Wajib, karena aplikasi ini akan tetap berstatus "Testing" (tidak perlu diajukan untuk verifikasi Google).
 
-## 3. Buat Service Account
+### A3. Buat OAuth Client ID
 
-1. Menu ☰ → **IAM & Admin** → **Service Accounts**.
-2. Klik **Create Service Account**.
-3. Nama bebas, misalnya `sipgatutkaca-drive` → **Create and Continue**.
-4. Bagian "Grant this service account access to project" boleh **dilewati** (Continue) - tidak perlu role apa pun di level project.
-5. Klik **Done**.
+1. Menu ☰ → **APIs & Services** → **Credentials** → **Create Credentials** → **OAuth client ID**.
+2. Application type: **Web application**.
+3. Authorized redirect URIs → **Add URI** → isi:
+   ```
+   https://sipgatutkaca.sigaru.my.id/admin/gdrive-oauth-callback
+   ```
+   (ganti domain kalau live-nya pindah nanti - dan boleh tambahkan juga versi `http://localhost/sipgatutkaca/admin/gdrive-oauth-callback` untuk uji coba di lokal.)
+4. **Create**. Catat/copy **Client ID** dan **Client secret** yang muncul.
 
-## 4. Buat & unduh kunci JSON
+### A4. Buat folder Drive
 
-1. Di daftar Service Accounts, klik service account yang baru dibuat.
-2. Tab **Keys** → **Add Key** → **Create new key**.
-3. Pilih **JSON** → **Create**. File JSON otomatis terunduh ke komputermu.
-4. **Catat alamat emailnya** (terlihat di halaman itu, formatnya seperti `sipgatutkaca-drive@nama-project.iam.gserviceaccount.com`) - dipakai di langkah 5.
-
-## 5. Buat folder Drive & bagikan ke service account
-
-1. Buka https://drive.google.com dengan akun Google-mu (akun pribadi/instansi biasa, bukan service account).
+1. Buka https://drive.google.com dengan akun Gmail yang tadi didaftarkan sebagai test user.
 2. Buat folder baru, misalnya `SIP Gatutkaca - Berkas`.
-3. Klik kanan folder → **Share** → tempel alamat email service account dari langkah 4 → beri akses **Editor** → **Send/Share** (boleh centang "Notify people" dimatikan, service account tidak punya inbox).
-4. Buka folder itu, lihat URL di address bar: `drive.google.com/drive/folders/XXXXXXXXXXXX` - bagian `XXXXXXXXXXXX` itu **Folder ID**-nya.
+3. Buka folder itu, lihat URL: `drive.google.com/drive/folders/XXXXXXXXXXXX` - `XXXXXXXXXXXX` itu **Folder ID**-nya. (Tidak perlu di-share ke siapa pun untuk Cara A, karena aplikasi login sebagai akun Gmail ini sendiri.)
 
-## 6. Pasang di server
+### A5. Pasang di server
 
-1. Beri nama file JSON yang terunduh tadi menjadi `credentials.json`.
-2. Upload/copy ke folder **`application/gdrive/credentials.json`** di server (folder ini sudah diblokir dari akses publik lewat `.htaccess` - jangan pernah taruh di `assets/` atau folder publik lainnya, dan jangan pernah commit ke git).
-3. Edit `application/config/gdrive.php`:
+1. Buat file **`application/gdrive/oauth-client.json`** (folder ini sudah diblokir dari akses publik lewat `.htaccess`) isinya:
+   ```json
+   {
+     "client_id": "TEMPEL_CLIENT_ID_DARI_A3",
+     "client_secret": "TEMPEL_CLIENT_SECRET_DARI_A3"
+   }
+   ```
+2. Edit `application/config/gdrive.php`:
    ```php
    $config['gdrive_enabled']   = true;
-   $config['gdrive_folder_id'] = 'XXXXXXXXXXXX'; // dari langkah 5.4
+   $config['gdrive_auth_mode'] = 'oauth';
+   $config['gdrive_folder_id'] = 'XXXXXXXXXXXX'; // dari langkah A4
    ```
-4. Selesai - upload berkas baru di aplikasi akan otomatis masuk ke Drive.
+3. Login ke aplikasi sebagai **admin**, lalu buka di browser:
+   ```
+   https://sipgatutkaca.sigaru.my.id/admin/gdrive-oauth
+   ```
+4. Kamu akan diarahkan ke halaman login/consent Google - login dengan akun Gmail pemilik folder (langkah A4), lalu **Allow**.
+5. Kalau berhasil, akan muncul pesan sukses dan file `application/gdrive/oauth-token.json` otomatis dibuat. Selesai - upload berkas baru di aplikasi akan otomatis masuk ke Drive.
+
+Langkah A5.3-A5.5 (kunjungi `admin/gdrive-oauth`) hanya perlu dilakukan **sekali**. Kalau nanti tokennya kedaluwarsa/dicabut, ulangi cukup langkah itu saja.
+
+---
+
+## Cara B: Service Account (akun Google Workspace + Shared Drive)
+
+### B1. Buat Google Cloud Project & aktifkan Drive API
+
+Sama seperti A1 di atas.
+
+### B2. Buat Service Account & kunci JSON
+
+1. Menu ☰ → **IAM & Admin** → **Service Accounts** → **Create Service Account**.
+2. Nama bebas (mis. `sipgatutkaca-drive`) → **Create and Continue** → bagian role boleh dilewati → **Done**.
+3. Klik service account yang baru dibuat → tab **Keys** → **Add Key** → **Create new key** → pilih **JSON** → **Create**. File JSON otomatis terunduh.
+4. Catat alamat emailnya (format `...@nama-project.iam.gserviceaccount.com`).
+
+### B3. Buat Shared Drive & tambahkan service account
+
+1. Di https://drive.google.com, buat **Shared Drive** baru (bukan folder biasa di My Drive - fitur ini cuma ada di akun Workspace).
+2. Tambahkan alamat email service account (langkah B2.4) sebagai anggota dengan peran **Content Manager** atau lebih tinggi.
+3. Folder ID diambil dari URL Shared Drive itu (atau buat subfolder di dalamnya dan pakai ID subfolder itu).
+
+### B4. Pasang di server
+
+1. Beri nama file JSON dari B2.3 menjadi `credentials.json`, taruh di **`application/gdrive/credentials.json`**.
+2. Edit `application/config/gdrive.php`:
+   ```php
+   $config['gdrive_enabled']   = true;
+   $config['gdrive_auth_mode'] = 'service_account';
+   $config['gdrive_folder_id'] = 'XXXXXXXXXXXX'; // dari langkah B3.3
+   ```
+3. Selesai - tidak perlu langkah consent seperti Cara A.
+
+---
 
 ## Kalau nanti ganti akun Google Drive
 
-Ulangi langkah 1-5 dengan akun/project baru, timpa
-`application/gdrive/credentials.json` dengan kunci JSON yang baru, dan
-ganti `gdrive_folder_id` di config sesuai folder barunya. Berkas lama
-yang sudah terlanjur ada di Drive akun lama tetap tersimpan di sana
-(tautannya di database tetap mengarah ke sana); hanya unggahan
-BARU yang akan masuk ke folder/akun yang baru.
+Ulangi langkah cara yang sesuai dengan akun baru, timpa file
+kredensialnya (`oauth-client.json` + `oauth-token.json`, atau
+`credentials.json`), dan ganti `gdrive_folder_id` di config. Berkas
+lama yang sudah terlanjur ada di akun Drive lama tetap tersimpan di
+sana (tautannya di database tetap mengarah ke sana); hanya unggahan
+BARU yang masuk ke akun/folder yang baru.
 
 ## Berkas yang SENGAJA tidak dipindah ke Drive
 
@@ -72,15 +130,15 @@ KTP & sertifikat tanah pemohon ITR (`Pemohon::simpan_itr`, disimpan di
 (`Pengajuan_pbg`, disimpan di `application/uploads/pengajuan_pbg/`)
 tetap di disk server, atas keputusan eksplisit (2026-09-22). Alasannya:
 kedua jalur itu bersifat privat - hanya pemilik yang login yang bisa
-mengaksesnya lewat controller yang memeriksa kepemilikan. Google Drive
-lewat service account hanya bisa dibagikan sebagai "siapa saja dengan
-tautan", yang akan menurunkan privasi dokumen kependudukan tersebut.
-Kalau nanti keputusan ini ingin diubah, `berkas_simpan()` di
+mengaksesnya lewat controller yang memeriksa kepemilikan, dan
+mengunggahnya ke Drive berarti membaginya sebagai "siapa saja dengan
+tautan", menurunkan privasi dokumen kependudukan tersebut. Kalau nanti
+keputusan ini ingin diubah, `berkas_simpan()` di
 `application/helpers/berkas_helper.php` bisa dipakai di kedua
 controller itu juga - tapi pertimbangkan dulu implikasi privasinya.
 
 ## Kalau belum sempat setup (default saat ini)
 
-Selama `gdrive_enabled` masih `false` (atau file kredensialnya belum
-ada), aplikasi otomatis kembali menyimpan berkas ke disk server
+Selama `gdrive_enabled` masih `false` (atau kredensialnya belum
+lengkap), aplikasi otomatis kembali menyimpan berkas ke disk server
 seperti sebelumnya - tidak ada yang rusak.

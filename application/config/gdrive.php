@@ -4,20 +4,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Penyimpanan berkas di Google Drive (bukan disk server) - antisipasi
  * kalau nanti domain/hosting berpindah, berkas lama tidak ikut hilang.
- * Isi tiga nilai ini, semuanya bisa diganti kapan pun (mis. kalau
- * akun Google Drive-nya berganti) TANPA mengubah kode sama sekali:
  *
- * 1. gdrive_enabled          - set TRUE setelah dua hal di bawah siap.
- * 2. gdrive_credentials_path - path file JSON kunci service account
- *                              (taruh di dalam application/gdrive/,
- *                              folder ini sudah diblokir dari akses
- *                              publik lewat application/.htaccess).
- * 3. gdrive_folder_id        - ID folder Drive tujuan upload, diambil
- *                              dari URL folder itu di browser:
- *                              drive.google.com/drive/folders/INI_ID_NYA
+ * PENTING soal jenis akun Drive:
+ * - Akun Gmail BIASA (@gmail.com) -> pakai gdrive_auth_mode = 'oauth'.
+ *   Google TIDAK MENGIZINKAN service account menulis berkas ke folder
+ *   milik akun Gmail biasa sejak 2020 (error storageQuotaExceeded),
+ *   jadi harus lewat OAuth memakai identitas akun Gmail itu sendiri.
+ * - Akun Google Workspace instansi (dengan fitur Shared Drive) -> boleh
+ *   pakai gdrive_auth_mode = 'service_account', lebih sederhana setupnya.
  *
- * Lihat docs/google-drive-setup.md untuk langkah lengkap membuatnya.
+ * Lihat docs/google-drive-setup.md untuk langkah lengkap kedua cara ini.
+ * Semua nilai di bawah bisa diganti kapan pun (mis. ganti akun Google)
+ * TANPA mengubah kode sama sekali.
  */
-$config['gdrive_enabled']          = false;
+$config['gdrive_enabled']   = false;
+$config['gdrive_auth_mode'] = 'oauth'; // 'oauth' atau 'service_account'
+$config['gdrive_folder_id'] = '';
+
+// --- Mode 'service_account' ---
 $config['gdrive_credentials_path'] = APPPATH . 'gdrive/credentials.json';
-$config['gdrive_folder_id']        = '';
+
+// --- Mode 'oauth' ---
+// oauth-client.json: {"client_id":"...","client_secret":"...","redirect_uri":"..."}
+// oauth-token.json: dibuat OTOMATIS oleh admin/gdrive-oauth-callback setelah
+// login Google sekali - jangan diisi manual.
+$config['gdrive_oauth_client_path'] = APPPATH . 'gdrive/oauth-client.json';
+$config['gdrive_oauth_token_path']  = APPPATH . 'gdrive/oauth-token.json';

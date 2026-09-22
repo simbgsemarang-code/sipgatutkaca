@@ -948,6 +948,56 @@ class Admin extends CI_Controller {
 	}
 
 	/* =====================================================================
+	 *  SETUP GOOGLE DRIVE (mode OAuth - akun Gmail biasa, lihat
+	 *  docs/google-drive-setup.md). Dikunjungi SEKALI oleh admin untuk
+	 *  menghasilkan refresh token, disimpan otomatis ke
+	 *  application/gdrive/oauth-token.json.
+	 * ===================================================================== */
+
+	public function gdrive_oauth()
+	{
+		$this->config->load('gdrive', TRUE);
+		$client_path = $this->config->item('gdrive_oauth_client_path', 'gdrive');
+		$client = is_readable($client_path) ? json_decode(file_get_contents($client_path), TRUE) : NULL;
+		if (empty($client['client_id']))
+		{
+			show_error('File application/gdrive/oauth-client.json belum ada atau belum berisi client_id. Lihat docs/google-drive-setup.md.', 500);
+			return;
+		}
+		$this->load->library('gdrive');
+		redirect($this->gdrive->oauth_url($client['client_id'], base_url('admin/gdrive-oauth-callback')));
+	}
+
+	public function gdrive_oauth_callback()
+	{
+		$code = (string) $this->input->get('code');
+		if ($code === '')
+		{
+			show_error('Tidak ada kode otorisasi dari Google (mungkin akses ditolak). Ulangi dari admin/gdrive-oauth.', 400);
+			return;
+		}
+		$this->config->load('gdrive', TRUE);
+		$client_path = $this->config->item('gdrive_oauth_client_path', 'gdrive');
+		$token_path  = $this->config->item('gdrive_oauth_token_path', 'gdrive');
+		$client = is_readable($client_path) ? json_decode(file_get_contents($client_path), TRUE) : NULL;
+		if (empty($client['client_id']) || empty($client['client_secret']))
+		{
+			show_error('File application/gdrive/oauth-client.json belum lengkap.', 500);
+			return;
+		}
+		$this->load->library('gdrive');
+		$refresh_token = $this->gdrive->oauth_tukar_kode($client['client_id'], $client['client_secret'], base_url('admin/gdrive-oauth-callback'), $code);
+		if (! $refresh_token)
+		{
+			show_error('Gagal menukar kode otorisasi dengan Google. Cek application/logs untuk detail errornya.', 500);
+			return;
+		}
+		file_put_contents($token_path, json_encode(array('refresh_token' => $refresh_token)));
+		$this->session->set_flashdata('sukses', 'Berhasil terhubung ke Google Drive. Token tersimpan otomatis. Pastikan gdrive_enabled=true di application/config/gdrive.php, lalu coba unggah berkas baru.');
+		redirect('admin');
+	}
+
+	/* =====================================================================
 	 *  SARAN & MASUKAN (kotak masuk) + FAQ publik (tabel `faq`)
 	 * ===================================================================== */
 
