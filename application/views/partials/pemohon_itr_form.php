@@ -48,8 +48,13 @@ $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_ar
 <div><label for="itr-perijinan">Keterangan Perijinan</label><select id="itr-perijinan" name="keterangan_perijinan"><option value="">— Pilih —</option><?php foreach($perijinan_opsi as $val=>$label): ?><option value="<?= htmlspecialchars($val,ENT_QUOTES,'UTF-8') ?>" <?= ($old['keterangan_perijinan']??'')===$val?'selected':'' ?>><?= htmlspecialchars($label,ENT_QUOTES,'UTF-8') ?></option><?php endforeach; ?></select></div>
 </div>
 
-<h3>Titik Koordinat Lokasi</h3><p class="itr-map-hint">Klik pada peta untuk menandai batas lokasi — minimal <b>4 titik</b> membentuk poligon. Klik titik yang sudah ada untuk menghapusnya.</p>
+<h3>Titik Koordinat Lokasi</h3><p class="itr-map-hint">Klik pada peta, atau masukkan koordinat secara manual di bawah — minimal <b>4 titik</b> membentuk poligon. Klik titik yang sudah ada di peta/daftar untuk menghapusnya.</p>
 <div id="itrMap" class="itr-map"></div>
+<div class="itr-titik-manual">
+  <div><label for="itr-manual-lat">Latitude</label><input id="itr-manual-lat" type="number" step="any" min="-90" max="90" placeholder="-7.726700"></div>
+  <div><label for="itr-manual-lng">Longitude</label><input id="itr-manual-lng" type="number" step="any" min="-180" max="180" placeholder="109.015400"></div>
+  <button type="button" id="itr-manual-add" class="btn btn-ghost">+ Tambah Titik</button>
+</div>
 <div id="itrTitikList" class="itr-titik-list"></div>
 
 <h3>Lampiran Persyaratan</h3><p>PDF, JPG, atau PNG. Maksimum 100 MB per berkas. Semua lampiran wajib diunggah.</p><div class="itr-form-grid">
@@ -78,6 +83,11 @@ $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_ar
 .itr-application.mode-perorangan .itr-perusahaan{display:none}
 .itr-application.mode-perusahaan .itr-perorangan{display:none}
 .itr-map{height:360px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+.itr-titik-manual{display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.itr-titik-manual div{flex:1;min-width:140px}
+.itr-titik-manual label{font-size:13px;margin-bottom:6px}
+.itr-titik-manual input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--input);color:var(--text);font:400 14px var(--body)}
+.itr-titik-manual button{flex:0 0 auto;white-space:nowrap}
 .itr-titik-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
 .itr-titik-chip{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:20px;font-size:12px;color:var(--muted)}
 .itr-titik-chip button{border:0;background:none;color:#e0526b;cursor:pointer;font-weight:700;padding:0}
@@ -133,5 +143,16 @@ $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_ar
   map.on('click',function(e){ titik.push({lat:e.latlng.lat,lng:e.latlng.lng}); render(); });
   render();
   setTimeout(function(){ map.invalidateSize(); },200);
+
+  // ---- Input manual koordinat ----
+  var manualLat=document.getElementById('itr-manual-lat'), manualLng=document.getElementById('itr-manual-lng');
+  document.getElementById('itr-manual-add').addEventListener('click', function(){
+    var lat=parseFloat(manualLat.value), lng=parseFloat(manualLng.value);
+    if(!isFinite(lat)||lat<-90||lat>90){ manualLat.focus(); return; }
+    if(!isFinite(lng)||lng<-180||lng>180){ manualLng.focus(); return; }
+    titik.push({lat:lat,lng:lng}); render();
+    map.panTo([lat,lng]);
+    manualLat.value=''; manualLng.value=''; manualLat.focus();
+  });
 })();
 </script>
