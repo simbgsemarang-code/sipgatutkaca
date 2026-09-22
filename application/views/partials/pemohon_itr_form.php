@@ -8,7 +8,7 @@ $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_ar
 ?>
 <p class="eyebrow">Portal Pemohon ITR</p><h2>Formulir Pengajuan ITR</h2><p class="section-lead">Mengikuti format resmi Surat Permohonan Informasi Tata Ruang 2021. Lengkapi data pemohon, lokasi, rencana kegiatan, titik koordinat, dan seluruh lampiran sebelum mengirim pengajuan.</p>
 <?php if($error): ?><div class="notice" role="alert"><?= htmlspecialchars($error,ENT_QUOTES,'UTF-8') ?></div><?php endif; ?>
-<?= form_open_multipart('pemohon/simpan_itr',array('class'=>'info-card itr-application','id'=>'itrForm')) ?>
+<?= form_open('pemohon/simpan_itr',array('class'=>'info-card itr-application','id'=>'itrForm')) ?>
 <input type="hidden" name="itr_token" value="<?= htmlspecialchars($this->session->userdata('itr_form_token'),ENT_QUOTES,'UTF-8') ?>">
 <input type="hidden" name="titik_koordinat" id="itr-titik" value="<?= htmlspecialchars(json_encode($titik_lama),ENT_QUOTES,'UTF-8') ?>">
 
@@ -57,17 +57,8 @@ $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_ar
 </div>
 <div id="itrTitikList" class="itr-titik-list"></div>
 
-<h3>Lampiran Persyaratan</h3><p>PDF, JPG, atau PNG. Maksimum 100 MB per berkas. Semua lampiran wajib diunggah.</p><div class="itr-form-grid">
-<div class="itr-full"><label for="itr-file-permohonan">Surat Permohonan (bertanda tangan &amp; bermaterai) *</label><input id="itr-file-permohonan" type="file" name="file_permohonan" accept=".pdf,.jpg,.jpeg,.png" required></div>
-<div class="itr-perusahaan"><label for="itr-file-nib">NIB *</label><input id="itr-file-nib" type="file" name="file_nib" accept=".pdf,.jpg,.jpeg,.png"></div>
-<div><label for="itr-file-ktp" id="itr-label-ktp">KTP Pemohon *</label><input id="itr-file-ktp" type="file" name="file_ktp" accept=".pdf,.jpg,.jpeg,.png" required></div>
-<div class="itr-perusahaan"><label for="itr-file-npwp">Fc NPWP *</label><input id="itr-file-npwp" type="file" name="file_npwp" accept=".pdf,.jpg,.jpeg,.png"></div>
-<div class="itr-perusahaan"><label for="itr-file-akta">Fc Akta Pendirian Perusahaan *</label><input id="itr-file-akta" type="file" name="file_akta" accept=".pdf,.jpg,.jpeg,.png"></div>
-<div><label for="itr-file-sertifikat">Sertifikat Tanah / Letter C &amp; Peta Blok Desa *</label><input id="itr-file-sertifikat" type="file" name="file_sertifikat" accept=".pdf,.jpg,.jpeg,.png" required></div>
-<div><label for="itr-file-siteplan">Rencana Teknis Bangunan / Site Plan *</label><input id="itr-file-siteplan" type="file" name="file_siteplan" accept=".pdf,.jpg,.jpeg,.png" required></div>
-<div><label for="itr-file-denah">Denah dan Foto Lokasi *</label><input id="itr-file-denah" type="file" name="file_denah_foto" accept=".pdf,.jpg,.jpeg,.png" required></div>
-</div>
-<div class="itr-form-actions"><button type="submit" class="btn btn-gold">Kirim Pengajuan ITR</button><a class="btn btn-ghost" href="<?= base_url('pemohon') ?>">Kembali ke Dashboard</a></div><?= form_close() ?>
+<div class="notice">Setelah data ini disimpan, Anda akan diarahkan ke halaman unggah berkas persyaratan (satu per satu, seperti pada Pengajuan PBG).</div>
+<div class="itr-form-actions"><button type="submit" class="btn btn-gold">Simpan &amp; Lanjut Unggah Berkas</button><a class="btn btn-ghost" href="<?= base_url('pemohon') ?>">Kembali ke Dashboard</a></div><?= form_close() ?>
 
 <style>
 .itr-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:22px 0 32px}
@@ -101,7 +92,7 @@ $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_ar
   // ---- Toggle Perorangan / Perusahaan ----
   var form=document.getElementById('itrForm');
   var radios=form.querySelectorAll('input[name="jenis_pemohon"]');
-  var labelNama=document.getElementById('itr-label-nama'), labelAlamat=document.getElementById('itr-label-alamat'), labelKtp=document.getElementById('itr-label-ktp');
+  var labelNama=document.getElementById('itr-label-nama'), labelAlamat=document.getElementById('itr-label-alamat');
   function terapkanJenis(){
     var perusahaan = form.querySelector('input[name="jenis_pemohon"]:checked').value === 'perusahaan';
     form.classList.toggle('mode-perusahaan', perusahaan);
@@ -110,7 +101,6 @@ $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_ar
     form.querySelectorAll('.itr-perusahaan input,.itr-perusahaan textarea').forEach(function(el){ el.required=perusahaan; el.disabled=!perusahaan; });
     labelNama.textContent = perusahaan ? 'Nama Direktur *' : 'Nama Pemilik *';
     labelAlamat.textContent = perusahaan ? 'Alamat Perusahaan *' : 'Alamat *';
-    labelKtp.textContent = perusahaan ? 'KTP Direktur *' : 'KTP Pemohon *';
   }
   radios.forEach(function(r){ r.addEventListener('change', terapkanJenis); });
   terapkanJenis();

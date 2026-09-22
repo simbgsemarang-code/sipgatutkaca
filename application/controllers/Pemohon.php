@@ -47,7 +47,7 @@ class Pemohon extends CI_Controller {
 		$data['email_pengguna'] = $this->session->userdata('email');
 		$data['label_portal']   = isset($this->peta_label_portal[$asal]) ? $this->peta_label_portal[$asal] : 'Portal Pemohon';
 		$data['portal_content'] = $content;
-		$data['aktif_itr'] = $content === 'partials/pemohon_itr_form';
+		$data['aktif_itr'] = in_array($content, array('partials/pemohon_itr_form','partials/pemohon_itr_upload'), TRUE);
 		$this->load->helper(array('form','url'));
 		$this->load->view('pages/pemohon_dashboard', $data);
 	}
@@ -110,17 +110,6 @@ class Pemohon extends CI_Controller {
 			$this->render_portal('partials/pemohon_itr_form', array('error'=>trim($error),'old'=>$old)); return;
 		}
 
-		$this->load->library('upload'); $dir=APPPATH.'uploads/itr/';
-		if (!is_dir($dir) && !mkdir($dir,0750,TRUE)) { show_error('Penyimpanan berkas tidak tersedia.',503); return; }
-		$uploaded=array();$error='';
-		foreach ($file_jenis as $field=>$label) {
-			if (empty($_FILES[$field]['name'])) { $error='Seluruh lampiran wajib diunggah.'; break; }
-			$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf|jpg|jpeg|png','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
-			if (!$this->upload->do_upload($field)) { $error=$label.': '.strip_tags($this->upload->display_errors('','')); break; }
-			$uploaded[$field]=$this->upload->data('file_name');
-		}
-		if ($error) { foreach($uploaded as $file) @unlink($dir.$file); $this->render_portal('partials/pemohon_itr_form',array('error'=>$error,'old'=>$old)); return; }
-
 		$lat_sum=0;$lng_sum=0; foreach($titik as $t){$lat_sum+=(float)$t['lat'];$lng_sum+=(float)$t['lng'];}
 		$n=count($titik);
 		$payload = $old;
@@ -131,12 +120,45 @@ class Pemohon extends CI_Controller {
 		if ($jenis === 'perusahaan') { $payload['nik']=null; $payload['pekerjaan']=null; }
 		else { $payload['nib']=null; }
 
-		$uid=(int)$this->session->userdata('user_id'); $this->db->trans_begin();
-		$this->db->insert('pengajuan_itr',array_merge($payload,$uploaded,array('user_id'=>$uid,'status'=>'diajukan'))); $id=(int)$this->db->insert_id();
+		$uid=(int)$this->session->userdata('user_id');
+		$this->db->insert('pengajuan_itr',array_merge($payload,array('user_id'=>$uid,'status'=>'diajukan'))); $id=(int)$this->db->insert_id();
 		$number='ITR-'.date('Ymd').'-'.sprintf('%06d',$id); $this->db->where('id',$id)->update('pengajuan_itr',array('no_permohonan'=>$number));
-		$this->db->insert('aktivitas_itr',array('user_id'=>$uid,'pengajuan_id'=>$id,'keterangan'=>'Pengajuan '.$number.' dikirim beserta seluruh dokumen.','created_at'=>date('Y-m-d H:i:s')));
-		if (!$this->db->trans_status()) { $this->db->trans_rollback(); foreach($uploaded as $file) @unlink($dir.$file); show_error('Pengajuan gagal disimpan. Silakan ulangi.',500); return; }
-		$this->db->trans_commit(); $this->session->unset_userdata('itr_form_token'); $this->session->set_flashdata('sukses','Pengajuan ITR berhasil dikirim. Nomor permohonan: '.$number); redirect('pemohon');
+		$this->db->insert('aktivitas_itr',array('user_id'=>$uid,'pengajuan_id'=>$id,'keterangan'=>'Pengajuan '.$number.' dikirim, menunggu lampiran berkas.','created_at'=>date('Y-m-d H:i:s')));
+		$this->session->unset_userdata('itr_form_token'); $this->session->set_flashdata('sukses','Data pengajuan ITR tersimpan. Nomor permohonan: '.$number.'. Lanjutkan unggah berkas persyaratan di bawah.'); redirect('pemohon/upload-berkas-itr/'.$id);
+	}
+
+	/** Berkas ITR diunggah terpisah setelah data tersimpan - satu field per permintaan, seperti Upload Berkas PBG. */
+	public function upload_berkas_itr($id)
+	{
+		$id=(int)$id;
+		$row=$this->db->where('id',$id)->where('user_id',(int)$this->session->userdata('user_id'))->get('pengajuan_itr')->row_array();
+		if (!$row) show_404();
+		$perusahaan = ($row['jenis_pemohon']??'perorangan')==='perusahaan';
+		$files = $perusahaan ? array_merge($this->itr_file_umum,$this->itr_file_perusahaan) : $this->itr_file_umum;
+		$errors=array();
+		if ($this->input->method(TRUE)==='POST')
+		{
+			$this->load->library('upload'); $dir=APPPATH.'uploads/itr/';
+			if (!is_dir($dir) && !mkdir($dir,0750,TRUE)) { show_error('Penyimpanan berkas tidak tersedia.',503); return; }
+			$terunggah=0;
+			foreach ($files as $field=>$label)
+			{
+				if (empty($_FILES[$field]['name'])) continue;
+				$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf|jpg|jpeg|png','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
+				if ($this->upload->do_upload($field))
+				{
+					$lama=$row[$field];
+					$this->db->where('id',$id)->update('pengajuan_itr',array($field=>$this->upload->data('file_name')));
+					if ($lama) @unlink($dir.$lama);
+					$terunggah++;
+				}
+				else { $errors[]=$label.': '.strip_tags($this->upload->display_errors('','')); }
+			}
+			if (!$terunggah && empty($errors)) $errors[]='Pilih minimal satu berkas untuk diunggah.';
+			if ($terunggah) $this->session->set_flashdata('sukses','Berkas berhasil diunggah.');
+			$row=$this->db->where('id',$id)->get('pengajuan_itr')->row_array();
+		}
+		$this->render_portal('partials/pemohon_itr_upload', array('row'=>$row,'files'=>$files,'errors'=>$errors));
 	}
 
 	public function berkas_itr($id=0,$field='')
