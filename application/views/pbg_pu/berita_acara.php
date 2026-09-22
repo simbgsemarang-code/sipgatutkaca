@@ -17,6 +17,7 @@ body{margin:0;background:#eef2f4;color:#1a1a1a;font:400 15px/1.7 'Times New Roma
 .toolbar .primary{background:linear-gradient(135deg,#c9a24b,#e4c87b);color:#102536;border:0}
 .sheet{max-width:800px;margin:28px auto 60px;padding:56px 64px;background:#fff;box-shadow:0 12px 32px rgba(21,47,69,.12)}
 .kop{text-align:center;margin-bottom:26px}
+.kop img{width:70px;height:auto;margin-bottom:8px}
 .kop .instansi{font:700 14px Arial,sans-serif;letter-spacing:.03em;margin:0}
 .kop .daerah{font:700 14px Arial,sans-serif;margin:2px 0 14px}
 .kop hr{border:0;border-top:3px double #000;margin:0}
@@ -54,6 +55,7 @@ table.ttd td.garis{width:260px}
 </div>
 <div class="sheet">
   <div class="kop">
+    <img src="<?= base_url('assets/img/lambang-cilacap.webp') ?>" alt="Lambang Kabupaten Cilacap">
     <p class="instansi">PEMERINTAH KABUPATEN CILACAP</p>
     <p class="daerah">TIM PROFESI AHLI PERSETUJUAN BANGUNAN GEDUNG</p>
     <hr>
