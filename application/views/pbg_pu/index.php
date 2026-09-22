@@ -9,7 +9,7 @@
 <?php if(empty($daftar)):?><tr><td class="pbg-list-empty" colspan="8">Belum ada pengajuan. Klik <b>+ Tambah Pengajuan</b> untuk mulai.</td></tr><?php endif;?>
 <?php foreach($daftar as $r):?><tr><td data-label="Jenis"><span class="badge diajukan">PBG</span></td><td data-label="No. Permohonan"><?= htmlspecialchars($r['no_permohonan']) ?></td><td data-label="Nama Pemohon"><?= htmlspecialchars($r['nama_pemohon']) ?></td><td data-label="Nomor Registrasi"><?= htmlspecialchars($r['nik']?:'—') ?></td><td data-label="Keterangan"><?= htmlspecialchars($r['keterangan']?:'—') ?></td><td data-label="Tanggal"><?= date('d/m/Y',strtotime($r['created_at'])) ?></td><td data-label="Status"><span class="badge <?= $r['status'] ?>"><?= pbg_status_label($r['status'], $r['tahap']) ?></span></td><td data-label="Aksi"><select class="aksi-select" onchange="pbgAksi(this)">
   <option value="">Pilih Aksi</option>
-  <option value="<?= base_url('pengajuan-pbg/tahap/'.$r['id']) ?>">Lihat</option>
+  <option value="<?= base_url('pengajuan-pbg/tahap/'.$r['id']) ?>">Proses Pengajuan</option>
   <?php if(!empty($ba_terbaru[$r['id']])):?><option value="<?= base_url('pengajuan-pbg/berita-acara/'.$ba_terbaru[$r['id']]) ?>" data-blank="1">Unduh BA Terbaru</option><?php endif;?>
   <?php if(!in_array($r['status'],array('disetujui','ditolak'),TRUE)):?><option value="<?= base_url('pengajuan-pbg/upload-berkas/'.$r['id']) ?>">Upload Berkas</option><?php endif;?>
   <?php if($r['status']==='diajukan'):?>
