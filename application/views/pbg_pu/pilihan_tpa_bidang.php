@@ -11,7 +11,6 @@
         </label>
       <?php endforeach; ?>
     </div>
-    <small class="multi-hint">Centang TPA berstatus Perlu Perbaikan yang akan menerima hasil perbaikan. Konsultasi ulang dapat dikirim setelah berkas perbaikan diunggah dan seluruh TPA selesai mereview.</small>
   <?php else: ?>
     <select multiple size="4" name="tpa_<?= htmlspecialchars($kode,ENT_QUOTES,'UTF-8') ?>[]" class="tpa-multiple" required>
       <?php foreach($tpa_per_bidang[$kode] as $tpa): ?><option value="<?= (int)$tpa['id'] ?>"><?= htmlspecialchars($tpa['nama'].' ('.$tpa['email'].')',ENT_QUOTES,'UTF-8') ?></option><?php endforeach; ?>
