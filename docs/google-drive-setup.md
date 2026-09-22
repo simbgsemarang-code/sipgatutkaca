@@ -65,6 +65,20 @@ yang sudah terlanjur ada di Drive akun lama tetap tersimpan di sana
 (tautannya di database tetap mengarah ke sana); hanya unggahan
 BARU yang akan masuk ke folder/akun yang baru.
 
+## Berkas yang SENGAJA tidak dipindah ke Drive
+
+KTP & sertifikat tanah pemohon ITR (`Pemohon::simpan_itr`, disimpan di
+`application/uploads/itr/`) dan berkas PBG jalur lama
+(`Pengajuan_pbg`, disimpan di `application/uploads/pengajuan_pbg/`)
+tetap di disk server, atas keputusan eksplisit (2026-09-22). Alasannya:
+kedua jalur itu bersifat privat - hanya pemilik yang login yang bisa
+mengaksesnya lewat controller yang memeriksa kepemilikan. Google Drive
+lewat service account hanya bisa dibagikan sebagai "siapa saja dengan
+tautan", yang akan menurunkan privasi dokumen kependudukan tersebut.
+Kalau nanti keputusan ini ingin diubah, `berkas_simpan()` di
+`application/helpers/berkas_helper.php` bisa dipakai di kedua
+controller itu juga - tapi pertimbangkan dulu implikasi privasinya.
+
 ## Kalau belum sempat setup (default saat ini)
 
 Selama `gdrive_enabled` masih `false` (atau file kredensialnya belum
