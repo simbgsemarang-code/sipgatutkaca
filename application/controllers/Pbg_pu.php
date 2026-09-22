@@ -170,6 +170,11 @@ class Pbg_pu extends CI_Controller
 			$raw=$this->input->post('tpa_'.$bidang); $uids=is_array($raw)?array_values(array_unique(array_map('intval',$raw))):array();
 			if(empty($uids))show_error('Pilih minimal satu TPA untuk bidang '.$bidang.'.',422);
 			foreach($uids as $uid){
+				if($akhir){
+					$anggota_sebelumnya=false;
+					foreach($akhir['anggota'] as $member){if((int)$member['tpa_user_id']===$uid&&$member['status']==='perlu_perbaikan')$anggota_sebelumnya=true;}
+					if(!$anggota_sebelumnya)show_error('Hasil perbaikan hanya dapat dikirim kepada TPA yang meminta perbaikan pada bidang '.$bidang.'.',422);
+				}
 				foreach($akhir['anggota']??array() as $member){if((int)$member['tpa_user_id']===$uid&&$member['status']==='direkomendasikan')show_error('TPA yang telah merekomendasikan tidak dapat dipilih lagi.',422);}
 				if(!$uid||!$this->db->where('id',$uid)->where('role',$role)->count_all_results('users'))show_error('Pilihan TPA '.$bidang.' tidak valid.',422);
 			}
