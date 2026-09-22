@@ -68,45 +68,81 @@ class Pemohon extends CI_Controller {
 		redirect('pemohon');
 	}
 
+	/** Field sesuai Format Surat Permohonan ITR 2021 (Perorangan & Perusahaan). */
+	private $itr_field_umum = array('no_hp','email','jenis_kegiatan','fungsi_bangunan','lokasi_jalan','lokasi_desa_kel','lokasi_kecamatan','luas_lahan','status_tanah','penggunaan_air');
+	private $itr_field_opsional = array('lokasi_rt_rw','no_npwp','luas_bangunan','lantai_bangunan','keterangan_perijinan');
+	private $itr_field_perorangan = array('nama_pemohon','nik','pekerjaan','alamat_pemohon');
+	private $itr_field_perusahaan = array('nib','nama_pemohon','alamat_pemohon'); // nama_pemohon = Nama Direktur untuk perusahaan
+	private $itr_file_umum = array('file_permohonan'=>'Surat Permohonan','file_ktp'=>'KTP','file_sertifikat'=>'Sertifikat Tanah/Letter C','file_siteplan'=>'Rencana Teknis/Site Plan','file_denah_foto'=>'Denah dan Foto Lokasi');
+	private $itr_file_perusahaan = array('file_nib'=>'NIB','file_npwp'=>'NPWP','file_akta'=>'Akta Pendirian Perusahaan');
+
 	public function simpan_itr()
 	{
 		if ($this->input->method() !== 'post') { show_404(); return; }
 		$token = (string)$this->session->userdata('itr_form_token');
 		if (!$token || !hash_equals($token, (string)$this->input->post('itr_token'))) { show_error('Formulir kedaluwarsa. Muat ulang halaman.',403); return; }
 		if (!$this->db->table_exists('pengajuan_itr') || !$this->db->table_exists('aktivitas_itr')) { show_error('Database pengajuan ITR belum dimigrasi.',503); return; }
-		$fields = array('nama_pemohon','nik','no_hp','email','alamat_lokasi','luas_lahan','rencana_kegiatan','latitude','longitude');
-		$old=array(); foreach($fields as $field) $old[$field]=trim((string)$this->input->post($field));
+
+		$jenis = (string) $this->input->post('jenis_pemohon');
+		if (!in_array($jenis, array('perorangan','perusahaan'), TRUE)) $jenis = 'perorangan';
+		$field_jenis = $jenis === 'perorangan' ? $this->itr_field_perorangan : $this->itr_field_perusahaan;
+		$file_jenis  = $jenis === 'perorangan' ? $this->itr_file_umum : array_merge($this->itr_file_umum, $this->itr_file_perusahaan);
+
+		$semua_field = array_unique(array_merge($this->itr_field_umum, $this->itr_field_opsional, $this->itr_field_perorangan, $this->itr_field_perusahaan));
+		$old = array(); foreach ($semua_field as $f) $old[$f] = trim((string) $this->input->post($f));
+		$old['jenis_pemohon'] = $jenis;
+
 		$this->load->library('form_validation');
-		foreach($fields as $field) $this->form_validation->set_rules($field, ucwords(str_replace('_',' ',$field)), 'required|trim');
-		$this->form_validation->set_rules('nik','NIK','required|exact_length[16]|numeric');
+		foreach ($this->itr_field_umum as $field) $this->form_validation->set_rules($field, ucwords(str_replace('_',' ',$field)), 'required|trim');
+		foreach ($field_jenis as $field) $this->form_validation->set_rules($field, ucwords(str_replace('_',' ',$field)), 'required|trim');
+		if ($jenis === 'perorangan') $this->form_validation->set_rules('nik','NIK','required|exact_length[16]|numeric');
 		$this->form_validation->set_rules('email','Email','required|valid_email|max_length[150]');
-		$this->form_validation->set_rules('nama_pemohon','Nama pemohon','required|max_length[150]');
-		$this->form_validation->set_rules('no_hp','Nomor HP','required|max_length[30]');
 		$this->form_validation->set_rules('luas_lahan','Luas lahan','required|numeric|greater_than[0]|less_than[1000000000000]');
-		$this->form_validation->set_rules('latitude','Latitude','required|numeric|greater_than_equal_to[-90]|less_than_equal_to[90]');
-		$this->form_validation->set_rules('longitude','Longitude','required|numeric|greater_than_equal_to[-180]|less_than_equal_to[180]');
-		if (!$this->form_validation->run()) { $this->render_portal('partials/pemohon_itr_form',array('error'=>strip_tags(validation_errors()),'old'=>$old)); return; }
+
+		$titik = json_decode((string) $this->input->post('titik_koordinat'), TRUE);
+		$titik_valid = is_array($titik) && count($titik) >= 4;
+		if ($titik_valid) foreach ($titik as $t) { if (!isset($t['lat'],$t['lng']) || !is_numeric($t['lat']) || !is_numeric($t['lng'])) { $titik_valid = FALSE; break; } }
+
+		if (!$this->form_validation->run() || !$titik_valid)
+		{
+			$error = !$this->form_validation->run() ? strip_tags(validation_errors()) : '';
+			if (!$titik_valid) $error .= ' Tandai minimal 4 titik koordinat di peta membentuk poligon lokasi.';
+			$this->render_portal('partials/pemohon_itr_form', array('error'=>trim($error),'old'=>$old)); return;
+		}
+
 		$this->load->library('upload'); $dir=APPPATH.'uploads/itr/';
 		if (!is_dir($dir) && !mkdir($dir,0750,TRUE)) { show_error('Penyimpanan berkas tidak tersedia.',503); return; }
 		$uploaded=array();$error='';
-		foreach(array('file_permohonan','file_ktp','file_sertifikat','file_siteplan') as $field) {
+		foreach ($file_jenis as $field=>$label) {
 			if (empty($_FILES[$field]['name'])) { $error='Seluruh lampiran wajib diunggah.'; break; }
 			$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf|jpg|jpeg|png','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
-			if (!$this->upload->do_upload($field)) { $error=strip_tags($this->upload->display_errors()); break; }
+			if (!$this->upload->do_upload($field)) { $error=$label.': '.strip_tags($this->upload->display_errors('','')); break; }
 			$uploaded[$field]=$this->upload->data('file_name');
 		}
-		if ($error) { foreach($uploaded as $file) unlink($dir.$file); $this->render_portal('partials/pemohon_itr_form',array('error'=>$error,'old'=>$old)); return; }
+		if ($error) { foreach($uploaded as $file) @unlink($dir.$file); $this->render_portal('partials/pemohon_itr_form',array('error'=>$error,'old'=>$old)); return; }
+
+		$lat_sum=0;$lng_sum=0; foreach($titik as $t){$lat_sum+=(float)$t['lat'];$lng_sum+=(float)$t['lng'];}
+		$n=count($titik);
+		$payload = $old;
+		$payload['latitude']=round($lat_sum/$n,7); $payload['longitude']=round($lng_sum/$n,7);
+		$payload['titik_koordinat']=json_encode(array_map(function($t){return array('lat'=>(float)$t['lat'],'lng'=>(float)$t['lng']);},$titik));
+		$payload['alamat_lokasi']=trim($old['lokasi_jalan'].', RT/RW '.$old['lokasi_rt_rw'].', '.$old['lokasi_desa_kel'].', Kec. '.$old['lokasi_kecamatan'],' ,');
+		$payload['rencana_kegiatan']=$old['jenis_kegiatan'];
+		if ($jenis === 'perusahaan') { $payload['nik']=null; $payload['pekerjaan']=null; }
+		else { $payload['nib']=null; }
+
 		$uid=(int)$this->session->userdata('user_id'); $this->db->trans_begin();
-		$this->db->insert('pengajuan_itr',array_merge($old,$uploaded,array('user_id'=>$uid,'status'=>'diajukan'))); $id=(int)$this->db->insert_id();
+		$this->db->insert('pengajuan_itr',array_merge($payload,$uploaded,array('user_id'=>$uid,'status'=>'diajukan'))); $id=(int)$this->db->insert_id();
 		$number='ITR-'.date('Ymd').'-'.sprintf('%06d',$id); $this->db->where('id',$id)->update('pengajuan_itr',array('no_permohonan'=>$number));
 		$this->db->insert('aktivitas_itr',array('user_id'=>$uid,'pengajuan_id'=>$id,'keterangan'=>'Pengajuan '.$number.' dikirim beserta seluruh dokumen.','created_at'=>date('Y-m-d H:i:s')));
-		if (!$this->db->trans_status()) { $this->db->trans_rollback(); foreach($uploaded as $file) unlink($dir.$file); show_error('Pengajuan gagal disimpan. Silakan ulangi.',500); return; }
+		if (!$this->db->trans_status()) { $this->db->trans_rollback(); foreach($uploaded as $file) @unlink($dir.$file); show_error('Pengajuan gagal disimpan. Silakan ulangi.',500); return; }
 		$this->db->trans_commit(); $this->session->unset_userdata('itr_form_token'); $this->session->set_flashdata('sukses','Pengajuan ITR berhasil dikirim. Nomor permohonan: '.$number); redirect('pemohon');
 	}
 
 	public function berkas_itr($id=0,$field='')
 	{
-		if (!in_array($field,array('file_permohonan','file_ktp','file_sertifikat','file_siteplan'),TRUE) || !$this->db->table_exists('pengajuan_itr')) { show_404(); return; }
+		$field_sah = array_keys(array_merge($this->itr_file_umum, $this->itr_file_perusahaan));
+		if (!in_array($field,$field_sah,TRUE) || !$this->db->table_exists('pengajuan_itr')) { show_404(); return; }
 		$row=$this->db->where('id',(int)$id)->where('user_id',(int)$this->session->userdata('user_id'))->get('pengajuan_itr')->row_array();
 		if (!$row || empty($row[$field])) { show_404(); return; }
 		$file=APPPATH.'uploads/itr/'.basename($row[$field]); if(!is_file($file)){show_404();return;}
