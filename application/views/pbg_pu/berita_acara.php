@@ -39,7 +39,7 @@ ol li{margin-bottom:4px}
 .ttd-wrap{margin-top:10px}
 .ttd-tempat{margin-bottom:14px}
 table.ttd{width:100%;border-collapse:collapse;margin-top:6px}
-table.ttd td{border:1px solid #000;padding:14px 16px;vertical-align:top}
+table.ttd td{padding:14px 16px;vertical-align:top}
 table.ttd td.no{width:28px;text-align:center}
 table.ttd td.garis{width:260px}
 @media print{
