@@ -102,7 +102,7 @@ class Gdrive
 			$token = $this->access_token();
 			if (! $token) return NULL;
 
-			$file_id = $this->unggah_multipart($token, $path_lokal, $nama_file, $mime);
+			$file_id = $this->unggah_resumable($token, $path_lokal, $nama_file, $mime);
 			if (! $file_id) return NULL;
 
 			$this->buat_izin_publik($token, $file_id);
@@ -208,33 +208,60 @@ class Gdrive
 		return $this->token['nilai'];
 	}
 
-	private function unggah_multipart($token, $path_lokal, $nama_file, $mime)
+	/**
+	 * Upload via protokol "resumable" Google (bukan "multipart"), supaya
+	 * berkas di-stream langsung dari disk (CURLOPT_INFILE) - TIDAK pernah
+	 * dimuat penuh ke memori PHP sekaligus. Penting untuk berkas besar
+	 * (sampai 100MB): pendekatan lama (satu string multipart raksasa di
+	 * memori + timeout cURL 60 detik tetap) gagal diam-diam untuk berkas
+	 * besar dan jatuh ke penyimpanan lokal tanpa pesan error yang jelas.
+	 */
+	private function unggah_resumable($token, $path_lokal, $nama_file, $mime)
 	{
-		$boundary  = 'gdrive-' . bin2hex(random_bytes(12));
-		$metadata  = json_encode(array('name' => $nama_file, 'parents' => array($this->folder_id)));
-		$isi_file  = file_get_contents($path_lokal);
+		// Langkah 1: minta URL sesi upload dari Google.
+		$metadata = json_encode(array('name' => $nama_file, 'parents' => array($this->folder_id)));
+		$ch = curl_init('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id');
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $metadata);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			'Authorization: Bearer ' . $token,
+			'Content-Type: application/json; charset=UTF-8',
+			'X-Upload-Content-Type: ' . $mime,
+		));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADER, TRUE);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+		$resp1 = curl_exec($ch);
+		if ($resp1 === FALSE) { $err = curl_error($ch); curl_close($ch); throw new Exception('cURL error (mulai sesi): ' . $err); }
+		curl_close($ch);
 
-		$body  = "--{$boundary}\r\n";
-		$body .= "Content-Type: application/json; charset=UTF-8\r\n\r\n";
-		$body .= $metadata . "\r\n";
-		$body .= "--{$boundary}\r\n";
-		$body .= "Content-Type: {$mime}\r\n\r\n";
-		$body .= $isi_file . "\r\n";
-		$body .= "--{$boundary}--";
+		if (! preg_match('/^Location:\s*(\S+)/mi', $resp1, $m))
+		{
+			log_message('error', 'Gdrive: gagal memulai sesi resumable - ' . $resp1);
+			return NULL;
+		}
+		$upload_url = trim($m[1]);
 
-		$resp = $this->kirim_permintaan(
-			'POST',
-			'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
-			$token,
-			$body,
-			'raw',
-			array('Content-Type: multipart/related; boundary=' . $boundary)
-		);
+		// Langkah 2: kirim isi berkas langsung dari disk (streaming, hemat memori).
+		$fh = fopen($path_lokal, 'rb');
+		if (! $fh) { log_message('error', 'Gdrive: gagal membuka berkas lokal ' . $path_lokal); return NULL; }
 
-		$data = json_decode($resp, TRUE);
+		$ch2 = curl_init($upload_url);
+		curl_setopt($ch2, CURLOPT_PUT, TRUE);
+		curl_setopt($ch2, CURLOPT_INFILE, $fh);
+		curl_setopt($ch2, CURLOPT_INFILESIZE, filesize($path_lokal));
+		curl_setopt($ch2, CURLOPT_HTTPHEADER, array('Content-Type: ' . $mime));
+		curl_setopt($ch2, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch2, CURLOPT_TIMEOUT, 280); // berkas besar butuh waktu lebih lama dari panggilan API biasa
+		$resp2 = curl_exec($ch2);
+		fclose($fh);
+		if ($resp2 === FALSE) { $err = curl_error($ch2); curl_close($ch2); throw new Exception('cURL error (kirim berkas): ' . $err); }
+		curl_close($ch2);
+
+		$data = json_decode($resp2, TRUE);
 		if (empty($data['id']))
 		{
-			log_message('error', 'Gdrive: gagal unggah berkas - ' . $resp);
+			log_message('error', 'Gdrive: gagal unggah berkas - ' . $resp2);
 			return NULL;
 		}
 		return $data['id'];
