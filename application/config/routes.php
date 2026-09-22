@@ -74,4 +74,4 @@ $route['pengajuan-pbg/konsultasi/(:num)'] = 'pbg_pu/ajukan_konsultasi/$1';
 $route['tpa-pengajuan-pbg'] = 'pbg_tpa/index';
 $route['tpa-pengajuan-pbg/review/(:num)'] = 'pbg_tpa/review/$1';
 $route['pengajuan-pbg/hapus/(:num)'] = 'pbg_pu/hapus/$1';
-$route['pengajuan-pbg/berita-acara/(:num)/(:num)'] = 'berita_acara/pbg/$1/$2';
+$route['pengajuan-pbg/berita-acara/(:num)'] = 'berita_acara/pbg/$1';

@@ -4,6 +4,7 @@ $bulan_id = array(1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','A
 $ts       = strtotime($tanggal_ba);
 $ba_hari  = $hari_id[date('l', $ts)];
 $ba_tgl   = date('j', $ts) . ' ' . $bulan_id[(int) date('n', $ts)] . ' ' . date('Y', $ts);
+$ba_jam   = date('H:i', $ts) . ' WIB';
 ?>
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Berita Acara Konsultasi TPA · <?= htmlspecialchars($row['no_permohonan']) ?></title>
@@ -62,6 +63,7 @@ table.ttd td.garis{width:260px}
   </div>
   <h1 class="judul">BERITA ACARA KONSULTASI TPA</h1>
   <p class="nomor">NOMOR : <?= htmlspecialchars($nomor) ?></p>
+  <p class="nomor">Diterbitkan : <?= htmlspecialchars($ba_tgl) ?>, pukul <?= htmlspecialchars($ba_jam) ?> — setelah TPA <?= $bidang_label[$bidang_pemicu] ?> menyelesaikan review</p>
 
   <p class="pembuka">Konsultasi TPA Kabupaten Cilacap yang memeriksa dokumen rencana teknis pada hari <?= htmlspecialchars($ba_hari) ?>,
   tanggal <?= htmlspecialchars($ba_tgl) ?>, Konsultasi ke-<?= (int) $putaran ?> untuk bidang: Arsitektur, Struktur dan MEP atas :</p>
@@ -71,18 +73,19 @@ table.ttd td.garis{width:260px}
   <div class="field-row"><div class="label">Lokasi Bangunan</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['alamat_bangunan']) ?></div></div>
   <div class="field-row"><div class="label">Nomor Registrasi</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['nik'] ?: '—') ?></div></div>
 
-  <p class="saran-heading">Saran dan Masukan dari Tim Profesi Ahli</p>
-  <?php foreach (array('arsitektur','struktur','mep') as $kode): $members = $per_bidang[$kode] ?? array(); ?>
-    <p class="bidang-heading">TPA <?= $bidang_label[$kode] ?><?php if(!empty($members)):?> <span class="nama-tpa">(<?= htmlspecialchars(implode(', ', array_map(function($m){return $m['nama_tpa'] ?: 'TPA';}, $members))) ?>)</span><?php endif;?> :</p>
+  <p class="saran-heading">Saran dan Masukan dari Tim Profesi Ahli <small style="font-weight:400">(review terakhir tiap bidang per saat BA ini terbit)</small></p>
+  <?php foreach (array('arsitektur','struktur','mep') as $kode): $s = $snapshot[$kode] ?? null; ?>
+    <p class="bidang-heading">TPA <?= $bidang_label[$kode] ?><?php if($s):?> <span class="nama-tpa">(<?= htmlspecialchars($s['nama_tpa'] ?: 'TPA') ?> — <?= date('d/m/Y H:i', strtotime($s['reviewed_at'])) ?>)</span><?php endif;?> :</p>
     <?php
       $poin = array();
-      foreach ($members as $m) {
-        $teks = trim((string) $m['rekomendasi_tpa']);
-        if ($teks === '') continue;
+      if ($s) {
+        $teks = trim((string) $s['rekomendasi']);
         foreach (preg_split('/\r\n|\r|\n/', $teks) as $baris) { $baris = trim($baris); if ($baris !== '') $poin[] = $baris; }
       }
     ?>
-    <?php if (empty($poin)): ?>
+    <?php if (!$s): ?>
+      <p class="kosong">Belum ada review dari bidang ini.</p>
+    <?php elseif (empty($poin)): ?>
       <p class="kosong">Tidak ada saran dan masukan tertulis.</p>
     <?php else: ?>
       <ol><?php foreach ($poin as $p): ?><li><?= htmlspecialchars($p) ?></li><?php endforeach; ?></ol>
@@ -93,10 +96,10 @@ table.ttd td.garis{width:260px}
   <div class="ttd-wrap">
     <p class="ttd-tempat">Cilacap, <?= htmlspecialchars($ba_tgl) ?></p>
     <table class="ttd"><tbody>
-    <?php $no = 1; foreach (array('arsitektur','struktur','mep') as $kode): $members = $per_bidang[$kode] ?? array(); ?>
+    <?php $no = 1; foreach (array('arsitektur','struktur','mep') as $kode): $s = $snapshot[$kode] ?? null; ?>
       <tr>
         <td class="no"><?= $no++ ?></td>
-        <td>TPA <?= $bidang_label[$kode] ?><?php if(!empty($members)):?><br><small><?= htmlspecialchars(implode(', ', array_map(function($m){return $m['nama_tpa'] ?: 'TPA';}, $members))) ?></small><?php endif;?></td>
+        <td>TPA <?= $bidang_label[$kode] ?><?php if($s):?><br><small><?= htmlspecialchars($s['nama_tpa'] ?: 'TPA') ?></small><?php endif;?></td>
         <td class="garis">………………………..</td>
       </tr>
     <?php endforeach; ?>
