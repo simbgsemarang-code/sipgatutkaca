@@ -4,7 +4,6 @@ $bulan_id = array(1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','A
 $ts       = strtotime($tanggal_ba);
 $ba_hari  = $hari_id[date('l', $ts)];
 $ba_tgl   = date('j', $ts) . ' ' . $bulan_id[(int) date('n', $ts)] . ' ' . date('Y', $ts);
-$ba_jam   = date('H:i', $ts) . ' WIB';
 ?>
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Berita Acara Konsultasi TPA · <?= htmlspecialchars($row['no_permohonan']) ?></title>
@@ -63,7 +62,6 @@ table.ttd td.garis{width:260px}
   </div>
   <h1 class="judul">BERITA ACARA KONSULTASI TPA</h1>
   <p class="nomor">NOMOR : <?= htmlspecialchars($nomor) ?></p>
-  <p class="nomor">Diterbitkan : <?= htmlspecialchars($ba_tgl) ?>, pukul <?= htmlspecialchars($ba_jam) ?> — setelah TPA <?= $bidang_label[$bidang_pemicu] ?> menyelesaikan review</p>
 
   <p class="pembuka">Konsultasi TPA Kabupaten Cilacap yang memeriksa dokumen rencana teknis pada hari <?= htmlspecialchars($ba_hari) ?>,
   tanggal <?= htmlspecialchars($ba_tgl) ?>, Konsultasi ke-<?= (int) $putaran ?> untuk bidang: Arsitektur, Struktur dan MEP atas :</p>
