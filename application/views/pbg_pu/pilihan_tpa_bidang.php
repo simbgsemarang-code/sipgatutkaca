@@ -6,7 +6,7 @@
     <div class="tpa-recipient-list">
       <?php foreach($akhir['anggota'] as $anggota): ?>
         <label class="tpa-recipient">
-          <input type="checkbox" name="tpa_<?= htmlspecialchars($kode,ENT_QUOTES,'UTF-8') ?>[]" value="<?= (int)$anggota['tpa_user_id'] ?>" <?= $anggota['status']!=='perlu_perbaikan'?'disabled':'' ?>>
+          <input type="checkbox" name="tpa_<?= htmlspecialchars($kode,ENT_QUOTES,'UTF-8') ?>[]" value="<?= (int)$anggota['tpa_user_id'] ?>" <?= $anggota['status']!=='perlu_perbaikan'?'disabled':'checked' ?>>
           <span><strong><?= htmlspecialchars($anggota['nama_tpa']?:'TPA',ENT_QUOTES,'UTF-8') ?></strong><small><?= $anggota['status']==='direkomendasikan'?'Sudah merekomendasikan':($anggota['status']==='ditugaskan'?'Menunggu hasil review':'Perlu perbaikan') ?></small></span>
         </label>
       <?php endforeach; ?>
