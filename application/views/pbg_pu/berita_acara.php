@@ -69,7 +69,7 @@ table.ttd td.garis{width:260px}
   tanggal <?= htmlspecialchars($ba_tgl) ?>, Konsultasi ke-<?= (int) $putaran ?> untuk bidang: Arsitektur, Struktur dan MEP atas :</p>
 
   <div class="field-row"><div class="label">Nama Pemilik</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['nama_pemohon']) ?></div></div>
-  <div class="field-row"><div class="label">Nama Bangunan Gedung</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['jenis_bangunan']) ?></div></div>
+  <div class="field-row"><div class="label">Nama Bangunan Gedung</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['nama_bangunan'] ?: '—') ?></div></div>
   <div class="field-row"><div class="label">Lokasi Bangunan</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['alamat_bangunan']) ?></div></div>
   <div class="field-row"><div class="label">Nomor Registrasi</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['nik'] ?: '—') ?></div></div>
 

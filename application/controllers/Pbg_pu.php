@@ -60,10 +60,12 @@ class Pbg_pu extends CI_Controller
 				$payload=array(
 					'user_id'=>$this->pu_id(),'nama_pemohon'=>trim($this->input->post('nama_pemohon')),
 					'nik'=>trim($this->input->post('nik'))?:null,
+					'nama_bangunan'=>trim($this->input->post('nama_bangunan')),
+					'alamat_bangunan'=>trim($this->input->post('alamat_bangunan')),
 					'keterangan'=>trim($this->input->post('keterangan'))?:null,
 					'updated_at'=>date('Y-m-d H:i:s')
 				);
-				if(!$row) $payload+=array('no_hp'=>'','email'=>null,'alamat_bangunan'=>'','jenis_bangunan'=>'','kategori_bangunan'=>'sederhana','luas_bangunan'=>null);
+				if(!$row) $payload+=array('no_hp'=>'','email'=>null,'jenis_bangunan'=>'','kategori_bangunan'=>'sederhana','luas_bangunan'=>null);
 				if(empty($data['errors'])){
 					if($row){ $this->pbg->update_owned($row['id'],$this->pu_id(),$payload); }
 					else { $payload+=array('no_permohonan'=>$this->pbg->generate_no(),'status'=>'diajukan','tahap'=>1,'created_at'=>date('Y-m-d H:i:s')); $this->pbg->insert($payload); }
