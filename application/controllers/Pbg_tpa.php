@@ -17,6 +17,7 @@ class Pbg_tpa extends CI_Controller
 		$fields=array('arsitektur'=>array('file_rencana_teknis'=>'Dokumen Arsitektur'),'struktur'=>array('file_teknis_struktur'=>'Dokumen Struktur'),'mep'=>array('file_checklist_mep'=>'Dokumen MEP'));
 		$dokumen=array($row['bidang']=>$fields[$row['bidang']]);
 		foreach($fields as $bidang=>$berkas){if($bidang!==$row['bidang'])$dokumen[$bidang]=$berkas;}
-		$data=array('row'=>$row,'dokumen'=>$dokumen,'nama_pengguna'=>$this->session->userdata('nama'),'error'=>$error);$this->load->view('pbg_tpa/review',$data);
+		$riwayat_ba=$this->db->where('permohonan_id',$row['permohonan_id'])->where('status !=','ditugaskan')->order_by('putaran','DESC')->order_by('bidang','ASC')->get('konsultasi_pbg')->result_array();
+		$data=array('row'=>$row,'dokumen'=>$dokumen,'riwayat_ba'=>$riwayat_ba,'nama_pengguna'=>$this->session->userdata('nama'),'error'=>$error);$this->load->view('pbg_tpa/review',$data);
 	}
 }

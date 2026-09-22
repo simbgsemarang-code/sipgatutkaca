@@ -41,6 +41,10 @@ class Pbg_pu extends CI_Controller
 	public function index()
 	{
 		$data=$this->common(); $data['daftar']=$this->pbg->by_pu($this->pu_id());
+		$data['ba_terbaru']=array();
+		foreach($this->db->select('permohonan_id, MAX(id) AS id')->where('status !=','ditugaskan')->group_by('permohonan_id')->get('konsultasi_pbg')->result_array() as $r){
+			$data['ba_terbaru'][$r['permohonan_id']]=$r['id'];
+		}
 		$this->load->view('pbg_pu/index',$data);
 	}
 

@@ -19,6 +19,18 @@
           <?php endif; ?>
         </div>
       <?php endforeach; endif; ?>
+      <?php
+        $ba_bidang = array();
+        foreach ((array) ($konsultasi_riwayat ?? array()) as $k) { if ($k['bidang'] === $kode && $k['status'] !== 'ditugaskan') $ba_bidang[] = $k; }
+      ?>
+      <?php if (!empty($ba_bidang)): ?>
+        <div class="tpa-review-ba">
+          <small>Berita Acara bidang ini:</small>
+          <?php foreach ($ba_bidang as $k): ?>
+            <a class="btn" target="_blank" href="<?= base_url('pengajuan-pbg/berita-acara/'.$k['id']) ?>">Unduh BA Putaran <?= (int) $k['putaran'] ?></a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
     </article>
     <?php endforeach; ?>
   </div>
