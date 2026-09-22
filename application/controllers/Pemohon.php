@@ -14,7 +14,7 @@ class Pemohon extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->library('session');
-		$this->load->helper(array('wilayah_cilacap','berkas'));
+		$this->load->helper(array('wilayah_cilacap','berkas','itr'));
 		$this->_wajib_pemohon();
 	}
 
@@ -74,10 +74,7 @@ class Pemohon extends CI_Controller {
 	private $itr_field_opsional = array('lokasi_rt_rw','no_npwp','luas_bangunan','lantai_bangunan','keterangan_perijinan');
 	private $itr_field_perorangan = array('nama_pemohon','nik','pekerjaan','alamat_pemohon');
 	private $itr_field_perusahaan = array('nib','nama_pemohon','alamat_pemohon'); // nama_pemohon = Nama Direktur untuk perusahaan
-	private $itr_file_umum = array('file_permohonan'=>'Surat Permohonan','file_ktp'=>'KTP','file_sertifikat'=>'Sertifikat Tanah/Letter C','file_siteplan'=>'Rencana Teknis/Site Plan','file_denah_foto'=>'Denah dan Foto Lokasi');
-	private $itr_file_perusahaan = array('file_nib'=>'NIB','file_npwp'=>'NPWP','file_akta'=>'Akta Pendirian Perusahaan');
-	/** Dokumen identitas paling sensitif - TETAP di server (privat, lihat docs/google-drive-setup.md). Lampiran ITR lainnya boleh ke Google Drive. */
-	private $itr_file_privat = array('file_ktp','file_npwp');
+	// Daftar field berkas ITR (itr_file_umum/itr_file_perusahaan/itr_file_privat) ada di application/helpers/itr_helper.php - sumber tunggal, dipakai juga oleh Admin_itr.
 
 	public function simpan_itr()
 	{
@@ -89,7 +86,7 @@ class Pemohon extends CI_Controller {
 		$jenis = (string) $this->input->post('jenis_pemohon');
 		if (!in_array($jenis, array('perorangan','perusahaan'), TRUE)) $jenis = 'perorangan';
 		$field_jenis = $jenis === 'perorangan' ? $this->itr_field_perorangan : $this->itr_field_perusahaan;
-		$file_jenis  = $jenis === 'perorangan' ? $this->itr_file_umum : array_merge($this->itr_file_umum, $this->itr_file_perusahaan);
+		$file_jenis  = itr_files_untuk($jenis);
 
 		$semua_field = array_unique(array_merge($this->itr_field_umum, $this->itr_field_opsional, $this->itr_field_perorangan, $this->itr_field_perusahaan));
 		$old = array(); foreach ($semua_field as $f) $old[$f] = trim((string) $this->input->post($f));
@@ -140,8 +137,8 @@ class Pemohon extends CI_Controller {
 		$id=(int)$id;
 		$row=$this->db->where('id',$id)->where('user_id',(int)$this->session->userdata('user_id'))->get('pengajuan_itr')->row_array();
 		if (!$row) show_404();
-		$perusahaan = ($row['jenis_pemohon']??'perorangan')==='perusahaan';
-		$files = $perusahaan ? array_merge($this->itr_file_umum,$this->itr_file_perusahaan) : $this->itr_file_umum;
+		$files = itr_files_untuk($row['jenis_pemohon']??'perorangan');
+		$privat = itr_file_privat();
 		$errors=array();
 		if ($this->input->method(TRUE)==='POST')
 		{
@@ -155,28 +152,46 @@ class Pemohon extends CI_Controller {
 				if ($this->upload->do_upload($field))
 				{
 					$lama=$row[$field];
-					$nilai = in_array($field,$this->itr_file_privat,TRUE) ? $this->upload->data('file_name') : berkas_simpan($this->upload->data());
+					$nilai = in_array($field,$privat,TRUE) ? $this->upload->data('file_name') : berkas_simpan($this->upload->data());
 					$this->db->where('id',$id)->update('pengajuan_itr',array($field=>$nilai));
 					if ($lama && stripos($lama,'http')!==0) @unlink($dir.$lama);
+					// Berkas baru/ganti selalu kembali ke antrean review - status lama (mis. ditolak) tidak relevan lagi.
+					$this->db->where('pengajuan_id',$id)->where('field',$field)->delete('pengajuan_itr_berkas_status');
+					$this->db->insert('pengajuan_itr_berkas_status',array('pengajuan_id'=>$id,'field'=>$field,'status'=>'menunggu'));
 					$terunggah++;
 				}
 				else { $errors[]=$label.': '.strip_tags($this->upload->display_errors('','')); }
 			}
 			if (!$terunggah && empty($errors)) $errors[]='Pilih minimal satu berkas untuk diunggah.';
-			if ($terunggah) $this->session->set_flashdata('sukses','Berkas berhasil diunggah.');
+			if ($terunggah)
+			{
+				$this->session->set_flashdata('sukses','Berkas berhasil diunggah, menunggu ditinjau admin.');
+				$this->db->insert('aktivitas_itr',array('user_id'=>(int)$this->session->userdata('user_id'),'pengajuan_id'=>$id,'keterangan'=>'Pemohon mengunggah '.$terunggah.' berkas untuk ditinjau ulang.','created_at'=>date('Y-m-d H:i:s')));
+			}
 			$row=$this->db->where('id',$id)->get('pengajuan_itr')->row_array();
 		}
-		$this->render_portal('partials/pemohon_itr_upload', array('row'=>$row,'files'=>$files,'errors'=>$errors));
+		$status_berkas = itr_status_berkas($id);
+		$this->render_portal('partials/pemohon_itr_upload', array('row'=>$row,'files'=>$files,'errors'=>$errors,'status_berkas'=>$status_berkas));
 	}
 
 	public function berkas_itr($id=0,$field='')
 	{
-		$field_sah = array_keys(array_merge($this->itr_file_umum, $this->itr_file_perusahaan));
+		$field_sah = array_keys(array_merge(itr_file_umum(), itr_file_perusahaan()));
 		if (!in_array($field,$field_sah,TRUE) || !$this->db->table_exists('pengajuan_itr')) { show_404(); return; }
 		$row=$this->db->where('id',(int)$id)->where('user_id',(int)$this->session->userdata('user_id'))->get('pengajuan_itr')->row_array();
 		if (!$row || empty($row[$field])) { show_404(); return; }
 		if (stripos($row[$field],'http')===0) { redirect($row[$field]); return; }
 		$file=APPPATH.'uploads/itr/'.basename($row[$field]); if(!is_file($file)){show_404();return;}
+		$this->load->helper('download'); force_download(basename($file),file_get_contents($file),TRUE);
+	}
+
+	/** Dokumen hasil ITR resmi (PDF) yang diunggah admin setelah semua berkas diterima. */
+	public function hasil_itr($id=0)
+	{
+		$row=$this->db->where('id',(int)$id)->where('user_id',(int)$this->session->userdata('user_id'))->get('pengajuan_itr')->row_array();
+		if (!$row || empty($row['file_hasil_itr'])) { show_404(); return; }
+		if (stripos($row['file_hasil_itr'],'http')===0) { redirect($row['file_hasil_itr']); return; }
+		$file=APPPATH.'uploads/itr/'.basename($row['file_hasil_itr']); if(!is_file($file)){show_404();return;}
 		$this->load->helper('download'); force_download(basename($file),file_get_contents($file),TRUE);
 	}
 }

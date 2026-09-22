@@ -4,10 +4,16 @@
 <?php foreach($errors as $e): ?><div class="notice upload-error"><?= htmlspecialchars($e,ENT_QUOTES,'UTF-8') ?></div><?php endforeach; ?>
 
 <div class="itr-upload-list">
-<?php foreach($files as $field=>$label): $ada=!empty($row[$field]); ?>
-<form action="<?= base_url('pemohon/upload-berkas-itr/'.$row['id']) ?>" class="itr-upload-row <?= $ada?'is-ready':'is-missing' ?>" enctype="multipart/form-data" method="post">
-  <div class="upload-state" aria-hidden="true"><?= $ada?'✓':'!' ?></div>
-  <div class="upload-name"><b><?= htmlspecialchars($label,ENT_QUOTES,'UTF-8') ?></b><span>Wajib</span></div>
+<?php foreach($files as $field=>$label): $ada=!empty($row[$field]); $st=$status_berkas[$field]??null; $review=$st['status']??'menunggu';
+  $kelas = !$ada ? 'is-missing' : ($review==='diterima' ? 'is-ready' : ($review==='ditolak' ? 'is-rejected' : 'is-pending'));
+  $ikon  = !$ada ? '!' : ($review==='diterima' ? '✓' : ($review==='ditolak' ? '✗' : '…'));
+?>
+<form action="<?= base_url('pemohon/upload-berkas-itr/'.$row['id']) ?>" class="itr-upload-row <?= $kelas ?>" enctype="multipart/form-data" method="post">
+  <div class="upload-state" aria-hidden="true"><?= $ikon ?></div>
+  <div class="upload-name"><b><?= htmlspecialchars($label,ENT_QUOTES,'UTF-8') ?></b><span>Wajib</span>
+    <?php if($ada): ?><small class="itr-review-badge itr-review-badge-<?= $review ?>"><?= $review==='diterima'?'Diterima admin':($review==='ditolak'?'Ditolak, perlu perbaikan':'Menunggu ditinjau admin') ?></small><?php endif; ?>
+    <?php if($review==='ditolak'&&!empty($st['catatan'])): ?><small class="itr-review-alasan">Alasan: <?= htmlspecialchars($st['catatan'],ENT_QUOTES,'UTF-8') ?></small><?php endif; ?>
+  </div>
   <div class="upload-actions">
     <small class="upload-status"></small>
     <?php if($ada): ?><a class="view-upload" target="_blank" rel="noopener" href="<?= base_url('pemohon/berkas_itr/'.$row['id'].'/'.$field) ?>">Lihat Berkas</a><?php endif; ?>
@@ -17,7 +23,7 @@
 </form>
 <?php endforeach; ?>
 </div>
-<p class="itr-upload-help">PDF, JPG, atau PNG. Maksimum 100 MB per berkas.</p>
+<p class="itr-upload-help">PDF, JPG, atau PNG. Maksimum 100 MB per berkas. Berkas yang ditolak admin bisa langsung diunggah ulang di sini.</p>
 <div class="itr-form-actions"><a class="btn btn-gold" href="<?= base_url('pemohon') ?>">Selesai, Kembali ke Dashboard</a></div>
 
 <style>
@@ -25,12 +31,20 @@
 .itr-upload-row{position:relative;overflow:hidden;display:flex;align-items:center;gap:18px;padding:15px 18px;border:1px solid var(--line);border-radius:13px}
 .itr-upload-row.is-missing{background:rgba(224,82,107,.06);border-color:rgba(224,82,107,.35)}
 .itr-upload-row.is-ready{background:rgba(46,168,79,.06);border-color:rgba(46,168,79,.35)}
+.itr-upload-row.is-pending{background:rgba(46,144,168,.06);border-color:rgba(46,144,168,.35)}
+.itr-upload-row.is-rejected{background:rgba(224,82,107,.1);border-color:rgba(224,82,107,.5)}
 .itr-upload-row .upload-state{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:0 0 38px;color:#fff;font-size:23px;font-weight:700}
 .itr-upload-row.is-missing .upload-state{background:#e0526b}
 .itr-upload-row.is-ready .upload-state{background:#2ea84f}
-.itr-upload-row .upload-name{flex:1;display:flex;align-items:center;gap:14px;min-width:0}
+.itr-upload-row.is-pending .upload-state{background:#2e90a8}
+.itr-upload-row.is-rejected .upload-state{background:#c0384a}
+.itr-upload-row .upload-name{flex:1;display:flex;align-items:center;gap:14px;flex-wrap:wrap;min-width:0}
 .itr-upload-row .upload-name b{font-size:16px;color:var(--text)}
 .itr-upload-row .upload-name span{padding:4px 10px;border-radius:20px;background:rgba(224,82,107,.12);color:#e0526b;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.itr-review-badge{display:block;width:100%;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.itr-review-badge-diterima{color:#2ea84f}
+.itr-review-badge-ditolak{color:#c0384a}
+.itr-review-alasan{display:block;width:100%;color:#c0384a;font-size:12px}
 .itr-upload-row .upload-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:flex-end}
 .itr-upload-row .upload-status{color:var(--gold-300);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .itr-upload-row .view-upload{color:var(--gold-300);font-size:12px;font-weight:700;text-transform:uppercase;text-decoration:underline}

@@ -1,13 +1,21 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 class Admin_itr extends CI_Controller {
- public function __construct(){parent::__construct();$this->load->library('session');$this->load->helper(array('url','form'));if(!$this->session->userdata('logged_in')){redirect('login?from=admin');exit;}if($this->session->userdata('role')!=='admin'){show_error('Khusus administrator.',403);exit;}if(!$this->session->userdata('admin_itr_token'))$this->session->set_userdata('admin_itr_token',bin2hex(random_bytes(32)));}
+ public function __construct(){parent::__construct();$this->load->library('session');$this->load->helper(array('url','form','itr','berkas'));if(!$this->session->userdata('logged_in')){redirect('login?from=admin');exit;}if($this->session->userdata('role')!=='admin'){show_error('Khusus administrator.',403);exit;}if(!$this->session->userdata('admin_itr_token'))$this->session->set_userdata('admin_itr_token',bin2hex(random_bytes(32)));}
+
  public function index(){
   $data['nama_pengguna']=$this->session->userdata('nama');
-  $data['daftar']=$this->db->table_exists('pengajuan_itr')?$this->db->order_by('id','DESC')->get('pengajuan_itr')->result_array():array();
+  $daftar=$this->db->table_exists('pengajuan_itr')?$this->db->order_by('id','DESC')->get('pengajuan_itr')->result_array():array();
+  foreach($daftar as &$r){
+   $r['_status_berkas']=itr_status_berkas($r['id']);
+   $r['_semua_diterima']=itr_semua_diterima($r);
+  }
+  unset($r);
+  $data['daftar']=$daftar;
   $data['pesan']=$this->db->table_exists('pesan_itr')?$this->db->select('p.*,u.nama AS nama_admin')->from('pesan_itr p')->join('users u','u.id=p.admin_id','left')->order_by('p.id','DESC')->get()->result_array():array();
   $this->load->view('pages/admin_itr',$data);
  }
+
  public function simpan($id=0){
   if($this->input->method()!=='post'){show_404();return;}
   if(!hash_equals((string)$this->session->userdata('admin_itr_token'),(string)$this->input->post('itr_token'))){show_error('Formulir tidak valid.',403);return;}
@@ -22,10 +30,78 @@ class Admin_itr extends CI_Controller {
   $this->db->insert('aktivitas_itr',array('user_id'=>$row['user_id'],'pengajuan_id'=>(int)$id,'keterangan'=>'Admin mengirim informasi untuk '.$row['no_permohonan'].'. Status: '.ucwords(str_replace('_',' ',$status))));
   if(!$this->db->trans_status()){$this->db->trans_rollback();show_error('Informasi gagal disimpan.',500);return;}$this->db->trans_commit();$this->session->set_flashdata('sukses','Status dan informasi berhasil dikirim kepada pemohon.');redirect('admin_itr');
  }
+
+ /** Admin menerima/menolak satu berkas. Menolak wajib disertai alasan; pemohon lihat & unggah ulang lewat pemohon/upload-berkas-itr. */
+ public function tinjau_berkas($id=0){
+  if($this->input->method()!=='post'){show_404();return;}
+  if(!hash_equals((string)$this->session->userdata('admin_itr_token'),(string)$this->input->post('itr_token'))){show_error('Formulir tidak valid.',403);return;}
+  $id=(int)$id;
+  $row=$this->db->where('id',$id)->get('pengajuan_itr')->row_array(); if(!$row){show_404();return;}
+  $field=(string)$this->input->post('field');
+  $files=itr_files_untuk($row['jenis_pemohon']??'perorangan');
+  if(!isset($files[$field])||empty($row[$field])){show_error('Berkas tidak valid.',422);return;}
+  $keputusan=(string)$this->input->post('keputusan');
+  $catatan=trim((string)$this->input->post('catatan'));
+  if(!in_array($keputusan,array('diterima','ditolak'),TRUE)){show_error('Keputusan tidak valid.',422);return;}
+  if($keputusan==='ditolak'&&$catatan===''){$this->session->set_flashdata('error','Alasan penolakan berkas '.$files[$field].' wajib diisi.');redirect('admin_itr');return;}
+
+  $this->db->where('pengajuan_id',$id)->where('field',$field)->delete('pengajuan_itr_berkas_status');
+  $this->db->insert('pengajuan_itr_berkas_status',array('pengajuan_id'=>$id,'field'=>$field,'status'=>$keputusan,'catatan'=>$catatan?:null,'ditinjau_oleh'=>(int)$this->session->userdata('user_id'),'ditinjau_pada'=>date('Y-m-d H:i:s')));
+
+  $status_baru=$this->_perbarui_status_otomatis($id);
+  $ket=$keputusan==='diterima' ? ('Admin menerima berkas '.$files[$field].'.') : ('Admin menolak berkas '.$files[$field].': '.$catatan.' Silakan unggah ulang.');
+  $this->db->insert('aktivitas_itr',array('user_id'=>$row['user_id'],'pengajuan_id'=>$id,'keterangan'=>$ket,'created_at'=>date('Y-m-d H:i:s')));
+  $this->session->set_flashdata('sukses','Hasil tinjauan berkas '.$files[$field].' tersimpan.'); redirect('admin_itr');
+ }
+
+ /** Setelah SEMUA berkas diterima, admin mengunggah dokumen hasil ITR resmi (PDF) yang bisa diunduh pemohon. */
+ public function unggah_hasil($id=0){
+  if($this->input->method()!=='post'){show_404();return;}
+  if(!hash_equals((string)$this->session->userdata('admin_itr_token'),(string)$this->input->post('itr_token'))){show_error('Formulir tidak valid.',403);return;}
+  $id=(int)$id;
+  $row=$this->db->where('id',$id)->get('pengajuan_itr')->row_array(); if(!$row){show_404();return;}
+  if(!itr_semua_diterima($row)){$this->session->set_flashdata('error','Semua berkas wajib diterima dahulu sebelum mengunggah hasil ITR.');redirect('admin_itr');return;}
+  if(empty($_FILES['file_hasil_itr']['name'])){$this->session->set_flashdata('error','Pilih berkas PDF hasil ITR terlebih dahulu.');redirect('admin_itr');return;}
+  $this->load->library('upload'); $dir=APPPATH.'uploads/itr/';
+  if(!is_dir($dir)&&!mkdir($dir,0750,TRUE)){show_error('Penyimpanan berkas tidak tersedia.',503);return;}
+  $this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
+  if(!$this->upload->do_upload('file_hasil_itr')){$this->session->set_flashdata('error',strip_tags($this->upload->display_errors('','')));redirect('admin_itr');return;}
+  $lama=$row['file_hasil_itr'];
+  $nilai=berkas_simpan($this->upload->data());
+  $this->db->where('id',$id)->update('pengajuan_itr',array('file_hasil_itr'=>$nilai,'hasil_diunggah_pada'=>date('Y-m-d H:i:s'),'status'=>'disetujui'));
+  if($lama&&stripos($lama,'http')!==0) @unlink($dir.$lama);
+  $this->db->insert('aktivitas_itr',array('user_id'=>$row['user_id'],'pengajuan_id'=>$id,'keterangan'=>'Dokumen hasil ITR resmi telah diterbitkan dan dapat diunduh.','created_at'=>date('Y-m-d H:i:s')));
+  $this->session->set_flashdata('sukses','Dokumen hasil ITR berhasil diunggah dan dapat diunduh pemohon.'); redirect('admin_itr');
+ }
+
+ /** status pengajuan_itr.status dihitung otomatis dari status seluruh baris pengajuan_itr_berkas_status, bukan ditulis manual. */
+ private function _perbarui_status_otomatis($id){
+  $row=$this->db->where('id',$id)->get('pengajuan_itr')->row_array();
+  $files=itr_files_untuk($row['jenis_pemohon']??'perorangan');
+  $status_berkas=itr_status_berkas($id);
+  $ada_ditolak=false;$semua_diterima=true;
+  foreach($files as $field=>$label){
+   if(empty($row[$field])){$semua_diterima=false;continue;}
+   $st=$status_berkas[$field]['status']??'menunggu';
+   if($st==='ditolak'){$ada_ditolak=true;$semua_diterima=false;}
+   elseif($st==='menunggu'){$semua_diterima=false;}
+  }
+  $status_baru=$ada_ditolak?'perlu_perbaikan':($semua_diterima?'disetujui':'sedang_diverifikasi');
+  $this->db->where('id',$id)->update('pengajuan_itr',array('status'=>$status_baru));
+  return $status_baru;
+ }
+
  public function berkas($id=0,$field=''){
-  if(!in_array($field,array('file_permohonan','file_ktp','file_sertifikat','file_siteplan','file_denah_foto','file_nib','file_npwp','file_akta'),TRUE)){show_404();return;}
+  $field_sah=array_keys(array_merge(itr_file_umum(),itr_file_perusahaan()));
+  if(!in_array($field,$field_sah,TRUE)){show_404();return;}
   $row=$this->db->where('id',(int)$id)->get('pengajuan_itr')->row_array();if(!$row||empty($row[$field])){show_404();return;}
   if(stripos($row[$field],'http')===0){redirect($row[$field]);return;}
   $file=APPPATH.'uploads/itr/'.basename($row[$field]);if(!is_file($file)){show_404();return;}$this->load->helper('download');force_download(basename($file),file_get_contents($file),TRUE);
+ }
+
+ public function hasil($id=0){
+  $row=$this->db->where('id',(int)$id)->get('pengajuan_itr')->row_array();if(!$row||empty($row['file_hasil_itr'])){show_404();return;}
+  if(stripos($row['file_hasil_itr'],'http')===0){redirect($row['file_hasil_itr']);return;}
+  $file=APPPATH.'uploads/itr/'.basename($row['file_hasil_itr']);if(!is_file($file)){show_404();return;}$this->load->helper('download');force_download(basename($file),file_get_contents($file),TRUE);
  }
 }
