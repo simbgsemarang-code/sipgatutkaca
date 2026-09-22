@@ -142,17 +142,27 @@ BARU yang masuk ke akun/folder yang baru.
 
 ## Berkas yang SENGAJA tidak dipindah ke Drive
 
-KTP & sertifikat tanah pemohon ITR (`Pemohon::simpan_itr`, disimpan di
-`application/uploads/itr/`) dan berkas PBG jalur lama
-(`Pengajuan_pbg`, disimpan di `application/uploads/pengajuan_pbg/`)
-tetap di disk server, atas keputusan eksplisit (2026-09-22). Alasannya:
-kedua jalur itu bersifat privat - hanya pemilik yang login yang bisa
-mengaksesnya lewat controller yang memeriksa kepemilikan, dan
-mengunggahnya ke Drive berarti membaginya sebagai "siapa saja dengan
-tautan", menurunkan privasi dokumen kependudukan tersebut. Kalau nanti
-keputusan ini ingin diubah, `berkas_simpan()` di
-`application/helpers/berkas_helper.php` bisa dipakai di kedua
-controller itu juga - tapi pertimbangkan dulu implikasi privasinya.
+- **PBG jalur lama** (`Pengajuan_pbg`, disimpan di
+  `application/uploads/pengajuan_pbg/`): seluruhnya tetap di disk
+  server (2026-09-22) - jalur ini privat, hanya pemilik yang login
+  yang bisa mengaksesnya.
+- **ITR - KTP & NPWP saja** (`Pemohon::upload_berkas_itr`, field
+  `file_ktp` dan `file_npwp`, daftarnya di properti
+  `$itr_file_privat` pada `application/controllers/Pemohon.php`):
+  ini dua dokumen identitas paling sensitif, tetap di
+  `application/uploads/itr/` (2026-09-24, meralat keputusan
+  2026-09-22 yang tadinya mengecualikan SEMUA berkas ITR). Lampiran
+  ITR lainnya (Surat Permohonan, Sertifikat Tanah, Site Plan, Denah &
+  Foto, NIB, Akta Pendirian Perusahaan) SUDAH boleh ke Drive.
+
+Alasannya: berkas yang dikecualikan bersifat privat - hanya pemilik
+yang login yang bisa mengaksesnya lewat controller yang memeriksa
+kepemilikan, dan mengunggahnya ke Drive berarti membaginya sebagai
+"siapa saja dengan tautan", menurunkan privasi dokumen kependudukan
+tersebut. Kalau nanti keputusan ini ingin diubah lagi,
+`berkas_simpan()` di `application/helpers/berkas_helper.php` tinggal
+dipakai/dilepas dari field terkait - tapi pertimbangkan dulu
+implikasi privasinya.
 
 ## Kalau belum sempat setup (default saat ini)
 

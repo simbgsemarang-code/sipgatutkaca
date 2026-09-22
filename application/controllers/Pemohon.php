@@ -14,7 +14,7 @@ class Pemohon extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->library('session');
-		$this->load->helper('wilayah_cilacap');
+		$this->load->helper(array('wilayah_cilacap','berkas'));
 		$this->_wajib_pemohon();
 	}
 
@@ -76,6 +76,8 @@ class Pemohon extends CI_Controller {
 	private $itr_field_perusahaan = array('nib','nama_pemohon','alamat_pemohon'); // nama_pemohon = Nama Direktur untuk perusahaan
 	private $itr_file_umum = array('file_permohonan'=>'Surat Permohonan','file_ktp'=>'KTP','file_sertifikat'=>'Sertifikat Tanah/Letter C','file_siteplan'=>'Rencana Teknis/Site Plan','file_denah_foto'=>'Denah dan Foto Lokasi');
 	private $itr_file_perusahaan = array('file_nib'=>'NIB','file_npwp'=>'NPWP','file_akta'=>'Akta Pendirian Perusahaan');
+	/** Dokumen identitas paling sensitif - TETAP di server (privat, lihat docs/google-drive-setup.md). Lampiran ITR lainnya boleh ke Google Drive. */
+	private $itr_file_privat = array('file_ktp','file_npwp');
 
 	public function simpan_itr()
 	{
@@ -153,8 +155,9 @@ class Pemohon extends CI_Controller {
 				if ($this->upload->do_upload($field))
 				{
 					$lama=$row[$field];
-					$this->db->where('id',$id)->update('pengajuan_itr',array($field=>$this->upload->data('file_name')));
-					if ($lama) @unlink($dir.$lama);
+					$nilai = in_array($field,$this->itr_file_privat,TRUE) ? $this->upload->data('file_name') : berkas_simpan($this->upload->data());
+					$this->db->where('id',$id)->update('pengajuan_itr',array($field=>$nilai));
+					if ($lama && stripos($lama,'http')!==0) @unlink($dir.$lama);
 					$terunggah++;
 				}
 				else { $errors[]=$label.': '.strip_tags($this->upload->display_errors('','')); }
@@ -172,6 +175,7 @@ class Pemohon extends CI_Controller {
 		if (!in_array($field,$field_sah,TRUE) || !$this->db->table_exists('pengajuan_itr')) { show_404(); return; }
 		$row=$this->db->where('id',(int)$id)->where('user_id',(int)$this->session->userdata('user_id'))->get('pengajuan_itr')->row_array();
 		if (!$row || empty($row[$field])) { show_404(); return; }
+		if (stripos($row[$field],'http')===0) { redirect($row[$field]); return; }
 		$file=APPPATH.'uploads/itr/'.basename($row[$field]); if(!is_file($file)){show_404();return;}
 		$this->load->helper('download'); force_download(basename($file),file_get_contents($file),TRUE);
 	}

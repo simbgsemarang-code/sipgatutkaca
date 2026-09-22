@@ -25,6 +25,7 @@ class Admin_itr extends CI_Controller {
  public function berkas($id=0,$field=''){
   if(!in_array($field,array('file_permohonan','file_ktp','file_sertifikat','file_siteplan','file_denah_foto','file_nib','file_npwp','file_akta'),TRUE)){show_404();return;}
   $row=$this->db->where('id',(int)$id)->get('pengajuan_itr')->row_array();if(!$row||empty($row[$field])){show_404();return;}
+  if(stripos($row[$field],'http')===0){redirect($row[$field]);return;}
   $file=APPPATH.'uploads/itr/'.basename($row[$field]);if(!is_file($file)){show_404();return;}$this->load->helper('download');force_download(basename($file),file_get_contents($file),TRUE);
  }
 }
