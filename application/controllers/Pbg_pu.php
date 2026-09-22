@@ -86,20 +86,31 @@ class Pbg_pu extends CI_Controller
 		if(in_array($row['status'],array('disetujui','ditolak'),TRUE)) show_error('Berkas permohonan yang telah selesai tidak dapat diubah.',422);
 		$perbaikan=$this->konsultasi_terakhir_per_bidang($id); $boleh_perbaiki=false; foreach($perbaikan as $k){if($k['status']==='perlu_perbaikan'&&empty($k['perbaikan_dikirim_at']))$boleh_perbaiki=true;}
 		$data=$this->common()+array('row'=>$row,'files'=>$this->files,'errors'=>array(),'mode_perbaikan'=>$boleh_perbaiki);
+		$is_ajax=$this->input->is_ajax_request();
 		if($this->input->method(TRUE)==='POST'){
-			$payload=array('updated_at'=>date('Y-m-d H:i:s')); $terunggah=0;
+			$payload=array('updated_at'=>date('Y-m-d H:i:s')); $terunggah=0; $field_diunggah=null;
 			foreach($this->files as $field=>$label){
 				if(empty($_FILES[$field]['name']))continue;
 				$dir=FCPATH.'assets/uploads/pbg/'; if(!is_dir($dir))mkdir($dir,0755,true);
 				$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'jpg|jpeg|png|pdf','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
-				if($this->upload->do_upload($field)){$payload[$field]=berkas_simpan($this->upload->data());$terunggah++;}
+				if($this->upload->do_upload($field)){$payload[$field]=berkas_simpan($this->upload->data());$terunggah++;$field_diunggah=$field;}
 				else $data['errors'][]=$label.': '.strip_tags($this->upload->display_errors('',''));
 			}
 			if(!$terunggah&&empty($data['errors']))$data['errors'][]='Pilih minimal satu berkas untuk diunggah.';
 			if(empty($data['errors'])){
 				$this->pbg->update_owned($id,$this->pu_id(),$payload);
 				if($boleh_perbaiki)$this->db->where('permohonan_id',$id)->where('status','perlu_perbaikan')->where('perbaikan_dikirim_at IS NULL',NULL,FALSE)->update('konsultasi_pbg',array('catatan_perbaikan'=>'Berkas diperbarui oleh PU.','perbaikan_dikirim_at'=>date('Y-m-d H:i:s')));
-				$this->session->set_flashdata('sukses',$boleh_perbaiki?'Perbaikan berkas berhasil dikirim.':'Berkas berhasil diunggah.'); redirect('pengajuan-pbg/upload-berkas/'.$id); return;
+				$pesan=$boleh_perbaiki?'Perbaikan berkas berhasil dikirim.':'Berkas berhasil diunggah.';
+				if($is_ajax){
+					$href=$field_diunggah?berkas_href($payload[$field_diunggah],'assets/uploads/pbg/'):null;
+					$this->output->set_content_type('application/json')->set_output(json_encode(array('ok'=>TRUE,'field'=>$field_diunggah,'href'=>$href,'pesan'=>$pesan)));
+					return;
+				}
+				$this->session->set_flashdata('sukses',$pesan); redirect('pengajuan-pbg/upload-berkas/'.$id); return;
+			}
+			if($is_ajax){
+				$this->output->set_content_type('application/json')->set_output(json_encode(array('ok'=>FALSE,'message'=>implode(' ',$data['errors']))));
+				return;
 			}
 		}
 		$this->load->view('pbg_pu/upload_berkas',$data);
