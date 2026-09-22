@@ -5,6 +5,7 @@ $status_tanah_opsi = array('SHM'=>'Sertifikat Hak Milik (SHM)','SHGU'=>'Sertifik
 $air_opsi = array('Sumur Dangkal'=>'Air Sumur Dangkal','Sumur Dalam'=>'Air Sumur Dalam','PDAM'=>'PDAM','Lain-lain'=>'Lain-lain');
 $perijinan_opsi = array('SPPL'=>'SPPL','PBG'=>'PBG','SIUJK'=>'SIUJK','SIUP'=>'SIUP','Perijinan Usaha Baru'=>'Perijinan Usaha Baru','Lain-Lain'=>'Lain-Lain');
 $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_array($titik_lama)) $titik_lama=array();
+$wilayah_cilacap = wilayah_cilacap();
 ?>
 <p class="eyebrow">Portal Pemohon ITR</p><h2>Formulir Pengajuan ITR</h2><p class="section-lead">Mengikuti format resmi Surat Permohonan Informasi Tata Ruang 2021. Lengkapi data pemohon, lokasi, rencana kegiatan, titik koordinat, dan seluruh lampiran sebelum mengirim pengajuan.</p>
 <?php if($error): ?><div class="notice" role="alert"><?= htmlspecialchars($error,ENT_QUOTES,'UTF-8') ?></div><?php endif; ?>
@@ -38,8 +39,8 @@ $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_ar
 <h3>Lokasi Kegiatan</h3><div class="itr-form-grid">
 <div><label for="itr-jalan">Jalan *</label><input id="itr-jalan" name="lokasi_jalan" type="text" value="<?= $v('lokasi_jalan') ?>" required></div>
 <div><label for="itr-rtrw">RT/RW</label><input id="itr-rtrw" name="lokasi_rt_rw" type="text" placeholder="001/002" value="<?= $v('lokasi_rt_rw') ?>"></div>
-<div><label for="itr-desa">Desa / Kelurahan *</label><input id="itr-desa" name="lokasi_desa_kel" type="text" value="<?= $v('lokasi_desa_kel') ?>" required></div>
-<div><label for="itr-kecamatan">Kecamatan *</label><input id="itr-kecamatan" name="lokasi_kecamatan" type="text" value="<?= $v('lokasi_kecamatan') ?>" required></div>
+<div><label for="itr-kecamatan">Kecamatan *</label><select id="itr-kecamatan" name="lokasi_kecamatan" required><option value="">— Pilih Kecamatan —</option><?php foreach(array_keys($wilayah_cilacap) as $kec): ?><option value="<?= htmlspecialchars($kec,ENT_QUOTES,'UTF-8') ?>" <?= ($old['lokasi_kecamatan']??'')===$kec?'selected':'' ?>><?= htmlspecialchars($kec,ENT_QUOTES,'UTF-8') ?></option><?php endforeach; ?></select></div>
+<div><label for="itr-desa">Desa / Kelurahan *</label><select id="itr-desa" name="lokasi_desa_kel" required <?= empty($old['lokasi_kecamatan'])?'disabled':'' ?>><option value="">— Pilih Kecamatan dahulu —</option></select></div>
 <div><label for="itr-luas-lahan">Luas Lahan (m²) *</label><input id="itr-luas-lahan" type="number" name="luas_lahan" min="0.01" step="0.01" value="<?= $v('luas_lahan') ?>" required></div>
 <div><label for="itr-luas-bangunan">Luas Bangunan (m²)</label><input id="itr-luas-bangunan" type="number" name="luas_bangunan" min="0" step="0.01" value="<?= $v('luas_bangunan') ?>"></div>
 <div><label for="itr-lantai">Lantai Bangunan</label><input id="itr-lantai" type="number" name="lantai_bangunan" min="0" step="1" value="<?= $v('lantai_bangunan') ?>"></div>
@@ -104,6 +105,25 @@ $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_ar
   }
   radios.forEach(function(r){ r.addEventListener('change', terapkanJenis); });
   terapkanJenis();
+
+  // ---- Kecamatan -> Desa/Kelurahan bertingkat ----
+  var wilayah = <?= json_encode($wilayah_cilacap, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
+  var selKec=document.getElementById('itr-kecamatan'), selDesa=document.getElementById('itr-desa');
+  var desaAwal='<?= $v('lokasi_desa_kel') ?>';
+  function isiDesa(){
+    var daftar=wilayah[selKec.value]||[];
+    selDesa.innerHTML='';
+    if(!daftar.length){ selDesa.disabled=true; selDesa.innerHTML='<option value="">— Pilih Kecamatan dahulu —</option>'; return; }
+    selDesa.disabled=false;
+    var opt=document.createElement('option'); opt.value=''; opt.textContent='— Pilih Desa/Kelurahan —'; selDesa.appendChild(opt);
+    daftar.forEach(function(d){
+      var o=document.createElement('option'); o.value=d; o.textContent=d;
+      if(d===desaAwal) o.selected=true;
+      selDesa.appendChild(o);
+    });
+  }
+  selKec.addEventListener('change', function(){ desaAwal=''; isiDesa(); });
+  if(selKec.value) isiDesa();
 
   // ---- Peta poligon titik koordinat ----
   var titikInput=document.getElementById('itr-titik');

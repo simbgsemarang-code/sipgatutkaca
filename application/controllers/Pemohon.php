@@ -14,6 +14,7 @@ class Pemohon extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->library('session');
+		$this->load->helper('wilayah_cilacap');
 		$this->_wajib_pemohon();
 	}
 
@@ -103,10 +104,14 @@ class Pemohon extends CI_Controller {
 		$titik_valid = is_array($titik) && count($titik) >= 4;
 		if ($titik_valid) foreach ($titik as $t) { if (!isset($t['lat'],$t['lng']) || !is_numeric($t['lat']) || !is_numeric($t['lng'])) { $titik_valid = FALSE; break; } }
 
-		if (!$this->form_validation->run() || !$titik_valid)
+		$wilayah = wilayah_cilacap();
+		$wilayah_valid = isset($wilayah[$old['lokasi_kecamatan']]) && in_array($old['lokasi_desa_kel'], $wilayah[$old['lokasi_kecamatan']], TRUE);
+
+		if (!$this->form_validation->run() || !$titik_valid || !$wilayah_valid)
 		{
 			$error = !$this->form_validation->run() ? strip_tags(validation_errors()) : '';
 			if (!$titik_valid) $error .= ' Tandai minimal 4 titik koordinat di peta membentuk poligon lokasi.';
+			if (!$wilayah_valid) $error .= ' Pilih Kecamatan dan Desa/Kelurahan yang valid.';
 			$this->render_portal('partials/pemohon_itr_form', array('error'=>trim($error),'old'=>$old)); return;
 		}
 
