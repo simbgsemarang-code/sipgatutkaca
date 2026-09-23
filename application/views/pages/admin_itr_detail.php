@@ -115,7 +115,10 @@ html[data-theme="dark"] .alert-err{color:#F3AEB9}
 .itr-review-catatan{margin:8px 0 0;color:#E0526B;font-size:.82rem}
 .itr-review-form{display:flex;gap:12px;align-items:flex-start;margin-top:12px;flex-wrap:wrap}
 .itr-review-form textarea{flex:1;min-width:220px;min-height:44px;padding:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-family:var(--body)}
-.itr-review-actions{display:flex;gap:8px;flex-shrink:0}
+.itr-review-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.itr-review-pesan{font-size:.76rem;font-weight:600}
+.itr-review-pesan.ok{color:#2EA84F}
+.itr-review-pesan.err{color:#E0526B}
 .itr-review-actions .btn{padding:10px 20px;font-size:.68rem;letter-spacing:.14em}
 label{display:block;font-size:.78rem;margin-bottom:7px;color:var(--muted)}
 select,textarea,input[type=file]{width:100%;padding:13px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-family:var(--body)}
@@ -242,7 +245,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <input type="hidden" name="itr_token" value="<?= htmlspecialchars($this->session->userdata('admin_itr_token'),ENT_QUOTES,'UTF-8') ?>">
         <input type="hidden" name="field" value="<?= htmlspecialchars($field,ENT_QUOTES,'UTF-8') ?>">
         <textarea name="catatan" placeholder="Alasan penolakan (wajib kalau memilih Tolak)"></textarea>
-        <div class="itr-review-actions"><button type="submit" name="keputusan" value="diterima" class="btn btn-gold">Terima</button><button type="submit" name="keputusan" value="ditolak" class="btn btn-danger">Tolak</button></div>
+        <div class="itr-review-actions"><button type="submit" name="keputusan" value="diterima" class="btn btn-gold">Terima</button><button type="submit" name="keputusan" value="ditolak" class="btn btn-danger">Tolak</button><span class="itr-review-pesan" data-role="pesan"></span></div>
         <?= form_close() ?>
       </div>
       <?php endforeach; ?>
@@ -365,30 +368,22 @@ document.addEventListener('click',function(e){
 var bar=document.getElementById('topbar');
 addEventListener('scroll',function(){bar.classList.toggle('scrolled',scrollY>40)},{passive:true});
 
-function tampilkanNotifikasiItr(pesan, error){
-  var el=document.getElementById('itrNotice');
-  if(!el){
-    el=document.createElement('div'); el.id='itrNotice';
-    document.getElementById('statusTag').insertAdjacentElement('afterend', el);
-  }
-  el.className='alert '+(error?'alert-err':'alert-ok');
-  el.textContent=pesan;
-  el.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
 document.querySelectorAll('.itr-review-form').forEach(function(form){
   form.querySelectorAll('button[name="keputusan"]').forEach(function(tombol){
     tombol.addEventListener('click', function(e){
       e.preventDefault();
       var row=form.closest('.itr-review-row');
+      var pesanEl=form.querySelector('[data-role="pesan"]');
       var semuaTombol=form.querySelectorAll('button[name="keputusan"]');
       var fd=new FormData(form);
       fd.set('keputusan', tombol.value);
       semuaTombol.forEach(function(b){ b.disabled=true; });
+      pesanEl.className='itr-review-pesan'; pesanEl.textContent='';
       fetch(form.getAttribute('action'), {method:'POST', body:fd, headers:{'X-Requested-With':'XMLHttpRequest'}})
         .then(function(res){ return res.json(); })
         .then(function(data){
           semuaTombol.forEach(function(b){ b.disabled=false; });
-          if(!data.ok){ tampilkanNotifikasiItr(data.message||'Gagal menyimpan tinjauan.', true); return; }
+          if(!data.ok){ pesanEl.className='itr-review-pesan err'; pesanEl.textContent=data.message||'Gagal menyimpan tinjauan.'; return; }
           row.className='itr-review-row itr-review-'+data.status;
           var tagBerkas=row.querySelector('[data-role="status-tag"]');
           tagBerkas.className='tag tag-'+data.status;
@@ -408,11 +403,11 @@ document.querySelectorAll('.itr-review-form').forEach(function(form){
           var hasilSiap=document.getElementById('hasilSiap'), hasilBelum=document.getElementById('hasilBelum');
           if(data.semua_diterima){ hasilSiap.style.display=''; hasilBelum.style.display='none'; }
           else { hasilSiap.style.display='none'; hasilBelum.style.display=''; }
-          tampilkanNotifikasiItr(data.pesan||'Tersimpan.', false);
+          pesanEl.className='itr-review-pesan ok'; pesanEl.textContent=data.pesan||'Tersimpan.';
         })
         .catch(function(){
           semuaTombol.forEach(function(b){ b.disabled=false; });
-          tampilkanNotifikasiItr('Gagal menghubungi server, coba lagi.', true);
+          pesanEl.className='itr-review-pesan err'; pesanEl.textContent='Gagal menghubungi server, coba lagi.';
         });
     });
   });

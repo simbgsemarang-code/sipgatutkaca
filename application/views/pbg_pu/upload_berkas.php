@@ -11,30 +11,21 @@
 </div>
 <style>.upload-page-card{padding:34px}.upload-page-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:28px;margin:28px 0}.upload-page-heading h2{margin:6px 0 8px;font-size:36px}.upload-page-heading p{margin:0;color:var(--muted)}.upload-applicant{min-width:260px;padding:18px;border:1px solid var(--line);display:grid;gap:4px}.upload-applicant span,.upload-applicant small{color:var(--muted)}.upload-error{background:rgba(224,82,107,.12)}.document-upload-list{display:grid;gap:12px}.document-upload-row{position:relative;overflow:hidden;display:flex;align-items:center;gap:18px;padding:15px 18px;border:1px solid;border-radius:13px}
 .upload-status{color:var(--gold);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;min-width:0}
+.upload-status.ok{color:#2ea84f}
+.upload-status.err{color:#e0526b}
 .upload-progress{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(201,162,75,.15);display:none;overflow:hidden}
 .document-upload-row.is-uploading .upload-progress{display:block}
 .upload-progress-fill{height:100%;width:0%;background:var(--gold2);transition:width .15s linear}
 .upload-progress-fill.indeterminate{width:30%!important;animation:upload-indeterminate 1.1s ease-in-out infinite}
 @keyframes upload-indeterminate{0%{margin-left:-30%}100%{margin-left:100%}}.document-upload-row.is-missing{background:rgba(224,82,107,.06);border-color:rgba(224,82,107,.35)}.document-upload-row.is-ready{background:rgba(46,168,79,.06);border-color:rgba(46,168,79,.35)}.upload-state{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:0 0 38px;color:#fff;font-size:23px;font-weight:700}.is-missing .upload-state{background:#e0526b}.is-ready .upload-state{background:#2ea84f}.upload-name{flex:1;display:flex;align-items:center;gap:14px;min-width:0}.upload-name b{font-size:17px}.upload-name span{padding:4px 10px;border-radius:20px;background:rgba(224,82,107,.12);color:#e0526b;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}.upload-actions{display:flex;align-items:center;gap:18px}.view-upload{color:var(--gold);font-size:12px;font-weight:700;text-transform:uppercase;text-decoration:underline}.btn-upload{background:linear-gradient(135deg,#c9a24b,#e4c87b);color:#102536;border:0;cursor:pointer}.btn-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}.btn-upload.is-uploading{opacity:.65;pointer-events:none}.upload-help{margin:18px 0 0;color:var(--muted);font-size:13px}@media(max-width:720px){.upload-page-card{padding:20px}.upload-page-heading{display:block}.upload-applicant{margin-top:18px;min-width:0}.document-upload-row{align-items:flex-start;flex-wrap:wrap}.upload-name{align-items:flex-start;flex-direction:column;gap:7px}.upload-actions{width:100%;justify-content:flex-end}.upload-page-heading h2{font-size:29px}}</style>
 <script>
-function tampilkanNotifikasiUpload(pesan, error){
-  var el=document.getElementById('uploadNotice');
-  if(!el){
-    el=document.createElement('div'); el.id='uploadNotice';
-    var list=document.querySelector('.document-upload-list');
-    list.parentNode.insertBefore(el, list);
-  }
-  el.className='notice'+(error?' upload-error':'');
-  el.textContent=pesan;
-  el.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
 document.querySelectorAll('.instant-upload').forEach(function(input){
   input.addEventListener('change', function(){
     if(!this.files.length) return;
     var form=this.closest('form'), button=form.querySelector('.btn-upload'), label=button.querySelector('span'),
         status=form.querySelector('.upload-status'), fill=form.querySelector('.upload-progress-fill');
     form.classList.add('is-uploading'); button.classList.add('is-uploading');
-    fill.style.width='0%'; fill.classList.remove('indeterminate');
+    fill.style.width='0%'; fill.classList.remove('indeterminate'); status.className='upload-status';
 
     var xhr=new XMLHttpRequest();
     xhr.open('POST', form.getAttribute('action'), true);
@@ -52,11 +43,11 @@ document.querySelectorAll('.instant-upload').forEach(function(input){
     });
     xhr.onload=function(){
       form.classList.remove('is-uploading'); button.classList.remove('is-uploading');
-      fill.classList.remove('indeterminate'); fill.style.width='0%'; status.textContent='';
+      fill.classList.remove('indeterminate'); fill.style.width='0%';
       var res=null; try{ res=JSON.parse(xhr.responseText); }catch(e){}
       if(!res||!res.ok){
         label.textContent=form.classList.contains('is-ready')?'Upload Ulang':'Upload';
-        tampilkanNotifikasiUpload((res&&res.message)?res.message:'Gagal mengunggah berkas, coba lagi.', true);
+        status.className='upload-status err'; status.textContent=(res&&res.message)?res.message:'Gagal mengunggah berkas, coba lagi.';
         return;
       }
       form.classList.remove('is-missing'); form.classList.add('is-ready');
@@ -70,12 +61,12 @@ document.querySelectorAll('.instant-upload').forEach(function(input){
         }
         lihat.href=res.href;
       }
-      tampilkanNotifikasiUpload(res.pesan||'Berkas berhasil diunggah.', false);
+      status.className='upload-status ok'; status.textContent=res.pesan||'Berkas berhasil diunggah.';
     };
     xhr.onerror=function(){
-      label.textContent=form.classList.contains('is-ready')?'Upload Ulang':'Upload'; status.textContent='';
+      label.textContent=form.classList.contains('is-ready')?'Upload Ulang':'Upload';
       form.classList.remove('is-uploading'); button.classList.remove('is-uploading');
-      tampilkanNotifikasiUpload('Gagal mengunggah berkas, coba lagi.', true);
+      status.className='upload-status err'; status.textContent='Gagal mengunggah berkas, coba lagi.';
     };
     xhr.send(new FormData(form));
   });
