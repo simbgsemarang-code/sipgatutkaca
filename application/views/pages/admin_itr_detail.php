@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 :root{
   --gold-500:#C9A24B;--gold-300:#E4C87B;--gold-100:#F3E3B8;
@@ -231,6 +232,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div class="kv full"><span>Keterangan Perijinan</span><b><?= htmlspecialchars($r['keterangan_perijinan']?:'—') ?></b></div>
         <div class="kv full"><span>Titik Koordinat Poligon</span><b><?php $titik=json_decode((string)($r['titik_koordinat']??''),TRUE); if(is_array($titik)&&$titik): ?><?= implode(' · ',array_map(function($t){return number_format($t['lat'],6).', '.number_format($t['lng'],6);},$titik)) ?><?php else: ?><?= htmlspecialchars($r['latitude'].', '.$r['longitude']) ?> (pusat)<?php endif; ?></b></div>
       </div>
+      <?php $titik_peta=(is_array($titik)&&$titik)?array_map(function($t){return array((float)$t['lat'],(float)$t['lng']);},$titik):array(array((float)$r['latitude'],(float)$r['longitude'])); ?>
+      <div id="mapPoligon" data-titik='<?= json_encode($titik_peta,JSON_HEX_APOS|JSON_HEX_QUOT) ?>' style="height:320px;margin-top:20px;border:1px solid var(--line);border-radius:8px"></div>
     </div>
 
     <div class="card">
@@ -412,6 +415,26 @@ document.querySelectorAll('.itr-review-form').forEach(function(form){
     });
   });
 });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  var el=document.getElementById('mapPoligon'); if(!el) return;
+  var titik=JSON.parse(el.getAttribute('data-titik')||'[]'); if(!titik.length) return;
+  var map=L.map(el,{scrollWheelZoom:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap',maxZoom:19}).addTo(map);
+  if(titik.length>=3){
+    var poly=L.polygon(titik,{color:'#A57E2C',weight:2,fillColor:'#C9A24B',fillOpacity:.25}).addTo(map);
+    map.fitBounds(poly.getBounds(),{padding:[24,24]});
+  } else if(titik.length===2){
+    var line=L.polyline(titik,{color:'#A57E2C',weight:2}).addTo(map);
+    titik.forEach(function(t){L.marker(t).addTo(map);});
+    map.fitBounds(line.getBounds(),{padding:[24,24]});
+  } else {
+    L.marker(titik[0]).addTo(map);
+    map.setView(titik[0],17);
+  }
+})();
 </script>
 </body>
 </html>
