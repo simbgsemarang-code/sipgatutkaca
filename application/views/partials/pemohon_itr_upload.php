@@ -1,5 +1,6 @@
 <p class="eyebrow">Portal Pemohon ITR</p><h2>Unggah Berkas Persyaratan</h2>
 <p class="section-lead">Pengajuan <b><?= htmlspecialchars($row['no_permohonan']) ?></b> — pilih berkas pada masing-masing bidang, berkas langsung diunggah setelah dipilih.</p>
+<?php if(!empty($row['file_hasil_itr'])): ?><div class="notice itr-hasil-notice"><span>Dokumen hasil ITR sudah diterbitkan admin<?= !empty($row['hasil_diunggah_pada'])?(' · '.date('d/m/Y H:i',strtotime($row['hasil_diunggah_pada']))):'' ?>.</span><a class="btn btn-gold itr-btn-xs" href="<?= base_url('pemohon/hasil_itr/'.$row['id']) ?>" target="_blank">Unduh Hasil ITR</a></div><?php endif; ?>
 <?php if($this->session->flashdata('sukses')): ?><div class="notice"><?= htmlspecialchars($this->session->flashdata('sukses'),ENT_QUOTES,'UTF-8') ?></div><?php endif; ?>
 <?php foreach($errors as $e): ?><div class="notice upload-error"><?= htmlspecialchars($e,ENT_QUOTES,'UTF-8') ?></div><?php endforeach; ?>
 
@@ -58,6 +59,8 @@
 @keyframes itr-indeterminate{0%{margin-left:-30%}100%{margin-left:100%}}
 .itr-upload-help{margin:10px 0 0;color:var(--muted);font-size:13px}
 .upload-error{background:rgba(224,82,107,.12)!important}
+.itr-hasil-notice{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:rgba(46,168,79,.08);border:1px solid rgba(46,168,79,.35)}
+.itr-btn-xs{padding:9px 16px!important;font-size:11px!important;letter-spacing:.12em!important;border-radius:8px;white-space:nowrap;flex:0 0 auto}
 @media(max-width:700px){.itr-upload-row{align-items:flex-start;flex-wrap:wrap}.itr-upload-row .upload-name{align-items:flex-start;flex-direction:column;gap:7px}.itr-upload-row .upload-actions{width:100%;justify-content:flex-end}}
 </style>
 <script>
