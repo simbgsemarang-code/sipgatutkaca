@@ -136,6 +136,10 @@ td:first-child{color:var(--text);font-weight:500}
 .dl{color:var(--gold-300);letter-spacing:.12em;font-size:.78rem;text-transform:uppercase;white-space:nowrap}
 .dl:hover{text-decoration:underline}
 
+.itr-pemohon-search{display:flex;gap:10px;margin-top:0}
+.itr-pemohon-search input{flex:1}
+.itr-pemohon-search .btn{padding:13px 22px;flex:0 0 auto}
+.itr-pemohon-pagination{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:26px;flex-wrap:wrap}
 .form-card{background:var(--surface);border:1px solid var(--line);padding:46px;max-width:520px}
 .form-card.center{margin:0 auto}
 .field{margin-bottom:22px}
@@ -278,16 +282,29 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
       <div>
         <p class="eyebrow" style="margin-bottom:20px">Daftar Pemohon</p>
-        <table style="margin-top:0">
+        <form method="get" action="<?php echo base_url('itr'); ?>" class="itr-pemohon-search">
+          <input type="search" name="q" value="<?php echo htmlspecialchars($q, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Cari nama pemohon atau kecamatan…">
+          <button class="btn btn-ghost" type="submit">Cari</button>
+        </form>
+        <table style="margin-top:24px">
           <thead><tr><th>Pemohon</th><th>Kecamatan</th><th>Tanggal</th><th>Status</th></tr></thead>
           <tbody>
-            <tr><td>Sri Wahyuni</td><td>Cilacap Tengah</td><td>21 Jul 2026</td><td><span class="tag">Diproses</span></td></tr>
-            <tr><td>Bambang Prakoso</td><td>Kroya</td><td>19 Jul 2026</td><td><span class="tag">Terbit</span></td></tr>
-            <tr><td>Dewi Anggraini</td><td>Majenang</td><td>18 Jul 2026</td><td><span class="tag">Terbit</span></td></tr>
-            <tr><td>Agus Santoso</td><td>Sidareja</td><td>15 Jul 2026</td><td><span class="tag">Diproses</span></td></tr>
-            <tr><td>Rina Kusumawati</td><td>Adipala</td><td>14 Jul 2026</td><td><span class="tag">Terbit</span></td></tr>
+            <?php if (empty($daftar_pemohon)): ?>
+            <tr><td colspan="4">Belum ada pemohon<?php echo $q !== '' ? ' yang cocok dengan pencarian "'.htmlspecialchars($q, ENT_QUOTES, 'UTF-8').'"' : ''; ?>.</td></tr>
+            <?php else: foreach ($daftar_pemohon as $p):
+              $label_status = $p['status']==='disetujui' ? 'Terbit' : ($p['status']==='ditolak' ? 'Ditolak' : 'Diproses');
+            ?>
+            <tr><td><?php echo htmlspecialchars($p['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo htmlspecialchars($p['lokasi_kecamatan']?:'—', ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo htmlspecialchars(date('d M Y', strtotime($p['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td><td><span class="tag"><?php echo $label_status; ?></span></td></tr>
+            <?php endforeach; endif; ?>
           </tbody>
         </table>
+        <?php if ($total_halaman > 1): ?>
+        <div class="itr-pemohon-pagination">
+          <?php if ($page > 1): ?><a class="btn btn-ghost btn-sm" href="<?php echo base_url('itr').'?q='.urlencode($q).'&page='.($page-1); ?>">‹ Sebelumnya</a><?php else: ?><span></span><?php endif; ?>
+          <span class="note" style="margin:0">Halaman <?php echo $page; ?> dari <?php echo $total_halaman; ?></span>
+          <?php if ($page < $total_halaman): ?><a class="btn btn-ghost btn-sm" href="<?php echo base_url('itr').'?q='.urlencode($q).'&page='.($page+1); ?>">Berikutnya ›</a><?php else: ?><span></span><?php endif; ?>
+        </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
