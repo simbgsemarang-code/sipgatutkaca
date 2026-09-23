@@ -196,7 +196,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-wrap">
     <p class="eyebrow"><a href="<?= base_url('admin_itr') ?>" style="color:var(--gold-500);text-decoration:underline">&larr; Kembali ke Daftar Pengajuan ITR</a></p>
     <h2><?= htmlspecialchars($r['no_permohonan']) ?></h2>
-    <span class="tag tag-<?= htmlspecialchars($r['status'],ENT_QUOTES,'UTF-8') ?>"><?= ucwords(str_replace('_',' ',$r['status'])) ?></span>
+    <span id="statusTag" class="tag tag-<?= htmlspecialchars($r['status'],ENT_QUOTES,'UTF-8') ?>"><?= ucwords(str_replace('_',' ',$r['status'])) ?></span>
 
     <?php if($this->session->flashdata('sukses')): ?><div class="alert alert-ok"><?= htmlspecialchars($this->session->flashdata('sukses')) ?></div><?php endif; ?>
     <?php if($this->session->flashdata('error')): ?><div class="alert alert-err"><?= htmlspecialchars($this->session->flashdata('error')) ?></div><?php endif; ?>
@@ -235,9 +235,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <?php $berkas=array('file_permohonan'=>'Surat Permohonan','file_ktp'=>'KTP','file_sertifikat'=>'Sertifikat','file_siteplan'=>'Site plan','file_denah_foto'=>'Denah &amp; Foto'); if($perusahaan) $berkas+=array('file_nib'=>'NIB','file_npwp'=>'NPWP','file_akta'=>'Akta Perusahaan'); foreach($berkas as $field=>$label): if(empty($r[$field])): ?>
       <div class="itr-review-row itr-review-kosong"><b><?= $label ?></b><span class="tag tag-kosong">Belum diunggah</span></div>
       <?php continue; endif; $st=$r['_status_berkas'][$field]??null; $status=$st['status']??'menunggu'; ?>
-      <div class="itr-review-row itr-review-<?= $status ?>">
-        <div class="itr-review-head"><b><?= $label ?></b><span class="tag tag-<?= $status ?>"><?= ucfirst($status) ?></span><a class="btn btn-ghost btn-sm" style="padding:8px 18px" target="_blank" href="<?= base_url('admin_itr/berkas/'.$r['id'].'/'.$field) ?>">Lihat Berkas</a></div>
-        <?php if($status==='ditolak'&&!empty($st['catatan'])): ?><p class="itr-review-catatan">Alasan sebelumnya: <?= nl2br(htmlspecialchars($st['catatan'])) ?></p><?php endif; ?>
+      <div class="itr-review-row itr-review-<?= $status ?>" data-field="<?= htmlspecialchars($field,ENT_QUOTES,'UTF-8') ?>">
+        <div class="itr-review-head"><b><?= $label ?></b><span class="tag tag-<?= $status ?>" data-role="status-tag"><?= ucfirst($status) ?></span><a class="btn btn-ghost btn-sm" style="padding:8px 18px" target="_blank" href="<?= base_url('admin_itr/berkas/'.$r['id'].'/'.$field) ?>">Lihat Berkas</a></div>
+        <p class="itr-review-catatan" data-role="catatan"<?= ($status==='ditolak'&&!empty($st['catatan']))?'':' style="display:none"' ?>>Alasan sebelumnya: <?= $status==='ditolak'?nl2br(htmlspecialchars($st['catatan']??'')):'' ?></p>
         <?= form_open('admin_itr/tinjau-berkas/'.$r['id'],array('class'=>'itr-review-form')) ?>
         <input type="hidden" name="itr_token" value="<?= htmlspecialchars($this->session->userdata('admin_itr_token'),ENT_QUOTES,'UTF-8') ?>">
         <input type="hidden" name="field" value="<?= htmlspecialchars($field,ENT_QUOTES,'UTF-8') ?>">
@@ -250,18 +250,19 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
     <div class="card">
       <h4>Dokumen Hasil ITR</h4>
-      <?php if($r['_semua_diterima']): ?>
+      <div id="hasilSiap" style="<?= $r['_semua_diterima']?'':'display:none' ?>">
         <?php if(!empty($r['file_hasil_itr'])): ?><div class="alert alert-ok">Sudah diterbitkan <?= !empty($r['hasil_diunggah_pada'])?('· '.date('d/m/Y H:i',strtotime($r['hasil_diunggah_pada']))):'' ?> — <a target="_blank" href="<?= base_url('admin_itr/hasil/'.$r['id']) ?>" style="text-decoration:underline">Lihat/Unduh</a>. Unggah file baru di bawah untuk menggantinya.</div><?php else: ?><div class="alert alert-ok">Semua berkas sudah diterima. Unggah dokumen resmi hasil ITR (PDF) supaya bisa diunduh pemohon.</div><?php endif; ?>
         <?= form_open_multipart('admin_itr/unggah-hasil/'.$r['id'],array('style'=>'margin-top:18px')) ?><input type="hidden" name="itr_token" value="<?= htmlspecialchars($this->session->userdata('admin_itr_token'),ENT_QUOTES,'UTF-8') ?>">
         <input type="file" name="file_hasil_itr" accept=".pdf" required><button class="btn btn-gold btn-sm" style="margin-top:14px"><?= empty($r['file_hasil_itr'])?'Unggah Hasil ITR':'Ganti Hasil ITR' ?></button><?= form_close() ?>
-      <?php else: ?><p style="color:var(--muted);font-size:.88rem">Unggah dokumen hasil ITR tersedia setelah semua berkas di atas berstatus Diterima.</p><?php endif; ?>
+      </div>
+      <p id="hasilBelum" style="color:var(--muted);font-size:.88rem<?= $r['_semua_diterima']?';display:none':'' ?>">Unggah dokumen hasil ITR tersedia setelah semua berkas di atas berstatus Diterima.</p>
     </div>
 
     <div class="card">
       <h4>Status &amp; Informasi Bebas</h4>
       <?= form_open('admin_itr/simpan/'.$r['id']) ?><input type="hidden" name="itr_token" value="<?= htmlspecialchars($this->session->userdata('admin_itr_token'),ENT_QUOTES,'UTF-8') ?>">
-      <label for="status-<?= (int)$r['id'] ?>">Status Pengajuan (otomatis mengikuti tinjauan berkas, bisa ditimpa manual)</label>
-      <select id="status-<?= (int)$r['id'] ?>" name="status"><?php foreach(array('diajukan'=>'Diajukan','sedang_diverifikasi'=>'Sedang diverifikasi','perlu_perbaikan'=>'Perlu perbaikan','disetujui'=>'Disetujui','ditolak'=>'Ditolak') as $code=>$label): ?><option value="<?= $code ?>" <?= $r['status']===$code?'selected':'' ?>><?= $label ?></option><?php endforeach; ?></select>
+      <label for="statusSelect">Status Pengajuan (otomatis mengikuti tinjauan berkas, bisa ditimpa manual)</label>
+      <select id="statusSelect" name="status"><?php foreach(array('diajukan'=>'Diajukan','sedang_diverifikasi'=>'Sedang diverifikasi','perlu_perbaikan'=>'Perlu perbaikan','disetujui'=>'Disetujui','ditolak'=>'Ditolak') as $code=>$label): ?><option value="<?= $code ?>" <?= $r['status']===$code?'selected':'' ?>><?= $label ?></option><?php endforeach; ?></select>
       <label for="pesan-<?= (int)$r['id'] ?>" style="margin-top:18px">Informasi untuk Pemohon</label>
       <textarea id="pesan-<?= (int)$r['id'] ?>" name="informasi" maxlength="10000" rows="3" placeholder="Tuliskan hasil pemeriksaan, permintaan perbaikan, atau informasi berikutnya."></textarea>
       <button class="btn btn-gold btn-sm" style="margin-top:16px">Simpan dan Kirim Informasi</button>
@@ -363,6 +364,59 @@ document.addEventListener('click',function(e){
 });
 var bar=document.getElementById('topbar');
 addEventListener('scroll',function(){bar.classList.toggle('scrolled',scrollY>40)},{passive:true});
+
+function tampilkanNotifikasiItr(pesan, error){
+  var el=document.getElementById('itrNotice');
+  if(!el){
+    el=document.createElement('div'); el.id='itrNotice';
+    document.getElementById('statusTag').insertAdjacentElement('afterend', el);
+  }
+  el.className='alert '+(error?'alert-err':'alert-ok');
+  el.textContent=pesan;
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+document.querySelectorAll('.itr-review-form').forEach(function(form){
+  form.querySelectorAll('button[name="keputusan"]').forEach(function(tombol){
+    tombol.addEventListener('click', function(e){
+      e.preventDefault();
+      var row=form.closest('.itr-review-row');
+      var semuaTombol=form.querySelectorAll('button[name="keputusan"]');
+      var fd=new FormData(form);
+      fd.set('keputusan', tombol.value);
+      semuaTombol.forEach(function(b){ b.disabled=true; });
+      fetch(form.getAttribute('action'), {method:'POST', body:fd, headers:{'X-Requested-With':'XMLHttpRequest'}})
+        .then(function(res){ return res.json(); })
+        .then(function(data){
+          semuaTombol.forEach(function(b){ b.disabled=false; });
+          if(!data.ok){ tampilkanNotifikasiItr(data.message||'Gagal menyimpan tinjauan.', true); return; }
+          row.className='itr-review-row itr-review-'+data.status;
+          var tagBerkas=row.querySelector('[data-role="status-tag"]');
+          tagBerkas.className='tag tag-'+data.status;
+          tagBerkas.textContent=data.status.charAt(0).toUpperCase()+data.status.slice(1);
+          var catatanEl=row.querySelector('[data-role="catatan"]');
+          if(data.status==='ditolak'&&data.catatan){
+            catatanEl.style.display=''; catatanEl.textContent='Alasan sebelumnya: '+data.catatan;
+          } else {
+            catatanEl.style.display='none'; catatanEl.textContent='';
+          }
+          form.querySelector('textarea[name="catatan"]').value='';
+          var statusTag=document.getElementById('statusTag');
+          statusTag.className='tag tag-'+data.status_pengajuan;
+          statusTag.textContent=data.status_label;
+          var statusSelect=document.getElementById('statusSelect');
+          if(statusSelect) statusSelect.value=data.status_pengajuan;
+          var hasilSiap=document.getElementById('hasilSiap'), hasilBelum=document.getElementById('hasilBelum');
+          if(data.semua_diterima){ hasilSiap.style.display=''; hasilBelum.style.display='none'; }
+          else { hasilSiap.style.display='none'; hasilBelum.style.display=''; }
+          tampilkanNotifikasiItr(data.pesan||'Tersimpan.', false);
+        })
+        .catch(function(){
+          semuaTombol.forEach(function(b){ b.disabled=false; });
+          tampilkanNotifikasiItr('Gagal menghubungi server, coba lagi.', true);
+        });
+    });
+  });
+});
 </script>
 </body>
 </html>

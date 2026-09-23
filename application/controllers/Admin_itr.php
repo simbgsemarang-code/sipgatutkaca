@@ -45,7 +45,11 @@ class Admin_itr extends CI_Controller {
  /** Admin menerima/menolak satu berkas. Menolak wajib disertai alasan; pemohon lihat & unggah ulang lewat pemohon/upload-berkas-itr. */
  public function tinjau_berkas($id=0){
   if($this->input->method()!=='post'){show_404();return;}
-  if(!hash_equals((string)$this->session->userdata('admin_itr_token'),(string)$this->input->post('itr_token'))){show_error('Formulir tidak valid.',403);return;}
+  $is_ajax=$this->input->is_ajax_request();
+  if(!hash_equals((string)$this->session->userdata('admin_itr_token'),(string)$this->input->post('itr_token'))){
+   if($is_ajax){$this->output->set_status_header(403)->set_content_type('application/json')->set_output(json_encode(array('ok'=>FALSE,'message'=>'Formulir tidak valid, muat ulang halaman.')));return;}
+   show_error('Formulir tidak valid.',403);return;
+  }
   $id=(int)$id;
   $row=$this->db->where('id',$id)->get('pengajuan_itr')->row_array(); if(!$row){show_404();return;}
   $field=(string)$this->input->post('field');
@@ -54,7 +58,11 @@ class Admin_itr extends CI_Controller {
   $keputusan=(string)$this->input->post('keputusan');
   $catatan=trim((string)$this->input->post('catatan'));
   if(!in_array($keputusan,array('diterima','ditolak'),TRUE)){show_error('Keputusan tidak valid.',422);return;}
-  if($keputusan==='ditolak'&&$catatan===''){$this->session->set_flashdata('error','Alasan penolakan berkas '.$files[$field].' wajib diisi.');redirect('admin_itr/detail/'.$id);return;}
+  if($keputusan==='ditolak'&&$catatan===''){
+   $pesan='Alasan penolakan berkas '.$files[$field].' wajib diisi.';
+   if($is_ajax){$this->output->set_content_type('application/json')->set_output(json_encode(array('ok'=>FALSE,'message'=>$pesan)));return;}
+   $this->session->set_flashdata('error',$pesan);redirect('admin_itr/detail/'.$id);return;
+  }
 
   $this->db->where('pengajuan_id',$id)->where('field',$field)->delete('pengajuan_itr_berkas_status');
   $this->db->insert('pengajuan_itr_berkas_status',array('pengajuan_id'=>$id,'field'=>$field,'status'=>$keputusan,'catatan'=>$catatan?:null,'ditinjau_oleh'=>(int)$this->session->userdata('user_id'),'ditinjau_pada'=>date('Y-m-d H:i:s')));
@@ -62,7 +70,17 @@ class Admin_itr extends CI_Controller {
   $status_baru=$this->_perbarui_status_otomatis($id);
   $ket=$keputusan==='diterima' ? ('Admin menerima berkas '.$files[$field].'.') : ('Admin menolak berkas '.$files[$field].': '.$catatan.' Silakan unggah ulang.');
   $this->db->insert('aktivitas_itr',array('user_id'=>$row['user_id'],'pengajuan_id'=>$id,'keterangan'=>$ket,'created_at'=>date('Y-m-d H:i:s')));
-  $this->session->set_flashdata('sukses','Hasil tinjauan berkas '.$files[$field].' tersimpan.'); redirect('admin_itr/detail/'.$id);
+  $pesan_sukses='Hasil tinjauan berkas '.$files[$field].' tersimpan.';
+  if($is_ajax){
+   $row['status']=$status_baru;
+   $this->output->set_content_type('application/json')->set_output(json_encode(array(
+    'ok'=>TRUE,'field'=>$field,'status'=>$keputusan,'catatan'=>$catatan?:null,
+    'status_pengajuan'=>$status_baru,'status_label'=>ucwords(str_replace('_',' ',$status_baru)),
+    'semua_diterima'=>itr_semua_diterima($row),'pesan'=>$pesan_sukses,
+   )));
+   return;
+  }
+  $this->session->set_flashdata('sukses',$pesan_sukses); redirect('admin_itr/detail/'.$id);
  }
 
  /** Setelah SEMUA berkas diterima, admin mengunggah dokumen hasil ITR resmi (PDF) yang bisa diunduh pemohon. */
