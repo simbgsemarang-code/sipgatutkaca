@@ -86,21 +86,46 @@ class Admin_itr extends CI_Controller {
  /** Setelah SEMUA berkas diterima, admin mengunggah dokumen hasil ITR resmi (PDF) yang bisa diunduh pemohon. */
  public function unggah_hasil($id=0){
   if($this->input->method()!=='post'){show_404();return;}
-  if(!hash_equals((string)$this->session->userdata('admin_itr_token'),(string)$this->input->post('itr_token'))){show_error('Formulir tidak valid.',403);return;}
+  $is_ajax=$this->input->is_ajax_request();
+  if(!hash_equals((string)$this->session->userdata('admin_itr_token'),(string)$this->input->post('itr_token'))){
+   if($is_ajax){$this->output->set_status_header(403)->set_content_type('application/json')->set_output(json_encode(array('ok'=>FALSE,'message'=>'Formulir tidak valid, muat ulang halaman.')));return;}
+   show_error('Formulir tidak valid.',403);return;
+  }
   $id=(int)$id;
   $row=$this->db->where('id',$id)->get('pengajuan_itr')->row_array(); if(!$row){show_404();return;}
-  if(!itr_semua_diterima($row)){$this->session->set_flashdata('error','Semua berkas wajib diterima dahulu sebelum mengunggah hasil ITR.');redirect('admin_itr/detail/'.$id);return;}
-  if(empty($_FILES['file_hasil_itr']['name'])){$this->session->set_flashdata('error','Pilih berkas PDF hasil ITR terlebih dahulu.');redirect('admin_itr/detail/'.$id);return;}
+  if(!itr_semua_diterima($row)){
+   $pesan='Semua berkas wajib diterima dahulu sebelum mengunggah hasil ITR.';
+   if($is_ajax){$this->output->set_content_type('application/json')->set_output(json_encode(array('ok'=>FALSE,'message'=>$pesan)));return;}
+   $this->session->set_flashdata('error',$pesan);redirect('admin_itr/detail/'.$id);return;
+  }
+  if(empty($_FILES['file_hasil_itr']['name'])){
+   $pesan='Pilih berkas PDF hasil ITR terlebih dahulu.';
+   if($is_ajax){$this->output->set_content_type('application/json')->set_output(json_encode(array('ok'=>FALSE,'message'=>$pesan)));return;}
+   $this->session->set_flashdata('error',$pesan);redirect('admin_itr/detail/'.$id);return;
+  }
   $this->load->library('upload'); $dir=APPPATH.'uploads/itr/';
   if(!is_dir($dir)&&!mkdir($dir,0750,TRUE)){show_error('Penyimpanan berkas tidak tersedia.',503);return;}
   $this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
-  if(!$this->upload->do_upload('file_hasil_itr')){$this->session->set_flashdata('error',strip_tags($this->upload->display_errors('','')));redirect('admin_itr/detail/'.$id);return;}
+  if(!$this->upload->do_upload('file_hasil_itr')){
+   $pesan=strip_tags($this->upload->display_errors('',''));
+   if($is_ajax){$this->output->set_content_type('application/json')->set_output(json_encode(array('ok'=>FALSE,'message'=>$pesan)));return;}
+   $this->session->set_flashdata('error',$pesan);redirect('admin_itr/detail/'.$id);return;
+  }
   $lama=$row['file_hasil_itr'];
   $nilai=berkas_simpan($this->upload->data());
-  $this->db->where('id',$id)->update('pengajuan_itr',array('file_hasil_itr'=>$nilai,'hasil_diunggah_pada'=>date('Y-m-d H:i:s'),'status'=>'disetujui'));
+  $diunggah_pada=date('Y-m-d H:i:s');
+  $this->db->where('id',$id)->update('pengajuan_itr',array('file_hasil_itr'=>$nilai,'hasil_diunggah_pada'=>$diunggah_pada,'status'=>'disetujui'));
   if($lama&&stripos($lama,'http')!==0) @unlink($dir.$lama);
-  $this->db->insert('aktivitas_itr',array('user_id'=>$row['user_id'],'pengajuan_id'=>$id,'keterangan'=>'Dokumen hasil ITR resmi telah diterbitkan dan dapat diunduh.','created_at'=>date('Y-m-d H:i:s')));
-  $this->session->set_flashdata('sukses','Dokumen hasil ITR berhasil diunggah dan dapat diunduh pemohon.'); redirect('admin_itr/detail/'.$id);
+  $this->db->insert('aktivitas_itr',array('user_id'=>$row['user_id'],'pengajuan_id'=>$id,'keterangan'=>'Dokumen hasil ITR resmi telah diterbitkan dan dapat diunduh.','created_at'=>$diunggah_pada));
+  $pesan_sukses='Dokumen hasil ITR berhasil diunggah dan dapat diunduh pemohon.';
+  if($is_ajax){
+   $this->output->set_content_type('application/json')->set_output(json_encode(array(
+    'ok'=>TRUE,'href'=>base_url('admin_itr/hasil/'.$id),'diunggah_pada'=>date('d/m/Y H:i',strtotime($diunggah_pada)),
+    'status_pengajuan'=>'disetujui','status_label'=>'Disetujui','pesan'=>$pesan_sukses,
+   )));
+   return;
+  }
+  $this->session->set_flashdata('sukses',$pesan_sukses); redirect('admin_itr/detail/'.$id);
  }
 
  /** status pengajuan_itr.status dihitung otomatis dari status seluruh baris pengajuan_itr_berkas_status, bukan ditulis manual. */

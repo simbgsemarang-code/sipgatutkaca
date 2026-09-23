@@ -257,9 +257,11 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <div class="card">
       <h4>Dokumen Hasil ITR</h4>
       <div id="hasilSiap" style="<?= $r['_semua_diterima']?'':'display:none' ?>">
-        <?php if(!empty($r['file_hasil_itr'])): ?><div class="alert alert-ok">Sudah diterbitkan <?= !empty($r['hasil_diunggah_pada'])?('· '.date('d/m/Y H:i',strtotime($r['hasil_diunggah_pada']))):'' ?> — <a target="_blank" href="<?= base_url('admin_itr/hasil/'.$r['id']) ?>" style="text-decoration:underline">Lihat/Unduh</a>. Unggah file baru di bawah untuk menggantinya.</div><?php else: ?><div class="alert alert-ok">Semua berkas sudah diterima. Unggah dokumen resmi hasil ITR (PDF) supaya bisa diunduh pemohon.</div><?php endif; ?>
-        <?= form_open_multipart('admin_itr/unggah-hasil/'.$r['id'],array('style'=>'margin-top:18px')) ?><input type="hidden" name="itr_token" value="<?= htmlspecialchars($this->session->userdata('admin_itr_token'),ENT_QUOTES,'UTF-8') ?>">
-        <input type="file" name="file_hasil_itr" accept=".pdf" required><button class="btn btn-gold btn-sm" style="margin-top:14px"><?= empty($r['file_hasil_itr'])?'Unggah Hasil ITR':'Ganti Hasil ITR' ?></button><?= form_close() ?>
+        <div id="hasilAlert" class="alert alert-ok"><?php if(!empty($r['file_hasil_itr'])): ?>Sudah diterbitkan <?= !empty($r['hasil_diunggah_pada'])?('· '.date('d/m/Y H:i',strtotime($r['hasil_diunggah_pada']))):'' ?> — <a target="_blank" href="<?= base_url('admin_itr/hasil/'.$r['id']) ?>" style="text-decoration:underline">Lihat/Unduh</a>. Unggah file baru di bawah untuk menggantinya.<?php else: ?>Semua berkas sudah diterima. Unggah dokumen resmi hasil ITR (PDF) supaya bisa diunduh pemohon.<?php endif; ?></div>
+        <?= form_open_multipart('admin_itr/unggah-hasil/'.$r['id'],array('style'=>'margin-top:18px','id'=>'hasilForm')) ?><input type="hidden" name="itr_token" value="<?= htmlspecialchars($this->session->userdata('admin_itr_token'),ENT_QUOTES,'UTF-8') ?>">
+        <input type="file" name="file_hasil_itr" accept=".pdf" required>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap"><button type="submit" class="btn btn-gold btn-sm" id="hasilBtn"><?= empty($r['file_hasil_itr'])?'Unggah Hasil ITR':'Ganti Hasil ITR' ?></button><span class="itr-review-pesan" id="hasilPesan"></span></div>
+        <?= form_close() ?>
       </div>
       <p id="hasilBelum" style="color:var(--muted);font-size:.88rem<?= $r['_semua_diterima']?';display:none':'' ?>">Unggah dokumen hasil ITR tersedia setelah semua berkas di atas berstatus Diterima.</p>
     </div>
@@ -415,6 +417,47 @@ document.querySelectorAll('.itr-review-form').forEach(function(form){
     });
   });
 });
+
+var hasilForm=document.getElementById('hasilForm');
+if(hasilForm){
+  hasilForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn=document.getElementById('hasilBtn'), pesanEl=document.getElementById('hasilPesan'), fileInput=hasilForm.querySelector('input[type="file"]');
+    if(!fileInput.files.length) return;
+    var teksAsli=btn.textContent;
+    btn.disabled=true; btn.textContent='Mengunggah...';
+    pesanEl.className='itr-review-pesan'; pesanEl.textContent='';
+    var xhr=new XMLHttpRequest();
+    xhr.open('POST', hasilForm.getAttribute('action'), true);
+    xhr.setRequestHeader('X-Requested-With','XMLHttpRequest');
+    xhr.upload.addEventListener('progress', function(ev){
+      if(!ev.lengthComputable) return;
+      btn.textContent='Mengunggah '+Math.round(ev.loaded/ev.total*100)+'%';
+    });
+    xhr.upload.addEventListener('load', function(){ btn.textContent='Menyimpan...'; });
+    xhr.onload=function(){
+      btn.disabled=false;
+      var data=null; try{ data=JSON.parse(xhr.responseText); }catch(err){}
+      if(!data||!data.ok){
+        btn.textContent=teksAsli;
+        pesanEl.className='itr-review-pesan err'; pesanEl.textContent=(data&&data.message)?data.message:'Gagal mengunggah, coba lagi.';
+        return;
+      }
+      btn.textContent='Ganti Hasil ITR';
+      fileInput.value='';
+      document.getElementById('hasilAlert').innerHTML='Sudah diterbitkan · '+data.diunggah_pada+' — <a target="_blank" href="'+data.href+'" style="text-decoration:underline">Lihat/Unduh</a>. Unggah file baru di bawah untuk menggantinya.';
+      var statusTag=document.getElementById('statusTag');
+      statusTag.className='tag tag-'+data.status_pengajuan; statusTag.textContent=data.status_label;
+      var statusSelect=document.getElementById('statusSelect'); if(statusSelect) statusSelect.value=data.status_pengajuan;
+      pesanEl.className='itr-review-pesan ok'; pesanEl.textContent=data.pesan||'Tersimpan.';
+    };
+    xhr.onerror=function(){
+      btn.disabled=false; btn.textContent=teksAsli;
+      pesanEl.className='itr-review-pesan err'; pesanEl.textContent='Gagal menghubungi server, coba lagi.';
+    };
+    xhr.send(new FormData(hasilForm));
+  });
+}
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
