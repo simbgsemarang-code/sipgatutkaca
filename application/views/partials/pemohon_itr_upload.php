@@ -58,8 +58,9 @@
 .itr-upload-row .upload-progress-fill.indeterminate{width:30%!important;animation:itr-indeterminate 1.1s ease-in-out infinite}
 @keyframes itr-indeterminate{0%{margin-left:-30%}100%{margin-left:100%}}
 .itr-upload-help{margin:10px 0 0;color:var(--muted);font-size:13px}
-.upload-error{background:rgba(224,82,107,.12)!important}
-.itr-hasil-notice{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:rgba(46,168,79,.08);border:1px solid rgba(46,168,79,.35)}
+.notice{padding:16px 20px;border-radius:12px;border:1px solid var(--line);background:var(--surface-hi);margin:20px 0;font-size:14px}
+.upload-error{background:rgba(224,82,107,.12)!important;border-color:rgba(224,82,107,.35)!important}
+.itr-hasil-notice{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:rgba(46,168,79,.08);border-color:rgba(46,168,79,.35)}
 .itr-btn-xs{padding:9px 16px!important;font-size:11px!important;letter-spacing:.12em!important;border-radius:8px;white-space:nowrap;flex:0 0 auto}
 @media(max-width:700px){.itr-upload-row{align-items:flex-start;flex-wrap:wrap}.itr-upload-row .upload-name{align-items:flex-start;flex-direction:column;gap:7px}.itr-upload-row .upload-actions{width:100%;justify-content:flex-end}}
 </style>

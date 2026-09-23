@@ -63,6 +63,7 @@ $wilayah_cilacap = wilayah_cilacap();
 <div class="itr-form-actions"><button type="submit" class="btn btn-gold"><?= $edit_id?'Simpan Perubahan':'Simpan &amp; Lanjut Unggah Berkas' ?></button><a class="btn btn-ghost" href="<?= base_url('pemohon') ?>">Kembali ke Dashboard</a></div><?= form_close() ?>
 
 <style>
+.notice{padding:16px 20px;border-radius:12px;border:1px solid var(--line);background:var(--surface-hi);margin:20px 0;font-size:14px}
 .itr-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:22px 0 32px}
 .itr-full{grid-column:1/-1}
 .itr-application label{display:block;margin-bottom:8px;font-size:15px;color:var(--gold-300)}
