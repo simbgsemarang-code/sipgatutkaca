@@ -1,4 +1,5 @@
 <?php
+$edit_id = isset($edit_id) ? (int)$edit_id : 0;
 $v=function($field,$default='')use($old){return htmlspecialchars(isset($old[$field])?$old[$field]:$default,ENT_QUOTES,'UTF-8');};
 $jenis = isset($old['jenis_pemohon']) && $old['jenis_pemohon']==='perusahaan' ? 'perusahaan' : 'perorangan';
 $status_tanah_opsi = array('SHM'=>'Sertifikat Hak Milik (SHM)','SHGU'=>'Sertifikat Hak Guna Usaha (SHGU)','SHGB'=>'Sertifikat Hak Guna Bangunan (SHGB)','SHP'=>'Sertifikat Hak Pakai (SHP)','Girik'=>'Surat Girik (Letter C)','Notaris'=>'Surat Keterangan Notaris');
@@ -7,9 +8,9 @@ $perijinan_opsi = array('SPPL'=>'SPPL','PBG'=>'PBG','SIUJK'=>'SIUJK','SIUP'=>'SI
 $titik_lama = json_decode((string)($old['titik_koordinat']??''),TRUE); if(!is_array($titik_lama)) $titik_lama=array();
 $wilayah_cilacap = wilayah_cilacap();
 ?>
-<p class="eyebrow">Portal Pemohon ITR</p><h2>Formulir Pengajuan ITR</h2><p class="section-lead">Mengikuti format resmi Surat Permohonan Informasi Tata Ruang 2021. Lengkapi data pemohon, lokasi, rencana kegiatan, titik koordinat, dan seluruh lampiran sebelum mengirim pengajuan.</p>
+<p class="eyebrow">Portal Pemohon ITR</p><h2><?= $edit_id?'Edit Pengajuan ITR':'Formulir Pengajuan ITR' ?></h2><p class="section-lead">Mengikuti format resmi Surat Permohonan Informasi Tata Ruang 2021. Lengkapi data pemohon, lokasi, rencana kegiatan, titik koordinat, dan seluruh lampiran sebelum mengirim pengajuan.</p>
 <?php if($error): ?><div class="notice" role="alert"><?= htmlspecialchars($error,ENT_QUOTES,'UTF-8') ?></div><?php endif; ?>
-<?= form_open('pemohon/simpan_itr',array('class'=>'info-card itr-application','id'=>'itrForm')) ?>
+<?= form_open($edit_id?'pemohon/perbarui_itr/'.$edit_id:'pemohon/simpan_itr',array('class'=>'info-card itr-application','id'=>'itrForm')) ?>
 <input type="hidden" name="itr_token" value="<?= htmlspecialchars($this->session->userdata('itr_form_token'),ENT_QUOTES,'UTF-8') ?>">
 <input type="hidden" name="titik_koordinat" id="itr-titik" value="<?= htmlspecialchars(json_encode($titik_lama),ENT_QUOTES,'UTF-8') ?>">
 
@@ -58,8 +59,8 @@ $wilayah_cilacap = wilayah_cilacap();
 </div>
 <div id="itrTitikList" class="itr-titik-list"></div>
 
-<div class="notice">Setelah data ini disimpan, Anda akan diarahkan ke halaman unggah berkas persyaratan (satu per satu, seperti pada Pengajuan PBG).</div>
-<div class="itr-form-actions"><button type="submit" class="btn btn-gold">Simpan &amp; Lanjut Unggah Berkas</button><a class="btn btn-ghost" href="<?= base_url('pemohon') ?>">Kembali ke Dashboard</a></div><?= form_close() ?>
+<?php if(!$edit_id): ?><div class="notice">Setelah data ini disimpan, Anda akan diarahkan ke halaman unggah berkas persyaratan (satu per satu, seperti pada Pengajuan PBG).</div><?php endif; ?>
+<div class="itr-form-actions"><button type="submit" class="btn btn-gold"><?= $edit_id?'Simpan Perubahan':'Simpan &amp; Lanjut Unggah Berkas' ?></button><a class="btn btn-ghost" href="<?= base_url('pemohon') ?>">Kembali ke Dashboard</a></div><?= form_close() ?>
 
 <style>
 .itr-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:22px 0 32px}

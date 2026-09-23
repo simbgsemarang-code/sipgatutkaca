@@ -76,17 +76,12 @@ class Pemohon extends CI_Controller {
 	private $itr_field_perusahaan = array('nib','nama_pemohon','alamat_pemohon'); // nama_pemohon = Nama Direktur untuk perusahaan
 	// Daftar field berkas ITR (itr_file_umum/itr_file_perusahaan/itr_file_privat) ada di application/helpers/itr_helper.php - sumber tunggal, dipakai juga oleh Admin_itr.
 
-	public function simpan_itr()
+	/** Validasi + susun payload form data ITR (dipakai bersama oleh simpan_itr & perbarui_itr). FALSE kalau tidak valid (isi $error). */
+	private function _proses_form_itr(&$old, &$error)
 	{
-		if ($this->input->method() !== 'post') { show_404(); return; }
-		$token = (string)$this->session->userdata('itr_form_token');
-		if (!$token || !hash_equals($token, (string)$this->input->post('itr_token'))) { show_error('Formulir kedaluwarsa. Muat ulang halaman.',403); return; }
-		if (!$this->db->table_exists('pengajuan_itr') || !$this->db->table_exists('aktivitas_itr')) { show_error('Database pengajuan ITR belum dimigrasi.',503); return; }
-
 		$jenis = (string) $this->input->post('jenis_pemohon');
 		if (!in_array($jenis, array('perorangan','perusahaan'), TRUE)) $jenis = 'perorangan';
 		$field_jenis = $jenis === 'perorangan' ? $this->itr_field_perorangan : $this->itr_field_perusahaan;
-		$file_jenis  = itr_files_untuk($jenis);
 
 		$semua_field = array_unique(array_merge($this->itr_field_umum, $this->itr_field_opsional, $this->itr_field_perorangan, $this->itr_field_perusahaan));
 		$old = array(); foreach ($semua_field as $f) $old[$f] = trim((string) $this->input->post($f));
@@ -111,7 +106,7 @@ class Pemohon extends CI_Controller {
 			$error = !$this->form_validation->run() ? strip_tags(validation_errors()) : '';
 			if (!$titik_valid) $error .= ' Tandai minimal 4 titik koordinat di peta membentuk poligon lokasi.';
 			if (!$wilayah_valid) $error .= ' Pilih Kecamatan dan Desa/Kelurahan yang valid.';
-			$this->render_portal('partials/pemohon_itr_form', array('error'=>trim($error),'old'=>$old)); return;
+			return FALSE;
 		}
 
 		$lat_sum=0;$lng_sum=0; foreach($titik as $t){$lat_sum+=(float)$t['lat'];$lng_sum+=(float)$t['lng'];}
@@ -123,12 +118,62 @@ class Pemohon extends CI_Controller {
 		$payload['rencana_kegiatan']=$old['jenis_kegiatan'];
 		if ($jenis === 'perusahaan') { $payload['nik']=null; $payload['pekerjaan']=null; }
 		else { $payload['nib']=null; }
+		return $payload;
+	}
+
+	public function simpan_itr()
+	{
+		if ($this->input->method() !== 'post') { show_404(); return; }
+		$token = (string)$this->session->userdata('itr_form_token');
+		if (!$token || !hash_equals($token, (string)$this->input->post('itr_token'))) { show_error('Formulir kedaluwarsa. Muat ulang halaman.',403); return; }
+		if (!$this->db->table_exists('pengajuan_itr') || !$this->db->table_exists('aktivitas_itr')) { show_error('Database pengajuan ITR belum dimigrasi.',503); return; }
+
+		$old=array(); $error='';
+		$payload = $this->_proses_form_itr($old, $error);
+		if ($payload === FALSE) { $this->render_portal('partials/pemohon_itr_form', array('error'=>trim($error),'old'=>$old)); return; }
 
 		$uid=(int)$this->session->userdata('user_id');
 		$this->db->insert('pengajuan_itr',array_merge($payload,array('user_id'=>$uid,'status'=>'diajukan'))); $id=(int)$this->db->insert_id();
 		$number='ITR-'.date('Ymd').'-'.sprintf('%06d',$id); $this->db->where('id',$id)->update('pengajuan_itr',array('no_permohonan'=>$number));
 		$this->db->insert('aktivitas_itr',array('user_id'=>$uid,'pengajuan_id'=>$id,'keterangan'=>'Pengajuan '.$number.' dikirim, menunggu lampiran berkas.','created_at'=>date('Y-m-d H:i:s')));
 		$this->session->unset_userdata('itr_form_token'); $this->session->set_flashdata('sukses','Data pengajuan ITR tersimpan. Nomor permohonan: '.$number.'. Lanjutkan unggah berkas persyaratan di bawah.'); redirect('pemohon/upload-berkas-itr/'.$id);
+	}
+
+	/** Pemohon hanya boleh mengedit/menghapus data selama pengajuan masih berstatus 'diajukan' (belum ada tinjauan admin). */
+	public function edit_itr($id)
+	{
+		$id=(int)$id;
+		$row=$this->db->where('id',$id)->where('user_id',(int)$this->session->userdata('user_id'))->get('pengajuan_itr')->row_array();
+		if(!$row){show_404();return;}
+		if($row['status']!=='diajukan'){show_error('Pengajuan yang sudah diproses admin tidak dapat diedit lagi.',403);return;}
+		if(!$this->session->userdata('itr_form_token')) $this->session->set_userdata('itr_form_token', bin2hex(random_bytes(32)));
+		$this->render_portal('partials/pemohon_itr_form', array('error'=>'','old'=>$row,'edit_id'=>$id));
+	}
+
+	public function perbarui_itr($id)
+	{
+		if ($this->input->method() !== 'post') { show_404(); return; }
+		$id=(int)$id;
+		$row=$this->db->where('id',$id)->where('user_id',(int)$this->session->userdata('user_id'))->get('pengajuan_itr')->row_array();
+		if(!$row){show_404();return;}
+		if($row['status']!=='diajukan'){show_error('Pengajuan yang sudah diproses admin tidak dapat diedit lagi.',403);return;}
+		$token = (string)$this->session->userdata('itr_form_token');
+		if (!$token || !hash_equals($token, (string)$this->input->post('itr_token'))) { show_error('Formulir kedaluwarsa. Muat ulang halaman.',403); return; }
+
+		$old=array(); $error='';
+		$payload = $this->_proses_form_itr($old, $error);
+		if ($payload === FALSE) { $this->render_portal('partials/pemohon_itr_form', array('error'=>trim($error),'old'=>$old,'edit_id'=>$id)); return; }
+
+		$this->db->where('id',$id)->update('pengajuan_itr',$payload);
+		$this->db->insert('aktivitas_itr',array('user_id'=>(int)$this->session->userdata('user_id'),'pengajuan_id'=>$id,'keterangan'=>'Pemohon memperbarui data pengajuan '.$row['no_permohonan'].'.','created_at'=>date('Y-m-d H:i:s')));
+		$this->session->unset_userdata('itr_form_token'); $this->session->set_flashdata('sukses','Data pengajuan berhasil diperbarui.'); redirect('pemohon');
+	}
+
+	public function hapus_itr($id)
+	{
+		$id=(int)$id;
+		$this->db->where('id',$id)->where('user_id',(int)$this->session->userdata('user_id'))->where('status','diajukan')->delete('pengajuan_itr');
+		redirect('pemohon');
 	}
 
 	/** Berkas ITR diunggah terpisah setelah data tersimpan - satu field per permintaan, seperti Upload Berkas PBG. */
