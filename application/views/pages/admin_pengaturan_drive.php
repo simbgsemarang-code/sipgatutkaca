@@ -101,9 +101,11 @@ html[data-theme="dark"] .badge-off{color:#F3AEB9}
 .field input[type=text],.field input[type=password]{width:100%;padding:13px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-family:var(--body);font-size:.9rem}
 .field input[type=file]{width:100%;padding:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-family:var(--body);font-size:.85rem}
 .field small{display:block;margin-top:6px;color:var(--muted);font-size:.78rem}
-.readonly-copy{display:flex;gap:10px}
-.readonly-copy input{flex:1;background:var(--surface-hi)!important;font-family:monospace;font-size:.82rem!important}
-.readonly-copy button{flex:0 0 auto;padding:0 20px;border:1px solid var(--gold-500);background:transparent;color:var(--gold-300);cursor:pointer;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+.readonly-copy{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:border-color .2s}
+.readonly-copy:focus-within{border-color:var(--gold-500)}
+.readonly-copy input{flex:1;min-width:0;border:0!important;outline:none;background:var(--surface-hi)!important;color:var(--text);font-family:monospace;font-size:.82rem!important;padding:14px 16px}
+.readonly-copy button{flex:0 0 auto;padding:0 22px;border:0;border-left:1px solid var(--line);background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;cursor:pointer;font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;transition:filter .2s}
+.readonly-copy button:hover{filter:brightness(1.08)}
 
 .mode-toggle{display:flex;gap:24px;margin-bottom:22px}
 .mode-toggle label{display:flex!important;align-items:center;gap:8px;font-size:.86rem;color:var(--text)!important;cursor:pointer}
