@@ -260,11 +260,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
     <?php if (!empty($akun_uji)): ?>
       <div class="reveal" style="max-width:560px;margin:24px auto 0;padding-top:20px;border-top:1px dashed var(--line)">
-        <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
-          <p class="note" style="text-align:center;margin:0">Mode pengembangan — kredensial akun uji coba</p>
-          <button type="button" id="btn-akun-uji" class="btn btn-ghost btn-sm" style="cursor:pointer" onclick="toggleAkunUji()">Tampilkan</button>
-        </div>
-        <div id="panel-akun-uji" style="display:none;gap:10px">
+        <p class="note" style="text-align:center;margin-top:0;margin-bottom:14px">Mode pengembangan — kredensial akun uji coba:</p>
+        <div style="display:grid;gap:10px">
           <?php foreach ($akun_uji as $a): ?>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 18px;border:1px solid var(--line);background:var(--surface);flex-wrap:wrap">
               <div style="font-size:.82rem;line-height:1.6">
@@ -337,16 +334,6 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 </div>
 
 <script>
-// ===== PANEL KREDENSIAL AKUN UJI COBA (disembunyikan bawaan, klik untuk lihat) =====
-function toggleAkunUji(){
-  var panel=document.getElementById('panel-akun-uji');
-  var btn=document.getElementById('btn-akun-uji');
-  if(!panel||!btn)return;
-  var tampil=panel.style.display==='none';
-  panel.style.display=tampil?'grid':'none';
-  btn.textContent=tampil?'Sembunyikan':'Tampilkan';
-}
-
 // ===== TEMA (tanpa penyimpanan browser: dibawa lewat parameter URL antar halaman) =====
 (function(){
   var p=new URLSearchParams(location.search);

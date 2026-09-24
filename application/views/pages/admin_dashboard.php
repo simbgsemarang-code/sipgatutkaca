@@ -178,6 +178,12 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
         <div class="num" style="font-size:1.4rem"><?php echo $drive_aktif ? 'Aktif' : 'Nonaktif'; ?></div>
         <div class="lbl">Google Drive</div><div class="go">Atur →</div>
       </a>
+      <?php if (!empty($tampilkan_menu_login)): ?>
+      <a class="stat" href="<?php echo base_url('admin/pengaturan-login'); ?>">
+        <div class="num" style="font-size:1.4rem"><?php echo $panel_login_ditampilkan ? 'Tampil' : 'Sembunyi'; ?></div>
+        <div class="lbl">Panel Login</div><div class="go">Atur →</div>
+      </a>
+      <?php endif; ?>
     </div>
 
     <?php $this->load->view('partials/dashboard_status_aktivitas', array(

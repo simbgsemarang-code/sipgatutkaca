@@ -70,6 +70,10 @@ class Admin extends CI_Controller {
 			$drive['auth_mode'] === 'oauth' ? ! empty($drive['oauth_refresh_token']) : ! empty($drive['service_account_json'])
 		);
 
+		$login_set = $this->db->table_exists('pengaturan_login') ? $this->db->where('id', 1)->get('pengaturan_login')->row_array() : NULL;
+		$data['tampilkan_menu_login']   = ENVIRONMENT === 'development';
+		$data['panel_login_ditampilkan'] = $login_set === NULL || $login_set['tampilkan_akun_uji'];
+
 		$data['nama_admin'] = $this->session->userdata('nama');
 		$this->load->view('pages/admin_dashboard', $data);
 	}
@@ -1037,6 +1041,37 @@ class Admin extends CI_Controller {
 		}
 		$this->session->set_flashdata('sukses', 'Koneksi Google Drive diputuskan. Hubungkan ulang untuk memakai akun yang baru.');
 		redirect('admin/pengaturan-drive');
+	}
+
+	/**
+	 * Saklar tampil/sembunyikan panel kredensial akun uji coba di
+	 * halaman login publik. Daftar akunnya sendiri tetap di
+	 * Login::$akun_uji - halaman ini cuma mengatur boolean di tabel
+	 * pengaturan_login (lihat Login::_akun_uji_untuk()).
+	 */
+	public function pengaturan_login()
+	{
+		$baris = $this->db->table_exists('pengaturan_login') ? $this->db->where('id', 1)->get('pengaturan_login')->row_array() : NULL;
+		$data['tampilkan']  = $baris === NULL || $baris['tampilkan_akun_uji'];
+		$data['nama_admin'] = $this->session->userdata('nama');
+		$this->load->view('pages/admin_pengaturan_login', $data);
+	}
+
+	public function simpan_pengaturan_login()
+	{
+		if ($this->input->method() !== 'post') { show_404(); return; }
+		if (! $this->db->table_exists('pengaturan_login'))
+		{
+			show_error('Tabel pengaturan_login belum ada. Jalankan migrasi database/pengaturan_login.sql lebih dulu.', 503);
+			return;
+		}
+		$this->db->replace('pengaturan_login', array(
+			'id'                 => 1,
+			'tampilkan_akun_uji' => $this->input->post('tampilkan_akun_uji') ? 1 : 0,
+			'updated_at'         => date('Y-m-d H:i:s'),
+		));
+		$this->session->set_flashdata('sukses', 'Pengaturan panel login tersimpan.');
+		redirect('admin/pengaturan-login');
 	}
 
 	public function gdrive_oauth()

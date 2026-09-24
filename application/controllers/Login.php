@@ -257,11 +257,22 @@ class Login extends CI_Controller {
 	 * akun staf yang sama - lihat catatan $peta_tombol_uji). Kalau
 	 * tidak ada $from spesifik (kunjungan langsung ke /login), tampilkan
 	 * semua akun dari semua grup. Selalu kosong di luar ENVIRONMENT
-	 * development.
+	 * development, dan juga kosong kalau admin mematikannya lewat
+	 * Admin::pengaturan_login() (tabel pengaturan_login, lihat
+	 * database/pengaturan_login.sql). Kalau tabelnya belum ada/belum
+	 * ada barisnya, dianggap masih menyala (perilaku lama sebelum
+	 * saklar ini ada).
 	 */
 	private function _akun_uji_untuk($from)
 	{
 		if (ENVIRONMENT !== 'development')
+		{
+			return array();
+		}
+
+		$this->load->database();
+		$baris = $this->db->table_exists('pengaturan_login') ? $this->db->where('id', 1)->get('pengaturan_login')->row_array() : NULL;
+		if ($baris !== NULL && ! $baris['tampilkan_akun_uji'])
 		{
 			return array();
 		}
