@@ -12,11 +12,14 @@ class Admin extends CI_Controller {
 	 */
 	private $peran_valid = array('admin', 'pu', 'tpa_arsitek', 'tpa_struktur', 'tpa_mep');
 
+	/** Jumlah baris per halaman di daftar Kelola Pengguna (lihat pengguna()). */
+	private $per_page_pengguna = 10;
+
 	public function __construct()
 	{
 		parent::__construct();
 		$this->load->library('session');
-		$this->load->helper(array('pbg_alur','berkas'));
+		$this->load->helper(array('pbg_alur','berkas','kredensial'));
 		$this->_wajib_admin();
 	}
 
@@ -167,69 +170,197 @@ class Admin extends CI_Controller {
 		redirect('admin/aturan');
 	}
 
+	/**
+	 * Daftar pengguna - full width, dengan pencarian (?q=) dan
+	 * paginasi (?halaman=) per $per_page_pengguna baris. Tombol
+	 * tambah/edit mengarah ke pengguna_form() (halaman terpisah - lihat
+	 * catatan di sana), bukan form inline di halaman ini lagi.
+	 */
 	public function pengguna()
 	{
-		$data['daftar_user'] = $this->db->order_by('created_at', 'DESC')->get('users')->result_array();
-		$data['sukses']      = $this->session->flashdata('sukses');
-		$data['error']       = $this->session->flashdata('error');
-		$data['old']         = $this->session->flashdata('old');
-		$data['nama_admin']  = $this->session->userdata('nama');
+		$this->load->helper('form');
+		$keyword = trim((string) $this->input->get('q'));
+
+		if ($keyword !== '')
+		{
+			$this->db->group_start()->like('nama', $keyword)->or_like('email', $keyword)->or_like('nik', $keyword)->or_like('no_hp', $keyword)->group_end();
+		}
+		$total = $this->db->count_all_results('users');
+
+		$page = max(1, (int) $this->input->get('halaman'));
+		$offset = ($page - 1) * $this->per_page_pengguna;
+
+		$this->load->library('pagination');
+		$config = array(
+			'base_url'             => base_url('admin/pengguna'),
+			'total_rows'           => $total,
+			'per_page'             => $this->per_page_pengguna,
+			'use_page_numbers'     => TRUE,
+			'page_query_string'    => TRUE,
+			'query_string_segment' => 'halaman',
+			'reuse_query_string'   => TRUE,
+			'full_tag_open'        => '<div class="pagination">',
+			'full_tag_close'       => '</div>',
+			'first_link'           => '&laquo;&laquo;',
+			'last_link'            => '&raquo;&raquo;',
+			'next_link'            => '&raquo;',
+			'prev_link'            => '&laquo;',
+			'cur_tag_open'         => '<span class="current">',
+			'cur_tag_close'        => '</span>',
+			'num_tag_open'         => '<span>',
+			'num_tag_close'        => '</span>',
+		);
+		$this->pagination->initialize($config);
+
+		if ($keyword !== '')
+		{
+			$this->db->group_start()->like('nama', $keyword)->or_like('email', $keyword)->or_like('nik', $keyword)->or_like('no_hp', $keyword)->group_end();
+		}
+		$data['daftar_user'] = $this->db->order_by('created_at', 'DESC')->limit($this->per_page_pengguna, $offset)->get('users')->result_array();
+
+		$data['total']            = $total;
+		$data['keyword']          = $keyword;
+		$data['pagination_links'] = $this->pagination->create_links();
+		$data['sukses']           = $this->session->flashdata('sukses');
+		$data['error']            = $this->session->flashdata('error');
+		$data['kredensial']       = $this->session->flashdata('kredensial');
+		$data['nama_admin']       = $this->session->userdata('nama');
 		$this->load->view('pages/admin_pengguna', $data);
 	}
 
-	public function tambah_pengguna()
+	/**
+	 * Form Tambah/Edit Pengguna - halaman TERSENDIRI (terpisah dari
+	 * daftar di pengguna()), supaya daftarnya bisa tampil full width
+	 * dan tombol Edit/+ Tambah Pengguna mengarah ke sini ($id null =
+	 * tambah, $id diisi = edit).
+	 */
+	public function pengguna_form($id = null)
 	{
-		$nama     = trim((string) $this->input->post('nama'));
-		$email    = trim((string) $this->input->post('email'));
-		$nik      = trim((string) $this->input->post('nik'));
-		$password = (string) $this->input->post('password');
-		$role     = (string) $this->input->post('role');
+		$this->load->helper('form');
+		$id = $id ? (int) $id : null;
+		$editing = $id ? $this->db->where('id', $id)->get('users')->row_array() : NULL;
+		if ($id && $editing === NULL) { show_404(); return; }
 
-		$old = array('nama' => $nama, 'email' => $email, 'nik' => $nik, 'role' => $role);
-
-		if ($nama === '' || $email === '' || $password === '' || ! in_array($role, $this->peran_valid, TRUE))
+		if ($this->input->method(TRUE) === 'POST')
 		{
-			$this->session->set_flashdata('error', 'Nama, surel, kata sandi, dan jenis pengguna wajib diisi dengan benar.');
-			$this->session->set_flashdata('old', $old);
+			$save_id  = (int) $this->input->post('record_id');
+			$nama     = trim((string) $this->input->post('nama'));
+			$email    = trim((string) $this->input->post('email'));
+			$nik      = trim((string) $this->input->post('nik'));
+			$no_hp    = trim((string) $this->input->post('no_hp'));
+			$password = (string) $this->input->post('password');
+			$role     = (string) $this->input->post('role');
+
+			// Admin tidak boleh menurunkan peran akunnya sendiri lewat form
+			// ini (senada dengan hapus_pengguna() yang mencegah admin
+			// menghapus akunnya sendiri) - supaya tidak pernah terjadi 0
+			// admin yang bisa login.
+			if ($save_id && $save_id === (int) $this->session->userdata('user_id')) { $role = 'admin'; }
+
+			$old = compact('nama', 'email', 'nik', 'no_hp', 'role');
+
+			$tujuan = $save_id ? 'admin/pengguna-form/' . $save_id : 'admin/pengguna-form';
+
+			if ($nama === '' || $email === '' || ! in_array($role, $this->peran_valid, TRUE))
+			{
+				$this->session->set_flashdata('error', 'Nama, surel, dan jenis pengguna wajib diisi dengan benar.');
+				$this->session->set_flashdata('old', $old);
+				redirect($tujuan); return;
+			}
+			if (! filter_var($email, FILTER_VALIDATE_EMAIL))
+			{
+				$this->session->set_flashdata('error', 'Format surel tidak valid.');
+				$this->session->set_flashdata('old', $old);
+				redirect($tujuan); return;
+			}
+			if (! $save_id && strlen($password) < 8)
+			{
+				$this->session->set_flashdata('error', 'Kata sandi awal minimal 8 karakter.');
+				$this->session->set_flashdata('old', $old);
+				redirect($tujuan); return;
+			}
+			if ($password !== '' && strlen($password) < 8)
+			{
+				$this->session->set_flashdata('error', 'Kata sandi minimal 8 karakter.');
+				$this->session->set_flashdata('old', $old);
+				redirect($tujuan); return;
+			}
+			$this->db->where('email', $email);
+			if ($save_id) { $this->db->where('id !=', $save_id); }
+			if ($this->db->get('users')->num_rows() > 0)
+			{
+				$this->session->set_flashdata('error', 'Surel tersebut sudah terdaftar.');
+				$this->session->set_flashdata('old', $old);
+				redirect($tujuan); return;
+			}
+
+			$simpan = array(
+				'nik'   => $nik !== '' ? $nik : NULL,
+				'no_hp' => $no_hp !== '' ? $no_hp : NULL,
+				'nama'  => $nama,
+				'email' => $email,
+				'role'  => $role,
+			);
+			if ($password !== '') { $simpan['password'] = password_hash($password, PASSWORD_DEFAULT); }
+
+			if ($save_id) { $this->db->where('id', $save_id)->update('users', $simpan); }
+			else { $this->db->insert('users', $simpan); }
+
+			// Kata sandi (plaintext) cuma diketahui server persis di sini -
+			// kalau baru dibuat atau sengaja diganti, simpan sebentar di
+			// flashdata supaya admin bisa langsung kirim kredensialnya ke
+			// pengguna lewat WA/Email di halaman daftar berikutnya.
+			if ($password !== '')
+			{
+				$this->session->set_flashdata('kredensial', array('nama' => $nama, 'email' => $email, 'no_hp' => $no_hp, 'password' => $password));
+			}
+			else
+			{
+				$this->session->set_flashdata('sukses', 'Data pengguna "' . $nama . '" berhasil diperbarui.');
+			}
 			redirect('admin/pengguna');
 			return;
 		}
 
-		if (! filter_var($email, FILTER_VALIDATE_EMAIL))
-		{
-			$this->session->set_flashdata('error', 'Format surel tidak valid.');
-			$this->session->set_flashdata('old', $old);
-			redirect('admin/pengguna');
-			return;
-		}
+		$data['editing']     = $editing;
+		$data['old']         = $this->session->flashdata('old');
+		$data['error']       = $this->session->flashdata('error');
+		$data['nama_admin']  = $this->session->userdata('nama');
+		$this->load->view('pages/admin_pengguna_form', $data);
+	}
 
-		if (strlen($password) < 8)
-		{
-			$this->session->set_flashdata('error', 'Kata sandi minimal 8 karakter.');
-			$this->session->set_flashdata('old', $old);
-			redirect('admin/pengguna');
-			return;
-		}
+	/**
+	 * Reset kata sandi 1 akun ke kata sandi acak baru, lalu simpan
+	 * sebentar di flashdata supaya halaman Kelola Pengguna bisa
+	 * menampilkan tombol kirim kredensial (WA/Email) memakai kata
+	 * sandi baru tsb - pola yang sama dengan pengguna_form().
+	 */
+	public function reset_password_pengguna($id = null)
+	{
+		$id = (int) $id;
+		$user = $this->db->where('id', $id)->get('users')->row_array();
+		if ($user === NULL) { show_404(); return; }
+		if ($this->input->method(TRUE) !== 'POST') { redirect('admin/pengguna'); return; }
 
-		$this->db->where('email', $email);
-		if ($this->db->get('users')->num_rows() > 0)
-		{
-			$this->session->set_flashdata('error', 'Surel tersebut sudah terdaftar.');
-			$this->session->set_flashdata('old', $old);
-			redirect('admin/pengguna');
-			return;
-		}
+		$password_baru = $this->_buat_kata_sandi_acak();
+		$this->db->where('id', $id)->update('users', array('password' => password_hash($password_baru, PASSWORD_DEFAULT)));
 
-		$this->db->insert('users', array(
-			'nik'      => $nik !== '' ? $nik : NULL,
-			'nama'     => $nama,
-			'email'    => $email,
-			'password' => password_hash($password, PASSWORD_DEFAULT),
-			'role'     => $role,
+		$this->session->set_flashdata('kredensial', array(
+			'nama' => $user['nama'], 'email' => $user['email'], 'no_hp' => $user['no_hp'], 'password' => $password_baru,
 		));
-
-		$this->session->set_flashdata('sukses', 'Pengguna "' . $nama . '" berhasil ditambahkan sebagai ' . strtoupper($role) . '.');
 		redirect('admin/pengguna');
+	}
+
+	/** Kata sandi acak 8 karakter (huruf besar/kecil + angka, tanpa karakter ambigu). */
+	private function _buat_kata_sandi_acak($panjang = 8)
+	{
+		$karakter = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+		$password = '';
+		for ($i = 0; $i < $panjang; $i++)
+		{
+			$password .= $karakter[random_int(0, strlen($karakter) - 1)];
+		}
+		return $password;
 	}
 
 	/**

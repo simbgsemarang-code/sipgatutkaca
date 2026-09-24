@@ -114,8 +114,21 @@ input:focus,select:focus,textarea:focus{outline:1px solid var(--gold-500);border
 .alert-ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#8CE0A6}
 .alert-err{background:rgba(224,82,107,.12);border-color:#E0526B;color:#F3AEB9}
 
-.split-admin{display:grid;grid-template-columns:1fr 1.3fr;gap:60px;align-items:start;margin-top:20px}
-.split-admin>*{min-width:0}
+.list-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-top:20px}
+.search-form{display:flex;gap:10px;margin-top:26px;max-width:460px}
+.search-form input{flex:1}
+.search-form button{flex:0 0 auto;padding:0 22px;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--gold-500);background:transparent;color:var(--gold-300);cursor:pointer;font-family:var(--body)}
+.search-form button:hover{background:var(--gold-500);color:#081826}
+.aksi-cell{white-space:nowrap;display:flex;gap:8px;flex-wrap:wrap}
+.reset-btn{border:1px solid var(--line);color:var(--muted);background:transparent;padding:7px 14px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;font-family:var(--body)}
+.reset-btn:hover{border-color:var(--gold-500);color:var(--gold-300)}
+.pagination{display:flex;gap:6px;margin-top:30px;flex-wrap:wrap;align-items:center;font-size:.8rem}
+.pagination a{display:inline-block;padding:8px 14px;border:1px solid var(--line);color:var(--muted)}
+.pagination a:hover{border-color:var(--gold-500);color:var(--gold-300)}
+.pagination span.current{display:inline-block;padding:8px 14px;border:1px solid var(--gold-500);background:var(--gold-500);color:#081826;font-weight:600}
+.kredensial-panel p{margin:0 0 10px}
+.kredensial-panel .kode{font-family:monospace;font-size:.86rem}
+.kredensial-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
 
 /* ===== PANEL WARNA ===== */
 .theme-fab{position:fixed;right:26px;bottom:26px;z-index:80;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold-500);background:var(--surface);color:var(--gold-300);cursor:pointer;display:grid;place-items:center;box-shadow:0 8px 26px var(--shadow);transition:transform .3s}
@@ -228,10 +241,13 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   <div class="dash-main">
 <section style="padding-top:20px">
   <div class="dash-wrap">
-    <div class="reveal">
-      <p class="eyebrow">Panel Admin</p>
-      <h2>Kelola Pengguna</h2>
-      <p class="section-lead">Tambahkan akun untuk staf Tim Profesi Ahli (Arsitek, Struktur, atau MEP), Pekerjaan Umum (PU), atau admin lain — dan lihat seluruh pengguna yang sudah terdaftar. Akun pemohon hanya bisa dibuat lewat pendaftaran mandiri di halaman <?php echo base_url('daftar'); ?>.</p>
+    <div class="reveal list-head">
+      <div>
+        <p class="eyebrow">Panel Admin</p>
+        <h2>Kelola Pengguna</h2>
+        <p class="section-lead">Kelola akun staf Tim Profesi Ahli (Arsitek, Struktur, atau MEP), Pekerjaan Umum (PU), atau admin lain. Akun pemohon hanya bisa dibuat lewat pendaftaran mandiri di halaman <?php echo base_url('daftar'); ?>.</p>
+      </div>
+      <a class="btn btn-gold btn-sm" href="<?php echo base_url('admin/pengguna-form'); ?>">+ Tambah Pengguna</a>
     </div>
 
     <?php if (!empty($sukses)): ?>
@@ -241,83 +257,75 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="alert alert-err reveal" style="margin-top:36px"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
-    <div class="split-admin">
-      <form class="form-card reveal" action="<?php echo base_url('admin/tambah-pengguna'); ?>" method="post">
-        <p class="eyebrow" style="margin-bottom:8px">Tambah Pengguna</p>
-        <h2 style="font-size:1.3rem;margin-bottom:24px">Buat Akun Baru</h2>
-        <div class="field">
-          <label for="a-nama">Nama Lengkap</label>
-          <input id="a-nama" name="nama" type="text" required value="<?php echo isset($old['nama']) ? htmlspecialchars($old['nama'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+    <?php if (!empty($kredensial)): ?>
+      <div class="alert alert-ok reveal kredensial-panel" style="margin-top:36px">
+        <p>Kata sandi untuk <strong><?php echo htmlspecialchars($kredensial['nama'], ENT_QUOTES, 'UTF-8'); ?></strong> berhasil disimpan. Kirim kredensial berikut ke pengguna:</p>
+        <p class="kode">Email: <?php echo htmlspecialchars($kredensial['email'], ENT_QUOTES, 'UTF-8'); ?> &nbsp;|&nbsp; Kata Sandi: <strong><?php echo htmlspecialchars($kredensial['password'], ENT_QUOTES, 'UTF-8'); ?></strong></p>
+        <div class="kredensial-actions">
+          <?php $wa_link = kredensial_wa_link($kredensial['no_hp'], $kredensial['nama'], $kredensial['email'], $kredensial['password']); ?>
+          <?php if ($wa_link): ?>
+            <a class="btn btn-gold btn-sm" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($wa_link, ENT_QUOTES, 'UTF-8'); ?>">Kirim via WhatsApp</a>
+          <?php else: ?>
+            <span class="note" style="margin:0">No. HP belum diisi — lengkapi dulu untuk kirim via WhatsApp.</span>
+          <?php endif; ?>
+          <a class="btn btn-ghost btn-sm" href="<?php echo htmlspecialchars(kredensial_mailto_link($kredensial['email'], $kredensial['nama'], $kredensial['email'], $kredensial['password']), ENT_QUOTES, 'UTF-8'); ?>">Kirim via Email</a>
         </div>
-        <div class="field">
-          <label for="a-email">Surel</label>
-          <input id="a-email" name="email" type="email" required value="<?php echo isset($old['email']) ? htmlspecialchars($old['email'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-        </div>
-        <div class="field">
-          <label for="a-nik">NIK <span style="text-transform:none;letter-spacing:0">(opsional)</span></label>
-          <input id="a-nik" name="nik" type="text" value="<?php echo isset($old['nik']) ? htmlspecialchars($old['nik'], ENT_QUOTES, 'UTF-8') : ''; ?>">
-        </div>
-        <div class="field">
-          <label for="a-password">Kata Sandi Awal</label>
-          <input id="a-password" name="password" type="password" required minlength="8" placeholder="Minimal 8 karakter">
-        </div>
-        <div class="field">
-          <label for="a-role">Jenis Pengguna</label>
-          <?php $peran_terpilih = isset($old['role']) ? $old['role'] : ''; ?>
-          <select id="a-role" name="role" required>
-            <option value="" disabled <?php echo $peran_terpilih === '' ? 'selected' : ''; ?>>— Pilih jenis pengguna —</option>
-            <option value="admin" <?php echo $peran_terpilih === 'admin' ? 'selected' : ''; ?>>Admin</option>
-            <option value="pu" <?php echo $peran_terpilih === 'pu' ? 'selected' : ''; ?>>PU — Pekerjaan Umum</option>
-            <option value="tpa_arsitek" <?php echo $peran_terpilih === 'tpa_arsitek' ? 'selected' : ''; ?>>TPA Arsitek — Tim Profesi Ahli Arsitektur</option>
-            <option value="tpa_struktur" <?php echo $peran_terpilih === 'tpa_struktur' ? 'selected' : ''; ?>>TPA Struktur — Tim Profesi Ahli Struktur</option>
-            <option value="tpa_mep" <?php echo $peran_terpilih === 'tpa_mep' ? 'selected' : ''; ?>>TPA MEP — Tim Profesi Ahli Mekanikal, Elektrikal, Plambing</option>
-          </select>
-        </div>
-        <button class="btn btn-gold" type="submit" style="width:100%">Tambah Pengguna</button>
-        <p class="note">Sampaikan kata sandi awal ini ke pengguna terkait secara langsung — sistem tidak mengirimkannya lewat surel.</p>
-      </form>
-
-      <div class="reveal">
-        <p class="eyebrow" style="margin-bottom:8px">Daftar Pengguna</p>
-        <h2 style="font-size:1.3rem">Total: <?php echo count($daftar_user); ?> akun</h2>
-        <table>
-          <thead><tr><th>Nama</th><th>Surel / NIK</th><th>Jenis</th><th>Terdaftar</th><th></th></tr></thead>
-          <tbody>
-            <?php if (empty($daftar_user)): ?>
-              <tr><td colspan="5">Belum ada pengguna.</td></tr>
-            <?php else: ?>
-              <?php foreach ($daftar_user as $u): ?>
-                <tr>
-                  <td><?php echo htmlspecialchars($u['nama'], ENT_QUOTES, 'UTF-8'); ?></td>
-                  <td>
-                    <?php echo htmlspecialchars($u['email'], ENT_QUOTES, 'UTF-8'); ?>
-                    <?php if (!empty($u['nik'])): ?><br><span style="font-size:.82rem">NIK: <?php echo htmlspecialchars($u['nik'], ENT_QUOTES, 'UTF-8'); ?></span><?php endif; ?>
-                  </td>
-                  <td>
-                    <?php
-                      // 'tpa'/'pemohon' generik dipertahankan di sini (bukan cuma
-                      // 3 spesialisasi baru) karena akun lama bertipe itu masih
-                      // bisa ada di tabel dan tetap harus tampil dengan tag yang
-                      // benar, walau sudah tidak bisa dipilih lagi saat membuat
-                      // pengguna baru.
-                      $kelas_tag = array('admin' => 'tag', 'pu' => 'tag tag-pu', 'tpa' => 'tag tag-tpa', 'tpa_arsitek' => 'tag tag-tpa', 'tpa_struktur' => 'tag tag-tpa', 'tpa_mep' => 'tag tag-tpa', 'pemohon' => 'tag tag-pemohon');
-                      $kelas = isset($kelas_tag[$u['role']]) ? $kelas_tag[$u['role']] : 'tag';
-                      $label_peran = strtoupper(str_replace('_', ' ', $u['role']));
-                    ?>
-                    <span class="<?php echo $kelas; ?>"><?php echo htmlspecialchars($label_peran, ENT_QUOTES, 'UTF-8'); ?></span>
-                  </td>
-                  <td><?php echo htmlspecialchars(date('d M Y', strtotime($u['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
-                  <td>
-                    <form action="<?php echo base_url('admin/hapus-pengguna/' . (int) $u['id']); ?>" method="post" onsubmit="return confirm('Hapus pengguna &quot;<?php echo htmlspecialchars(addslashes($u['nama']), ENT_QUOTES, 'UTF-8'); ?>&quot;?');" style="margin:0">
-                      <button type="submit" class="hapus-link">Hapus</button>
-                    </form>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            <?php endif; ?>
-          </tbody>
-        </table>
       </div>
+    <?php endif; ?>
+
+    <?php echo form_open('admin/pengguna', array('method' => 'get', 'class' => 'search-form reveal')); ?>
+      <input type="search" name="q" value="<?php echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Cari nama, surel, NIK, atau No. HP">
+      <button type="submit">Cari</button>
+    <?php echo form_close(); ?>
+
+    <div class="reveal">
+      <p class="eyebrow" style="margin-top:30px;margin-bottom:8px">Daftar Pengguna</p>
+      <h2 style="font-size:1.3rem"><?php echo (int) $total; ?> akun ditemukan</h2>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Aksi</th><th>Pengguna</th><th>No. HP</th><th>Jenis</th><th>Terdaftar</th></tr></thead>
+        <tbody>
+          <?php if (empty($daftar_user)): ?>
+            <tr><td colspan="5">Pengguna tidak ditemukan.</td></tr>
+          <?php else: ?>
+            <?php foreach ($daftar_user as $u): ?>
+              <tr>
+                <td class="aksi-cell">
+                  <a class="btn btn-ghost btn-sm" style="padding:9px 18px" href="<?php echo base_url('admin/pengguna-form/' . (int) $u['id']); ?>">Edit</a>
+                  <form action="<?php echo base_url('admin/reset-password-pengguna/' . (int) $u['id']); ?>" method="post" onsubmit="return confirm('Kata sandi &quot;<?php echo htmlspecialchars(addslashes($u['nama']), ENT_QUOTES, 'UTF-8'); ?>&quot; akan diganti dengan kata sandi acak baru. Lanjutkan?');" style="margin:0">
+                    <button type="submit" class="reset-btn" title="Buat kata sandi baru lalu siapkan link kirim ke WA/Email">Reset &amp; Kirim</button>
+                  </form>
+                  <form action="<?php echo base_url('admin/hapus-pengguna/' . (int) $u['id']); ?>" method="post" onsubmit="return confirm('Hapus pengguna &quot;<?php echo htmlspecialchars(addslashes($u['nama']), ENT_QUOTES, 'UTF-8'); ?>&quot;?');" style="margin:0">
+                    <button type="submit" class="hapus-link">Hapus</button>
+                  </form>
+                </td>
+                <td>
+                  <?php echo htmlspecialchars($u['nama'], ENT_QUOTES, 'UTF-8'); ?><br>
+                  <span style="font-size:.82rem"><?php echo htmlspecialchars($u['email'], ENT_QUOTES, 'UTF-8'); ?></span>
+                  <?php if (!empty($u['nik'])): ?><br><span style="font-size:.82rem">NIK: <?php echo htmlspecialchars($u['nik'], ENT_QUOTES, 'UTF-8'); ?></span><?php endif; ?>
+                </td>
+                <td><?php echo !empty($u['no_hp']) ? htmlspecialchars($u['no_hp'], ENT_QUOTES, 'UTF-8') : '—'; ?></td>
+                <td>
+                  <?php
+                    // 'tpa'/'pemohon' generik dipertahankan di sini (bukan cuma
+                    // 3 spesialisasi baru) karena akun lama bertipe itu masih
+                    // bisa ada di tabel dan tetap harus tampil dengan tag yang
+                    // benar, walau sudah tidak bisa dipilih lagi saat membuat
+                    // pengguna baru.
+                    $kelas_tag = array('admin' => 'tag', 'pu' => 'tag tag-pu', 'tpa' => 'tag tag-tpa', 'tpa_arsitek' => 'tag tag-tpa', 'tpa_struktur' => 'tag tag-tpa', 'tpa_mep' => 'tag tag-tpa', 'pemohon' => 'tag tag-pemohon');
+                    $kelas = isset($kelas_tag[$u['role']]) ? $kelas_tag[$u['role']] : 'tag';
+                    $label_peran = strtoupper(str_replace('_', ' ', $u['role']));
+                  ?>
+                  <span class="<?php echo $kelas; ?>"><?php echo htmlspecialchars($label_peran, ENT_QUOTES, 'UTF-8'); ?></span>
+                </td>
+                <td><?php echo htmlspecialchars(date('d M Y', strtotime($u['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+      </div>
+      <?php if (!empty($pagination_links)): ?><?php echo $pagination_links; ?><?php endif; ?>
     </div>
   </div>
 </section>
