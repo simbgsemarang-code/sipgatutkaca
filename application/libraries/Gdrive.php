@@ -29,13 +29,59 @@ class Gdrive
 	public function __construct()
 	{
 		$ci =& get_instance();
+		$ci->load->database();
+
+		// Sumber utama: baris pengaturan_gdrive yang diisi admin lewat UI
+		// (Admin::pengaturan_drive). Kalau baris ini ADA, dia jadi satu-
+		// satunya sumber kebenaran (termasuk kalau enabled=0) - supaya
+		// admin yang mematikan lewat UI tidak diam-diam jatuh balik ke
+		// file config lama yang mungkin masih enabled=true.
+		$baris = $ci->db->table_exists('pengaturan_gdrive') ? $ci->db->where('id', 1)->get('pengaturan_gdrive')->row_array() : NULL;
+
+		if ($baris !== NULL)
+		{
+			$this->enabled   = (bool) $baris['enabled'];
+			$this->mode      = (string) $baris['auth_mode'];
+			$this->folder_id = (string) $baris['folder_id'];
+
+			if ($this->enabled)
+			{
+				$this->muat_kredensial(
+					array('client_id' => $baris['oauth_client_id'], 'client_secret' => $baris['oauth_client_secret'], 'refresh_token' => $baris['oauth_refresh_token']),
+					json_decode((string) $baris['service_account_json'], TRUE)
+				);
+			}
+			return;
+		}
+
+		// Belum pernah diatur lewat UI - pakai cara lama (file config),
+		// supaya server yang sudah disetup sebelum UI ini ada tetap jalan.
 		$ci->config->load('gdrive', TRUE);
 
 		$this->enabled   = (bool) $ci->config->item('gdrive_enabled', 'gdrive');
 		$this->mode      = (string) $ci->config->item('gdrive_auth_mode', 'gdrive');
 		$this->folder_id = (string) $ci->config->item('gdrive_folder_id', 'gdrive');
 
-		if (! $this->enabled || $this->folder_id === '')
+		if (! $this->enabled) return;
+
+		$client_path = (string) $ci->config->item('gdrive_oauth_client_path', 'gdrive');
+		$this->oauth_token_path = (string) $ci->config->item('gdrive_oauth_token_path', 'gdrive');
+		$client = is_readable($client_path) ? json_decode(file_get_contents($client_path), TRUE) : NULL;
+		$token  = is_readable($this->oauth_token_path) ? json_decode(file_get_contents($this->oauth_token_path), TRUE) : NULL;
+
+		$sa_path = (string) $ci->config->item('gdrive_credentials_path', 'gdrive');
+		$sa_json = is_readable($sa_path) ? json_decode(file_get_contents($sa_path), TRUE) : NULL;
+
+		$this->muat_kredensial(
+			is_array($client) && is_array($token) ? $client + array('refresh_token' => $token['refresh_token'] ?? NULL) : NULL,
+			$sa_json
+		);
+	}
+
+	/** Validasi &amp; simpan kredensial mode yang sedang aktif ($this->mode), dari DB maupun file - sumbernya sudah tidak relevan di titik ini. */
+	private function muat_kredensial($oauth, $service_account)
+	{
+		if ($this->folder_id === '')
 		{
 			$this->enabled = FALSE;
 			return;
@@ -43,35 +89,26 @@ class Gdrive
 
 		if ($this->mode === 'oauth')
 		{
-			$client_path = (string) $ci->config->item('gdrive_oauth_client_path', 'gdrive');
-			$this->oauth_token_path = (string) $ci->config->item('gdrive_oauth_token_path', 'gdrive');
-
-			$client = is_readable($client_path) ? json_decode(file_get_contents($client_path), TRUE) : NULL;
-			$token  = is_readable($this->oauth_token_path) ? json_decode(file_get_contents($this->oauth_token_path), TRUE) : NULL;
-
-			if (is_array($client) && ! empty($client['client_id']) && ! empty($client['client_secret'])
-				&& is_array($token) && ! empty($token['refresh_token']))
+			if (is_array($oauth) && ! empty($oauth['client_id']) && ! empty($oauth['client_secret']) && ! empty($oauth['refresh_token']))
 			{
-				$this->oauth_client = $client + array('refresh_token' => $token['refresh_token']);
+				$this->oauth_client = $oauth;
 			}
 			else
 			{
 				$this->enabled = FALSE;
-				log_message('error', 'Gdrive: kredensial OAuth belum lengkap. Jalankan admin/gdrive-oauth dulu.');
+				log_message('error', 'Gdrive: kredensial OAuth belum lengkap. Buka Pengaturan Google Drive di panel admin.');
 			}
 		}
 		elseif ($this->mode === 'service_account')
 		{
-			$path = (string) $ci->config->item('gdrive_credentials_path', 'gdrive');
-			$json = is_readable($path) ? json_decode(file_get_contents($path), TRUE) : NULL;
-			if (is_array($json) && ! empty($json['client_email']) && ! empty($json['private_key']))
+			if (is_array($service_account) && ! empty($service_account['client_email']) && ! empty($service_account['private_key']))
 			{
-				$this->creds = $json;
+				$this->creds = $service_account;
 			}
 			else
 			{
 				$this->enabled = FALSE;
-				log_message('error', 'Gdrive: file credentials.json tidak valid.');
+				log_message('error', 'Gdrive: kredensial service account tidak valid.');
 			}
 		}
 		else

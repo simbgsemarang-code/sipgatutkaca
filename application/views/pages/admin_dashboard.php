@@ -174,6 +174,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px s
         <div class="num"><?php echo number_format($stat['saran'], 0, ',', '.'); ?><?php if ($saran_baru > 0): ?><span class="badge-baru"><?php echo (int) $saran_baru; ?> baru</span><?php endif; ?></div>
         <div class="lbl">Saran &amp; Masukan</div><div class="go">Kelola →</div>
       </a>
+      <a class="stat <?php echo $drive_aktif ? '' : 'hi'; ?>" href="<?php echo base_url('admin/pengaturan-drive'); ?>">
+        <div class="num" style="font-size:1.4rem"><?php echo $drive_aktif ? 'Aktif' : 'Nonaktif'; ?></div>
+        <div class="lbl">Google Drive</div><div class="go">Atur →</div>
+      </a>
     </div>
 
     <?php $this->load->view('partials/dashboard_status_aktivitas', array(
