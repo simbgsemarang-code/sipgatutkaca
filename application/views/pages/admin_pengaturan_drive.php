@@ -209,6 +209,50 @@ ol.guide code{background:var(--surface-hi);padding:2px 6px;font-size:.82em;color
       </div>
     </div>
 
+    <?php if(!empty($pengaturan['oauth_client_id']) || !empty($pengaturan['oauth_client_secret']) || !empty($pengaturan['service_account_json'])): ?>
+    <div class="card">
+      <h4>Kredensial Tersimpan</h4>
+      <p class="help">Nilai yang sedang tersimpan di sistem saat ini. Client Secret sengaja disembunyikan secara default karena Google Cloud Console sendiri tidak menampilkannya lagi setelah dibuat pertama kali - klik Tampilkan kalau perlu menyalinnya ulang.</p>
+
+      <?php if(!empty($pengaturan['oauth_client_id'])): ?>
+      <div class="field">
+        <label>Client ID</label>
+        <div class="readonly-copy">
+          <input type="text" readonly onclick="this.select()" value="<?= htmlspecialchars($pengaturan['oauth_client_id'],ENT_QUOTES,'UTF-8') ?>">
+        </div>
+      </div>
+      <?php endif; ?>
+
+      <?php if(!empty($pengaturan['oauth_client_secret'])): ?>
+      <div class="field">
+        <label>Client Secret</label>
+        <div class="readonly-copy">
+          <input type="password" id="viewClientSecret" readonly onclick="this.select()" value="<?= htmlspecialchars($pengaturan['oauth_client_secret'],ENT_QUOTES,'UTF-8') ?>">
+          <button type="button" onclick="toggleKredensial('viewClientSecret', this)">Tampilkan</button>
+        </div>
+      </div>
+      <?php endif; ?>
+
+      <?php if(!empty($pengaturan['service_account_json'])): $sa = json_decode($pengaturan['service_account_json'], TRUE); ?>
+      <div class="field">
+        <label>Service Account (email)</label>
+        <div class="readonly-copy">
+          <input type="text" readonly onclick="this.select()" value="<?= htmlspecialchars($sa['client_email'] ?? '—',ENT_QUOTES,'UTF-8') ?>">
+        </div>
+        <small>Email ini yang perlu ditambahkan sebagai anggota Shared Drive di Google Drive.</small>
+      </div>
+      <div class="field">
+        <label>Isi Lengkap JSON Kunci (private key)</label>
+        <div class="readonly-copy" style="align-items:flex-start">
+          <textarea id="viewServiceAccount" readonly onclick="this.select()" style="flex:1;min-width:0;border:0;outline:none;background:var(--surface-hi);color:var(--text);font-family:monospace;font-size:.78rem;padding:14px 16px;min-height:44px;resize:vertical;filter:blur(4px)"><?= htmlspecialchars($pengaturan['service_account_json'],ENT_QUOTES,'UTF-8') ?></textarea>
+          <button type="button" onclick="toggleBlur('viewServiceAccount', this)">Tampilkan</button>
+        </div>
+        <small>Berisi private key rahasia - hindari membagikan tangkapan layarnya.</small>
+      </div>
+      <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
     <div class="card">
       <h4>Redirect URI untuk Google Cloud Console</h4>
       <p class="help">Isikan alamat persis di bawah ini ke kolom &#8220;Authorized redirect URIs&#8221; pada OAuth Client di Google Cloud Console. Alamat ini otomatis mengikuti domain aplikasi saat ini - kalau domain berpindah, cukup buka halaman ini lagi untuk melihat alamat yang baru.</p>
@@ -327,6 +371,20 @@ function salinRedirectUri(){
   var el=document.getElementById('redirectUri');
   el.select();
   navigator.clipboard && navigator.clipboard.writeText(el.value).catch(function(){ document.execCommand('copy'); });
+}
+
+function toggleKredensial(id, btn){
+  var el=document.getElementById(id);
+  var tampil = el.type === 'password';
+  el.type = tampil ? 'text' : 'password';
+  btn.textContent = tampil ? 'Sembunyikan' : 'Tampilkan';
+}
+
+function toggleBlur(id, btn){
+  var el=document.getElementById(id);
+  var tampil = el.style.filter !== 'none';
+  el.style.filter = tampil ? 'none' : 'blur(4px)';
+  btn.textContent = tampil ? 'Sembunyikan' : 'Tampilkan';
 }
 
 var radios=document.querySelectorAll('input[name="auth_mode"]');
