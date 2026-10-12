@@ -271,6 +271,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .map-geo input:focus{outline:2px solid #C9A24B;outline-offset:-2px;border:none}
 .map-geo button{border:none;background:#fff;color:#667;padding:0 14px;cursor:pointer;font-size:1rem}
 .map-geo button:hover{color:#C9A24B}
+.map-geo{width:min(720px,80%)}
+.map-geo select{border:none;border-right:1px solid rgba(0,0,0,.12);background:#fff;color:#223;padding:11px 10px;font-size:.84rem;flex:0 1 170px;min-width:0;cursor:pointer}
+.map-geo select:focus{outline:2px solid #C9A24B;outline-offset:-2px}
+@media(max-width:1150px){.map-geo{width:min(420px,80%);flex-wrap:wrap}.map-geo select{flex:1 1 50%;border-bottom:1px solid rgba(0,0,0,.12)}.map-geo select:nth-of-type(2){border-right:none}}
 /* Legenda & kontrol */
 .legend{background:#fff;color:#223;padding:12px 14px;font-size:.72rem;line-height:1.45;box-shadow:0 2px 10px rgba(0,0,0,.25);max-height:300px;max-width:280px;overflow-y:auto}
 .legend b{display:block;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.68rem;margin-bottom:4px;color:#8a6a1c}
@@ -326,6 +330,8 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
 
     <div class="map-shell reveal">
       <div class="map-geo">
+        <select id="zoomKec" aria-label="Zoom ke kecamatan"><option value="">Semua Kecamatan</option></select>
+        <select id="zoomDesa" aria-label="Zoom ke desa atau kelurahan"><option value="">Semua Desa/Kelurahan</option></select>
         <input id="geoInput" type="text" placeholder="Masukkan koordinat (mis. -7.7267, 109.0154)" autocomplete="off">
         <button id="geoClear" title="Bersihkan" aria-label="Bersihkan pencarian">&times;</button>
       </div>
@@ -618,7 +624,66 @@ function bootPetaSpasial(){
   /* ============ CARI ALAMAT / KOORDINAT ============ */
   var geoInput=document.getElementById("geoInput"),geoBtn=document.getElementById("geoClear"),geoMarker=null;
   L.DomEvent.disableClickPropagation(document.querySelector(".map-geo"));
-  function geoClearFn(){geoInput.value="";if(geoMarker){map.removeLayer(geoMarker);geoMarker=null;}}
+  function geoClearFn(){
+    geoInput.value="";if(geoMarker){map.removeLayer(geoMarker);geoMarker=null;}
+    zoomKec.value="";isiDesa("");sorot.clearLayers();map.setView([-7.53,108.99],10);
+  }
+
+  /* ============ ZOOM KE KECAMATAN / DESA ============ */
+  var zoomKec=document.getElementById("zoomKec"),zoomDesa=document.getElementById("zoomDesa");
+  var sorot=L.geoJSON(null,{interactive:false,style:{color:"#FFD21F",weight:4,opacity:1,fillOpacity:0}}).addTo(map);
+  function daftarPoligon(g){
+    var o=[];
+    (function telusur(x){
+      if(!x)return;
+      if(x.type==="GeometryCollection")x.geometries.forEach(telusur);
+      else if(x.type==="Polygon")o.push(turf.polygon(x.coordinates));
+      else if(x.type==="MultiPolygon")x.coordinates.forEach(function(c){o.push(turf.polygon(c));});
+    })(g);
+    return o;
+  }
+  /* gisDesa tidak menyimpan kecamatannya, jadi dicocokkan secara spasial:
+     satu titik di dalam bidang terluas desa diuji ke tiap poligon kecamatan. */
+  var kecPoligon=(gisKecamatan.features||[]).map(function(f){
+    return{nama:f.properties&&f.properties.namaKecamatan,fitur:f,poligon:daftarPoligon(f.geometry)};
+  }).filter(function(k){return k.nama;});
+  var desaList=(gisDesa.features||[]).map(function(f,i){
+    var ps=daftarPoligon(f.geometry),kec="";
+    if(ps.length){
+      var titik=turf.pointOnFeature(ps.sort(function(a,b){return turf.area(b)-turf.area(a);})[0]);
+      kecPoligon.some(function(k){
+        return k.poligon.some(function(p){return turf.booleanPointInPolygon(titik,p);})&&(kec=k.nama);
+      });
+    }
+    return{idx:i,nama:(f.properties&&f.properties.namaDesa)||"Tanpa nama",kec:kec,fitur:f};
+  }).sort(function(a,b){return a.nama.localeCompare(b.nama)||a.kec.localeCompare(b.kec);});
+
+  kecPoligon.map(function(k){return k.nama;}).sort().forEach(function(nm){
+    var o=document.createElement("option");o.value=nm;o.textContent=nm;zoomKec.appendChild(o);
+  });
+  function isiDesa(kec){
+    zoomDesa.length=1;
+    desaList.forEach(function(d){
+      if(kec&&d.kec!==kec)return;
+      var o=document.createElement("option");o.value=d.idx;
+      o.textContent=kec||!d.kec?d.nama:d.nama+" (Kec. "+d.kec+")";
+      zoomDesa.appendChild(o);
+    });
+  }
+  isiDesa("");
+  function zoomKeFitur(fitur){
+    sorot.clearLayers();sorot.addData(fitur);
+    map.fitBounds(sorot.getBounds(),{padding:[30,30]});
+  }
+  zoomKec.addEventListener("change",function(){
+    isiDesa(zoomKec.value);
+    var k=kecPoligon.filter(function(x){return x.nama===zoomKec.value;})[0];
+    if(k)zoomKeFitur(k.fitur);else{sorot.clearLayers();map.setView([-7.53,108.99],10);}
+  });
+  zoomDesa.addEventListener("change",function(){
+    if(zoomDesa.value===""){zoomKec.dispatchEvent(new Event("change"));return;}
+    zoomKeFitur(gisDesa.features[+zoomDesa.value]);
+  });
   geoBtn.addEventListener("click",geoClearFn);
   geoInput.addEventListener("keydown",function(e){
     if(e.key!=="Enter")return;
