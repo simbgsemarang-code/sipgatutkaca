@@ -248,7 +248,20 @@ $lng0 = $v('longitude', '108.99');
         </div>
         <div class="fld">
           <label>Fungsi Bangunan</label>
-          <input type="text" name="fungsi" placeholder="mis. Perkantoran / Pendidikan / Hunian" value="<?php echo htmlspecialchars($v('fungsi'), ENT_QUOTES, 'UTF-8'); ?>">
+          <?php
+            // Daftar tetap supaya penulisan seragam (dipakai saringan Fungsi di
+            // peta Analisa Kerusakan). Nilai lama di luar daftar tetap
+            // ditampilkan agar tidak berubah diam-diam saat disimpan ulang.
+            $fungsi_opsi = array('Perkantoran', 'Pendidikan', 'Kesehatan', 'Hunian', 'Keagamaan', 'Sosial Budaya', 'Usaha', 'Sarana Pendukung', 'Campuran');
+            $fungsi_kini = (string) $v('fungsi');
+            if ($fungsi_kini !== '' && ! in_array($fungsi_kini, $fungsi_opsi, TRUE)) { $fungsi_opsi[] = $fungsi_kini; }
+          ?>
+          <select name="fungsi">
+            <option value="">— Pilih fungsi —</option>
+            <?php foreach ($fungsi_opsi as $fo): ?>
+              <option value="<?php echo htmlspecialchars($fo, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $fungsi_kini === $fo ? 'selected' : ''; ?>><?php echo htmlspecialchars($fo, ENT_QUOTES, 'UTF-8'); ?></option>
+            <?php endforeach; ?>
+          </select>
         </div>
         <div class="fld">
           <label>Jumlah Lantai</label>
