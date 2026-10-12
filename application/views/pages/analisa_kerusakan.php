@@ -92,7 +92,7 @@ input:focus,select:focus,textarea:focus{outline:1px solid var(--gold-500);border
 .stat span{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 
 /* ===== PETA ===== */
-.map-filter{position:absolute;top:16px;left:16px;right:16px;z-index:20;display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:16px;align-items:end;
+.map-filter{position:absolute;top:16px;left:16px;right:16px;z-index:20;display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:16px;align-items:end;
   background:rgba(255,255,255,.5);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
   border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:16px 22px;box-shadow:0 12px 34px rgba(21,42,59,.20)}
 .map-filter label{color:var(--gold-300)}
@@ -257,6 +257,10 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <div class="field">
           <label for="f-kec">Kecamatan</label>
           <select id="f-kec"><option value="">— Semua —</option></select>
+        </div>
+        <div class="field">
+          <label for="f-fungsi">Fungsi</label>
+          <select id="f-fungsi"><option value="">— Semua —</option></select>
         </div>
         <div class="field">
           <label for="f-kondisi">Kondisi</label>
@@ -537,6 +541,7 @@ function bootPetaAnalisa(){
   /* ============ FILTER ============ */
   var elCari=document.getElementById("f-cari"),
       elKec=document.getElementById("f-kec"),
+      elFungsi=document.getElementById("f-fungsi"),
       elKondisi=document.getElementById("f-kondisi"),
       elReset=document.getElementById("btnReset"),
       elShown=document.getElementById("countShown"),
@@ -548,12 +553,19 @@ function bootPetaAnalisa(){
     var o=document.createElement("option");o.value=nm;o.textContent=nm;elKec.appendChild(o);
   });
 
+  var FUNGSI_NAMES=[];
+  DATA.forEach(function(d){ if(d.fungsi!=="-"&&FUNGSI_NAMES.indexOf(d.fungsi)<0)FUNGSI_NAMES.push(d.fungsi); });
+  FUNGSI_NAMES.sort().forEach(function(nm){
+    var o=document.createElement("option");o.value=nm;o.textContent=nm;elFungsi.appendChild(o);
+  });
+
   var PAGE_SIZE=12,curPage=1,curFiltered=[];
 
   function applyFilter(){
-    var q=elCari.value.trim().toLowerCase(),kec=elKec.value,kon=elKondisi.value;
+    var q=elCari.value.trim().toLowerCase(),kec=elKec.value,fun=elFungsi.value,kon=elKondisi.value;
     return DATA.filter(function(d){
       if(kec&&d.kec!==kec)return false;
+      if(fun&&d.fungsi!==fun)return false;
       if(kon&&d.kondisi!==kon)return false;
       if(q&&(d.nama+" "+d.opd+" "+d.alamat).toLowerCase().indexOf(q)<0)return false;
       return true;
@@ -632,9 +644,10 @@ function bootPetaAnalisa(){
 
   elCari.addEventListener("input",function(){render(false)});
   elKec.addEventListener("change",function(){render(true)});
+  elFungsi.addEventListener("change",function(){render(true)});
   elKondisi.addEventListener("change",function(){render(true)});
   elReset.addEventListener("click",function(){
-    elCari.value="";elKec.value="";elKondisi.value="";
+    elCari.value="";elKec.value="";elFungsi.value="";elKondisi.value="";
     render(true);
   });
   document.getElementById("prevPage").addEventListener("click",function(){if(curPage>1){curPage--;renderGallery();}});
