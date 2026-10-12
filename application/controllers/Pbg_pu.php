@@ -192,12 +192,12 @@ class Pbg_pu extends CI_Controller
 					foreach($akhir['anggota'] as $member){if((int)$member['tpa_user_id']===$uid&&$member['status']==='perlu_perbaikan')$anggota_sebelumnya=true;}
 					if(!$anggota_sebelumnya)show_error('Hasil perbaikan hanya dapat dikirim kepada TPA yang meminta perbaikan pada bidang '.$bidang.'.',422);
 				}
-				foreach($akhir['anggota']??array() as $member){if((int)$member['tpa_user_id']===$uid&&$member['status']==='direkomendasikan')show_error('TPA yang telah merekomendasikan tidak dapat dipilih lagi.',422);}
+				foreach($akhir['anggota']??array() as $member){if((int)$member['tpa_user_id']===$uid&&$member['status']==='direkomendasikan')show_error('TPA yang telah menyatakan sudah sesuai tidak dapat dipilih lagi.',422);}
 				if(!$uid||!$this->db->where('id',$uid)->where('role',$role)->count_all_results('users'))show_error('Pilihan TPA '.$bidang.' tidak valid.',422);
 			}
 			$pilihan[$bidang]=$uids;
 		}
-		if(empty($pilihan))show_error('Seluruh bidang sudah direkomendasikan.',422);
+		if(empty($pilihan))show_error('Seluruh bidang sudah berstatus sesuai.',422);
 		$file=null;
 		if(!empty($_FILES['file_konsultasi']['name'])){
 			$dir=FCPATH.'assets/uploads/konsultasi_pbg/'; if(!is_dir($dir)) mkdir($dir,0755,true);
@@ -222,7 +222,7 @@ class Pbg_pu extends CI_Controller
 			redirect('pengajuan-pbg/tahap/'.$id.'/2'); return;
 		}
 		if($t===4&&$status==='disetujui'){
-			$akhir=$this->konsultasi_terakhir_per_bidang($id);$selesai=count($akhir)===3;foreach($akhir as $k){if($k['status']!=='direkomendasikan')$selesai=false;}if(!$selesai)show_error('Proses belum dapat diselesaikan sebelum ketiga bidang TPA memberikan rekomendasi.',422);
+			$akhir=$this->konsultasi_terakhir_per_bidang($id);$selesai=count($akhir)===3;foreach($akhir as $k){if($k['status']!=='direkomendasikan')$selesai=false;}if(!$selesai)show_error('Proses belum dapat diselesaikan sebelum ketiga bidang TPA menyatakan sudah sesuai.',422);
 		}
 		$catatan=trim($this->input->post('catatan')); if($status==='ditolak'&&$catatan==='') show_error('Catatan penolakan wajib diisi.',422);
 		$this->pbg->update_owned($id,$this->pu_id(),array('tahap'=>$t,'status'=>$status,'catatan_admin'=>$catatan?:null,'catatan_admin_at'=>date('Y-m-d H:i:s'),'updated_at'=>date('Y-m-d H:i:s')));

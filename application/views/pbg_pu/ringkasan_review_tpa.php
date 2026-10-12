@@ -10,7 +10,7 @@
       <?php else: foreach($konsultasi_terakhir[$kode]['anggota'] as $anggota): ?>
         <div class="tpa-review-member">
           <strong><?= htmlspecialchars($anggota['nama_tpa']?:'TPA',ENT_QUOTES,'UTF-8') ?></strong>
-          <span class="badge <?= $anggota['status']==='direkomendasikan'?'disetujui':($anggota['status']==='perlu_perbaikan'?'ditolak':'diverifikasi') ?>"><?= ucwords(str_replace('_',' ',$anggota['status'])) ?></span>
+          <span class="badge <?= $anggota['status']==='direkomendasikan'?'disetujui':($anggota['status']==='perlu_perbaikan'?'ditolak':'diverifikasi') ?>"><?= konsultasi_label_status($anggota['status']) ?></span>
           <?php if($anggota['status']==='ditugaskan'): ?>
             <p>Belum mengirim hasil review.</p>
           <?php else: ?>

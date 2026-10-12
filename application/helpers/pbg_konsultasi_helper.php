@@ -31,3 +31,11 @@ function pbg_ringkasan_konsultasi($rows)
     }
     return $result;
 }
+
+// Nilai status di database tetap (ditugaskan/perlu_perbaikan/direkomendasikan);
+// hanya tulisan yang tampil ke pengguna yang diganti.
+function konsultasi_label_status($status)
+{
+    $peta=array("direkomendasikan"=>"Sudah Sesuai","perlu_perbaikan"=>"Perlu Perbaikan","ditugaskan"=>"Ditugaskan");
+    return isset($peta[$status])?$peta[$status]:ucwords(str_replace("_"," ",(string)$status));
+}

@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Pbg_tpa extends CI_Controller
 {
 	private $roles=array('tpa_arsitek'=>'arsitektur','tpa_struktur'=>'struktur','tpa_mep'=>'mep');
-	public function __construct(){parent::__construct();$this->load->library(array('session','form_validation','upload'));$this->load->helper(array('url','form','berkas'));if(!$this->session->userdata('logged_in'))redirect('login');if(!isset($this->roles[$this->session->userdata('role')]))show_error('Halaman ini khusus TPA bidang.',403);}
+	public function __construct(){parent::__construct();$this->load->library(array('session','form_validation','upload'));$this->load->helper(array('url','form','berkas','pbg_konsultasi'));if(!$this->session->userdata('logged_in'))redirect('login');if(!isset($this->roles[$this->session->userdata('role')]))show_error('Halaman ini khusus TPA bidang.',403);}
 	private function uid(){return (int)$this->session->userdata('user_id');}
 	public function index(){
 		$data['nama_pengguna']=$this->session->userdata('nama');$data['bidang']=$this->roles[$this->session->userdata('role')];
