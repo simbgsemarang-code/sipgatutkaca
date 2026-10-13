@@ -95,8 +95,8 @@ class Pemohon extends CI_Controller {
 		$this->form_validation->set_rules('luas_lahan','Luas lahan','required|numeric|greater_than[0]|less_than[1000000000000]');
 
 		$titik = json_decode((string) $this->input->post('titik_koordinat'), TRUE);
-		$titik_valid = is_array($titik) && count($titik) >= 4;
-		if ($titik_valid) foreach ($titik as $t) { if (!isset($t['lat'],$t['lng']) || !is_numeric($t['lat']) || !is_numeric($t['lng'])) { $titik_valid = FALSE; break; } }
+		$titik_valid = is_array($titik) && count($titik) >= 4 && count($titik) <= 1000;
+		if ($titik_valid) foreach ($titik as $t) { if (!isset($t['lat'],$t['lng']) || !is_numeric($t['lat']) || !is_numeric($t['lng']) || abs($t['lat']) > 90 || abs($t['lng']) > 180) { $titik_valid = FALSE; break; } }
 
 		$wilayah = wilayah_cilacap();
 		$wilayah_valid = isset($wilayah[$old['lokasi_kecamatan']]) && in_array($old['lokasi_desa_kel'], $wilayah[$old['lokasi_kecamatan']], TRUE);
@@ -104,7 +104,7 @@ class Pemohon extends CI_Controller {
 		if (!$this->form_validation->run() || !$titik_valid || !$wilayah_valid)
 		{
 			$error = !$this->form_validation->run() ? strip_tags(validation_errors()) : '';
-			if (!$titik_valid) $error .= ' Tandai minimal 4 titik koordinat di peta membentuk poligon lokasi.';
+			if (!$titik_valid) $error .= ' Tandai minimal 4 titik (maksimal 1000) koordinat di peta membentuk poligon lokasi.';
 			if (!$wilayah_valid) $error .= ' Pilih Kecamatan dan Desa/Kelurahan yang valid.';
 			return FALSE;
 		}

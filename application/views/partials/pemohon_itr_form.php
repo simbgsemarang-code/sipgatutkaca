@@ -51,6 +51,13 @@ $wilayah_cilacap = wilayah_cilacap();
 </div>
 
 <h3>Titik Koordinat Lokasi</h3><p class="itr-map-hint">Klik pada peta, atau masukkan koordinat secara manual di bawah — minimal <b>4 titik</b> membentuk poligon. Klik titik yang sudah ada di peta/daftar untuk menghapusnya.</p>
+<div class="itr-geo-bar">
+  <label for="itr-file-geo" class="btn btn-ghost itr-geo-btn">&#11014; Unggah SHP / KML / GeoJSON</label>
+  <input type="file" id="itr-file-geo" accept=".zip,.shp,.kml,.geojson,.json" hidden>
+  <button type="button" id="itr-hapus-semua" class="btn btn-ghost">Hapus Semua Titik</button>
+  <span id="itr-geo-status" class="itr-geo-status" aria-live="polite"></span>
+</div>
+<p class="itr-geo-hint">Format: <b>.geojson</b>, <b>.kml</b>, atau shapefile berupa <b>.zip</b> (berisi .shp, .shx, .dbf, dan .prj). Seluruh titik batas poligon dari berkas dimuat ke peta dan ikut tersimpan bersama permohonan.</p>
 <div id="itrMap" class="itr-map"></div>
 <div class="itr-titik-manual">
   <div><label for="itr-manual-lat">Latitude</label><input id="itr-manual-lat" type="number" step="any" min="-90" max="90" placeholder="-7.726700"></div>
@@ -77,6 +84,11 @@ $wilayah_cilacap = wilayah_cilacap();
 .itr-application.mode-perorangan .itr-perusahaan{display:none}
 .itr-application.mode-perusahaan .itr-perorangan{display:none}
 .itr-map{height:360px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+.itr-geo-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.itr-geo-bar .btn{cursor:pointer}
+.itr-geo-status{font-size:13px;color:var(--muted)}
+.itr-geo-status.galat{color:#e0526b}
+.itr-geo-hint{font-size:12.5px;color:var(--muted);margin:0 0 12px}
 .itr-titik-manual{display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;flex-wrap:wrap}
 .itr-titik-manual div{flex:1;min-width:140px}
 .itr-titik-manual label{font-size:13px;margin-bottom:6px}
@@ -132,25 +144,33 @@ $wilayah_cilacap = wilayah_cilacap();
   var titik=[]; try{ titik=JSON.parse(titikInput.value)||[]; }catch(e){ titik=[]; }
   var map=L.map('itrMap').setView(titik.length?[titik[0].lat,titik[0].lng]:[-7.7267,109.0154], titik.length?15:11);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
-  var markers=[], polygon=null;
+  var markers=[], polygon=null, BATAS_CHIP=30;
   var list=document.getElementById('itrTitikList');
   function render(){
     titikInput.value=JSON.stringify(titik);
     markers.forEach(function(m){ map.removeLayer(m); }); markers=[];
     if(polygon){ map.removeLayer(polygon); polygon=null; }
+    var banyak=titik.length>100;
     titik.forEach(function(t,i){
-      var m=L.marker([t.lat,t.lng]).addTo(map);
+      var m=banyak?L.circleMarker([t.lat,t.lng],{radius:4,color:'#c9a24b',weight:2,fillOpacity:.9}):L.marker([t.lat,t.lng]);
+      m.addTo(map);
       m.on('click',function(){ titik.splice(i,1); render(); });
       markers.push(m);
     });
     if(titik.length>=3) polygon=L.polygon(titik.map(function(t){return [t.lat,t.lng];}),{color:'#c9a24b'}).addTo(map);
     list.innerHTML='';
     titik.forEach(function(t,i){
+      if(i>=BATAS_CHIP) return;
       var chip=document.createElement('span'); chip.className='itr-titik-chip';
       chip.innerHTML='Titik '+(i+1)+': '+t.lat.toFixed(5)+', '+t.lng.toFixed(5)+' <button type="button">×</button>';
       chip.querySelector('button').addEventListener('click',function(){ titik.splice(i,1); render(); });
       list.appendChild(chip);
     });
+    if(titik.length>BATAS_CHIP){
+      var sisa=document.createElement('span'); sisa.className='itr-titik-chip';
+      sisa.textContent='… dan '+(titik.length-BATAS_CHIP)+' titik lainnya';
+      list.appendChild(sisa);
+    }
   }
   map.on('click',function(e){ titik.push({lat:e.latlng.lat,lng:e.latlng.lng}); render(); });
   render();
@@ -165,6 +185,153 @@ $wilayah_cilacap = wilayah_cilacap();
     titik.push({lat:lat,lng:lng}); render();
     map.panTo([lat,lng]);
     manualLat.value=''; manualLng.value=''; manualLat.focus();
+  });
+
+  // ---- Hapus semua titik ----
+  document.getElementById('itr-hapus-semua').addEventListener('click', function(){
+    if(!titik.length) return;
+    if(!confirm('Hapus seluruh '+titik.length+' titik koordinat?')) return;
+    titik=[]; render(); pesan('');
+  });
+
+  // ---- Unggah berkas SHP / KML / GeoJSON ----
+  // Seluruh titik batas poligon dimuat ke daftar `titik`, lalu ikut terkirim
+  // lewat input tersembunyi #itr-titik dan disimpan di kolom titik_koordinat.
+  var MAKS_TITIK=1000;
+  var fileGeo=document.getElementById('itr-file-geo'), statusGeo=document.getElementById('itr-geo-status');
+  function pesan(teks,galat){ statusGeo.textContent=teks; statusGeo.className='itr-geo-status'+(galat?' galat':''); }
+
+  function muatShpjs(){
+    if(window.shp) return Promise.resolve();
+    return new Promise(function(ok,gagal){
+      var s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/shpjs@4.0.4/dist/shp.min.js';
+      s.onload=ok;
+      s.onerror=function(){ gagal(new Error('Pembaca shapefile gagal dimuat. Periksa koneksi internet lalu coba lagi.')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function kumpulGeom(x,out){
+    if(!x) return out;
+    if(Array.isArray(x)){ x.forEach(function(i){ kumpulGeom(i,out); }); return out; }
+    switch(x.type){
+      case 'FeatureCollection': (x.features||[]).forEach(function(f){ kumpulGeom(f,out); }); break;
+      case 'Feature': kumpulGeom(x.geometry,out); break;
+      case 'GeometryCollection': (x.geometries||[]).forEach(function(g){ kumpulGeom(g,out); }); break;
+      case 'Polygon': case 'MultiPolygon': case 'LineString': case 'MultiLineString': case 'Point': case 'MultiPoint': out.push(x); break;
+    }
+    return out;
+  }
+
+  function parseKml(teks){
+    var dok=new DOMParser().parseFromString(teks,'application/xml');
+    if(dok.getElementsByTagName('parsererror').length) throw new Error('Berkas KML tidak valid (isi XML rusak).');
+    function koordinat(el){
+      var c=el.getElementsByTagName('coordinates')[0]; if(!c) return [];
+      return c.textContent.trim().split(/\s+/).map(function(s){ var a=s.split(','); return [parseFloat(a[0]),parseFloat(a[1])]; })
+        .filter(function(p){ return isFinite(p[0])&&isFinite(p[1]); });
+    }
+    var out=[];
+    [].forEach.call(dok.getElementsByTagName('Polygon'),function(p){
+      out.push({type:'Polygon',coordinates:[koordinat(p.getElementsByTagName('outerBoundaryIs')[0]||p)]});
+    });
+    [].forEach.call(dok.getElementsByTagName('LineString'),function(l){ out.push({type:'LineString',coordinates:koordinat(l)}); });
+    [].forEach.call(dok.getElementsByTagName('Point'),function(p){ var k=koordinat(p); if(k.length) out.push({type:'Point',coordinates:k[0]}); });
+    return out;
+  }
+
+  function luasRing(r){ var a=0; for(var i=0,j=r.length-1;i<r.length;j=i++){ a+=(r[j][0]+r[i][0])*(r[j][1]-r[i][1]); } return Math.abs(a/2); }
+  function pilihTitik(geoms){
+    var cincin=[],garis=[],pts=[];
+    geoms.forEach(function(g){
+      if(g.type==='Polygon') cincin.push(g.coordinates[0]);
+      else if(g.type==='MultiPolygon') g.coordinates.forEach(function(p){ cincin.push(p[0]); });
+      else if(g.type==='LineString') garis.push(g.coordinates);
+      else if(g.type==='MultiLineString') g.coordinates.forEach(function(l){ garis.push(l); });
+      else if(g.type==='Point') pts.push(g.coordinates);
+      else if(g.type==='MultiPoint') g.coordinates.forEach(function(p){ pts.push(p); });
+    });
+    cincin=cincin.filter(function(r){ return r&&r.length>=3; });
+    garis=garis.filter(function(l){ return l&&l.length>=2; });
+    if(cincin.length){ cincin.sort(function(a,b){ return luasRing(b)-luasRing(a); }); return {jenis:'poligon',titik:cincin[0],bidang:cincin.length}; }
+    if(garis.length){ garis.sort(function(a,b){ return b.length-a.length; }); return {jenis:'garis',titik:garis[0],bidang:garis.length}; }
+    if(pts.length) return {jenis:'titik',titik:pts,bidang:pts.length};
+    return null;
+  }
+
+  function bersihkan(mentah,jenis){
+    var out=[];
+    for(var i=0;i<mentah.length;i++){
+      var lng=+mentah[i][0], lat=+mentah[i][1];
+      if(!isFinite(lat)||!isFinite(lng)) continue;
+      if(Math.abs(lat)>90||Math.abs(lng)>180) throw new Error('Koordinat berkas bukan lintang-bujur (WGS84). Untuk shapefile berkoordinat UTM, unggah .zip yang menyertakan berkas .prj agar dikonversi otomatis.');
+      lat=Math.round(lat*1e7)/1e7; lng=Math.round(lng*1e7)/1e7;
+      var p=out[out.length-1]; if(p&&p.lat===lat&&p.lng===lng) continue;
+      out.push({lat:lat,lng:lng});
+    }
+    if(jenis==='poligon'&&out.length>1&&out[0].lat===out[out.length-1].lat&&out[0].lng===out[out.length-1].lng) out.pop();
+    return out;
+  }
+
+  // Douglas-Peucker (iteratif) supaya data tetap muat di kolom basis data.
+  function sederhanakan(pts,maks){
+    function jarak2(p,a,b){
+      var dx=b.lng-a.lng, dy=b.lat-a.lat, l=dx*dx+dy*dy;
+      if(!l){ var ex=p.lng-a.lng, ey=p.lat-a.lat; return ex*ex+ey*ey; }
+      var t=Math.max(0,Math.min(1,((p.lng-a.lng)*dx+(p.lat-a.lat)*dy)/l));
+      var cx=a.lng+t*dx-p.lng, cy=a.lat+t*dy-p.lat; return cx*cx+cy*cy;
+    }
+    function dp(tol){
+      var tol2=tol*tol, simpan=new Array(pts.length).fill(false), tumpuk=[[0,pts.length-1]];
+      simpan[0]=simpan[pts.length-1]=true;
+      while(tumpuk.length){
+        var r=tumpuk.pop(), maksJ=0, idx=-1;
+        for(var i=r[0]+1;i<r[1];i++){ var d=jarak2(pts[i],pts[r[0]],pts[r[1]]); if(d>maksJ){ maksJ=d; idx=i; } }
+        if(idx>-1&&maksJ>tol2){ simpan[idx]=true; tumpuk.push([r[0],idx],[idx,r[1]]); }
+      }
+      return pts.filter(function(_,i){ return simpan[i]; });
+    }
+    var tol=1e-7, hasil=pts;
+    while(hasil.length>maks&&tol<1){ tol*=2; hasil=dp(tol); }
+    return hasil;
+  }
+
+  function terapkan(geoms,namaBerkas){
+    var pilih=pilihTitik(geoms);
+    if(!pilih) throw new Error('Tidak ditemukan poligon, garis, atau titik di dalam berkas.');
+    var pts=bersihkan(pilih.titik,pilih.jenis), catatan=[];
+    if(pilih.bidang>1) catatan.push('berkas berisi '+pilih.bidang+' objek, yang dipakai: '+(pilih.jenis==='poligon'?'poligon terluas':pilih.jenis==='garis'?'garis terpanjang':'seluruh titik'));
+    if(pts.length>MAKS_TITIK){
+      var asal=pts.length; pts=sederhanakan(pts,MAKS_TITIK);
+      catatan.push('disederhanakan dari '+asal+' menjadi '+pts.length+' titik (batas '+MAKS_TITIK+' titik)');
+    }
+    if(!pts.length) throw new Error('Tidak ada koordinat valid di dalam berkas.');
+    if(titik.length&&!confirm('Titik yang sudah ada ('+titik.length+') akan diganti dengan '+pts.length+' titik dari berkas ini. Lanjutkan?')){ pesan('Dibatalkan.'); return; }
+    titik=pts; render();
+    map.fitBounds(L.latLngBounds(titik.map(function(t){ return [t.lat,t.lng]; })),{padding:[30,30],maxZoom:19});
+    var ket='\u2713 '+namaBerkas+': '+pts.length+' titik '+pilih.jenis+' dimuat ke peta'+(catatan.length?' ('+catatan.join('; ')+')':'')+'.';
+    if(pts.length<4){ ket+=' Minimal 4 titik diperlukan — tambahkan titik lain di peta.'; pesan(ket,true); } else pesan(ket);
+  }
+
+  fileGeo.addEventListener('change',function(){
+    var f=fileGeo.files[0]; if(!f) return;
+    var nama=f.name.toLowerCase(), ext=nama.slice(nama.lastIndexOf('.')+1), baca;
+    pesan('Membaca '+f.name+' …');
+    if(ext==='geojson'||ext==='json'){
+      baca=f.text().then(function(t){ try{ return kumpulGeom(JSON.parse(t),[]); }catch(e){ throw new Error('Berkas GeoJSON tidak valid.'); } });
+    } else if(ext==='kml'){
+      baca=f.text().then(parseKml);
+    } else if(ext==='zip'||ext==='shp'){
+      baca=Promise.all([f.arrayBuffer(),muatShpjs()]).then(function(h){
+        return ext==='zip'?Promise.resolve(shp.parseZip(h[0])):shp.parseShp(h[0]);
+      }).then(function(h){ return kumpulGeom(h,[]); });
+    } else {
+      baca=Promise.reject(new Error('Format .'+ext+' tidak didukung. Gunakan .zip (shapefile), .shp, .kml, atau .geojson.'));
+    }
+    baca.then(function(geoms){ terapkan(geoms,f.name); })
+      .catch(function(e){ pesan(e&&e.message?e.message:'Berkas tidak dapat dibaca.',true); })
+      .then(function(){ fileGeo.value=''; });
   });
 })();
 </script>
