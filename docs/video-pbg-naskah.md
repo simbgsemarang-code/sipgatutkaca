@@ -4,27 +4,27 @@ Target: pemilik pekerjaan. Gunakan pengajuan dummy di lokal, bukan data produksi
 
 ## 1. Pembukaan — dashboard PU
 
-Selamat datang di SIP Gatutkaca. Video ini menjelaskan alur pemrosesan permohonan PBG oleh petugas PU, mulai dari pendaftaran, pemeriksaan dokumen, konsultasi kepada Tim Profesi Ahli atau TPA, hingga penyelesaian pemeriksaan. Seluruh data yang ditampilkan dalam demonstrasi adalah data dummy.
+Selamat datang di SIP Gatutkaca. Video ini menjelaskan alur pemrosesan permohonan PBG oleh petugas PU, mulai dari pendaftaran, distribusi tugas kepada Tim Profesi Ahli atau TPA, hingga penyelesaian pemeriksaan. Seluruh data yang ditampilkan dalam demonstrasi adalah data dummy.
 
 ## 2. Pendaftaran — Pengajuan PBG, Tambah Pengajuan
 
-Petugas PU membuka menu Pengajuan PBG, lalu memilih Tambah Pengajuan. Isi identitas pemohon, lokasi bangunan, serta informasi bangunan yang dimohonkan. Lengkapi dokumen umum dan dokumen teknis sesuai bidang arsitektur, struktur, serta mekanikal, elektrikal dan perpipaan. Setelah permohonan disimpan, petugas dapat memantau proses melalui timeline di bagian atas halaman.
+Petugas PU membuka menu Pengajuan PBG, lalu memilih Tambah Pengajuan. Isi identitas pemohon, lokasi bangunan, serta informasi bangunan yang dimohonkan. Isi Nomor Registrasi sesuai SIMBG; berkas permohonan tidak diunggah di aplikasi ini karena TPA meninjaunya langsung dari SIMBG. Setelah permohonan disimpan, petugas dapat memantau proses melalui timeline di bagian atas halaman.
 
 ## 3. Tahap satu — Pendaftaran Permohonan
 
-Pada tahap pertama, petugas memastikan seluruh dokumen wajib telah diunggah. Untuk dokumen yang belum tersedia, klik Belum diunggah, pilih berkas, lalu sistem mengunggahnya. Tombol Berkas Lengkap, Lanjut digunakan setelah seluruh dokumen wajib tersedia.
+Pada tahap pertama, petugas langsung membagi tugas review. Pilih TPA untuk setiap bidang melalui dropdown dengan pilihan centang; satu bidang dapat ditugaskan kepada lebih dari satu TPA. Tambahkan komentar dan pernyataan PU, lalu klik Distribusikan ke TPA. Tidak ada dokumen yang diunggah karena TPA meninjau berkas dari SIMBG.
 
-## 4. Tahap dua — Pemeriksaan Kelengkapan Data
+## 4. Tahap dua — Distribusi Tugas ke TPA
 
-Pada tahap kedua, klik Lihat Berkas untuk membuka dokumen dalam modal pratinjau. Petugas memeriksa isinya, kemudian memilih Sesuai atau Tidak sesuai di samping masing-masing berkas. Tombol Berkas Sudah Benar hanya aktif jika penilaian seluruh berkas yang dipersyaratkan sudah sesuai. Jika masih terdapat kesalahan, petugas mencatat keterangan untuk perbaikan.
+Setelah tugas dibagikan, permohonan masuk tahap kedua. Petugas memantau TPA yang ditugaskan di setiap bidang beserta status dan catatan hasil reviewnya. Penugasan muncul pada akun TPA yang dipilih, dan petugas menunggu seluruh hasil review sebelum melanjutkan.
 
-## 5. Tahap tiga — Konsultasi TPA
+## 5. Tahap tiga — Verifikasi Hasil Perbaikan
 
-Pada tahap ketiga, petugas memilih TPA untuk setiap bidang melalui dropdown dengan pilihan centang. Satu bidang dapat ditugaskan kepada lebih dari satu TPA. Tambahkan komentar, pernyataan PU, dan lampiran konsultasi apabila diperlukan. Setelah konsultasi dikirim, penugasan muncul pada akun TPA yang dipilih. Petugas menunggu hasil review sebelum melanjutkan putaran konsultasi berikutnya.
+Tahap ketiga dipakai untuk putaran review berikutnya setelah perbaikan diterima. Petugas memilih kembali TPA yang meminta perbaikan, menambahkan komentar, pernyataan PU, dan lampiran konsultasi apabila diperlukan, lalu mengirimkannya. Petugas menunggu hasil review sebelum melanjutkan.
 
 ## 6. Akun TPA — review penugasan
 
-Sekarang kita beralih ke akun TPA. TPA membuka daftar penugasan PBG dan memilih permohonan yang akan direview. TPA memeriksa dokumen serta arahan dari PU, kemudian mengisi hasil review dan rekomendasi. Hasilnya dapat berupa Perlu Perbaikan atau Direkomendasikan, dengan lampiran pendukung bila diperlukan. Hasil review yang sudah dikirim tidak dapat diubah melalui formulir ini.
+Sekarang kita beralih ke akun TPA. TPA membuka daftar penugasan PBG dan memilih permohonan yang akan direview. TPA meninjau berkas permohonan di SIMBG serta arahan dari PU, kemudian mengisi hasil review dan rekomendasi. Hasilnya dapat berupa Perlu Perbaikan atau Direkomendasikan, dengan lampiran pendukung bila diperlukan. Hasil review yang sudah dikirim tidak dapat diubah melalui formulir ini.
 
 ## 7. Kembali ke PU — perbaikan dan konsultasi ulang
 

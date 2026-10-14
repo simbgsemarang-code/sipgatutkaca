@@ -1,10 +1,10 @@
-<?php $heading='Tahapan Pengajuan PBG'; $top_actions='<a class="btn" href="'.base_url('pengajuan-pbg').'">Kembali ke Daftar</a>'; $this->load->view('pbg_pu/header',compact('heading','top_actions','nama_pengguna')); $labels=array(1=>'Pendaftaran Permohonan',2=>'Pemeriksaan Kelengkapan Data',3=>'Verifikasi Hasil Perbaikan',4=>'Pemeriksaan Selesai'); ?>
+<?php $heading='Tahapan Pengajuan PBG'; $top_actions='<a class="btn" href="'.base_url('pengajuan-pbg').'">Kembali ke Daftar</a>'; $this->load->view('pbg_pu/header',compact('heading','top_actions','nama_pengguna')); $labels=array(1=>'Pendaftaran Permohonan',2=>'Distribusi Tugas ke TPA',3=>'Verifikasi Hasil Perbaikan',4=>'Pemeriksaan Selesai'); ?>
 <?php if($this->session->flashdata('sukses')):?><div class="notice"><?= htmlspecialchars($this->session->flashdata('sukses')) ?></div><?php endif;?>
 <?php if($this->session->flashdata('error')):?><div class="notice upload-error"><?= htmlspecialchars($this->session->flashdata('error')) ?></div><?php endif;?>
 <?php
 $timeline = array(
   1 => array('Pendaftaran Permohonan','Permohonan PBG berhasil didaftarkan.','<rect x="6" y="3" width="12" height="18" rx="1.5"/><path d="M9 4.5V4a1.5 1.5 0 011.5-1.5h3A1.5 1.5 0 0115 4v.5"/><path d="M9 13l2.2 2.2L15.5 11"/>'),
-  2 => array('Pemeriksaan Kelengkapan Data','PU mendistribusikan tugas review ke TPA (berkas ditinjau dari SIMBG).','<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>'),
+  2 => array('Distribusi Tugas ke TPA','PU mendistribusikan tugas review ke TPA (berkas ditinjau dari SIMBG).','<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>'),
   3 => array('Verifikasi Hasil Perbaikan','PU memverifikasi hasil perbaikan yang diterima.','<rect x="6" y="3" width="12" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 11h7M8.5 15l2.3 2.3 4.7-5"/>'),
   4 => array('Pemeriksaan Selesai','Pemeriksaan data dan dokumen telah selesai.','<circle cx="12" cy="9" r="5.5"/><path d="M9 13.8L7 21l5-2.6 5 2.6-2-7.2"/><path d="M9.7 9.2l1.6 1.6 3-3.2"/>'),
 );
