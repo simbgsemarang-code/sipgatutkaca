@@ -119,6 +119,7 @@ class Pbg_pu extends CI_Controller
 	public function tahap($id,$tahap=null)
 	{
 		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
+		if(pbg_sinkron_tahap($id)) $row=$this->pbg->owned($id,$this->pu_id());
 		$tahap=$tahap?(int)$tahap:(int)$row['tahap']; if($tahap<1||$tahap>4) show_404();
 		$data=$this->common()+array('row'=>$row,'tahap'=>$tahap,'files'=>$this->files);
 		$data['penilaian_dokumen']=$this->pbg->penilaian_dokumen($id);
@@ -201,8 +202,9 @@ class Pbg_pu extends CI_Controller
 		}
 		if(empty($pilihan))show_error('Seluruh bidang sudah berstatus sesuai.',422);
 		$max=$this->db->select_max('putaran','maks')->where('permohonan_id',$id)->get('konsultasi_pbg')->row_array(); $putaran=((int)$max['maks'])+1;
-		// Putaran 1 = distribusi tugas ke TPA di Tahap 2 (berkas ditinjau TPA dari SIMBG); putaran berikutnya (hasil perbaikan) di Tahap 3.
-		$tahap_tujuan=$putaran===1?2:3;
+		// Putaran 1 = distribusi tugas ke TPA, tetap di Tahap 1 (berkas ditinjau TPA dari SIMBG) sampai semua TPA mengirim hasil
+		// (lalu Tahap 2 otomatis - lihat pbg_sinkron_tahap); putaran berikutnya (hasil perbaikan) di Tahap 3.
+		$tahap_tujuan=$putaran===1?1:3;
 		$file=null;
 		if(!empty($_FILES['file_konsultasi']['name'])){
 			$dir=FCPATH.'assets/uploads/konsultasi_pbg/'; if(!is_dir($dir)) mkdir($dir,0755,true);
@@ -286,6 +288,7 @@ class Pbg_pu extends CI_Controller
 			elseif($this->buat_ba_distribusi($id,$putaran_ba,$tanggal_ba,$this->pu_id()))$ba_berubah=TRUE;
 		}
 		$this->db->trans_complete();
+		pbg_sinkron_tahap($id); $row=$this->pbg->owned($id,$this->pu_id());
 		$pesan=array(); if($berubah)$pesan[]='Penugasan TPA berhasil diperbarui.'; if($ba_berubah)$pesan[]='Tanggal berita acara berhasil disimpan.';
 		$this->session->set_flashdata('sukses',$pesan?implode(' ',$pesan):'Tidak ada perubahan.');
 		redirect('pengajuan-pbg/tahap/'.$id.'/'.(int)$row['tahap']);

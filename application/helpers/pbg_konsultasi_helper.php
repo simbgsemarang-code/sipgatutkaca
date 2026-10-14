@@ -39,3 +39,24 @@ function konsultasi_label_status($status)
     $peta=array("direkomendasikan"=>"Sudah Sesuai","perlu_perbaikan"=>"Perlu Perbaikan","ditugaskan"=>"Ditugaskan");
     return isset($peta[$status])?$peta[$status]:ucwords(str_replace("_"," ",(string)$status));
 }
+
+/**
+ * Sinkronkan tahap permohonan untuk penugasan PUTARAN 1: selama masih ada TPA
+ * berstatus "ditugaskan" permohonan berada di Tahap 1; setelah semua TPA
+ * mengirim hasil review otomatis pindah ke Tahap 2. Putaran lanjutan (Tahap 3
+ * dan seterusnya) tidak disentuh. TRUE bila tahap diubah.
+ */
+function pbg_sinkron_tahap($permohonan_id)
+{
+    $ci =& get_instance();
+    $permohonan_id = (int) $permohonan_id;
+    $row = $ci->db->select('id,tahap,status')->where('id', $permohonan_id)->get('permohonan_pbg')->row_array();
+    if (!$row || !in_array((int) $row['tahap'], array(1, 2), TRUE) || in_array($row['status'], array('disetujui', 'ditolak'), TRUE)) return FALSE;
+    $maks = $ci->db->select_max('putaran', 'maks')->where('permohonan_id', $permohonan_id)->get('konsultasi_pbg')->row_array();
+    if ((int) $maks['maks'] !== 1) return FALSE;
+    $menunggu = $ci->db->where('permohonan_id', $permohonan_id)->where('status', 'ditugaskan')->count_all_results('konsultasi_pbg');
+    $tujuan = $menunggu > 0 ? 1 : 2;
+    if ($tujuan === (int) $row['tahap']) return FALSE;
+    $ci->db->where('id', $permohonan_id)->update('permohonan_pbg', array('tahap' => $tujuan, 'updated_at' => date('Y-m-d H:i:s')));
+    return TRUE;
+}
