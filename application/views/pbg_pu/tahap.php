@@ -32,7 +32,7 @@ $timeline = array(
 <?php $this->load->view('pbg_pu/ringkasan_review_tpa',array('konsultasi_terakhir'=>$konsultasi_terakhir,'konsultasi_riwayat'=>$konsultasi)); ?>
 <?php $this->load->view('pbg_pu/ba_distribusi',compact('konsultasi','ba_distribusi','ba_aktif','row')); ?>
 <?php $ada_perbaikan=false;$menunggu_review=false;foreach($konsultasi_terakhir as $k){if($k['status']==='perlu_perbaikan')$ada_perbaikan=true;if($k['status']==='ditugaskan')$menunggu_review=true;} ?>
-<?php if($ada_perbaikan):?><div class="revision-alert"><div><b>Perbaikan diperlukan</b><p>Unggah berkas pengganti untuk bidang yang berstatus Perlu Perbaikan.</p></div><a class="btn btn-primary" href="<?= base_url('pengajuan-pbg/upload-berkas/'.$row['id']) ?>">Perbaikan Berkas</a></div><?php endif;?>
+<?php $this->load->view('pbg_pu/link_perbaikan',compact('row','ada_perbaikan','link_aktif','link_perbaikan','konsultasi_terakhir')); ?>
 <?php if($menunggu_review):?><?php $this->load->view('pbg_pu/ubah_tpa',compact('konsultasi_terakhir','tpa_per_bidang','row','ba_distribusi','ba_aktif')); ?><?php elseif(!$konsultasi_selesai):?><?= form_open_multipart('pengajuan-pbg/konsultasi/'.$row['id']) ?>
 <div class="tpa-grid">
 <?php foreach(array('arsitektur'=>'Arsitektur & Tata Ruang','struktur'=>'Struktur','mep'=>'Mekanikal, Elektrikal & Perpipaan (MEP)') as $kode=>$nama): $akhir=$konsultasi_terakhir[$kode]??null; $this->load->view('pbg_pu/pilihan_tpa_bidang',compact('kode','nama','akhir','tpa_per_bidang')); endforeach; ?>

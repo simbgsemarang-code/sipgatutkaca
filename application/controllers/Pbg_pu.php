@@ -131,6 +131,8 @@ class Pbg_pu extends CI_Controller
 		}
 		$data['konsultasi']=$this->db->select('k.*,u.nama AS nama_tpa,u.email AS email_tpa')->from('konsultasi_pbg k')->join('users u','u.id=k.tpa_user_id','left')->where('k.permohonan_id',$id)->order_by('k.putaran','DESC')->order_by('k.bidang','ASC')->get()->result_array();
 		$data['konsultasi_terakhir']=$this->konsultasi_terakhir_per_bidang($id); $data['konsultasi_selesai']=count($data['konsultasi_terakhir'])===3; foreach($data['konsultasi_terakhir'] as $k){if($k['status']!=='direkomendasikan')$data['konsultasi_selesai']=false;}
+		$data['link_aktif']=$this->db->table_exists('link_perbaikan_pbg'); $data['link_perbaikan']=array();
+		if($data['link_aktif']){$data['link_perbaikan']=$this->db->select('l.*,u.nama AS nama_pengirim')->from('link_perbaikan_pbg l')->join('users u','u.id=l.dibuat_oleh','left')->where('l.permohonan_id',$id)->order_by('l.putaran','DESC')->order_by('l.id','DESC')->get()->result_array();}
 		$data['ba_aktif']=$this->db->table_exists('berita_acara_distribusi'); $data['ba_distribusi']=array();
 		if($data['ba_aktif']){foreach($this->db->where('permohonan_id',$id)->get('berita_acara_distribusi')->result_array() as $b){$data['ba_distribusi'][(int)$b['putaran']]=$b;}}
 		$this->load->view('pbg_pu/tahap',$data);
@@ -236,6 +238,37 @@ class Pbg_pu extends CI_Controller
 		return TRUE;
 	}
 
+	/** Link Google Drive valid: https, host drive.google.com / docs.google.com. */
+	private function link_drive_valid($url)
+	{
+		if(strlen($url)>500||!filter_var($url,FILTER_VALIDATE_URL))return FALSE;
+		$p=parse_url($url);
+		return isset($p['scheme'],$p['host'])&&strtolower($p['scheme'])==='https'&&in_array(strtolower($p['host']),array('drive.google.com','docs.google.com'),TRUE);
+	}
+
+	/**
+	 * PU mengirim link Google Drive berkas perbaikan untuk putaran yang meminta
+	 * perbaikan. Disimpan sebagai riwayat per putaran (append-only) dan menandai
+	 * perbaikan sebagai terkirim supaya konsultasi berikutnya bisa diajukan.
+	 */
+	public function kirim_link_perbaikan($id)
+	{
+		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
+		if($this->input->method(TRUE)!=='POST')show_404();
+		if(in_array($row['status'],array('disetujui','ditolak'),TRUE))show_error('Permohonan telah selesai.',422);
+		if(!$this->db->table_exists('link_perbaikan_pbg'))show_error('Tabel link_perbaikan_pbg belum ada. Jalankan migrasi database/link_perbaikan_pbg.sql lebih dulu.',503);
+		$url=trim((string)$this->input->post('link_drive')); $ket=trim((string)$this->input->post('keterangan'));
+		if(!$this->link_drive_valid($url))show_error('Link harus berupa alamat https dari drive.google.com atau docs.google.com.',422);
+		if(mb_strlen($ket)>255)$ket=mb_substr($ket,0,255);
+		$putaran=0; foreach($this->konsultasi_terakhir_per_bidang($id) as $k){foreach($k['anggota'] as $m){if($m['status']==='perlu_perbaikan')$putaran=max($putaran,(int)$m['putaran']);}}
+		if(!$putaran)show_error('Tidak ada TPA yang meminta perbaikan.',422);
+		$this->db->trans_start();
+		$this->db->insert('link_perbaikan_pbg',array('permohonan_id'=>$id,'putaran'=>$putaran,'url'=>$url,'keterangan'=>$ket!==''?$ket:null,'dibuat_oleh'=>$this->pu_id(),'created_at'=>date('Y-m-d H:i:s')));
+		$this->db->where('permohonan_id',$id)->where('status','perlu_perbaikan')->where('perbaikan_dikirim_at IS NULL',NULL,FALSE)->update('konsultasi_pbg',array('catatan_perbaikan'=>'Link Google Drive perbaikan dikirim oleh PU.','perbaikan_dikirim_at'=>date('Y-m-d H:i:s')));
+		$this->db->trans_complete();
+		$this->session->set_flashdata('sukses','Link perbaikan putaran '.$putaran.' berhasil dikirim.');
+		redirect('pengajuan-pbg/tahap/'.$id.'/'.(int)$row['tahap']);
+	}
 	/**
 	 * Ubah TPA yang sudah ditugaskan SEBELUM mengirim hasil review (putaran 1).
 	 * TPA berstatus 'ditugaskan' boleh diganti/ditambah/dibatalkan; yang sudah
