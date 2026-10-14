@@ -23,7 +23,7 @@ foreach ($konsultasi_terakhir as $k)
 ?>
 <style>.link-form{display:grid;grid-template-columns:2fr 1.4fr auto;gap:10px;align-items:center;margin:14px 0 6px}.link-form input{min-width:0}.link-hint{display:block;color:var(--muted);font-size:12px}.link-url{overflow-wrap:anywhere}.link-terbaru{display:inline-block;margin-left:6px}.link-status{margin:10px 0 0;padding:10px 14px;border-radius:10px;font-size:13px;border:1px solid transparent}.link-status.ok{background:rgba(46,168,79,.12);border-color:#2EA84F;color:#1c7a37}.link-status.err{background:rgba(224,82,107,.12);border-color:#E0526B;color:#a3283d}@media(max-width:900px){.link-form{grid-template-columns:1fr}}</style>
 <?php if (!empty($ada_perbaikan)): ?>
-<div class="revision-alert" style="display:block">
+<div class="revision-alert" id="linkBox" style="display:block">
 	<b>Perbaikan diperlukan</b>
 	<p>Ada TPA yang meminta perbaikan pada putaran <?= (int) $putaran_perbaikan ?>. Kirim link Google Drive berisi berkas perbaikan. Setiap putaran memakai link baru.</p>
 	<?= form_open('pengajuan-pbg/link-perbaikan/'.$row['id'], array('class' => 'link-form', 'id' => 'linkForm')) ?>
@@ -49,8 +49,13 @@ foreach ($konsultasi_terakhir as $k)
         if(d.ok){
           f.reset();
           document.getElementById('linkRiwayat').innerHTML=d.riwayat_html;
-          var b=document.querySelector('form[action*="pengajuan-pbg/konsultasi/"] button.btn-primary'); if(b)b.disabled=false;
-          tampil(d.pesan,'ok');
+          if(d.ditugaskan_ulang){
+            var kf=document.querySelector('form[action*="pengajuan-pbg/konsultasi/"]'); if(kf)kf.remove();
+            var box=document.getElementById('linkBox'); box.innerHTML=''; var n=document.createElement('div'); n.className='notice'; n.setAttribute('role','status'); n.textContent=d.pesan; box.appendChild(n);
+          } else {
+            var b=document.querySelector('form[action*="pengajuan-pbg/konsultasi/"] button.btn-primary'); if(b)b.disabled=false;
+            tampil(d.pesan,'ok');
+          }
         } else tampil(d.pesan||'Link gagal dikirim.','err');
       })
       .catch(function(){ tampil('Koneksi gagal. Coba kirim lagi.','err'); })

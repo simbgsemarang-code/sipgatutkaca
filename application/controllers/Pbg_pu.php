@@ -277,17 +277,30 @@ class Pbg_pu extends CI_Controller
 		if(mb_strlen($ket)>255)$ket=mb_substr($ket,0,255);
 		$putaran=0; foreach($this->konsultasi_terakhir_per_bidang($id) as $k){foreach($k['anggota'] as $m){if($m['status']==='perlu_perbaikan')$putaran=max($putaran,(int)$m['putaran']);}}
 		if(!$putaran)return $this->link_gagal($ajax,'Tidak ada TPA yang meminta perbaikan.');
+		$baru_ditugaskan=array();
+		foreach($this->konsultasi_terakhir_per_bidang($id) as $k){foreach($k['anggota'] as $m){if($m['status']==='perlu_perbaikan'&&empty($m['perbaikan_dikirim_at']))$baru_ditugaskan[]=$m;}}
 		$this->db->trans_start();
 		$this->db->insert('link_perbaikan_pbg',array('permohonan_id'=>$id,'putaran'=>$putaran,'url'=>$url,'keterangan'=>$ket!==''?$ket:null,'dibuat_oleh'=>$this->pu_id(),'created_at'=>date('Y-m-d H:i:s')));
 		$this->db->where('permohonan_id',$id)->where('status','perlu_perbaikan')->where('perbaikan_dikirim_at IS NULL',NULL,FALSE)->update('konsultasi_pbg',array('catatan_perbaikan'=>'Link Google Drive perbaikan dikirim oleh PU.','perbaikan_dikirim_at'=>date('Y-m-d H:i:s')));
+		// TPA yang meminta perbaikan langsung ditugaskan lagi (putaran berikutnya) agar bisa meninjau ulang
+		// tanpa PU mengajukan konsultasi lagi. Hanya yang perbaikannya belum terkirim (yang barusan ditandai di atas).
+		$sekarang=date('Y-m-d H:i:s'); $nama_tpa=array(); $putaran_baru=0;
+		foreach($baru_ditugaskan as $m){
+			$p=(int)$m['putaran']+1;
+			if($this->db->where('permohonan_id',$id)->where('bidang',$m['bidang'])->where('tpa_user_id',$m['tpa_user_id'])->where('putaran',$p)->count_all_results('konsultasi_pbg'))continue;
+			$this->db->insert('konsultasi_pbg',array('permohonan_id'=>$id,'tpa_user_id'=>$m['tpa_user_id'],'bidang'=>$m['bidang'],'putaran'=>$p,'status'=>'ditugaskan','komentar_pu'=>$ket!==''?$ket:null,'assigned_by'=>$this->pu_id(),'assigned_at'=>$sekarang));
+			$this->buat_ba_distribusi($id,$p,date('Y-m-d'),$this->pu_id());
+			$nama_tpa[]=$m['nama_tpa']?:'TPA'; $putaran_baru=max($putaran_baru,$p);
+		}
+		if($putaran_baru)$this->pbg->update_owned($id,$this->pu_id(),array('tahap'=>3,'status'=>'diverifikasi','updated_at'=>$sekarang));
 		$this->db->trans_complete();
-		$pesan='Link perbaikan putaran '.$putaran.' berhasil dikirim.';
+		$pesan='Link perbaikan putaran '.$putaran.' berhasil dikirim.'.($putaran_baru?' '.implode(', ',array_unique($nama_tpa)).' kini dapat meninjau ulang (putaran '.$putaran_baru.').':'');
 		if($ajax){
-			$this->output->set_content_type('application/json')->set_output(json_encode(array('ok'=>TRUE,'pesan'=>$pesan,'riwayat_html'=>$this->load->view('pbg_pu/link_riwayat',array('link_perbaikan'=>$this->daftar_link($id)),TRUE))));
+			$this->output->set_content_type('application/json')->set_output(json_encode(array('ok'=>TRUE,'pesan'=>$pesan,'ditugaskan_ulang'=>(bool)$putaran_baru,'riwayat_html'=>$this->load->view('pbg_pu/link_riwayat',array('link_perbaikan'=>$this->daftar_link($id)),TRUE))));
 			return;
 		}
 		$this->session->set_flashdata('sukses',$pesan);
-		redirect('pengajuan-pbg/tahap/'.$id.'/'.(int)$row['tahap']);
+		redirect('pengajuan-pbg/tahap/'.$id.'/'.($putaran_baru?3:(int)$row['tahap']));
 	}
 	/**
 	 * Ubah TPA yang sudah ditugaskan SEBELUM mengirim hasil review (putaran 1).
