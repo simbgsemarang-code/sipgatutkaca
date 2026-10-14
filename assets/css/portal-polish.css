@@ -63,10 +63,9 @@ label { font-size:17px; }
 .hint { font-size:13px; }
 .user-btn,.user-panel a { font-size:14px; }
 .user-panel { border-radius:12px; }
-.pbg-list-table th,.pbg-list-table td { font-size:15px!important; overflow-wrap:normal!important; }
-.pbg-list-table th { font-size:13px!important; }
+.pbg-list-table th,.pbg-list-table td { font-size:14.5px!important; overflow-wrap:normal!important; }
+.pbg-list-table th { font-size:11.5px!important; letter-spacing:.09em!important; }
 .pbg-list-table .actions .btn { font-size:12px; min-height:40px; padding:0 16px; }
-@media(min-width:821px) { .pbg-list-table { min-width:1050px; } }
 @media(max-width:1200px) { .main>.content { padding-left:28px; padding-right:28px; } .main>.top { padding-left:28px; padding-right:28px; } }
 @media(max-width:860px) { .side,.dash-sidebar { width:100%;flex-basis:auto;padding:0; } .side a,.dash-sidebar a { padding:12px 16px;font-size:13px; } .side a.active,.dash-sidebar a.active { margin-right:0;border-radius:0; } .brandbar .brand-name { font-size:17px; } .brandbar .brand-sub { font-size:9px; } .brandbar .brand-actions { gap:12px; } .brandbar .btn { padding:9px 14px; } .card,.panel { padding:20px; } .content,.top { padding-left:20px;padding-right:20px; } }
 @media(prefers-reduced-motion:reduce) { .btn:hover { transform:none; } }
@@ -343,12 +342,11 @@ html:not([data-theme="dark"]) .menu-label-box {
   .stat:hover, .stat-card:hover, .menu-card:hover .menu-icon-box { transform:none !important; }
 }
 
-/* Nomor registrasi panjang (digit tanpa spasi) tidak boleh menimpa kolom di sebelahnya. */
-.pbg-list-table td:nth-child(4) { word-break:break-all; }
 
 /* Lencana tidak boleh terpotong per huruf di kolom sempit; tabel daftar PBG boleh membungkus per kata. */
 .badge, .tag, .act-badge { white-space:nowrap; }
-.pbg-list-table .badge { white-space:normal; }
+.pbg-list-table .badge { white-space:normal; line-height:1.35; }
+.pbg-list-table td:nth-child(4) .badge { align-items:center; }
 
 /* Penyesuaian tema gelap: emas dibuat lebih terang agar tetap terbaca. */
 html[data-theme="dark"] .dash-main .eyebrow:not(:has(a)), html[data-theme="dark"] .main .eyebrow:not(:has(a)) { color:var(--lx-gold-3); }
