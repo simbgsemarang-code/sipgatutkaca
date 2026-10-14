@@ -16,11 +16,7 @@ $timeline = array(
 <div class="card applicant-card"><div class="applicant-head"><div><span class="badge diajukan">PBG</span><strong><?= htmlspecialchars($row['no_permohonan']) ?></strong></div><span class="badge <?= $row['status'] ?>"><?= pbg_status_label($row['status'], $row['tahap']) ?></span></div><div class="detail-grid"><div><small>Nama Pemohon</small><?= htmlspecialchars($row['nama_pemohon']) ?></div><div><small>Nomor Registrasi</small><?= htmlspecialchars($row['nik']?:'—') ?></div><div class="full"><small>Keterangan</small><?= nl2br(htmlspecialchars($row['keterangan']?:'—')) ?></div></div></div>
 
 <div class="card stage-card"><div class="stage-heading"><div><p class="eyebrow">Tahap <?= $tahap ?></p><h2><?= $labels[$tahap] ?></h2></div></div>
-<?php if($tahap===1):?>
-<div class="notice"><b>Pendaftaran selesai.</b> Berkas permohonan ditinjau TPA langsung dari SIMBG (Nomor Registrasi <b><?= htmlspecialchars($row['nik']?:'—') ?></b>), sehingga tidak ada dokumen yang perlu diunggah. Lanjutkan ke Tahap 2 untuk membagi tugas review ke TPA pada setiap bidang.</div>
-<?php if(!empty($row['catatan_admin'])):?><div class="notice"><b>Catatan PU terakhir</b><br><?= nl2br(htmlspecialchars($row['catatan_admin'])) ?></div><?php endif;?>
-<div class="decision-actions"><?= form_open('pengajuan-pbg/ubah-tahap/'.$row['id']) ?><input type="hidden" name="tahap" value="2"><input type="hidden" name="status" value="diverifikasi"><button class="btn btn-primary">Lanjut: Bagi Tugas ke TPA</button><?= form_close() ?></div>
-<?php elseif($tahap===2&&empty($konsultasi)):?>
+<?php if($tahap<=2&&empty($konsultasi)):?>
 <div class="notice"><b>Putaran 1 — tanpa unggah berkas.</b> TPA meninjau berkas permohonan langsung dari SIMBG menggunakan Nomor Registrasi <b><?= htmlspecialchars($row['nik']?:'—') ?></b>, sehingga PU tidak perlu mengunggah dokumen. Tugaskan Tim Profesi Ahli pada setiap bidang di bawah ini.</div>
 <?= form_open('pengajuan-pbg/konsultasi/'.$row['id']) ?>
 <div class="tpa-grid">
@@ -29,6 +25,9 @@ $timeline = array(
 <div class="consultation-fields"><div><label>Komentar untuk TPA</label><textarea name="komentar_pu" placeholder="Fokus pemeriksaan atau konteks yang perlu diperhatikan TPA."></textarea></div><div><label>Pernyataan PU</label><textarea name="pernyataan_pu" placeholder="Instruksi resmi untuk putaran 1 ini."></textarea></div></div>
 <div class="decision-actions"><button class="btn btn-primary" type="submit">Distribusikan ke TPA</button></div>
 <?= form_close() ?>
+<?php elseif($tahap===1):?>
+<div class="notice"><b>Pendaftaran selesai.</b> Tugas review sudah dibagikan ke TPA. Pantau hasilnya di Tahap 2.</div>
+<div class="decision-actions"><a class="btn btn-primary" href="<?= base_url('pengajuan-pbg/tahap/'.$row['id'].'/2') ?>">Ke Tahap 2</a></div>
 <?php elseif($tahap===3&&empty($konsultasi)):?>
 <div class="notice"><b>Belum ada putaran review.</b> Distribusi tugas ke TPA untuk putaran pertama dilakukan pada Tahap 2.</div>
 <div class="decision-actions"><a class="btn btn-primary" href="<?= base_url('pengajuan-pbg/tahap/'.$row['id'].'/2') ?>">Ke Tahap 2</a></div>
