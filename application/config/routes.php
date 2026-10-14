@@ -76,3 +76,6 @@ $route['tpa-pengajuan-pbg'] = 'pbg_tpa/index';
 $route['tpa-pengajuan-pbg/review/(:num)'] = 'pbg_tpa/review/$1';
 $route['pengajuan-pbg/hapus/(:num)'] = 'pbg_pu/hapus/$1';
 $route['pengajuan-pbg/berita-acara/(:num)'] = 'berita_acara/pbg/$1';
+$route['pengajuan-pbg/berita-acara-distribusi/(:num)'] = 'berita_acara/distribusi/$1';
+$route['pengajuan-pbg/terbitkan-ba/(:num)'] = 'pbg_pu/terbitkan_ba/$1';
+$route['pengajuan-pbg/ubah-tanggal-ba/(:num)'] = 'pbg_pu/ubah_tanggal_ba/$1';

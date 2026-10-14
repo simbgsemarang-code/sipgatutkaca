@@ -130,6 +130,8 @@ class Pbg_pu extends CI_Controller
 		}
 		$data['konsultasi']=$this->db->select('k.*,u.nama AS nama_tpa,u.email AS email_tpa')->from('konsultasi_pbg k')->join('users u','u.id=k.tpa_user_id','left')->where('k.permohonan_id',$id)->order_by('k.putaran','DESC')->order_by('k.bidang','ASC')->get()->result_array();
 		$data['konsultasi_terakhir']=$this->konsultasi_terakhir_per_bidang($id); $data['konsultasi_selesai']=count($data['konsultasi_terakhir'])===3; foreach($data['konsultasi_terakhir'] as $k){if($k['status']!=='direkomendasikan')$data['konsultasi_selesai']=false;}
+		$data['ba_aktif']=$this->db->table_exists('berita_acara_distribusi'); $data['ba_distribusi']=array();
+		if($data['ba_aktif']){foreach($this->db->where('permohonan_id',$id)->get('berita_acara_distribusi')->result_array() as $b){$data['ba_distribusi'][(int)$b['putaran']]=$b;}}
 		$this->load->view('pbg_pu/tahap',$data);
 	}
 
@@ -208,10 +210,56 @@ class Pbg_pu extends CI_Controller
 			if(!$this->upload->do_upload('file_konsultasi')){ $this->session->set_flashdata('error',strip_tags($this->upload->display_errors('',''))); redirect('pengajuan-pbg/tahap/'.$id.'/'.$tahap_tujuan); return; }
 			$file=berkas_simpan($this->upload->data());
 		}
-		$this->db->trans_start(); foreach($pilihan as $bidang=>$uids){foreach($uids as $uid){$this->db->insert('konsultasi_pbg',array('permohonan_id'=>$id,'tpa_user_id'=>$uid,'bidang'=>$bidang,'putaran'=>$putaran,'status'=>'ditugaskan','komentar_pu'=>trim($this->input->post('komentar_pu'))?:null,'pernyataan_pu'=>trim($this->input->post('pernyataan_pu'))?:null,'file_pu'=>$file,'assigned_by'=>$this->pu_id(),'assigned_at'=>date('Y-m-d H:i:s')));}} $this->pbg->update_owned($id,$this->pu_id(),array('tahap'=>$tahap_tujuan,'status'=>'diverifikasi','updated_at'=>date('Y-m-d H:i:s'))); $this->db->trans_complete();
-		$this->session->set_flashdata('sukses',$putaran===1?'Tugas review berhasil didistribusikan kepada TPA yang dipilih (putaran 1).':'Konsultasi putaran '.$putaran.' berhasil ditugaskan kepada seluruh TPA yang dipilih.'); redirect('pengajuan-pbg/tahap/'.$id.'/'.$tahap_tujuan);
+		$this->db->trans_start(); foreach($pilihan as $bidang=>$uids){foreach($uids as $uid){$this->db->insert('konsultasi_pbg',array('permohonan_id'=>$id,'tpa_user_id'=>$uid,'bidang'=>$bidang,'putaran'=>$putaran,'status'=>'ditugaskan','komentar_pu'=>trim($this->input->post('komentar_pu'))?:null,'pernyataan_pu'=>trim($this->input->post('pernyataan_pu'))?:null,'file_pu'=>$file,'assigned_by'=>$this->pu_id(),'assigned_at'=>date('Y-m-d H:i:s')));}} $this->pbg->update_owned($id,$this->pu_id(),array('tahap'=>$tahap_tujuan,'status'=>'diverifikasi','updated_at'=>date('Y-m-d H:i:s'))); $ba_terbit=$this->buat_ba_distribusi($id,$putaran,$this->tanggal_ba(),$this->pu_id()); $this->db->trans_complete();
+		$this->session->set_flashdata('sukses',($putaran===1?'Tugas review berhasil didistribusikan kepada TPA yang dipilih (putaran 1).':'Konsultasi putaran '.$putaran.' berhasil ditugaskan kepada seluruh TPA yang dipilih.').($ba_terbit?' Berita acara distribusi telah terbit.':'')); redirect('pengajuan-pbg/tahap/'.$id.'/'.$tahap_tujuan);
 	}
 
+	/** Tanggal berita acara dari input (Y-m-d valid); bila kosong/tidak valid: hari ini. */
+	private function tanggal_ba($nilai=null)
+	{
+		$n=trim((string)($nilai===null?$this->input->post('tanggal_ba'):$nilai));
+		return $this->tanggal_valid($n)?$n:date('Y-m-d');
+	}
+	private function tanggal_valid($n){ return (bool)(preg_match('/^(\d{4})-(\d{2})-(\d{2})$/',(string)$n,$m)&&checkdate((int)$m[2],(int)$m[3],(int)$m[1])); }
+
+	/** Terbitkan BA distribusi untuk satu putaran (satu per putaran). TRUE kalau baru terbit. */
+	private function buat_ba_distribusi($permohonan_id,$putaran,$tanggal,$oleh)
+	{
+		if(!$this->db->table_exists('berita_acara_distribusi'))return FALSE;
+		if($this->db->where('permohonan_id',$permohonan_id)->where('putaran',$putaran)->count_all_results('berita_acara_distribusi'))return FALSE;
+		$romawi=array('I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII');
+		$tahun=date('Y',strtotime($tanggal)); $bulan=(int)date('n',strtotime($tanggal));
+		$urut=$this->db->where('YEAR(tanggal_ba)',$tahun)->count_all_results('berita_acara_distribusi')+1;
+		$this->db->insert('berita_acara_distribusi',array('permohonan_id'=>$permohonan_id,'putaran'=>$putaran,'nomor'=>'600.1.15.2/'.$urut.'/BA-DTPA/'.$romawi[$bulan-1].'/'.$tahun,'tanggal_ba'=>$tanggal,'dibuat_oleh'=>$oleh,'created_at'=>date('Y-m-d H:i:s')));
+		return TRUE;
+	}
+
+	/** Terbitkan BA distribusi untuk putaran yang belum punya (mis. penugasan lama sebelum fitur ini ada). */
+	public function terbitkan_ba($id)
+	{
+		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
+		if($this->input->method(TRUE)!=='POST')show_404();
+		if(!$this->db->table_exists('berita_acara_distribusi'))show_error('Tabel berita_acara_distribusi belum ada. Jalankan migrasi database/berita_acara_distribusi.sql lebih dulu.',503);
+		$putaran=(int)$this->input->post('putaran'); $tanggal=(string)$this->input->post('tanggal_ba');
+		if(!$this->tanggal_valid($tanggal))show_error('Tanggal berita acara tidak valid.',422);
+		if(!$putaran||!$this->db->where('permohonan_id',$id)->where('putaran',$putaran)->count_all_results('konsultasi_pbg'))show_error('Putaran tidak ditemukan.',422);
+		$this->session->set_flashdata('sukses',$this->buat_ba_distribusi($id,$putaran,$tanggal,$this->pu_id())?'Berita acara distribusi putaran '.$putaran.' berhasil diterbitkan.':'Berita acara putaran '.$putaran.' sudah terbit sebelumnya.');
+		redirect('pengajuan-pbg/tahap/'.$id.'/'.(int)$row['tahap']);
+	}
+
+	/** Ubah tanggal BA distribusi. */
+	public function ubah_tanggal_ba($ba_id)
+	{
+		if($this->input->method(TRUE)!=='POST')show_404();
+		if(!$this->db->table_exists('berita_acara_distribusi'))show_404();
+		$ba=$this->db->where('id',(int)$ba_id)->get('berita_acara_distribusi')->row_array(); if(!$ba)show_404();
+		$row=$this->pbg->owned($ba['permohonan_id'],$this->pu_id()); if(!$row)show_404();
+		$tanggal=(string)$this->input->post('tanggal_ba');
+		if(!$this->tanggal_valid($tanggal))show_error('Tanggal berita acara tidak valid.',422);
+		$this->db->where('id',$ba['id'])->update('berita_acara_distribusi',array('tanggal_ba'=>$tanggal,'updated_at'=>date('Y-m-d H:i:s')));
+		$this->session->set_flashdata('sukses','Tanggal berita acara putaran '.(int)$ba['putaran'].' berhasil diubah.');
+		redirect('pengajuan-pbg/tahap/'.$ba['permohonan_id'].'/'.(int)$row['tahap']);
+	}
 	/**
 	 * Ubah TPA yang sudah ditugaskan SEBELUM mengirim hasil review (putaran 1).
 	 * TPA berstatus 'ditugaskan' boleh diganti/ditambah/dibatalkan; yang sudah

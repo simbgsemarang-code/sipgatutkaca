@@ -99,4 +99,61 @@ class Berita_acara extends CI_Controller
 		);
 		$this->load->view('pbg_pu/berita_acara', $data);
 	}
+
+	/**
+	 * Berita acara DISTRIBUSI tugas ke TPA (satu per putaran). Daftar TPA dan
+	 * saran dibaca langsung dari konsultasi_pbg, jadi ikut berubah bila PU
+	 * mengganti TPA atau TPA mengirim hasil review. $id = berita_acara_distribusi.id.
+	 */
+	public function distribusi($id)
+	{
+		if (! $this->db->table_exists('berita_acara_distribusi')) show_404();
+		$ba  = $this->db->where('id', (int) $id)->get('berita_acara_distribusi')->row_array();
+		if ($ba === NULL) show_404();
+		$row = $this->db->where('id', $ba['permohonan_id'])->get('permohonan_pbg')->row_array();
+		if ($row === NULL) show_404();
+
+		$role = (string) $this->session->userdata('role');
+		if ($role === 'pu')
+		{
+			if ((int) $row['user_id'] !== (int) $this->session->userdata('user_id'))
+			{
+				show_error('Anda tidak berhak mengakses berita acara permohonan ini.', 403);
+				return;
+			}
+		}
+		elseif (isset($this->bidang_role[$role]))
+		{
+			$ikut = $this->db->where('permohonan_id', $ba['permohonan_id'])
+				->where('tpa_user_id', (int) $this->session->userdata('user_id'))->count_all_results('konsultasi_pbg');
+			if ($ikut === 0)
+			{
+				show_error('Anda tidak pernah ditugaskan pada permohonan ini.', 403);
+				return;
+			}
+		}
+		else
+		{
+			show_error('Halaman ini khusus PU dan TPA.', 403);
+			return;
+		}
+
+		$anggota = array('arsitektur' => array(), 'struktur' => array(), 'mep' => array());
+		foreach ($this->db->select('k.*, u.nama AS nama_tpa')->from('konsultasi_pbg k')
+			->join('users u', 'u.id = k.tpa_user_id', 'left')
+			->where('k.permohonan_id', $ba['permohonan_id'])->where('k.putaran', $ba['putaran'])
+			->order_by('k.id', 'ASC')->get()->result_array() as $k)
+		{
+			$anggota[$k['bidang']][] = $k;
+		}
+
+		$this->load->view('pbg_pu/berita_acara_distribusi', array(
+			'row'          => $row,
+			'putaran'      => (int) $ba['putaran'],
+			'nomor'        => $ba['nomor'],
+			'tanggal_ba'   => $ba['tanggal_ba'],
+			'anggota'      => $anggota,
+			'bidang_label' => $this->bidang_label,
+		));
+	}
 }
