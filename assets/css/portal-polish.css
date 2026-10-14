@@ -71,3 +71,305 @@ label { font-size:17px; }
 @media(max-width:860px) { .side,.dash-sidebar { width:100%;flex-basis:auto;padding:0; } .side a,.dash-sidebar a { padding:12px 16px;font-size:13px; } .side a.active,.dash-sidebar a.active { margin-right:0;border-radius:0; } .brandbar .brand-name { font-size:17px; } .brandbar .brand-sub { font-size:9px; } .brandbar .brand-actions { gap:12px; } .brandbar .btn { padding:9px 14px; } .card,.panel { padding:20px; } .content,.top { padding-left:20px;padding-right:20px; } }
 @media(prefers-reduced-motion:reduce) { .btn:hover { transform:none; } }
 @media(max-width:860px) { .sidebar { width:100%; flex-basis:auto; } .sidebar a { padding:12px 16px; font-size:13px; } }
+
+/* =====================================================================
+   LAPISAN "LUXE" — tampilan portal pengguna yang mewah, elegan, kekinian.
+   Navy dalam + emas champagne, permukaan kaca, bayangan berlapis, gerak
+   halus. Berlaku di semua halaman berlayout portal (admin, PU, TPA,
+   pemohon) karena berkas ini hanya disisipkan di halaman bersidebar
+   (lihat MY_Output). Tema gelap sengaja tidak diubah permukaannya.
+   ===================================================================== */
+body {
+  --lx-navy-1:#10304a; --lx-navy-2:#0b2234; --lx-navy-3:#071a29;
+  --lx-gold-1:#8a6a1e; --lx-gold-2:#c9a24b; --lx-gold-3:#e9d08e;
+  --lx-ink:#14293a;
+  --lx-edge:rgba(176,134,48,.20);
+  --lx-card:linear-gradient(180deg,rgba(255,255,255,.98),rgba(249,251,252,.93));
+  --lx-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 24px 46px -28px rgba(13,38,56,.36),0 3px 8px -3px rgba(13,38,56,.06);
+  --lx-ease:cubic-bezier(.2,.7,.2,1);
+}
+
+/* ---- Kanvas halaman: cahaya champagne di kanan-atas, biru lembut di kiri ---- */
+html:not([data-theme="dark"]) body.is-inner-page {
+  background-color:#f5f8fb;
+  background-image:
+    radial-gradient(900px 420px at 92% -6%,rgba(233,208,142,.32),transparent 62%),
+    radial-gradient(760px 430px at -8% 4%,rgba(76,153,190,.17),transparent 64%),
+    linear-gradient(180deg,#fbfcfd 0%,#f1f5f9 100%);
+  background-attachment:fixed;
+}
+
+/* ---- Bilah atas: kaca buram dengan garis emas tipis ---- */
+html:not([data-theme="dark"]) header,
+html:not([data-theme="dark"]) .brandbar {
+  background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.80)) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);
+  backdrop-filter:blur(20px) saturate(1.5);
+  border-bottom:1px solid var(--lx-edge) !important;
+  box-shadow:0 16px 40px -26px rgba(13,38,56,.38) !important;
+}
+header .brand-name, .brandbar .brand-name {
+  background:linear-gradient(95deg,#7d5f17 0%,#c9a24b 48%,#7d5f17 100%);
+  -webkit-background-clip:text; background-clip:text;
+  color:transparent; -webkit-text-fill-color:transparent;
+}
+html[data-theme="dark"] header .brand-name {
+  background:linear-gradient(95deg,#e4c87b,#f6e8bf 50%,#e4c87b);
+  -webkit-background-clip:text; background-clip:text;
+}
+html:not([data-theme="dark"]) header .user-menu-btn,
+html:not([data-theme="dark"]) .brandbar .user-menu-btn {
+  padding:8px 16px;
+  border:1px solid var(--lx-edge);
+  border-radius:999px;
+  background:rgba(255,255,255,.72);
+  transition:border-color .25s,box-shadow .25s,background .25s;
+}
+html:not([data-theme="dark"]) header .user-menu-btn:hover,
+html:not([data-theme="dark"]) .brandbar .user-menu-btn:hover {
+  border-color:var(--lx-gold-2); background:#fff;
+  box-shadow:0 10px 24px -14px rgba(165,126,44,.7);
+}
+html:not([data-theme="dark"]) .user-menu-panel {
+  background:rgba(255,255,255,.94);
+  -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px);
+  border:1px solid var(--lx-edge); border-radius:16px;
+  box-shadow:0 28px 56px -22px rgba(13,38,56,.45);
+}
+
+/* ---- Sidebar: panel navy dengan penanda aktif emas bercahaya ---- */
+.sidebar { position:relative; }
+.dash-sidebar, .side, .sidebar {
+  background:linear-gradient(190deg,var(--lx-navy-1) 0%,var(--lx-navy-2) 52%,var(--lx-navy-3) 100%) !important;
+  border-right:1px solid rgba(233,208,142,.14) !important;
+  box-shadow:22px 0 60px -32px rgba(7,26,41,.65) !important;
+  isolation:isolate;
+}
+.dash-sidebar::before, .side::before, .sidebar::before {
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(280px 220px at 0% 0%,rgba(233,208,142,.17),transparent 70%),
+    radial-gradient(260px 240px at 100% 100%,rgba(76,153,190,.15),transparent 70%);
+}
+.dash-sidebar a, .side a, .sidebar a {
+  position:relative;
+  color:#b3c4d1 !important;
+  border-left:0 !important;
+  margin:3px 14px 3px 0;
+  padding:14px 22px 14px 28px;
+  border-radius:0 999px 999px 0 !important;
+  letter-spacing:.07em;
+  transition:background .25s,color .25s,transform .25s var(--lx-ease),box-shadow .25s;
+}
+.dash-sidebar a:hover, .side a:hover, .sidebar a:hover {
+  color:#fff !important;
+  background:rgba(255,255,255,.07) !important;
+  transform:translateX(4px);
+}
+.dash-sidebar a.active, .side a.active, .sidebar a.active {
+  color:#fbefcf !important;
+  background:linear-gradient(90deg,rgba(233,208,142,.27),rgba(233,208,142,.05)) !important;
+  box-shadow:inset 0 0 0 1px rgba(233,208,142,.20),0 12px 26px -16px rgba(0,0,0,.7) !important;
+}
+.dash-sidebar a.active::before, .side a.active::before, .sidebar a.active::before {
+  content:""; position:absolute; left:0; top:50%; width:4px; height:58%;
+  transform:translateY(-50%); border-radius:0 4px 4px 0;
+  background:linear-gradient(180deg,#f6e3a9,#c9a24b);
+  box-shadow:0 0 16px rgba(233,208,142,.75);
+}
+.dash-sidebar a.logout, .side a.logout, .sidebar a.logout { color:#f0a9b6 !important; }
+.dash-sidebar a.logout:hover, .side a.logout:hover, .sidebar a.logout:hover {
+  color:#ffd6dd !important; background:rgba(224,82,107,.16) !important;
+}
+
+/* ---- Judul halaman & ornamen ---- */
+.top h1, .dash-wrap h2, .main h1 { letter-spacing:-.02em; }
+html:not([data-theme="dark"]) .top h1, html:not([data-theme="dark"]) .dash-wrap h2, html:not([data-theme="dark"]) .main h1 { color:var(--lx-ink); }
+.dash-main .eyebrow:not(:has(a)), .main .eyebrow:not(:has(a)) {
+  display:inline-flex; align-items:center; gap:12px; color:var(--lx-gold-1); font-weight:600;
+}
+.dash-main .eyebrow:not(:has(a))::before, .main .eyebrow:not(:has(a))::before {
+  content:""; width:34px; height:1px; background:linear-gradient(90deg,transparent,var(--lx-gold-2));
+}
+
+/* ---- Kartu & panel: kaca terang, tepi champagne, bayangan berlapis ---- */
+html:not([data-theme="dark"]) .card,
+html:not([data-theme="dark"]) .panel,
+html:not([data-theme="dark"]) .stat,
+html:not([data-theme="dark"]) .stat-card,
+html:not([data-theme="dark"]) .info-card,
+html:not([data-theme="dark"]) .form-card,
+html:not([data-theme="dark"]) .dsa-panel,
+html:not([data-theme="dark"]) .timeline-card {
+  background:var(--lx-card) !important;
+  border:1px solid var(--lx-edge) !important;
+  border-radius:22px;
+  box-shadow:var(--lx-shadow) !important;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+}
+.dash-main .card:hover, .main .card:hover { transform:none !important; }
+
+/* ---- Kartu ringkasan: sel terpisah, aksen emas, angka bergradasi ---- */
+.stat-grid, .stat-row { gap:20px !important; background:transparent !important; border:0 !important; }
+.stat, .stat-card {
+  position:relative; overflow:hidden; padding:30px 26px 24px !important;
+  transition:transform .4s var(--lx-ease),box-shadow .4s;
+}
+.stat::after, .stat-card::after {
+  content:""; position:absolute; left:26px; top:0; width:46px; height:3px;
+  border-radius:0 0 6px 6px; background:linear-gradient(90deg,var(--lx-gold-2),var(--lx-gold-3));
+}
+.stat:hover, .stat-card:hover {
+  transform:translateY(-5px);
+  box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 34px 56px -28px rgba(13,38,56,.5) !important;
+}
+.stat .num, .stat-card b {
+  font-family:var(--display); font-weight:400; letter-spacing:-.01em;
+  background:linear-gradient(135deg,#79591a 0%,#c9a24b 62%,#e3c673 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.stat .lbl, .stat-card span { text-transform:uppercase; letter-spacing:.14em; font-size:11.5px; }
+.stat .go { color:var(--lx-gold-1); font-weight:600; letter-spacing:.04em; }
+
+/* ---- Tabel: header emas berhuruf kapital, baris melayang saat disorot ---- */
+.table-wrap { border-radius:18px; }
+table { border:0 !important; }
+thead th, th {
+  background:transparent !important; color:var(--lx-gold-1) !important;
+  text-transform:uppercase; letter-spacing:.12em; font-size:11.5px !important; font-weight:600 !important;
+  box-shadow:inset 0 -1px 0 rgba(176,134,48,.55);
+}
+td { border-bottom:1px solid rgba(35,91,116,.09) !important; }
+tbody tr:last-child td { border-bottom:0 !important; }
+tbody tr:nth-child(even) { background:transparent !important; }
+tbody tr { transition:background .25s; }
+tbody tr:hover { background:linear-gradient(90deg,rgba(233,208,142,.18),rgba(233,208,142,.03) 75%) !important; }
+html:not([data-theme="dark"]) td:first-child { color:var(--lx-ink); }
+
+/* ---- Lencana status: pil dengan titik ---- */
+.badge, .tag, .act-badge, .dsa-badge {
+  display:inline-flex; align-items:center; gap:7px; border-radius:999px !important;
+  padding:5px 12px 5px 10px; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+}
+.badge::before, .tag::before, .act-badge::before {
+  content:""; width:6px; height:6px; border-radius:50%; background:currentColor; flex:0 0 auto;
+  box-shadow:0 0 0 3px rgba(255,255,255,.55);
+}
+.dsa-badge::before { content:none; }
+
+/* ---- Tombol: emas bersinar untuk aksi utama, kaca untuk lainnya ---- */
+.btn-gold, .btn-primary {
+  position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#b58a30 0%,#dbb968 46%,#bd9340 100%) !important;
+  color:#1d2a33 !important; border:0 !important; font-weight:600;
+  box-shadow:0 16px 30px -14px rgba(165,126,44,.8),inset 0 1px 0 rgba(255,255,255,.55) !important;
+}
+.btn-gold::after, .btn-primary::after {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.5) 50%,transparent 70%);
+  transform:translateX(-120%); transition:transform .8s var(--lx-ease);
+}
+.btn-gold:hover::after, .btn-primary:hover::after { transform:translateX(120%); }
+html:not([data-theme="dark"]) .btn:not(.btn-primary):not(.btn-gold):not(.btn-danger) {
+  background:rgba(255,255,255,.78); border:1px solid var(--lx-edge); color:var(--lx-ink);
+}
+html:not([data-theme="dark"]) .btn:not(.btn-primary):not(.btn-gold):not(.btn-danger):hover {
+  background:#fff; border-color:var(--lx-gold-2); color:var(--lx-gold-1);
+  box-shadow:0 14px 28px -16px rgba(165,126,44,.7);
+}
+
+/* ---- Kolom isian: lembut, kolom cari berbentuk pil dengan ikon kaca pembesar ---- */
+html:not([data-theme="dark"]) input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]),
+html:not([data-theme="dark"]) select,
+html:not([data-theme="dark"]) textarea {
+  background-color:rgba(255,255,255,.92);
+  border:1px solid rgba(35,91,116,.18);
+  box-shadow:inset 0 1px 2px rgba(13,38,56,.045);
+}
+input.search, .search {
+  border-radius:999px !important; padding-left:48px !important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23a57e2c' stroke-width='1.9' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:19px 50%;
+}
+.notice, .alert { border-left:3px solid var(--lx-gold-2); }
+
+/* ---- Kartu menu pemohon: ubin gading berbingkai emas ---- */
+.menu-icon-box {
+  width:92px; height:92px; border-radius:30px !important;
+  background:linear-gradient(150deg,#fffdf7 0%,#f4e8c8 100%) !important;
+  border:1px solid rgba(201,162,75,.65) !important;
+  box-shadow:0 26px 38px -20px rgba(13,38,56,.55),inset 0 1px 0 #fff,inset 0 -8px 16px rgba(201,162,75,.12) !important;
+}
+.menu-card:hover .menu-icon-box {
+  transform:translateY(-7px) scale(1.04) !important;
+  box-shadow:0 34px 46px -20px rgba(165,126,44,.6),inset 0 1px 0 #fff !important;
+}
+html:not([data-theme="dark"]) .menu-label-box {
+  background:rgba(255,255,255,.92) !important; border:1px solid var(--lx-edge) !important;
+  border-radius:0 0 18px 18px !important; padding-top:22px;
+  box-shadow:0 14px 26px -20px rgba(13,38,56,.4);
+}
+.menu-label-box span { letter-spacing:.06em; color:var(--lx-ink); }
+
+/* ---- Distribusi status & aktivitas ---- */
+.dsa-bar { height:8px; background:rgba(35,91,116,.10); }
+.dsa-bar i {
+  background:linear-gradient(90deg,var(--lx-gold-1),var(--lx-gold-2) 55%,var(--lx-gold-3));
+  box-shadow:0 0 12px rgba(201,162,75,.5);
+}
+.dsa-av {
+  background:linear-gradient(145deg,#16405f,#0d2638) !important;
+  color:var(--lx-gold-3) !important; border:1px solid rgba(233,208,142,.45) !important;
+}
+
+/* ---- Gerak masuk halus (dimatikan bila pengguna meminta gerak minimal) ---- */
+@keyframes lx-rise { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+.dash-wrap>*:not(.reveal), .content>*, .main>.top { animation:lx-rise .75s var(--lx-ease) both; }
+.dash-wrap>*:nth-child(2), .content>*:nth-child(2) { animation-delay:.07s; }
+.dash-wrap>*:nth-child(3), .content>*:nth-child(3) { animation-delay:.14s; }
+.dash-wrap>*:nth-child(4), .content>*:nth-child(4) { animation-delay:.21s; }
+.dash-wrap>*:nth-child(n+5), .content>*:nth-child(n+5) { animation-delay:.28s; }
+
+@media (max-width:860px) {
+  .dash-sidebar a.active::before, .side a.active::before, .sidebar a.active::before {
+    left:22%; right:22%; top:auto; bottom:0; width:auto; height:3px; transform:none; border-radius:4px 4px 0 0;
+  }
+  .dash-sidebar a, .side a, .sidebar a { margin:0; border-radius:0 !important; }
+  .dash-sidebar a:hover, .side a:hover, .sidebar a:hover { transform:none; }
+  .stat-grid, .stat-row { gap:14px !important; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .dash-wrap>*, .content>*, .main>.top { animation:none !important; }
+  .stat:hover, .stat-card:hover, .menu-card:hover .menu-icon-box { transform:none !important; }
+}
+
+/* Nomor registrasi panjang (digit tanpa spasi) tidak boleh menimpa kolom di sebelahnya. */
+.pbg-list-table td:nth-child(4) { word-break:break-all; }
+
+/* Lencana tidak boleh terpotong per huruf di kolom sempit; tabel daftar PBG boleh membungkus per kata. */
+.badge, .tag, .act-badge { white-space:nowrap; }
+.pbg-list-table .badge { white-space:normal; }
+
+/* Penyesuaian tema gelap: emas dibuat lebih terang agar tetap terbaca. */
+html[data-theme="dark"] .dash-main .eyebrow:not(:has(a)), html[data-theme="dark"] .main .eyebrow:not(:has(a)) { color:var(--lx-gold-3); }
+html[data-theme="dark"] thead th, html[data-theme="dark"] th { color:var(--lx-gold-3) !important; }
+html[data-theme="dark"] .stat .num, html[data-theme="dark"] .stat-card b {
+  background:linear-gradient(135deg,#e4c87b,#f6e8bf 70%); -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+html[data-theme="dark"] .stat .go { color:var(--lx-gold-3); }
+
+/* Ponsel/tablet kecil: menu samping jadi satu baris yang bisa digeser, bukan tumpukan tinggi. */
+@media (max-width:860px) {
+  .dash-sidebar, .side, .sidebar {
+    flex-direction:row !important; align-items:center; justify-content:flex-start !important; gap:6px;
+    height:auto !important; min-height:0 !important; overflow-x:auto; overflow-y:hidden;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  }
+  .dash-sidebar::-webkit-scrollbar, .side::-webkit-scrollbar, .sidebar::-webkit-scrollbar { display:none; }
+  .dash-sidebar nav, .side nav { flex-direction:row !important; flex-wrap:nowrap !important; justify-content:flex-start !important; }
+  .dash-sidebar a, .side a, .sidebar a { white-space:nowrap; padding:14px 16px !important; font-size:12.5px !important; flex:0 0 auto; }
+}
+@media (max-width:560px) {
+  .auth-actions>.btn, .brand-actions>.btn { display:none; }
+  .auth-actions, .brand-actions { gap:8px; }
+}
