@@ -68,6 +68,7 @@ class Berita_acara extends CI_Controller
 				$snapshot[$bidang] = $r ? array(
 					'nama_tpa'    => $r['nama_tpa'],
 					'rekomendasi' => $r['rekomendasi_tpa'],
+					'status'      => $r['status'],
 					'reviewed_at' => $r['reviewed_at'],
 				) : null;
 			}

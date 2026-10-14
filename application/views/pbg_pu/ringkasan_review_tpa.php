@@ -14,7 +14,7 @@
           <?php if($anggota['status']==='ditugaskan'): ?>
             <p>Belum mengirim hasil review.</p>
           <?php else: ?>
-            <p><?= nl2br(htmlspecialchars($anggota['rekomendasi_tpa']?:'Tidak ada catatan review.',ENT_QUOTES,'UTF-8')) ?></p>
+            <p><?= nl2br(htmlspecialchars($anggota['rekomendasi_tpa']?:($anggota['status']==='direkomendasikan'?'Sudah Sesuai.':'Tidak ada catatan review.'),ENT_QUOTES,'UTF-8')) ?></p>
             <?php if(!empty($anggota['file_rekomendasi'])): ?><a target="_blank" rel="noopener" href="<?= berkas_href($anggota['file_rekomendasi'],'assets/uploads/konsultasi_pbg/') ?>">Lihat lampiran rekomendasi</a><?php endif; ?>
           <?php endif; ?>
         </div>

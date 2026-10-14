@@ -83,9 +83,12 @@ table.ttd td.garis{width:260px}
     ?>
     <?php if (!$s): ?>
       <p class="kosong">Belum ada review dari bidang ini.</p>
+    <?php elseif (empty($poin) && ($s['status'] ?? '') === 'direkomendasikan'): ?>
+      <p><strong>Sudah Sesuai</strong></p>
     <?php elseif (empty($poin)): ?>
       <p class="kosong">Tidak ada saran dan masukan tertulis.</p>
     <?php else: ?>
+      <?php if (($s['status'] ?? '') === 'direkomendasikan'): ?><p><strong>Sudah Sesuai</strong></p><?php endif; ?>
       <ol><?php foreach ($poin as $p): ?><li><?= htmlspecialchars($p) ?></li><?php endforeach; ?></ol>
     <?php endif; ?>
   <?php endforeach; ?>
