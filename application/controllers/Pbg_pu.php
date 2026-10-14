@@ -212,6 +212,53 @@ class Pbg_pu extends CI_Controller
 		$this->session->set_flashdata('sukses',$putaran===1?'Tugas review berhasil didistribusikan kepada TPA yang dipilih (putaran 1).':'Konsultasi putaran '.$putaran.' berhasil ditugaskan kepada seluruh TPA yang dipilih.'); redirect('pengajuan-pbg/tahap/'.$id.'/'.$tahap_tujuan);
 	}
 
+	/**
+	 * Ubah TPA yang sudah ditugaskan SEBELUM mengirim hasil review (putaran 1).
+	 * TPA berstatus 'ditugaskan' boleh diganti/ditambah/dibatalkan; yang sudah
+	 * mengirim hasil terkunci. Putaran lanjutan tidak bisa diubah di sini karena
+	 * hasil perbaikan wajib kembali ke TPA yang meminta perbaikan.
+	 */
+	public function ubah_tpa($id)
+	{
+		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
+		if($this->input->method(TRUE)!=='POST')show_404();
+		if(in_array($row['status'],array('disetujui','ditolak'),TRUE))show_error('Permohonan telah selesai.',422);
+		$terakhir=$this->konsultasi_terakhir_per_bidang($id);
+		$roles=array('arsitektur'=>'tpa_arsitek','struktur'=>'tpa_struktur','mep'=>'tpa_mep');
+		$rencana=array();
+		foreach($roles as $bidang=>$role){
+			$akhir=$terakhir[$bidang]??null;
+			if(!$akhir||$akhir['status']!=='ditugaskan')continue;
+			$menunggu=array();$terkunci=array();$contoh=null;$awal=true;
+			foreach($akhir['anggota'] as $m){
+				if($m['status']==='ditugaskan'){$menunggu[(int)$m['tpa_user_id']]=TRUE;$contoh=$contoh?:$m;if((int)$m['putaran']!==1)$awal=false;}
+				else $terkunci[(int)$m['tpa_user_id']]=TRUE;
+			}
+			if(!$awal)continue;
+			$raw=$this->input->post('tpa_'.$bidang); $uids=is_array($raw)?array_values(array_unique(array_map('intval',$raw))):array();
+			foreach($uids as $uid){
+				if(isset($terkunci[$uid]))show_error('TPA yang sudah mengirim hasil tidak dapat diubah.',422);
+				if(!$uid||!$this->db->where('id',$uid)->where('role',$role)->count_all_results('users'))show_error('Pilihan TPA '.$bidang.' tidak valid.',422);
+			}
+			if(count($terkunci)+count($uids)<1)show_error('Bidang '.$bidang.' harus memiliki minimal satu TPA.',422);
+			$rencana[$bidang]=array('hapus'=>array_values(array_diff(array_keys($menunggu),$uids)),'tambah'=>array_values(array_diff($uids,array_keys($menunggu))),'contoh'=>$contoh);
+		}
+		$berubah=0;
+		$this->db->trans_start();
+		foreach($rencana as $bidang=>$r){
+			if(!empty($r['hapus'])){
+				$this->db->where('permohonan_id',$id)->where('bidang',$bidang)->where('putaran',1)->where('status','ditugaskan')->where_in('tpa_user_id',$r['hapus'])->delete('konsultasi_pbg');
+				$berubah+=$this->db->affected_rows();
+			}
+			foreach($r['tambah'] as $uid){
+				$this->db->insert('konsultasi_pbg',array('permohonan_id'=>$id,'tpa_user_id'=>$uid,'bidang'=>$bidang,'putaran'=>1,'status'=>'ditugaskan','komentar_pu'=>$r['contoh']['komentar_pu'],'pernyataan_pu'=>$r['contoh']['pernyataan_pu'],'file_pu'=>$r['contoh']['file_pu'],'assigned_by'=>$this->pu_id(),'assigned_at'=>date('Y-m-d H:i:s')));
+				$berubah++;
+			}
+		}
+		$this->db->trans_complete();
+		$this->session->set_flashdata('sukses',$berubah?'Penugasan TPA berhasil diperbarui.':'Tidak ada perubahan pada penugasan TPA.');
+		redirect('pengajuan-pbg/tahap/'.$id.'/'.(int)$row['tahap']);
+	}
 	public function ubah_tahap($id)
 	{
 		$row=$this->pbg->owned($id,$this->pu_id()); if(!$row) show_404();
