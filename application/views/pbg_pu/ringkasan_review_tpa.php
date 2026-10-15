@@ -27,7 +27,7 @@
         <div class="tpa-review-ba">
           <small>Berita Acara bidang ini:</small>
           <?php foreach ($ba_bidang as $k): ?>
-            <a class="btn" target="_blank" href="<?= base_url('pengajuan-pbg/berita-acara/'.$k['id']) ?>">Unduh BA Putaran <?= (int) $k['putaran'] ?></a>
+            <button type="button" class="btn" data-ba-modal data-konsultasi="<?= (int) $k['id'] ?>" data-tanggal="<?= htmlspecialchars(isset($ba_tanggal[(int) $k['id']]) ? $ba_tanggal[(int) $k['id']] : substr((string) $k['reviewed_at'], 0, 10), ENT_QUOTES, 'UTF-8') ?>">Unduh BA Putaran <?= (int) $k['putaran'] ?></button>
           <?php endforeach; ?>
         </div>
       <?php endif; ?>
@@ -35,4 +35,36 @@
     <?php endforeach; ?>
   </div>
 </section>
+<?php endif; ?>
+<?php if (!empty($permohonan_id)): ?>
+<dialog id="baTanggalModal" style="border:1px solid #d9dee6;border-radius:16px;padding:26px 28px;max-width:420px;width:calc(100% - 32px);box-shadow:0 24px 60px rgba(15,30,50,.28)">
+  <form method="post" target="_blank" id="baTanggalForm" action="<?= base_url('pengajuan-pbg/berita-acara-tanggal/'.(int) $permohonan_id) ?>">
+    <h3 style="margin:0 0 6px">Tanggal Berita Acara</h3>
+    <p style="margin:0 0 16px;font-size:.9rem;opacity:.8">Tanggal ini dipakai untuk <b>seluruh berita acara</b> permohonan ini. Anda dapat mengubahnya lagi kapan saja.</p>
+    <input type="hidden" name="konsultasi_id" id="baKonsultasi">
+    <label for="baTanggal" style="display:block;margin-bottom:6px;font-weight:600">Tanggal</label>
+    <input type="date" name="tanggal_ba" id="baTanggal" required style="width:100%;box-sizing:border-box">
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button type="button" class="btn" id="baBatal">Batal</button>
+      <button type="submit" class="btn btn-primary">Simpan &amp; Unduh BA</button>
+    </div>
+  </form>
+</dialog>
+<script>
+(function(){
+  var dlg=document.getElementById('baTanggalModal'); if(!dlg)return;
+  var f=document.getElementById('baTanggalForm'), tg=document.getElementById('baTanggal'), kid=document.getElementById('baKonsultasi');
+  function buka(){ if(dlg.showModal)dlg.showModal(); else dlg.setAttribute('open',''); }
+  function tutup(){ if(dlg.close)dlg.close(); else dlg.removeAttribute('open'); }
+  document.querySelectorAll('[data-ba-modal]').forEach(function(b){
+    b.addEventListener('click',function(){ kid.value=b.getAttribute('data-konsultasi'); tg.value=b.getAttribute('data-tanggal')||''; buka(); });
+  });
+  document.getElementById('baBatal').addEventListener('click',tutup);
+  dlg.addEventListener('click',function(e){ if(e.target===dlg)tutup(); });
+  f.addEventListener('submit',function(){
+    var t=tg.value; document.querySelectorAll('[data-ba-modal]').forEach(function(b){ b.setAttribute('data-tanggal',t); });
+    setTimeout(tutup,150);
+  });
+})();
+</script>
 <?php endif; ?>

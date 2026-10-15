@@ -133,6 +133,7 @@ class Pbg_pu extends CI_Controller
 		$data['konsultasi_terakhir']=$this->konsultasi_terakhir_per_bidang($id); $data['konsultasi_selesai']=count($data['konsultasi_terakhir'])===3; foreach($data['konsultasi_terakhir'] as $k){if($k['status']!=='direkomendasikan')$data['konsultasi_selesai']=false;}
 		$data['link_aktif']=$this->db->table_exists('link_perbaikan_pbg'); $data['link_perbaikan']=array();
 		if($data['link_aktif']){$data['link_perbaikan']=$this->daftar_link($id);}
+		$data['ba_tanggal']=array(); if($this->db->table_exists('berita_acara_pbg')){foreach($this->db->where('permohonan_id',$id)->get('berita_acara_pbg')->result_array() as $b){$data['ba_tanggal'][(int)$b['konsultasi_id']]=!empty($b['tanggal_ba'])?$b['tanggal_ba']:substr($b['diterbitkan_at'],0,10);}}
 		$data['ba_aktif']=$this->db->table_exists('berita_acara_distribusi'); $data['ba_distribusi']=array();
 		if($data['ba_aktif']){foreach($this->db->where('permohonan_id',$id)->get('berita_acara_distribusi')->result_array() as $b){$data['ba_distribusi'][(int)$b['putaran']]=$b;}}
 		$this->load->view('pbg_pu/tahap',$data);
