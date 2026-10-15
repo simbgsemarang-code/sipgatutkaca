@@ -71,6 +71,10 @@ $wilayah_cilacap = wilayah_cilacap();
 
 <style>
 .notice{padding:16px 20px;border-radius:12px;border:1px solid var(--line);background:var(--surface-hi);margin:20px 0;font-size:14px}
+.itr-basemap{background:#fff;color:#223;padding:10px 14px;font-size:13px;line-height:1.5;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.itr-basemap b{display:block;margin-bottom:4px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a6a1c}
+.itr-basemap label{display:flex;align-items:center;gap:8px;padding:2px 0;cursor:pointer;margin:0;font-weight:400}
+.itr-basemap input{accent-color:#A57E2C;width:14px;height:14px;margin:0;cursor:pointer}
 .itr-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:22px 0 32px}
 .itr-full{grid-column:1/-1}
 .itr-application label{display:block;margin-bottom:8px;font-size:15px;color:var(--gold-300)}
@@ -143,7 +147,25 @@ $wilayah_cilacap = wilayah_cilacap();
   var titikInput=document.getElementById('itr-titik');
   var titik=[]; try{ titik=JSON.parse(titikInput.value)||[]; }catch(e){ titik=[]; }
   var map=L.map('itrMap').setView(titik.length?[titik[0].lat,titik[0].lng]:[-7.7267,109.0154], titik.length?15:11);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
+  // Basemap: Peta Jalan (OSM) atau Citra Satelit (Esri) lewat radio button
+  var osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
+  var esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
+  var baseCtl=L.control({position:'topright'});
+  baseCtl.onAdd=function(){
+    var d=L.DomUtil.create('div','itr-basemap');
+    d.innerHTML='<b>Jenis Tampilan</b>'+
+      '<label><input type="radio" name="itr-base" value="osm" checked> Peta Jalan</label>'+
+      '<label><input type="radio" name="itr-base" value="esri"> Citra Satelit</label>';
+    L.DomEvent.disableClickPropagation(d);
+    d.querySelectorAll('input').forEach(function(r){
+      r.addEventListener('change',function(){
+        if(!this.checked)return;
+        if(this.value==='esri'){map.removeLayer(osm);map.addLayer(esri);}else{map.removeLayer(esri);map.addLayer(osm);}
+      });
+    });
+    return d;
+  };
+  baseCtl.addTo(map);
   var markers=[], polygon=null, BATAS_CHIP=30;
   var list=document.getElementById('itrTitikList');
   function render(){
