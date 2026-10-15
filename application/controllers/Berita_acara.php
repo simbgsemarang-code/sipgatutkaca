@@ -96,9 +96,26 @@ class Berita_acara extends CI_Controller
 			'nomor'        => $ba['nomor'],
 			'tanggal_ba'   => $ba['diterbitkan_at'],
 			'snapshot'     => json_decode($ba['snapshot'], true),
+			'riwayat'      => $this->riwayat_review($trigger['permohonan_id'], $ba['diterbitkan_at']),
 			'bidang_label' => $this->bidang_label,
 		);
 		$this->load->view('pbg_pu/berita_acara', $data);
+	}
+
+	/**
+	 * Seluruh review TPA (semua putaran, semua TPA) per bidang yang sudah masuk sampai
+	 * saat BA terbit, urut waktu. Review tidak bisa diubah setelah dikirim, jadi hasilnya
+	 * tetap sama kapan pun BA dibuka (BA lama ikut memuat riwayat lengkap).
+	 */
+	private function riwayat_review($permohonan_id, $sampai)
+	{
+		$hasil = array('arsitektur' => array(), 'struktur' => array(), 'mep' => array());
+		$rows = $this->db->select('k.bidang,k.putaran,k.status,k.rekomendasi_tpa,k.reviewed_at,u.nama AS nama_tpa')->from('konsultasi_pbg k')
+			->join('users u', 'u.id = k.tpa_user_id', 'left')
+			->where('k.permohonan_id', (int) $permohonan_id)->where('k.reviewed_at IS NOT NULL')->where('k.reviewed_at <=', $sampai)
+			->order_by('k.reviewed_at', 'ASC')->order_by('k.id', 'ASC')->get()->result_array();
+		foreach ($rows as $r) { if (isset($hasil[$r['bidang']])) $hasil[$r['bidang']][] = $r; }
+		return $hasil;
 	}
 
 	/**

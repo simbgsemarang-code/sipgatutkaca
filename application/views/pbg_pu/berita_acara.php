@@ -71,36 +71,33 @@ table.ttd td.garis{width:260px}
   <div class="field-row"><div class="label">Lokasi Bangunan</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['alamat_bangunan']) ?></div></div>
   <div class="field-row"><div class="label">Nomor Registrasi</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['nik'] ?: '—') ?></div></div>
 
-  <p class="saran-heading">Saran dan Masukan dari Tim Profesi Ahli <small style="font-weight:400">(review terakhir tiap bidang per saat BA ini terbit)</small></p>
-  <?php foreach (array('arsitektur','struktur','mep') as $kode): $s = $snapshot[$kode] ?? null; ?>
-    <p class="bidang-heading">TPA <?= $bidang_label[$kode] ?><?php if($s):?> <span class="nama-tpa">(<?= htmlspecialchars($s['nama_tpa'] ?: 'TPA') ?> — <?= date('d/m/Y H:i', strtotime($s['reviewed_at'])) ?>)</span><?php endif;?> :</p>
-    <?php
-      $poin = array();
-      if ($s) {
-        $teks = trim((string) $s['rekomendasi']);
-        foreach (preg_split('/\r\n|\r|\n/', $teks) as $baris) { $baris = trim($baris); if ($baris !== '') $poin[] = $baris; }
-      }
-    ?>
-    <?php if (!$s): ?>
+  <p class="saran-heading">Saran dan Masukan dari Tim Profesi Ahli <small style="font-weight:400">(seluruh review tiap bidang hingga BA ini terbit)</small></p>
+  <?php $label_hasil = array('perlu_perbaikan' => 'Perlu Perbaikan', 'direkomendasikan' => 'Sudah Sesuai', 'ditugaskan' => 'Ditugaskan'); ?>
+  <?php foreach (array('arsitektur','struktur','mep') as $kode): $daftar = isset($riwayat[$kode]) ? $riwayat[$kode] : array(); ?>
+    <p class="bidang-heading">TPA <?= $bidang_label[$kode] ?> :</p>
+    <?php if (empty($daftar)): ?>
       <p class="kosong">Belum ada review dari bidang ini.</p>
-    <?php elseif (empty($poin) && ($s['status'] ?? '') === 'direkomendasikan'): ?>
-      <p><strong>Sudah Sesuai</strong></p>
-    <?php elseif (empty($poin)): ?>
-      <p class="kosong">Tidak ada saran dan masukan tertulis.</p>
-    <?php else: ?>
-      <?php if (($s['status'] ?? '') === 'direkomendasikan'): ?><p><strong>Sudah Sesuai</strong></p><?php endif; ?>
-      <ol><?php foreach ($poin as $p): ?><li><?= htmlspecialchars($p) ?></li><?php endforeach; ?></ol>
-    <?php endif; ?>
+    <?php else: foreach ($daftar as $r):
+      $poin = array();
+      foreach (preg_split('/\r\n|\r|\n/', trim((string) $r['rekomendasi_tpa'])) as $baris) { $baris = trim($baris); if ($baris !== '') $poin[] = $baris; }
+    ?>
+      <p style="margin:8px 0 2px"><strong>Putaran <?= (int) $r['putaran'] ?></strong> <span class="nama-tpa">(<?= htmlspecialchars($r['nama_tpa'] ?: 'TPA') ?> — <?= date('d/m/Y H:i', strtotime($r['reviewed_at'])) ?>)</span> — <strong><?= $label_hasil[$r['status']] ?? htmlspecialchars($r['status']) ?></strong></p>
+      <?php if (!empty($poin)): ?>
+        <ol><?php foreach ($poin as $p): ?><li><?= htmlspecialchars($p) ?></li><?php endforeach; ?></ol>
+      <?php elseif ($r['status'] !== 'direkomendasikan'): ?>
+        <p class="kosong">Tidak ada saran dan masukan tertulis.</p>
+      <?php endif; ?>
+    <?php endforeach; endif; ?>
   <?php endforeach; ?>
 
   <p class="penutup">Demikian berita acara ini dibuat, untuk bisa digunakan sebagaimana mestinya.</p>
   <div class="ttd-wrap">
     <p class="ttd-tempat">Cilacap, <?= htmlspecialchars($ba_tgl) ?></p>
     <table class="ttd"><tbody>
-    <?php $no = 1; foreach (array('arsitektur','struktur','mep') as $kode): $s = $snapshot[$kode] ?? null; ?>
+    <?php $no = 1; foreach (array('arsitektur','struktur','mep') as $kode): $nama_ttd = array(); foreach ((isset($riwayat[$kode]) ? $riwayat[$kode] : array()) as $r) { $nama_ttd[$r['nama_tpa'] ?: 'TPA'] = TRUE; } ?>
       <tr>
         <td class="no"><?= $no++ ?></td>
-        <td>TPA <?= $bidang_label[$kode] ?><?php if($s):?><br><small><?= htmlspecialchars($s['nama_tpa'] ?: 'TPA') ?></small><?php endif;?></td>
+        <td>TPA <?= $bidang_label[$kode] ?><?php foreach (array_keys($nama_ttd) as $n): ?><br><small><?= htmlspecialchars($n) ?></small><?php endforeach; ?></td>
         <td class="garis">………………………..</td>
       </tr>
     <?php endforeach; ?>
