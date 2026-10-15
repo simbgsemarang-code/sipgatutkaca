@@ -72,22 +72,23 @@ table.ttd td.garis{width:260px}
   <div class="field-row"><div class="label">Nomor Registrasi</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['nik'] ?: '—') ?></div></div>
 
   <p class="saran-heading">Saran dan Masukan dari Tim Profesi Ahli <small style="font-weight:400">(seluruh review tiap bidang hingga BA ini terbit)</small></p>
-  <?php $label_hasil = array('perlu_perbaikan' => 'Perlu Perbaikan', 'direkomendasikan' => 'Sudah Sesuai', 'ditugaskan' => 'Ditugaskan'); ?>
-  <?php foreach (array('arsitektur','struktur','mep') as $kode): $daftar = isset($riwayat[$kode]) ? $riwayat[$kode] : array(); ?>
+    <?php foreach (array('arsitektur','struktur','mep') as $kode): $daftar = isset($riwayat[$kode]) ? $riwayat[$kode] : array(); ?>
     <p class="bidang-heading">TPA <?= $bidang_label[$kode] ?> :</p>
+    <?php
+      // Semua catatan bidang ini berurutan waktu (semua putaran), satu nomor berlanjut; review "Sudah Sesuai" ditulis sebagai butir tersendiri.
+      $poin = array();
+      foreach ($daftar as $r) {
+        foreach (preg_split('/\r\n|\r|\n/', trim((string) $r['rekomendasi_tpa'])) as $baris) { $baris = trim($baris); if ($baris !== '') $poin[] = $baris; }
+        if ($r['status'] === 'direkomendasikan') $poin[] = 'Sudah Sesuai';
+      }
+    ?>
     <?php if (empty($daftar)): ?>
       <p class="kosong">Belum ada review dari bidang ini.</p>
-    <?php else: foreach ($daftar as $r):
-      $poin = array();
-      foreach (preg_split('/\r\n|\r|\n/', trim((string) $r['rekomendasi_tpa'])) as $baris) { $baris = trim($baris); if ($baris !== '') $poin[] = $baris; }
-    ?>
-      <p style="margin:8px 0 2px"><strong>Putaran <?= (int) $r['putaran'] ?></strong> <span class="nama-tpa">(<?= htmlspecialchars($r['nama_tpa'] ?: 'TPA') ?> — <?= date('d/m/Y H:i', strtotime($r['reviewed_at'])) ?>)</span> — <strong><?= $label_hasil[$r['status']] ?? htmlspecialchars($r['status']) ?></strong></p>
-      <?php if (!empty($poin)): ?>
-        <ol><?php foreach ($poin as $p): ?><li><?= htmlspecialchars($p) ?></li><?php endforeach; ?></ol>
-      <?php elseif ($r['status'] !== 'direkomendasikan'): ?>
-        <p class="kosong">Tidak ada saran dan masukan tertulis.</p>
-      <?php endif; ?>
-    <?php endforeach; endif; ?>
+    <?php elseif (empty($poin)): ?>
+      <p class="kosong">Tidak ada saran dan masukan tertulis.</p>
+    <?php else: ?>
+      <ol><?php foreach ($poin as $p): ?><li><?= htmlspecialchars($p) ?></li><?php endforeach; ?></ol>
+    <?php endif; ?>
   <?php endforeach; ?>
 
   <p class="penutup">Demikian berita acara ini dibuat, untuk bisa digunakan sebagaimana mestinya.</p>
