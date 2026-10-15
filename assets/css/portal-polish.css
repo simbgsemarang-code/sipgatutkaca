@@ -346,7 +346,7 @@ html:not([data-theme="dark"]) .menu-label-box {
 /* Lencana tidak boleh terpotong per huruf di kolom sempit; tabel daftar PBG boleh membungkus per kata. */
 .badge, .tag, .act-badge { white-space:nowrap; }
 .pbg-list-table .badge { white-space:normal; line-height:1.35; }
-.pbg-list-table td:nth-child(4) .badge { align-items:center; }
+.pbg-list-table td:nth-child(3) .badge { align-items:center; }
 
 /* Penyesuaian tema gelap: emas dibuat lebih terang agar tetap terbaca. */
 html[data-theme="dark"] .dash-main .eyebrow:not(:has(a)), html[data-theme="dark"] .main .eyebrow:not(:has(a)) { color:var(--lx-gold-3); }
