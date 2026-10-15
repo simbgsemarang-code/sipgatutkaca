@@ -11,6 +11,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
+.itr-basemap{background:#fff;color:#223;padding:10px 14px;font-size:13px;line-height:1.5;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.itr-basemap b{display:block;margin-bottom:4px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a6a1c}
+.itr-basemap label{display:flex;align-items:center;gap:8px;padding:2px 0;cursor:pointer;margin:0;font-weight:400}
+.itr-basemap input{accent-color:#A57E2C;width:14px;height:14px;margin:0;cursor:pointer}
 :root{
   --gold-500:#C9A24B;--gold-300:#E4C87B;--gold-100:#F3E3B8;
   --display:'Marcellus',serif;--body:'Plus Jakarta Sans',system-ui,sans-serif;
@@ -465,7 +469,25 @@ if(hasilForm){
   var el=document.getElementById('mapPoligon'); if(!el) return;
   var titik=JSON.parse(el.getAttribute('data-titik')||'[]'); if(!titik.length) return;
   var map=L.map(el,{scrollWheelZoom:false});
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap',maxZoom:19}).addTo(map);
+  // Basemap: Peta Jalan (OSM) atau Citra Satelit (Esri) lewat radio button
+  var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap',maxZoom:19}).addTo(map);
+  var esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
+  var baseCtl=L.control({position:'topright'});
+  baseCtl.onAdd=function(){
+    var d=L.DomUtil.create('div','itr-basemap');
+    d.innerHTML='<b>Jenis Tampilan</b>'+
+      '<label><input type="radio" name="itr-base" value="osm" checked> Peta Jalan</label>'+
+      '<label><input type="radio" name="itr-base" value="esri"> Citra Satelit</label>';
+    L.DomEvent.disableClickPropagation(d);
+    d.querySelectorAll('input').forEach(function(r){
+      r.addEventListener('change',function(){
+        if(!this.checked)return;
+        if(this.value==='esri'){map.removeLayer(osm);map.addLayer(esri);}else{map.removeLayer(esri);map.addLayer(osm);}
+      });
+    });
+    return d;
+  };
+  baseCtl.addTo(map);
   if(titik.length>=3){
     var poly=L.polygon(titik,{color:'#A57E2C',weight:2,fillColor:'#C9A24B',fillOpacity:.25}).addTo(map);
     map.fitBounds(poly.getBounds(),{padding:[24,24]});
