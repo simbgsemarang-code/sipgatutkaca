@@ -136,10 +136,9 @@ td:first-child{color:var(--text);font-weight:500}
 .dl{color:var(--gold-300);letter-spacing:.12em;font-size:.78rem;text-transform:uppercase;white-space:nowrap}
 .dl:hover{text-decoration:underline}
 
-.itr-pemohon-search{display:flex;gap:10px;margin-top:0}
-.itr-pemohon-search input{flex:1}
-.itr-pemohon-search .btn{padding:13px 22px;flex:0 0 auto}
-.itr-pemohon-pagination{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:26px;flex-wrap:wrap}
+.itr-intro{text-align:center;max-width:720px;margin:0 auto}.itr-intro .section-lead{margin-left:auto;margin-right:auto}
+.form-card.itr-apply-card{margin-top:44px;max-width:620px;text-align:center}
+.itr-format-note{margin:0;font-size:12px;opacity:.75}
 .form-card{background:var(--surface);border:1px solid var(--line);padding:46px;max-width:520px}
 .form-card.center{margin:0 auto}
 .field{margin-bottom:22px}
@@ -265,47 +264,19 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <section class="alt" style="padding-top:calc(84px + 30px)">
   <div class="wrap">
     <a class="btn btn-ghost" href="<?php echo base_url(); ?>" style="margin-bottom:24px"><span aria-hidden="true">←</span> Kembali ke Beranda</a>
-    <div class="reveal">
+    <div class="reveal itr-intro">
       <p class="eyebrow">Pengajuan ITR</p>
-      <h2>Unduh Formulir, Unggah Berkas, Pantau Pemohon</h2>
-      <p class="section-lead">Unduh formulir permohonan, lengkapi dan tanda tangani, lalu unggah kembali berkasnya. Daftar pemohon terbaru dapat dipantau di sisi kanan.</p>
+      <h2>Unduh Formulir dan Ajukan ITR</h2>
+      <p class="section-lead">Unduh formulir permohonan, lengkapi dan tanda tangani, lalu unggah kembali berkasnya melalui dashboard pengajuan ITR.</p>
     </div>
 
-    <div class="split reveal" style="margin-top:50px;align-items:start">
-      <div class="form-card">
-        <p class="eyebrow" style="margin-bottom:20px">Formulir Permohonan</p>
-        <p class="note" style="margin-top:0">Unduh formulir permohonan ITR, isi dan tanda tangani, lalu unggah kembali berkasnya di sini.</p>
-        <a class="btn btn-ghost" href="formulir_pengajuan_itr.pdf" download style="width:100%;text-align:center;margin:18px 0">Unduh Formulir ITR ↓</a>
-        <button class="btn btn-gold" id="itrApplyButton" type="button" style="width:100%" aria-haspopup="dialog" aria-controls="itrAuthModal">PENGAJUAN ITR</button>
-        <p class="note">Masuk atau daftar sebagai pemohon untuk mengakses dashboard pengajuan ITR.</p>
-      </div>
-
-      <div>
-        <p class="eyebrow" style="margin-bottom:20px">Daftar Pemohon</p>
-        <form method="get" action="<?php echo base_url('itr'); ?>" class="itr-pemohon-search">
-          <input type="search" name="q" value="<?php echo htmlspecialchars($q, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Cari nama pemohon atau kecamatan…">
-          <button class="btn btn-ghost" type="submit">Cari</button>
-        </form>
-        <table style="margin-top:24px">
-          <thead><tr><th>Pemohon</th><th>Kecamatan</th><th>Tanggal</th><th>Status</th></tr></thead>
-          <tbody>
-            <?php if (empty($daftar_pemohon)): ?>
-            <tr><td colspan="4">Belum ada pemohon<?php echo $q !== '' ? ' yang cocok dengan pencarian "'.htmlspecialchars($q, ENT_QUOTES, 'UTF-8').'"' : ''; ?>.</td></tr>
-            <?php else: foreach ($daftar_pemohon as $p):
-              $label_status = $p['status']==='disetujui' ? 'Terbit' : ($p['status']==='ditolak' ? 'Ditolak' : 'Diproses');
-            ?>
-            <tr><td><?php echo htmlspecialchars($p['nama_pemohon'], ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo htmlspecialchars($p['lokasi_kecamatan']?:'—', ENT_QUOTES, 'UTF-8'); ?></td><td><?php echo htmlspecialchars(date('d M Y', strtotime($p['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td><td><span class="tag"><?php echo $label_status; ?></span></td></tr>
-            <?php endforeach; endif; ?>
-          </tbody>
-        </table>
-        <?php if ($total_halaman > 1): ?>
-        <div class="itr-pemohon-pagination">
-          <?php if ($page > 1): ?><a class="btn btn-ghost btn-sm" href="<?php echo base_url('itr').'?q='.urlencode($q).'&page='.($page-1); ?>">‹ Sebelumnya</a><?php else: ?><span></span><?php endif; ?>
-          <span class="note" style="margin:0">Halaman <?php echo $page; ?> dari <?php echo $total_halaman; ?></span>
-          <?php if ($page < $total_halaman): ?><a class="btn btn-ghost btn-sm" href="<?php echo base_url('itr').'?q='.urlencode($q).'&page='.($page+1); ?>">Berikutnya ›</a><?php else: ?><span></span><?php endif; ?>
-        </div>
-        <?php endif; ?>
-      </div>
+    <div class="form-card center itr-apply-card reveal">
+      <p class="eyebrow" style="margin-bottom:20px">Formulir Permohonan</p>
+      <p class="note" style="margin-top:0">Unduh formulir permohonan ITR dalam format Word, isi dan tanda tangani, lalu unggah kembali berkasnya di sini.</p>
+      <a class="btn btn-ghost" href="<?php echo base_url('formulir_pengajuan_itr.docx'); ?>" download="Formulir Permohonan ITR.docx" style="width:100%;text-align:center;margin:18px 0 6px">Unduh Formulir ITR (Word) ↓</a>
+      <p class="note itr-format-note">Format .docx · dapat diketik langsung atau dicetak</p>
+      <button class="btn btn-gold" id="itrApplyButton" type="button" style="width:100%;margin-top:22px" aria-haspopup="dialog" aria-controls="itrAuthModal">PENGAJUAN ITR</button>
+      <p class="note">Masuk atau daftar sebagai pemohon untuk mengakses dashboard pengajuan ITR.</p>
     </div>
   </div>
 </section>
