@@ -489,6 +489,11 @@ function bootPetaSpasial(){
       "<h6>Peta</h6>"+
       "<label class='row'><input type='checkbox' id='lc-pola' checked> Pola Ruang</label>"+
       "<label class='row'><input type='checkbox' id='lc-lp2b'> LP2B</label>"+
+      "<h6 class='sep'>RDTR Perkotaan</h6>"+
+      "<label class='row'><input type='checkbox' id='lc-rdtr-cilacap'> RDTR Cilacap</label>"+
+      "<label class='row'><input type='checkbox' id='lc-rdtr-kroya'> RDTR Kroya</label>"+
+      "<label class='row'><input type='checkbox' id='lc-rdtr-sidareja'> RDTR Sidareja</label>"+
+      "<h6 class='sep'>Batas &amp; Jaringan</h6>"+
       "<label class='row'><input type='checkbox' id='lc-kab' checked> Batas Kabupaten</label>"+
       "<label class='row'><input type='checkbox' id='lc-kec' checked> Batas Kecamatan</label>"+
       "<label class='row'><input type='checkbox' id='lc-desa'> Batas Desa/Kelurahan</label>"+
@@ -540,12 +545,73 @@ function bootPetaSpasial(){
       var p=f.properties||{},nama=p.NAMOBJ||"Pola Ruang";
       kategori[nama]=p.Warna||"#C9A24B";
     });
-    var html="<b>Legenda Pola Ruang</b>";
+    legendPolaHtml=htmlLegenda("Legenda Pola Ruang",kategori);
+    renderLegenda();
+  }
+  function htmlLegenda(judul,kategori){
+    var html="<b>"+esc(judul)+"</b>";
     Object.keys(kategori).sort().forEach(function(nama){
       html+="<div class='legend-row'><span class='legend-swatch' style='background:"+esc(kategori[nama])+"'></span><span>"+esc(nama)+"</span></div>";
     });
+    return html;
+  }
+  /* Legenda = Pola Ruang (RTRW) + satu blok per RDTR yang sedang tampil */
+  var legendPolaHtml="";
+  var legendRdtr={};
+  function renderLegenda(){
+    if(!legendNode)return;
+    var html=legendPolaHtml||"<b>Legenda Pola Ruang</b><span>Memuat kategori…</span>";
+    ["cilacap","kroya","sidareja"].forEach(function(k){if(legendRdtr[k])html+="<div style='margin-top:8px'>"+legendRdtr[k]+"</div>";});
     legendNode.innerHTML=html;
   }
+
+  /* RDTR Perkotaan — dimuat saat dicentang pertama kali (berkas besar), lalu zoom ke wilayahnya */
+  var rdtrDef={
+    cilacap:{judul:"Legenda RDTR Cilacap",url:"<?php echo base_url('assets/data/spatial/rdtr-cilacap.geojson'); ?>"},
+    kroya:{judul:"Legenda RDTR Kroya",url:"<?php echo base_url('assets/data/spatial/rdtr-kroya.geojson'); ?>"},
+    sidareja:{judul:"Legenda RDTR Sidareja",url:"<?php echo base_url('assets/data/spatial/rdtr-sidareja.geojson'); ?>"}
+  };
+  function popupRdtr(p){
+    return "<h6>"+esc(p.NAMOBJ||"Pola Ruang RDTR")+"</h6>"+
+      "<div class='pp-row'><span>Wilayah</span><span>"+esc(p.Wilayah||"RDTR Perkotaan")+"</span></div>"+
+      (p.Zonasi?"<div class='pp-row'><span>Kode zona</span><span>"+esc(p.Zonasi)+"</span></div>":"");
+  }
+  Object.keys(rdtrDef).forEach(function(k){
+    var d=rdtrDef[k],cb=document.getElementById("lc-rdtr-"+k);
+    d.layer=L.geoJSON(null,{
+      style:function(f){
+        var color=(f.properties&&f.properties.Warna)||"#C9A24B";
+        return{color:"#4a3b12",weight:.7,opacity:.8,fillColor:color,fillOpacity:.6};
+      },
+      onEachFeature:function(f,l){
+        var p=f.properties||{};
+        l.bindTooltip(p.NAMOBJ||"Pola Ruang RDTR",{sticky:true});
+        l.bindPopup(popupRdtr(p),{maxWidth:360});
+      }
+    });
+    d.dimuat=false;
+    function tampil(){
+      d.layer.addTo(map);
+      if(legendRdtr[k]===undefined&&d.kategori)legendRdtr[k]=htmlLegenda(d.judul,d.kategori);
+      renderLegenda();
+      if(d.layer.getBounds().isValid())map.fitBounds(d.layer.getBounds(),{padding:[30,30]});
+    }
+    cb.addEventListener("change",function(){
+      if(!cb.checked){map.removeLayer(d.layer);delete legendRdtr[k];renderLegenda();return;}
+      if(d.dimuat){tampil();return;}
+      cb.disabled=true;
+      fetch(d.url,{headers:{"Accept":"application/geo+json,application/json"}})
+        .then(function(r){if(!r.ok)throw new Error(k);return r.json();})
+        .then(function(data){
+          d.layer.addData(data);d.kategori={};
+          (data.features||[]).forEach(function(f){var p=f.properties||{};d.kategori[p.NAMOBJ||"Pola Ruang"]=p.Warna||"#C9A24B";});
+          d.dimuat=true;
+          if(cb.checked)tampil();
+        })
+        .catch(function(){cb.checked=false;alert("Peta RDTR tidak dapat dimuat. Coba lagi.");})
+        .then(function(){cb.disabled=false;});
+    });
+  });
   muatLayer("<?php echo base_url('assets/data/spatial/pola-ruang.geojson'); ?>",polaRuangLayer,"Pola Ruang");
   muatLayer("<?php echo base_url('assets/data/spatial/lp2b.geojson'); ?>",lp2bLayer,"LP2B");
 
