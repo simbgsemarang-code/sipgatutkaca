@@ -60,3 +60,52 @@ function pbg_sinkron_tahap($permohonan_id)
     $ci->db->where('id', $permohonan_id)->update('permohonan_pbg', array('tahap' => $tujuan, 'updated_at' => date('Y-m-d H:i:s')));
     return TRUE;
 }
+
+/** Terbitkan BA distribusi untuk satu putaran (satu per putaran). TRUE kalau baru terbit. */
+function pbg_buat_ba_distribusi($permohonan_id, $putaran, $tanggal, $oleh)
+{
+    $ci =& get_instance();
+    if (!$ci->db->table_exists('berita_acara_distribusi')) return FALSE;
+    if ($ci->db->where('permohonan_id', $permohonan_id)->where('putaran', $putaran)->count_all_results('berita_acara_distribusi')) return FALSE;
+    $romawi = array('I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII');
+    $tahun = date('Y', strtotime($tanggal)); $bulan = (int) date('n', strtotime($tanggal));
+    $urut = $ci->db->where('YEAR(tanggal_ba)', $tahun)->count_all_results('berita_acara_distribusi') + 1;
+    $ci->db->insert('berita_acara_distribusi', array('permohonan_id' => $permohonan_id, 'putaran' => $putaran, 'nomor' => '600.1.15.2/'.$urut.'/BA-DTPA/'.$romawi[$bulan - 1].'/'.$tahun, 'tanggal_ba' => $tanggal, 'dibuat_oleh' => $oleh, 'created_at' => date('Y-m-d H:i:s')));
+    return TRUE;
+}
+
+/**
+ * TPA yang meminta perbaikan ditugaskan lagi (putaran berikutnya) begitu PU
+ * mengirim link Google Drive perbaikannya, tanpa PU mengajukan konsultasi lagi.
+ * Idempoten: hanya TPA yang perbaikannya sudah terkirim lewat link, belum
+ * punya tugas lanjutan, dan yang putarannya masih yang terbaru di bidangnya.
+ * Aman dipanggil berulang (juga untuk menyusul link yang terkirim sebelum
+ * fitur ini ada). Mengembalikan daftar penugasan baru: konsultasi_id, tpa_user_id, nama, bidang, putaran.
+ */
+function pbg_tugaskan_ulang_perbaikan($permohonan_id)
+{
+    $ci =& get_instance(); $id = (int) $permohonan_id;
+    if (!$ci->db->table_exists('link_perbaikan_pbg')) return array();
+    $p = $ci->db->select('id,status')->where('id', $id)->get('permohonan_pbg')->row_array();
+    if (!$p || in_array($p['status'], array('disetujui', 'ditolak'), TRUE)) return array();
+    $rows = $ci->db->select('k.*,u.nama AS nama_tpa')->from('konsultasi_pbg k')->join('users u', 'u.id=k.tpa_user_id', 'left')->where('k.permohonan_id', $id)->order_by('k.putaran', 'DESC')->order_by('k.id', 'DESC')->get()->result_array();
+    if (!$rows) return array();
+    $maks = array();
+    foreach ($rows as $r) $maks[$r['bidang']] = max(isset($maks[$r['bidang']]) ? $maks[$r['bidang']] : 0, (int) $r['putaran']);
+    $hasil = array(); $sekarang = date('Y-m-d H:i:s');
+    $ci->db->trans_start();
+    foreach (pbg_ringkasan_konsultasi($rows) as $bidang => $ringkas) {
+        foreach ($ringkas['anggota'] as $m) {
+            if ($m['status'] !== 'perlu_perbaikan' || empty($m['perbaikan_dikirim_at']) || (int) $m['putaran'] !== $maks[$bidang]) continue;
+            $link = $ci->db->where('permohonan_id', $id)->where('putaran', (int) $m['putaran'])->order_by('id', 'DESC')->get('link_perbaikan_pbg')->row_array();
+            if (!$link) continue;
+            $baru = (int) $m['putaran'] + 1; $oleh = $link['dibuat_oleh'] ? (int) $link['dibuat_oleh'] : (int) $m['assigned_by'];
+            $ci->db->insert('konsultasi_pbg', array('permohonan_id' => $id, 'tpa_user_id' => $m['tpa_user_id'], 'bidang' => $bidang, 'putaran' => $baru, 'status' => 'ditugaskan', 'komentar_pu' => $link['keterangan'] !== null && $link['keterangan'] !== '' ? $link['keterangan'] : null, 'assigned_by' => $oleh, 'assigned_at' => $sekarang));
+            pbg_buat_ba_distribusi($id, $baru, date('Y-m-d'), $oleh);
+            $hasil[] = array('konsultasi_id' => $ci->db->insert_id(), 'tpa_user_id' => (int) $m['tpa_user_id'], 'nama' => $m['nama_tpa'] ? $m['nama_tpa'] : 'TPA', 'bidang' => $bidang, 'putaran' => $baru);
+        }
+    }
+    if ($hasil) $ci->db->where('id', $id)->update('permohonan_pbg', array('tahap' => 3, 'status' => 'diverifikasi', 'updated_at' => $sekarang));
+    $ci->db->trans_complete();
+    return $hasil;
+}
