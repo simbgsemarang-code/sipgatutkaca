@@ -355,8 +355,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .massa-mode{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .massa-mode label{display:flex;align-items:center;gap:7px;font-size:.84rem;color:var(--text);letter-spacing:0;text-transform:none;margin:0;cursor:pointer}
 .massa-mode input{width:auto;accent-color:#A57E2C}
-.massa-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px 30px;align-items:start}
-.massa-kanan .massa-peta{height:400px}
+.massa-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:22px 30px;align-items:start}
+.massa-kanan .massa-peta{height:340px}
+.massa-kanan .massa-koord{grid-template-columns:1fr 1fr}.massa-kanan .massa-koord .btn{grid-column:1/-1;justify-self:start}
 @media(max-width:980px){.massa-cols{grid-template-columns:1fr}.massa-kanan .massa-peta{height:320px}}
 .massa-peta{height:320px;border:1px solid var(--line);border-radius:10px;background:#dfeee2;position:relative;z-index:0}
 .massa-koord{display:grid;grid-template-columns:1fr 1fr auto;gap:10px 12px;align-items:end;margin-top:12px}
