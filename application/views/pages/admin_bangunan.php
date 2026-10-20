@@ -234,7 +234,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <td class="no-reg"><?php echo htmlspecialchars(round((float) $r['latitude'], 5) . ', ' . round((float) $r['longitude'], 5), ENT_QUOTES, 'UTF-8'); ?></td>
               <td class="aksi-cell">
                 <a href="<?php echo base_url('admin/bangunan-ubah/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Ubah</a>
-                <a href="<?php echo base_url('admin/bangunan-massa/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs" title="Atur massa bangunan">Massa<?php echo !empty($jml_massa[(int) $r['id']]) ? ' (' . (int) $jml_massa[(int) $r['id']] . ')' : ''; ?></a>
+                <button type="button" class="btn btn-ghost btn-xs" data-massa="<?php echo (int) $r['id']; ?>" title="Atur massa bangunan">Massa<?php echo !empty($jml_massa[(int) $r['id']]) ? ' (' . (int) $jml_massa[(int) $r['id']] . ')' : ''; ?></button>
                 <form action="<?php echo base_url('admin/bangunan-hapus/' . (int) $r['id']); ?>" method="post" style="margin:0" onsubmit="return confirm('Hapus bangunan &quot;<?php echo htmlspecialchars(addslashes($r['nama_bangunan']), ENT_QUOTES, 'UTF-8'); ?>&quot; dari peta?');">
                   <button type="submit" class="btn btn-xs" style="border:1px solid #E0526B;color:#E0526B;background:transparent;cursor:pointer">Hapus</button>
                 </form>
@@ -310,6 +310,194 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   </div>
 </footer>
 
+<style>
+[hidden]{display:none!important}
+.massa-dlg{border:1px solid var(--line);border-radius:18px;padding:0;width:min(1040px,calc(100% - 28px));max-height:calc(100vh - 40px);background:var(--surface);color:var(--text);box-shadow:0 30px 80px rgba(8,24,38,.4)}
+.massa-dlg::backdrop{background:rgba(8,24,38,.55);backdrop-filter:blur(2px)}
+.massa-wrap{display:flex;flex-direction:column;max-height:calc(100vh - 40px)}
+.massa-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:24px 28px 14px;border-bottom:1px solid var(--line)}
+.massa-top h3{font-family:var(--display);font-weight:400;font-size:1.5rem;line-height:1.2;margin:0}
+.massa-top p{margin:6px 0 0;color:var(--muted);font-size:.84rem}
+.massa-x{background:none;border:1px solid var(--line);color:var(--muted);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1.1rem;line-height:1;flex:0 0 auto}
+.massa-x:hover{color:var(--text);border-color:var(--gold-500)}
+.massa-body{padding:18px 28px 26px;overflow:auto}
+.massa-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.massa-ringkas{color:var(--muted);font-size:.82rem}
+.massa-ringkas b{color:var(--text);font-weight:600}
+.massa-info{margin-top:12px;padding:10px 14px;font-size:.86rem;border:1px solid}
+.massa-info.ok{border-color:#2EA84F;background:rgba(46,168,79,.12);color:#2EA84F}
+.massa-info.err{border-color:#E0526B;background:rgba(224,82,107,.12);color:#E0526B}
+.massa-tbl{width:100%;border-collapse:collapse;margin-top:14px;font-size:.86rem}
+.massa-tbl th{font-family:var(--display);font-weight:400;letter-spacing:.08em;text-transform:uppercase;font-size:.68rem;color:var(--gold-300);text-align:left;padding:10px 10px;border-bottom:1px solid var(--gold-500);white-space:nowrap}
+.massa-tbl td{padding:10px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:middle}
+.massa-tbl td.nm{color:var(--text);font-weight:500}
+.massa-tbl .num{text-align:right;white-space:nowrap}
+.massa-tbl .aksi{display:flex;gap:6px;flex-wrap:wrap}
+.massa-tbl-wrap{overflow:auto}
+.massa-foto{width:72px;height:54px;object-fit:cover;border:1px solid var(--line);border-radius:8px;display:block;background:var(--surface-hi)}
+.massa-foto-kosong{width:72px;height:54px;border:1px dashed var(--line);border-radius:8px;display:grid;place-items:center;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.massa-kosong{margin-top:14px;border:1px dashed var(--line);padding:26px;text-align:center;color:var(--muted);font-size:.88rem}
+.massa-form{margin-top:16px;border:1px solid var(--line);background:var(--surface-hi);padding:20px 22px;border-radius:12px}
+.massa-form h4{font-family:var(--display);font-weight:400;font-size:1.1rem;margin:0 0 14px}
+.massa-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
+.massa-grid .fl{min-width:0}
+.massa-grid .full{grid-column:1/-1}
+.massa-form label.lb{display:block;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.massa-form input[type=text],.massa-form input[type=number],.massa-form select{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:10px 12px;font-family:var(--body);font-size:.9rem}
+.massa-form input[type=file]{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:8px 10px;font-family:var(--body);font-size:.85rem}
+.massa-form input:focus,.massa-form select:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+.massa-form .req{color:#E0526B}
+.massa-fotoprev{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.massa-fotoprev img{height:84px;width:auto;max-width:150px;border:1px solid var(--line);border-radius:8px;object-fit:cover}
+.massa-fotoprev label{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text)}
+.massa-hint{font-size:.72rem;color:var(--muted);margin-top:5px}
+.massa-form-aksi{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+@media(max-width:640px){.massa-grid{grid-template-columns:1fr}.massa-top,.massa-body{padding-left:18px;padding-right:18px}}
+</style>
+<dialog class="massa-dlg" id="massaModal" aria-labelledby="massaJudul">
+  <div class="massa-wrap">
+    <div class="massa-top">
+      <div>
+        <h3 id="massaJudul">Massa Bangunan</h3>
+        <p id="massaSub"></p>
+      </div>
+      <button type="button" class="massa-x" id="massaTutup" aria-label="Tutup">&times;</button>
+    </div>
+    <div class="massa-body">
+      <div class="massa-bar">
+        <span class="massa-ringkas" id="massaRingkas"></span>
+        <button type="button" class="btn btn-gold btn-xs" id="massaTambah">+ Tambah Massa</button>
+      </div>
+      <div class="massa-info" id="massaInfo" role="status" hidden></div>
+
+      <form class="massa-form" id="massaForm" enctype="multipart/form-data" hidden>
+        <h4 id="massaFormJudul">Tambah Massa</h4>
+        <input type="hidden" name="massa_id" id="mfId" value="0">
+        <div class="massa-grid">
+          <div class="fl"><label class="lb" for="mfNama">Nama Massa <span class="req">*</span></label><input type="text" name="nama_massa" id="mfNama" maxlength="150" required placeholder="mis. Massa A — Ruang Kelas"></div>
+          <div class="fl"><label class="lb" for="mfKondisi">Kondisi <span class="req">*</span></label><select name="kondisi" id="mfKondisi" required></select></div>
+          <div class="fl"><label class="lb" for="mfLantai">Jumlah Lantai</label><input type="number" name="jumlah_lantai" id="mfLantai" min="0" max="200" step="1" placeholder="mis. 2"></div>
+          <div class="fl"><label class="lb" for="mfLuas">Luas Bangunan (m²)</label><input type="text" inputmode="decimal" name="luas_m2" id="mfLuas" placeholder="mis. 245,5"></div>
+          <div class="fl"><label class="lb" for="mfTahun">Tahun Dibangun</label><input type="number" name="tahun_dibangun" id="mfTahun" min="1800" step="1" placeholder="mis. 1998"></div>
+          <div class="fl"><label class="lb" for="mfKet">Keterangan</label><input type="text" name="keterangan" id="mfKet" maxlength="255" placeholder="Fungsi atau catatan massa"></div>
+          <div class="fl full">
+            <label class="lb" for="mfFoto">Foto Massa</label>
+            <div class="massa-fotoprev" id="mfFotoIni" hidden><img src="" alt="Foto massa saat ini" id="mfFotoIniImg"><label><input type="checkbox" name="hapus_foto" value="1" id="mfHapusFoto"> Hapus foto ini</label></div>
+            <div class="massa-fotoprev" id="mfFotoBaru" hidden><img src="" alt="Pratinjau foto baru" id="mfFotoBaruImg"><span class="massa-hint" style="margin:0">Pratinjau foto yang akan diunggah</span></div>
+            <input type="file" name="foto_file" id="mfFoto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+            <p class="massa-hint" id="mfFotoHint">JPG / PNG / WebP, maksimal 100 MB.</p>
+          </div>
+        </div>
+        <div class="massa-form-aksi">
+          <button type="submit" class="btn btn-gold btn-xs" id="mfSimpan">Tambah Massa</button>
+          <button type="button" class="btn btn-ghost btn-xs" id="mfBatal">Batal</button>
+        </div>
+      </form>
+
+      <div class="massa-tbl-wrap" id="massaTabelWrap">
+        <table class="massa-tbl">
+          <thead><tr><th>Foto</th><th>Nama Massa</th><th class="num">Lantai</th><th class="num">Luas (m²)</th><th>Kondisi</th><th class="num">Tahun</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+          <tbody id="massaBody"></tbody>
+        </table>
+      </div>
+      <div class="massa-kosong" id="massaKosong" hidden>Belum ada massa untuk bangunan ini. Klik <b>+ Tambah Massa</b> untuk menambahkan.</div>
+    </div>
+  </div>
+</dialog>
+<script>
+(function(){
+  var BASE='<?php echo base_url(); ?>';
+  var WARNA={'1':'#2EA84F','2':'#F2C230','3':'#D9822B','4':'#C0392B'};
+  var dlg=document.getElementById('massaModal'); if(!dlg)return;
+  var $=function(id){return document.getElementById(id);};
+  var st={bid:0,tombol:null,daftar:[],kondisi:{}};
+  var info=$('massaInfo'), form=$('massaForm'), body=$('massaBody');
+  var fotoIni=$('mfFotoIni'), fotoIniImg=$('mfFotoIniImg'), fotoBaru=$('mfFotoBaru'), fotoBaruImg=$('mfFotoBaruImg'), inFoto=$('mfFoto'), hapusFoto=$('mfHapusFoto'), fotoHint=$('mfFotoHint');
+  var XHR={'X-Requested-With':'XMLHttpRequest','Accept':'application/json'};
+
+  function el(tag,attr,teks){var e=document.createElement(tag);if(attr)for(var k in attr){if(k==='class')e.className=attr[k];else e.setAttribute(k,attr[k]);}if(teks!==undefined&&teks!==null)e.textContent=teks;return e;}
+  function pesan(teks,jenis){info.textContent=teks||'';info.className='massa-info'+(jenis?' '+jenis:'');info.hidden=!teks;}
+  function angka(n,des){return n===null||n===undefined?'—':Number(n).toLocaleString('id-ID',{minimumFractionDigits:des||0,maximumFractionDigits:des||0});}
+  function setFoto(src){hapusFoto.checked=false;inFoto.value='';fotoBaru.hidden=true;if(src){fotoIniImg.src=src;fotoIni.hidden=false;fotoHint.textContent='JPG / PNG / WebP, maksimal 100 MB. Biarkan kosong kalau tidak ingin mengganti.';}else{fotoIniImg.removeAttribute('src');fotoIni.hidden=true;fotoHint.textContent='JPG / PNG / WebP, maksimal 100 MB.';}}
+  function isiKondisi(){var s=$('mfKondisi');s.innerHTML='';Object.keys(st.kondisi).forEach(function(k){s.appendChild(el('option',{value:k},st.kondisi[k]));});}
+
+  function formTampil(data){
+    form.reset(); setFoto(data&&data.foto_src?data.foto_src:''); $('mfId').value=data?data.id:0;
+    $('massaFormJudul').textContent=data?'Ubah Massa':'Tambah Massa'; $('mfSimpan').textContent=data?'Simpan Perubahan':'Tambah Massa';
+    if(data){$('mfNama').value=data.nama_massa;$('mfKondisi').value=data.kondisi;$('mfLantai').value=data.jumlah_lantai===null?'':data.jumlah_lantai;$('mfLuas').value=data.luas_m2===null?'':String(data.luas_m2).replace('.',',');$('mfTahun').value=data.tahun_dibangun===null?'':data.tahun_dibangun;$('mfKet').value=data.keterangan||'';}
+    else{$('mfKondisi').value='1';}
+    form.hidden=false; $('massaTambah').hidden=true; form.scrollIntoView({block:'nearest'}); $('mfNama').focus();
+  }
+  function formTutup(){form.hidden=true;$('massaTambah').hidden=false;}
+
+  function gambar(m){
+    if(m.foto_src){var a=el('a',{href:m.foto_src,target:'_blank',rel:'noopener',title:'Lihat foto'});a.appendChild(el('img',{class:'massa-foto',src:m.foto_src,alt:'Foto '+m.nama_massa,loading:'lazy'}));return a;}
+    return el('span',{class:'massa-foto-kosong'},'Tanpa foto');
+  }
+  function render(){
+    body.innerHTML=''; var luas=0,n=st.daftar.length;
+    st.daftar.forEach(function(m){
+      luas+=m.luas_m2||0;
+      var tr=el('tr'); var td=el('td'); td.appendChild(gambar(m)); tr.appendChild(td);
+      tr.appendChild(el('td',{class:'nm'},m.nama_massa));
+      tr.appendChild(el('td',{class:'num'},m.jumlah_lantai===null?'—':String(m.jumlah_lantai)));
+      tr.appendChild(el('td',{class:'num'},angka(m.luas_m2,2)));
+      var tk=el('td'); var tag=el('span',{class:'tag'},st.kondisi[m.kondisi]||m.kondisi); tag.style.color=WARNA[m.kondisi]||'';tag.style.borderColor=WARNA[m.kondisi]||''; tk.appendChild(tag); tr.appendChild(tk);
+      tr.appendChild(el('td',{class:'num'},m.tahun_dibangun===null?'—':String(m.tahun_dibangun)));
+      tr.appendChild(el('td',null,m.keterangan||'—'));
+      var ak=el('td'); var box=el('div',{class:'aksi'});
+      var ub=el('button',{type:'button',class:'btn btn-ghost btn-xs'},'Ubah'); ub.addEventListener('click',function(){pesan('');formTampil(m);});
+      var hp=el('button',{type:'button',class:'btn btn-xs'},'Hapus'); hp.style.cssText='border:1px solid #E0526B;color:#E0526B;background:transparent;cursor:pointer';
+      hp.addEventListener('click',function(){hapus(m);});
+      box.appendChild(ub); box.appendChild(hp); ak.appendChild(box); tr.appendChild(ak); body.appendChild(tr);
+    });
+    $('massaTabelWrap').hidden=n===0; $('massaKosong').hidden=n!==0;
+    var r=$('massaRingkas'); r.innerHTML=''; r.appendChild(el('b',null,String(n))); r.appendChild(document.createTextNode(' massa'+(luas>0?' · total luas ':'')));
+    if(luas>0){r.appendChild(el('b',null,angka(luas,2)+' m²'));}
+    if(st.tombol){st.tombol.textContent='Massa'+(n?' ('+n+')':'');}
+  }
+
+  function bacaJson(r){return r.json().catch(function(){return {ok:false,pesan:'Jawaban server tidak dikenali.'};});}
+  function muat(bid){
+    pesan(''); body.innerHTML=''; $('massaRingkas').textContent='Memuat…'; $('massaTabelWrap').hidden=true; $('massaKosong').hidden=true;
+    fetch(BASE+'admin/bangunan-massa-data/'+bid,{credentials:'same-origin',headers:XHR}).then(bacaJson).then(function(d){
+      if(!d.ok){$('massaRingkas').textContent='';pesan(d.pesan||'Data massa gagal dimuat.','err');return;}
+      st.daftar=d.daftar; st.kondisi=d.kondisi; if(d.tahun_maks)$('mfTahun').max=d.tahun_maks; isiKondisi();
+      $('massaSub').textContent=[d.bangunan.nama_bangunan,d.bangunan.opd].filter(Boolean).join(' · '); render();
+    }).catch(function(){$('massaRingkas').textContent='';pesan('Koneksi gagal. Tutup lalu buka lagi modal ini.','err');});
+  }
+  function buka(bid,tombol){
+    st.bid=bid; st.tombol=tombol||null; formTutup(); $('massaSub').textContent='';
+    if(dlg.showModal)dlg.showModal(); else dlg.setAttribute('open',''); muat(bid);
+  }
+  function tutup(){if(dlg.close)dlg.close(); else dlg.removeAttribute('open');}
+
+  function hapus(m){
+    if(!confirm('Hapus massa "'+m.nama_massa+'"?'))return;
+    fetch(BASE+'admin/bangunan-massa-hapus/'+st.bid+'/'+m.id,{method:'POST',credentials:'same-origin',headers:XHR}).then(bacaJson).then(function(d){
+      if(d.ok){st.daftar=d.daftar;if(!form.hidden&&$('mfId').value==String(m.id))formTutup();render();pesan(d.pesan,'ok');}else pesan(d.pesan||'Massa gagal dihapus.','err');
+    }).catch(function(){pesan('Koneksi gagal. Coba lagi.','err');});
+  }
+
+  document.querySelectorAll('[data-massa]').forEach(function(b){b.addEventListener('click',function(){buka(parseInt(b.getAttribute('data-massa'),10),b);});});
+  $('massaTutup').addEventListener('click',tutup);
+  dlg.addEventListener('click',function(e){if(e.target===dlg)tutup();});
+  $('massaTambah').addEventListener('click',function(){pesan('');formTampil(null);});
+  $('mfBatal').addEventListener('click',formTutup);
+  inFoto.addEventListener('change',function(){var fl=inFoto.files&&inFoto.files[0];if(fl&&fl.type.indexOf('image/')===0){fotoBaruImg.src=URL.createObjectURL(fl);fotoBaru.hidden=false;}else{fotoBaru.hidden=true;}});
+  form.addEventListener('submit',function(e){
+    e.preventDefault(); if(!form.reportValidity())return;
+    var tb=$('mfSimpan'),label=tb.textContent; tb.disabled=true; tb.textContent='Menyimpan…'; pesan('');
+    fetch(BASE+'admin/bangunan-massa-simpan/'+st.bid,{method:'POST',body:new FormData(form),credentials:'same-origin',headers:XHR}).then(bacaJson).then(function(d){
+      if(d.ok){st.daftar=d.daftar;formTutup();render();pesan(d.pesan,'ok');}else{pesan(d.pesan||'Massa gagal disimpan.','err');}
+    }).catch(function(){pesan('Koneksi gagal. Coba simpan lagi.','err');}).then(function(){tb.disabled=false;tb.textContent=label;});
+  });
+
+  // URL lama / pengalihan: ?massa=ID membuka modal otomatis
+  var q=new URLSearchParams(location.search).get('massa');
+  if(q&&/^\d+$/.test(q)){var tb0=document.querySelector('[data-massa="'+q+'"]');buka(parseInt(q,10),tb0);}
+})();
+</script>
 <button class="theme-fab" id="themeFab" aria-expanded="false" aria-controls="themePanel" title="Pilih warna latar">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3a9 9 0 100 18c1.2 0 2-.9 2-2 0-.5-.2-1-.5-1.4-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.3A4.7 4.7 0 0021 9.7C20.4 5.9 16.6 3 12 3z" stroke="currentColor" stroke-width="1.4"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1.2" fill="currentColor"/><circle cx="15" cy="7.5" r="1.2" fill="currentColor"/></svg>
 </button>

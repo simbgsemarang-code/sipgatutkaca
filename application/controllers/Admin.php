@@ -897,27 +897,72 @@ class Admin extends CI_Controller {
 		return $ada();
 	}
 
-	/** Kelola massa/blok sebuah bangunan: daftar + form tambah/ubah. */
+	/** Massa bangunan kini dikelola lewat modal di daftar Sebaran Bangunan; URL lama membuka modalnya. */
 	public function bangunan_massa($id = null)
+	{
+		redirect('admin/bangunan?massa=' . (int) $id);
+	}
+
+	private function _massa_foto_src($nilai)
+	{
+		$nilai = (string) $nilai;
+		if ($nilai === '') return '';
+		return preg_match('#^https?://#i', $nilai) ? $nilai : base_url('assets/foto-bangunan/' . rawurlencode($nilai));
+	}
+
+	/** Daftar massa satu bangunan (urut id), lengkap dengan URL foto. */
+	private function _massa_daftar($bid)
+	{
+		if (! $this->_pastikan_tabel_massa()) return array();
+		$rows = $this->db->where('bangunan_id', (int) $bid)->order_by('id', 'ASC')->get('bangunan_massa')->result_array();
+		foreach ($rows as &$r)
+		{
+			$r['id']            = (int) $r['id'];
+			$r['jumlah_lantai'] = $r['jumlah_lantai'] !== NULL ? (int) $r['jumlah_lantai'] : NULL;
+			$r['luas_m2']       = $r['luas_m2'] !== NULL ? (float) $r['luas_m2'] : NULL;
+			$r['tahun_dibangun'] = $r['tahun_dibangun'] !== NULL ? (int) $r['tahun_dibangun'] : NULL;
+			$r['foto_src']      = $this->_massa_foto_src(isset($r['foto']) ? $r['foto'] : '');
+		}
+		unset($r);
+		return $rows;
+	}
+
+	/** Jawaban simpan/hapus massa: JSON untuk modal (AJAX), atau flash + kembali ke daftar bila bukan AJAX. */
+	private function _massa_balas($bid, $ok, $pesan, $kode = 422)
+	{
+		if ($this->input->is_ajax_request())
+		{
+			$out = array('ok' => (bool) $ok, 'pesan' => $pesan);
+			if ($ok) $out['daftar'] = $this->_massa_daftar($bid);
+			$this->output->set_status_header($ok ? 200 : $kode)->set_content_type('application/json')->set_output(json_encode($out));
+			return;
+		}
+		$this->session->set_flashdata($ok ? 'sukses' : 'error', $pesan);
+		redirect('admin/bangunan?massa=' . (int) $bid);
+	}
+
+	/** Data modal Massa Bangunan (JSON): bangunan + daftar massa + label kondisi. */
+	public function bangunan_massa_data($id = null)
 	{
 		$row = $this->db->where('id', (int) $id)->get('bangunan_gis')->row_array();
 		if ($row === NULL)
 		{
-			show_404();
+			$this->output->set_status_header(404)->set_content_type('application/json')->set_output(json_encode(array('ok' => FALSE, 'pesan' => 'Bangunan tidak ditemukan.')));
 			return;
 		}
-		$tabel_ok = $this->_pastikan_tabel_massa();
-		$data['row']           = $row;
-		$data['tabel_ok']      = $tabel_ok;
-		$data['daftar']        = $tabel_ok ? $this->db->where('bangunan_id', (int) $row['id'])->order_by('id', 'ASC')->get('bangunan_massa')->result_array() : array();
-		$data['kondisi_label'] = $this->kondisi_label;
-		$data['sukses']        = $this->session->flashdata('sukses');
-		$data['error']         = $this->session->flashdata('error');
-		$data['old']           = $this->session->flashdata('old');
-		$data['nama_admin']    = $this->session->userdata('nama');
-		$this->load->view('pages/admin_bangunan_massa', $data);
+		if (! $this->_pastikan_tabel_massa())
+		{
+			$this->output->set_status_header(503)->set_content_type('application/json')->set_output(json_encode(array('ok' => FALSE, 'pesan' => 'Tabel bangunan_massa belum ada dan tidak dapat dibuat otomatis. Jalankan database/bangunan_massa.sql di phpMyAdmin.')));
+			return;
+		}
+		$this->output->set_content_type('application/json')->set_output(json_encode(array(
+			'ok'        => TRUE,
+			'bangunan'  => array('id' => (int) $row['id'], 'nama_bangunan' => $row['nama_bangunan'], 'opd' => $row['opd'], 'alamat' => $row['alamat']),
+			'daftar'    => $this->_massa_daftar($row['id']),
+			'kondisi'   => $this->kondisi_label,
+			'tahun_maks' => (int) date('Y') + 1,
+		)));
 	}
-
 	/** Simpan massa (POST): massa_id kosong/0 = tambah, selain itu ubah. */
 	public function bangunan_massa_simpan($bangunan_id = null)
 	{
@@ -928,12 +973,9 @@ class Admin extends CI_Controller {
 			show_404();
 			return;
 		}
-		$tujuan = 'admin/bangunan-massa/' . $bid;
 		if (! $this->_pastikan_tabel_massa())
 		{
-			$this->session->set_flashdata('error', 'Tabel bangunan_massa belum ada. Jalankan database/bangunan_massa.sql di phpMyAdmin.');
-			redirect($tujuan);
-			return;
+			return $this->_massa_balas($bid, FALSE, 'Tabel bangunan_massa belum ada. Jalankan database/bangunan_massa.sql di phpMyAdmin.', 503);
 		}
 
 		$mid     = (int) $this->input->post('massa_id');
@@ -955,10 +997,7 @@ class Admin extends CI_Controller {
 
 		if (! empty($salah))
 		{
-			$this->session->set_flashdata('error', 'Periksa lagi: ' . implode('; ', $salah) . '.');
-			$this->session->set_flashdata('old', $this->input->post());
-			redirect($tujuan);
-			return;
+			return $this->_massa_balas($bid, FALSE, 'Periksa lagi: ' . implode('; ', $salah) . '.');
 		}
 
 		// ---- Foto massa: unggah ke assets/foto-bangunan/ (sama seperti foto bangunan) ----
@@ -992,10 +1031,7 @@ class Admin extends CI_Controller {
 			}
 			else
 			{
-				$this->session->set_flashdata('error', 'Foto gagal diunggah: ' . strip_tags($this->upload->display_errors('', '')));
-				$this->session->set_flashdata('old', $this->input->post());
-				redirect($tujuan);
-				return;
+				return $this->_massa_balas($bid, FALSE, 'Foto gagal diunggah: ' . strip_tags($this->upload->display_errors('', '')));
 			}
 		}
 
@@ -1012,17 +1048,17 @@ class Admin extends CI_Controller {
 		if ($mid > 0)
 		{
 			$this->db->where('id', $mid)->where('bangunan_id', $bid)->update('bangunan_massa', $simpan);
-			$this->session->set_flashdata('sukses', 'Massa "' . $nama . '" berhasil diperbarui.');
+			$pesan = 'Massa "' . $nama . '" berhasil diperbarui.';
 		}
 		else
 		{
 			$simpan['bangunan_id'] = $bid;
 			$simpan['created_at']  = $simpan['updated_at'];
 			$this->db->insert('bangunan_massa', $simpan);
-			$this->session->set_flashdata('sukses', 'Massa "' . $nama . '" berhasil ditambahkan.');
+			$pesan = 'Massa "' . $nama . '" berhasil ditambahkan.';
 		}
 		foreach ($foto_hapus as $fh) { if (stripos($fh, 'http') !== 0) @unlink($dir_foto . basename($fh)); }
-		redirect($tujuan);
+		$this->_massa_balas($bid, TRUE, $pesan);
 	}
 
 	/** Hapus satu massa (POST). */
@@ -1030,19 +1066,15 @@ class Admin extends CI_Controller {
 	{
 		$bid = (int) $bangunan_id;
 		$mid = (int) $massa_id;
-		$tujuan = 'admin/bangunan-massa/' . $bid;
 		if ($this->input->method(TRUE) !== 'POST') show_404();
 		$m = $this->db->table_exists('bangunan_massa') ? $this->db->where('id', $mid)->where('bangunan_id', $bid)->get('bangunan_massa')->row_array() : NULL;
 		if ($m === NULL)
 		{
-			$this->session->set_flashdata('error', 'Data massa tidak ditemukan.');
-			redirect($tujuan);
-			return;
+			return $this->_massa_balas($bid, FALSE, 'Data massa tidak ditemukan.', 404);
 		}
 		if (! empty($m['foto']) && stripos($m['foto'], 'http') !== 0) @unlink(FCPATH . 'assets/foto-bangunan/' . basename($m['foto']));
 		$this->db->where('id', $mid)->delete('bangunan_massa');
-		$this->session->set_flashdata('sukses', 'Massa "' . $m['nama_massa'] . '" berhasil dihapus.');
-		redirect($tujuan);
+		$this->_massa_balas($bid, TRUE, 'Massa "' . $m['nama_massa'] . '" berhasil dihapus.');
 	}
 	/** Hapus (POST). */
 	public function bangunan_hapus($id = null)
