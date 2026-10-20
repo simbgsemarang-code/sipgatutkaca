@@ -186,40 +186,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 </header>
 
 <div class="dash-layout">
-  <aside class="dash-sidebar">
-    <nav>
-      <a href="<?php echo base_url('admin'); ?>">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="2" y="2" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="2" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="8" width="6" height="8" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="10" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
-        Dashboard
-      </a>
-      <a href="<?php echo base_url('admin/pengguna'); ?>">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="6.5" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.4"/><path d="M1.8 15c0-2.6 2.1-4.4 4.7-4.4S11.2 12.4 11.2 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12.4 4.2a2.3 2.3 0 010 4.4M13.6 14.8c0-2.1-1-3.7-2.6-4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        Kelola Pengguna
-      </a>
-      <a href="<?php echo base_url('admin/pengajuan'); ?>">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 1.5h7L14.5 5v11a1 1 0 01-1 1h-9a1 1 0 01-1-1v-13a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 1.5V5h3.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 9.5h7M5.5 12h7M5.5 7h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        Pengajuan PBG
-      </a>
-      <a href="<?php echo base_url('admin/bangunan'); ?>" class="active">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 1.5c-2.9 0-5 2.1-5 4.9 0 3.4 5 10.1 5 10.1s5-6.7 5-10.1c0-2.8-2.1-4.9-5-4.9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="9" cy="6.4" r="1.9" stroke="currentColor" stroke-width="1.4"/></svg>
-        Sebaran Bangunan
-      </a>
-      <a href="<?php echo base_url('admin/cagar-budaya'); ?>">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 1.4l2.1 4.4 4.8.7-3.5 3.4.8 4.8L9 12.4l-4.2 2.3.8-4.8L2.1 6.5l4.8-.7L9 1.4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-        Kelola Cagar Budaya
-      </a>
-      <a href="<?php echo base_url('admin/saran'); ?>">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M2.5 3.5h13a1 1 0 011 1v7a1 1 0 01-1 1H7l-3.5 3v-3H2.5a1 1 0 01-1-1v-7a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5 6.5h8M5 9h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        Saran &amp; FAQ
-      </a>
-    </nav>
-    <nav>
-      <a href="<?php echo base_url('login/keluar'); ?>" class="logout">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 12.5L15 9l-4-3.5M15 9H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Logout
-      </a>
-    </nav>
-  </aside>
+  <?php $this->load->view('partials/sidebar', array('role'=>'admin','aktif'=>'bangunan')); ?>
   <div class="dash-main">
 <?php
 $warna_kondisi = array('1' => '#2EA84F', '2' => '#F2C230', '3' => '#D9822B', '4' => '#C0392B');

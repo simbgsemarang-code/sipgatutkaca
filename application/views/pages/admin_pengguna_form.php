@@ -135,21 +135,7 @@ input:disabled,select:disabled{opacity:.6;cursor:not-allowed}
 </header>
 
 <div class="dash-layout">
-  <aside class="dash-sidebar">
-    <nav>
-      <a href="<?php echo base_url('admin'); ?>">Dashboard</a>
-      <a href="<?php echo base_url('admin/pengguna'); ?>" class="active">Kelola Pengguna</a>
-      <a href="<?php echo base_url('admin/pengajuan'); ?>">Pengajuan PBG</a>
-      <a href="<?= base_url('admin_itr') ?>">Pengajuan ITR</a>
-      <a href="<?php echo base_url('admin/bangunan'); ?>">Sebaran Bangunan</a>
-      <a href="<?php echo base_url('admin/cagar-budaya'); ?>">Kelola Cagar Budaya</a>
-      <a href="<?php echo base_url('admin/aturan'); ?>">Kelola Aturan</a>
-      <a href="<?php echo base_url('admin/saran'); ?>">Saran &amp; FAQ</a>
-    </nav>
-    <nav>
-      <a href="<?php echo base_url('login/keluar'); ?>" class="logout">Logout</a>
-    </nav>
-  </aside>
+  <?php $this->load->view('partials/sidebar', array('role'=>'admin','aktif'=>'pengguna')); ?>
   <div class="dash-main">
 <section style="padding-top:20px">
   <div class="dash-wrap">

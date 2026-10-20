@@ -179,21 +179,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 </header>
 
 <div class="dash-layout">
-  <aside class="dash-sidebar">
-    <nav>
-      <a href="<?php echo base_url('pemohon'); ?>" class="<?= empty($aktif_itr)?'active':'' ?>">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
-        Dashboard
-      </a>
-      <a href="<?= base_url('pemohon/pengajuan_itr') ?>" class="<?= !empty($aktif_itr)?'active':'' ?>">▤ &nbsp; PENGAJUAN ITR</a>
-    </nav>
-    <nav>
-      <a href="<?php echo base_url('login/keluar'); ?>" class="logout">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 12.5L15 9l-4-3.5M15 9H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Logout
-      </a>
-    </nav>
-  </aside>
+  <?php $this->load->view('partials/sidebar', array('role'=>'pemohon','aktif'=>empty($aktif_itr)?'dashboard':'itr')); ?>
   <div class="dash-main">
 <section style="padding-top:100px">
   <div class="dash-wrap">

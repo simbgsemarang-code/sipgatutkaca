@@ -77,17 +77,7 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(1.7rem,3vw,2.3rem)
 </header>
 
 <div class="dash-layout">
-  <aside class="dash-sidebar">
-    <nav>
-      <a href="<?php echo base_url('admin'); ?>">Dashboard</a>
-      <a href="<?php echo base_url('admin/pengguna'); ?>">Kelola Pengguna</a>
-      <a href="<?php echo base_url('admin/pengajuan'); ?>">Pengajuan PBG</a>
-      <a href="<?php echo base_url('admin/bangunan'); ?>">Sebaran Bangunan</a>
-      <a href="<?php echo base_url('admin/cagar-budaya'); ?>" class="active">Kelola Cagar Budaya</a>
-      <a href="<?php echo base_url('admin/saran'); ?>">Saran &amp; FAQ</a>
-    </nav>
-    <nav><a href="<?php echo base_url('login/keluar'); ?>">Logout</a></nav>
-  </aside>
+  <?php $this->load->view('partials/sidebar', array('role'=>'admin','aktif'=>'cagar')); ?>
   <div class="dash-main">
 <section style="padding-top:20px">
   <div class="dash-wrap">

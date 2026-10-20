@@ -6,11 +6,329 @@ $v = function ($k, $def = '') use ($row, $old) {
 	return $def;
 };
 ?>
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?php echo $ubah ? 'Ubah' : 'Tambah'; ?> Aturan — Panel Admin · SIP Gatutkaca</title><link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>"><link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"><style>
-:root{--gold:#A57E2C;--gold2:#C9A24B;--display:'Marcellus',serif;--body:'Plus Jakarta Sans',sans-serif;--bg:#FDFBF5;--soft:#f3f7f8;--text:#152A3B;--muted:#64798b;--line:#d7e1e6}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:300 14px/1.7 var(--body)}a{text-decoration:none;color:inherit}.top{height:84px;display:flex;align-items:center;justify-content:space-between;padding:0 34px;border-bottom:1px solid var(--line);background:#fff}.brand{font:400 19px var(--display);letter-spacing:.14em;color:var(--gold)}.brand small{display:block;font:400 9px var(--body);letter-spacing:.28em;color:var(--muted)}.top-actions{display:flex;align-items:center;gap:22px}.user{color:var(--gold);font-weight:600}.btn{display:inline-block;padding:11px 18px;border:1px solid var(--line);background:#fff;color:var(--text);font:600 10px var(--body);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}.btn.gold{background:var(--gold2);border-color:var(--gold2)}.layout{display:flex;min-height:calc(100vh - 84px)}.sidebar{width:240px;flex:0 0 240px;padding:38px 0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column}.sidebar a{display:block;padding:13px 28px;border-left:3px solid transparent;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}.sidebar a:hover,.sidebar a.active{background:var(--soft);border-color:var(--gold);color:var(--gold)}.sidebar .logout{margin-top:auto}.content{flex:1;min-width:0}.wrap{max-width:1000px;padding:48px}.eyebrow{margin:0;color:var(--gold);font-size:11px;letter-spacing:.34em;text-transform:uppercase}h1{margin:8px 0 10px;font:400 40px var(--display)}.lead{color:var(--muted)}.notice{margin:22px 0;padding:14px 18px;border:1px solid #e0526b;background:#fff1f3;color:#bd3048}.grid{display:grid;gap:22px;margin-top:34px;padding:30px;background:#fff;border:1px solid var(--line)}.field label{display:block;margin-bottom:7px;color:var(--gold);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}.field textarea{width:100%;min-height:130px;resize:vertical;padding:12px 14px;border:1px solid var(--line);color:var(--text);font:400 14px var(--body)}.check{display:flex!important;align-items:center;gap:10px;text-transform:none!important;letter-spacing:0!important;color:var(--text)!important}.hint{margin:7px 0 0;color:var(--muted);font-size:11px}.current{margin-top:10px;padding:12px;background:var(--soft)}.buttons{display:flex;gap:12px;flex-wrap:wrap;margin-top:25px}@media(max-width:800px){.top{padding:0 18px}.user{display:none}.layout{display:block}.sidebar{width:auto;padding:8px;display:flex;flex-direction:row;overflow:auto}.sidebar a{white-space:nowrap;border-left:0;border-bottom:3px solid transparent}.sidebar .logout{margin-top:0}.wrap{padding:30px 20px}h1{font-size:32px}.grid{padding:22px}}
-</style><style>.user-menu{position:relative}.user-btn{display:flex;align-items:center;gap:8px;padding:10px 2px;border:0;background:none;color:var(--gold);font:600 14px var(--body);cursor:pointer}.user-btn svg{transition:.2s}.user-btn[aria-expanded="true"] svg{transform:rotate(180deg)}.user-panel{position:absolute;z-index:20;right:0;top:calc(100% + 10px);display:none;min-width:180px;padding:7px;background:#fff;border:1px solid var(--line);box-shadow:0 14px 38px rgba(21,42,59,.18)}.user-panel.open{display:block}.user-panel a{display:block;padding:10px 12px;font-size:12px}.user-panel a:hover{background:var(--soft);color:var(--gold)}@media(max-width:800px){.user-menu{display:none}}</style></head><body>
-<header class="top"><a class="brand" href="<?php echo base_url(); ?>">SIP GATUTKACA<small>KABUPATEN CILACAP</small></a><div class="top-actions"><a class="btn" href="<?php echo base_url(); ?>">Beranda</a><div class="user-menu"><button class="user-btn" id="userBtn" type="button" aria-expanded="false" aria-controls="userPanel"><?php echo htmlspecialchars($nama_admin, ENT_QUOTES, 'UTF-8'); ?><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button><div class="user-panel" id="userPanel"><a href="<?php echo base_url('pengaturan'); ?>">Pengaturan</a><a href="<?php echo base_url('login/keluar'); ?>">Logout</a></div></div></div></header>
-<div class="layout"><aside class="sidebar"><a href="<?php echo base_url('admin'); ?>">Dashboard</a><a href="<?php echo base_url('admin/pengguna'); ?>">Kelola Pengguna</a><a href="<?php echo base_url('admin/pengajuan'); ?>">Pengajuan PBG</a><a href="<?php echo base_url('admin/bangunan'); ?>">Sebaran Bangunan</a><a href="<?php echo base_url('admin/cagar-budaya'); ?>">Kelola Cagar Budaya</a><a class="active" href="<?php echo base_url('admin/aturan'); ?>">Kelola Aturan</a><a href="<?php echo base_url('admin/saran'); ?>">Saran &amp; FAQ</a><a class="logout" href="<?php echo base_url('login/keluar'); ?>">Logout</a></aside>
-<main class="content"><div class="wrap"><p class="eyebrow">Panel Admin</p><h1><?php echo $ubah ? 'Ubah Aturan' : 'Tambah Aturan'; ?></h1><p class="lead">PDF bersifat opsional dan dapat diunggah kemudian. Ukuran maksimum 100 MB.</p><?php if (!empty($error)): ?><div class="notice"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
-<form method="post" enctype="multipart/form-data" action="<?php echo base_url('admin/aturan-simpan' . ($ubah ? '/' . (int) $row['id'] : '')); ?>"><div class="grid"><div class="field"><label for="judul">Judul Aturan *</label><textarea id="judul" name="judul" required><?php echo htmlspecialchars($v('judul'), ENT_QUOTES, 'UTF-8'); ?></textarea></div><div class="field"><label>Status Publikasi</label><label class="check"><input type="checkbox" name="aktif" value="1" <?php echo $v('aktif', '1') === '1' ? 'checked' : ''; ?>> Tampilkan di halaman publik</label></div><div class="field"><label for="pdf">Dokumen PDF</label><input id="pdf" type="file" name="file_pdf" accept="application/pdf,.pdf"><p class="hint">Hanya PDF, maksimal 20 MB. Unggahan baru akan mengganti PDF lama.</p><?php if ($ubah && !empty($row['file_pdf'])): ?><div class="current"><a href="<?php echo base_url('regulasi/unduh/' . (int) $row['id']); ?>">Lihat PDF saat ini</a><label class="check" style="margin-top:8px"><input type="checkbox" name="hapus_pdf" value="1"> Hapus PDF saat disimpan</label></div><?php endif; ?></div></div><div class="buttons"><button class="btn gold" type="submit">Simpan Aturan</button><a class="btn" href="<?php echo base_url('admin/aturan'); ?>">Batal</a></div></form></div></main></div><script>(function(){var b=document.getElementById('userBtn'),p=document.getElementById('userPanel');if(!b||!p)return;b.addEventListener('click',function(e){e.stopPropagation();var open=p.classList.toggle('open');b.setAttribute('aria-expanded',open?'true':'false')});document.addEventListener('click',function(){p.classList.remove('open');b.setAttribute('aria-expanded','false')});})();</script></body></html>
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><?php echo $ubah ? 'Ubah' : 'Tambah'; ?> Aturan — Panel Admin · SIP Gatutkaca</title>
+<link rel="icon" type="image/png" href="<?php echo base_url('assets/img/icon.png'); ?>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold-500:#C9A24B;--gold-300:#E4C87B;--gold-100:#F3E3B8;
+  --display:'Marcellus',serif;--body:'Plus Jakarta Sans',system-ui,sans-serif;
+}
+html[data-theme="dark"]{
+  --bg:#081826;--bg-alt:#0C2236;--surface:#0C2236;--surface-hi:#123249;
+  --text:#F8F4EA;--muted:#B9C7D2;--line:rgba(201,162,75,.28);
+  --head-bg:rgba(8,24,38,.94);--head-grad:rgba(8,24,38,.85);
+  --foot:#050F19;--input:#0F2A40;--shadow:rgba(0,0,0,.5);
+}
+html[data-theme="light"]{
+  --bg:#FDFBF5;--bg-alt:#F6F1E3;--surface:#FFFFFF;--surface-hi:#FAF5E8;
+  --text:#152A3B;--muted:#4E6070;--line:rgba(160,124,45,.35);
+  --head-bg:rgba(253,251,245,.94);--head-grad:rgba(253,251,245,.85);
+  --foot:#122536;--input:#FFFFFF;--shadow:rgba(21,42,59,.18);
+  --gold-500:#A57E2C;--gold-300:#8F6C1F;--gold-100:#6E5314;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.7;font-weight:300;transition:background .4s,color .4s}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+
+header{position:fixed;inset:0 0 auto 0;z-index:60;transition:.4s;background:linear-gradient(180deg,var(--head-grad),transparent)}
+header.scrolled{background:var(--head-bg);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:84px;gap:18px}
+.brand{display:flex;align-items:center;gap:13px;flex:0 0 auto}
+.brand img{height:50px;width:auto;filter:drop-shadow(0 2px 6px var(--shadow))}
+.brand-name{font-family:var(--display);font-size:1.2rem;letter-spacing:.13em;color:var(--gold-300)}
+.brand-sub{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
+.auth-actions{display:flex;align-items:center;gap:14px}
+
+.user-menu{position:relative}
+.user-menu-btn{display:flex;align-items:center;gap:8px;background:none;border:none;font-family:var(--body);font-size:.78rem;letter-spacing:.08em;color:var(--gold-300);font-weight:600;cursor:pointer;padding:8px 2px}
+.user-menu-btn svg{transition:transform .25s}
+.user-menu-btn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.user-menu-panel{position:absolute;top:calc(100% + 12px);right:0;min-width:190px;background:var(--surface);border:1px solid var(--line);box-shadow:0 16px 42px var(--shadow);padding:8px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.25s;z-index:70}
+.user-menu-panel.open{opacity:1;transform:none;pointer-events:auto}
+.user-menu-panel a{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.76rem;letter-spacing:.04em;color:var(--text)}
+.user-menu-panel a:hover{background:var(--surface-hi);color:var(--gold-300)}
+.user-menu-panel a.logout:hover{color:#E0526B;background:rgba(224,82,107,.08)}
+
+.dash-layout{display:flex;padding-top:84px}
+.dash-sidebar{width:240px;flex:0 0 240px;height:calc(100vh - 84px);position:sticky;top:84px;background:var(--surface);border-right:1px solid var(--line);padding:40px 0;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto}
+.dash-sidebar nav{display:flex;flex-direction:column;gap:4px}
+.dash-sidebar a{display:flex;align-items:center;gap:12px;padding:14px 28px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-left:3px solid transparent;transition:.25s}
+.dash-sidebar a:hover{color:var(--text);background:var(--surface-hi)}
+.dash-sidebar a.active{color:var(--gold-300);border-left-color:var(--gold-500);background:var(--surface-hi)}
+.dash-sidebar a.logout:hover{color:#E0526B;background:rgba(224,82,107,.08)}
+.dash-main{flex:1;min-width:0}
+.dash-wrap{max-width:1400px;margin:0;padding:0 44px}
+@media(max-width:860px){
+  .dash-layout{flex-direction:column}
+  .dash-sidebar{width:100%;flex:0 0 auto;height:auto;min-height:0;flex-direction:row;justify-content:space-between;align-items:center;border-right:none;border-bottom:1px solid var(--line);padding:0}
+  .dash-sidebar nav{flex-direction:row;justify-content:center;flex-wrap:wrap}
+  .dash-sidebar a{padding:14px 20px;border-left:none;border-bottom:3px solid transparent}
+  .dash-sidebar a.active{border-left-color:transparent;border-bottom-color:var(--gold-500)}
+  .dash-wrap{padding:0 24px}
+}
+
+.btn{display:inline-block;padding:15px 34px;font-size:.78rem;letter-spacing:.26em;text-transform:uppercase;transition:.3s;cursor:pointer;border:none;font-family:var(--body)}
+.btn-ghost{border:1px solid var(--line);color:var(--text);background:transparent}
+.btn-ghost:hover{border-color:#C9A24B;color:#E4C87B}
+.btn-sm{padding:11px 26px;font-size:.72rem;letter-spacing:.2em}
+.btn-xs{padding:8px 16px;font-size:.68rem;letter-spacing:.12em}
+
+section{padding:60px 0 100px}
+.eyebrow{font-size:.7rem;letter-spacing:.38em;text-transform:uppercase;color:var(--gold-500);margin-bottom:14px}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.6rem);line-height:1.2;max-width:32ch}
+
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:44px}
+.toolbar input[type=search]{background:var(--input);border:1px solid var(--line);color:var(--text);padding:12px 16px;font-family:var(--body);font-size:.85rem;min-width:260px}
+.toolbar input[type=search]:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+
+table{width:100%;border-collapse:collapse;margin-top:26px;font-size:.88rem}
+th{font-family:var(--display);font-weight:400;letter-spacing:.1em;text-transform:uppercase;font-size:.72rem;color:var(--gold-300);text-align:left;padding:14px;border-bottom:1px solid var(--gold-500)}
+td{padding:14px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:top}
+td:first-child{color:var(--text);font-weight:500}
+.tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300)}
+.tag-draf{color:#F0A048;border-color:#B4573B}
+.tag-verifikasi_dokumen{color:#5FC2E0;border-color:#1E86A3}
+.tag-perbaikan_dokumen{color:#E0526B;border-color:#E0526B}
+.tag-perbaikan_dokumen_konsultasi{color:#E0526B;border-color:#E0526B}
+.tag-menunggu_jadwal_konsultasi{color:#6FCF97;border-color:#2EA84F}
+.tag-disetujui_tpa{color:#6FCF97;border-color:#2EA84F}
+.no-reg{font-size:.72rem;color:var(--muted)}
+.bidang-progres{margin-top:6px;font-size:.68rem;letter-spacing:.02em;color:var(--muted)}
+
+.theme-fab{position:fixed;right:26px;bottom:26px;z-index:80;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold-500);background:var(--surface);color:var(--gold-300);cursor:pointer;display:grid;place-items:center;box-shadow:0 8px 26px var(--shadow);transition:transform .3s}
+.theme-fab:hover{transform:rotate(24deg)}
+.theme-panel{position:fixed;right:26px;bottom:94px;z-index:80;background:var(--surface);border:1px solid var(--line);box-shadow:0 16px 42px var(--shadow);padding:22px;width:230px;opacity:0;transform:translateY(12px);pointer-events:none;transition:.3s}
+.theme-panel.open{opacity:1;transform:none;pointer-events:auto}
+.theme-panel h5{font-family:var(--display);font-weight:400;letter-spacing:.2em;text-transform:uppercase;font-size:.72rem;color:var(--gold-300);margin-bottom:16px}
+.swatches{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.swatch{border:1px solid var(--line);background:none;cursor:pointer;padding:10px;display:grid;gap:8px;justify-items:center;transition:.25s}
+.swatch:hover{border-color:var(--gold-500)}
+.swatch.sel{border-color:var(--gold-500);box-shadow:0 0 0 1px var(--gold-500)}
+.swatch i{width:100%;height:34px;display:block;border:1px solid var(--line)}
+.swatch .sw-dark{background:linear-gradient(135deg,#081826,#123249)}
+.swatch .sw-light{background:linear-gradient(135deg,#F8F4EA,#EFE7D6)}
+.swatch span{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+
+footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px solid var(--line)}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:50px}
+.foot-grid h4{font-family:var(--display);font-weight:400;letter-spacing:.14em;color:#E4C87B;margin-bottom:18px;font-size:1rem}
+.foot-grid p,.foot-grid li{font-size:.88rem;color:#B9C7D2}
+.foot-grid ul{list-style:none;display:grid;gap:10px}
+.foot-grid a:hover{color:#E4C87B}
+.credit{margin-top:50px;padding-top:22px;border-top:1px solid rgba(185,199,210,.15);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:.72rem;color:rgba(185,199,210,.6);letter-spacing:.06em}
+
+@media(max-width:980px){
+  .foot-grid{grid-template-columns:1fr}
+  table{display:block;overflow-x:auto}
+}
+.btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
+.btn-gold:hover{filter:brightness(1.08)}
+.form-card{background:var(--surface);border:1px solid var(--line);padding:34px 38px;max-width:760px;margin-top:30px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.fld{margin-bottom:18px}
+.fld label{display:block;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:12px 14px;font-family:var(--body);font-size:.92rem}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+.fld .req{color:#E0526B}
+#pickMap{height:300px;width:100%;border:1px solid var(--line);margin-top:6px;background:#dfeee2}
+.alertbox{padding:14px 18px;margin-top:24px;font-size:.88rem;border:1px solid}
+.massa-sub{margin-top:10px;color:var(--muted);font-size:.9rem;max-width:80ch}
+.massa-sub strong{color:var(--text);font-weight:600}
+.massa-stat{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.massa-stat .pill{border:1px solid var(--line);background:var(--surface);padding:10px 18px;font-size:.78rem;letter-spacing:.06em;color:var(--muted)}
+.massa-stat .pill b{display:block;font-family:var(--display);font-weight:400;font-size:1.25rem;letter-spacing:.02em;color:var(--gold-300)}
+.massa-tabel td.num,.massa-tabel th.num{text-align:right;white-space:nowrap}
+.massa-tabel .aksi{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
+.massa-kosong{margin-top:26px;border:1px dashed var(--line);padding:30px;text-align:center;color:var(--muted);font-size:.9rem}
+[hidden]{display:none!important}
+.massa-foto{width:84px;height:64px;object-fit:cover;border:1px solid var(--line);border-radius:8px;display:block;background:var(--surface-hi)}.massa-foto-kosong{width:84px;height:64px;border:1px dashed var(--line);border-radius:8px;display:grid;place-items:center;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.foto-pratinjau{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.foto-pratinjau img{height:92px;width:auto;max-width:160px;border:1px solid var(--line);border-radius:8px;object-fit:cover}
+.form-card h3{font-family:var(--display);font-weight:400;font-size:1.25rem;margin-bottom:20px}
+.form-card .fld .hint{font-size:.72rem;color:var(--muted);margin-top:5px}
+.aturan-lead{margin-top:10px;color:var(--muted);font-size:.9rem;max-width:80ch}
+.aturan-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.aturan-tabel td.judul{color:var(--text);font-weight:500}
+.aturan-tabel .aksi{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
+.aturan-form-card .cek{display:flex;align-items:center;gap:10px;font-size:.88rem;color:var(--text);letter-spacing:0;text-transform:none;margin:0}
+.aturan-form-card .cek input{width:auto}
+.aturan-form-card .terkini{margin-top:12px;padding:12px 14px;background:var(--surface-hi);border:1px solid var(--line);font-size:.86rem}
+.aturan-form-card .terkini a{color:var(--gold-500);text-decoration:underline}
+.aturan-form-card textarea{min-height:130px;resize:vertical}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+</head>
+<body>
+
+<header id="topbar">
+  <div class="wrap nav">
+    <a class="brand" href="<?php echo base_url(); ?>" aria-label="Beranda SIP Gatutkaca">
+      <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Seal_of_Cilacap_Regency.svg?width=120" alt="Lambang Kabupaten Cilacap">
+      <span>
+        <span class="brand-name">SIP GATUTKACA</span><br>
+        <span class="brand-sub">Kabupaten Cilacap</span>
+      </span>
+    </a>
+    <div class="auth-actions">
+      <a class="btn btn-ghost btn-sm" href="<?php echo base_url(); ?>">Beranda</a>
+      <div class="user-menu">
+        <button class="user-menu-btn" id="userMenuBtn" type="button" aria-expanded="false" aria-controls="userMenuPanel">
+          <?php echo htmlspecialchars($nama_admin, ENT_QUOTES, 'UTF-8'); ?>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="user-menu-panel" id="userMenuPanel" role="menu">
+          <a href="<?php echo base_url('pengaturan'); ?>" role="menuitem">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="2.3" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5v1.6M8 12.9v1.6M14.5 8h-1.6M3.1 8H1.5M12.4 3.6l-1.1 1.1M4.7 11.3l-1.1 1.1M12.4 12.4l-1.1-1.1M4.7 4.7L3.6 3.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Pengaturan
+          </a>
+          <a href="<?php echo base_url('login/keluar'); ?>" role="menuitem" class="logout">
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 12.5L15 9l-4-3.5M15 9H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="dash-layout">
+  <?php $this->load->view('partials/sidebar', array('role'=>'admin','aktif'=>'aturan')); ?>
+  <div class="dash-main">
+<section style="padding-top:20px">
+  <div class="dash-wrap">
+    <p class="eyebrow"><a href="<?php echo base_url('admin/aturan'); ?>" style="color:var(--gold-500);text-decoration:underline">← Kembali ke Kelola Aturan</a></p>
+    <h2><?php echo $ubah ? 'Ubah Aturan' : 'Tambah Aturan'; ?></h2>
+    <p class="aturan-lead">PDF bersifat opsional dan dapat diunggah kemudian. Ukuran maksimum 100 MB.</p>
+
+    <?php if (!empty($error)): ?>
+      <div class="alertbox" style="border-color:#E0526B;background:rgba(224,82,107,.12);color:#E0526B"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+    <?php endif; ?>
+
+    <form class="form-card aturan-form-card" method="post" enctype="multipart/form-data" action="<?php echo base_url('admin/aturan-simpan' . ($ubah ? '/' . (int) $row['id'] : '')); ?>">
+      <div class="fld">
+        <label for="judul">Judul Aturan <span class="req">*</span></label>
+        <textarea id="judul" name="judul" required><?php echo htmlspecialchars($v('judul'), ENT_QUOTES, 'UTF-8'); ?></textarea>
+      </div>
+      <div class="fld">
+        <label>Status Publikasi</label>
+        <label class="cek"><input type="checkbox" name="aktif" value="1" <?php echo $v('aktif', '1') === '1' ? 'checked' : ''; ?>> Tampilkan di halaman publik</label>
+      </div>
+      <div class="fld">
+        <label for="pdf">Dokumen PDF</label>
+        <input id="pdf" type="file" name="file_pdf" accept="application/pdf,.pdf">
+        <p class="hint" style="font-size:.72rem;color:var(--muted);margin-top:6px">Hanya PDF, maksimal 20 MB. Unggahan baru akan mengganti PDF lama.</p>
+        <?php if ($ubah && !empty($row['file_pdf'])): ?>
+          <div class="terkini">
+            <a href="<?php echo base_url('regulasi/unduh/' . (int) $row['id']); ?>">Lihat PDF saat ini</a>
+            <label class="cek" style="margin-top:8px"><input type="checkbox" name="hapus_pdf" value="1"> Hapus PDF saat disimpan</label>
+          </div>
+        <?php endif; ?>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
+        <button class="btn btn-gold btn-sm" type="submit">Simpan Aturan</button>
+        <a class="btn btn-ghost btn-sm" href="<?php echo base_url('admin/aturan'); ?>">Batal</a>
+      </div>
+    </form>
+  </div>
+</section>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="brand" style="margin-bottom:18px">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Seal_of_Cilacap_Regency.svg?width=120" alt="" style="height:56px">
+          <span>
+            <span class="brand-name" style="font-size:1.05rem">SIP GATUTKACA</span><br>
+            <span class="brand-sub">Sistem Informasi Pengelolaan Gedung</span>
+          </span>
+        </div>
+        <p>Dinas Pekerjaan Umum dan Penataan Ruang Kabupaten Cilacap. Melayani dengan semangat <em>“otot kawat, balung wesi”</em> — kokoh dalam aturan, luwes dalam pelayanan.</p>
+      </div>
+      <div>
+        <h4>Layanan</h4>
+        <ul>
+          <li><a href="<?php echo base_url('konsultasi'); ?>">Konsultasi Tata Ruang</a></li>
+          <li><a href="<?php echo base_url('regulasi'); ?>">Pustaka Regulasi</a></li>
+          <li><a href="<?php echo base_url('itr'); ?>">Informasi Tata Ruang</a></li>
+          <li><a href="<?php echo base_url('tatacara'); ?>">Tata Cara KKPR</a></li>
+          <li><a href="<?php echo base_url('spasial'); ?>">Peta Spasial</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kontak</h4>
+        <ul>
+          <li>Jl. MT. Haryono, Cilacap, Jawa Tengah</li>
+          <li>Senin–Jumat · 08.00–15.30 WIB</li>
+          <li>siptaru@cilacapkab.go.id</li>
+        </ul>
+      </div>
+    </div>
+    <div class="credit">
+      <span>© 2026 Pemerintah Kabupaten Cilacap · Jala Bhumi Wijayakusuma Cakti</span>
+      <span>Foto: Wikimedia Commons (lisensi CC BY / CC BY-SA, kreator masing-masing)</span>
+    </div>
+  </div>
+</footer>
+
+<button class="theme-fab" id="themeFab" aria-expanded="false" aria-controls="themePanel" title="Pilih warna latar">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3a9 9 0 100 18c1.2 0 2-.9 2-2 0-.5-.2-1-.5-1.4-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.3A4.7 4.7 0 0021 9.7C20.4 5.9 16.6 3 12 3z" stroke="currentColor" stroke-width="1.4"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1.2" fill="currentColor"/><circle cx="15" cy="7.5" r="1.2" fill="currentColor"/></svg>
+</button>
+<div class="theme-panel" id="themePanel" role="dialog" aria-label="Pilih warna latar">
+  <h5>Warna Latar</h5>
+  <div class="swatches">
+    <button class="swatch sel" data-theme="light"><i class="sw-light"></i><span>Terang</span></button>
+    <button class="swatch" data-theme="dark"><i class="sw-dark"></i><span>Gelap</span></button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var p=new URLSearchParams(location.search);
+  var t=p.get('theme')==='dark'?'dark':'light';
+  applyTheme(t);
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme',theme);
+    document.querySelectorAll('.swatch').forEach(function(s){
+      s.classList.toggle('sel',s.dataset.theme===theme);
+    });
+  }
+  window.__applyTheme=applyTheme;
+})();
+var fab=document.getElementById('themeFab'),panel=document.getElementById('themePanel');
+fab.addEventListener('click',function(){
+  var open=panel.classList.toggle('open');
+  fab.setAttribute('aria-expanded',open);
+});
+document.querySelectorAll('.swatch').forEach(function(s){
+  s.addEventListener('click',function(){ window.__applyTheme(s.dataset.theme); });
+});
+document.addEventListener('click',function(e){
+  if(!panel.contains(e.target)&&e.target!==fab&&!fab.contains(e.target))panel.classList.remove('open');
+});
+var userBtn=document.getElementById('userMenuBtn'),userPanel=document.getElementById('userMenuPanel');
+userBtn.addEventListener('click',function(){
+  var open=userPanel.classList.toggle('open');
+  userBtn.setAttribute('aria-expanded',open);
+});
+document.addEventListener('click',function(e){
+  if(!userPanel.contains(e.target)&&e.target!==userBtn&&!userBtn.contains(e.target))userPanel.classList.remove('open');
+});
+var bar=document.getElementById('topbar');
+addEventListener('scroll',function(){bar.classList.toggle('scrolled',scrollY>40)},{passive:true});
+</script>
+</body>
+</html>
