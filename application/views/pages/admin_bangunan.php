@@ -312,7 +312,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
 <style>
 [hidden]{display:none!important}
-.massa-dlg{border:1px solid var(--line);border-radius:18px;padding:0;width:min(1040px,calc(100% - 28px));max-height:calc(100vh - 40px);background:var(--surface);color:var(--text);box-shadow:0 30px 80px rgba(8,24,38,.4)}
+.massa-dlg{margin:auto;border:1px solid var(--line);border-radius:18px;padding:0;width:min(1040px,calc(100% - 28px));max-height:calc(100vh - 40px);background:var(--surface);color:var(--text);box-shadow:0 30px 80px rgba(8,24,38,.4)}
 .massa-dlg::backdrop{background:rgba(8,24,38,.55);backdrop-filter:blur(2px)}
 .massa-wrap{display:flex;flex-direction:column;max-height:calc(100vh - 40px)}
 .massa-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:24px 28px 14px;border-bottom:1px solid var(--line)}

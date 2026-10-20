@@ -37,7 +37,7 @@
 </section>
 <?php endif; ?>
 <?php if (!empty($permohonan_id)): ?>
-<dialog id="baTanggalModal" style="border:1px solid #d9dee6;border-radius:16px;padding:26px 28px;max-width:420px;width:calc(100% - 32px);box-shadow:0 24px 60px rgba(15,30,50,.28)">
+<dialog id="baTanggalModal" style="margin:auto;border:1px solid #d9dee6;border-radius:16px;padding:26px 28px;max-width:420px;width:calc(100% - 32px);box-shadow:0 24px 60px rgba(15,30,50,.28)">
   <form method="post" target="_blank" id="baTanggalForm" action="<?= base_url('pengajuan-pbg/berita-acara-tanggal/'.(int) $permohonan_id) ?>">
     <h3 style="margin:0 0 6px">Tanggal Berita Acara</h3>
     <p style="margin:0 0 16px;font-size:.9rem;opacity:.8">Tanggal ini dipakai untuk <b>seluruh berita acara</b> permohonan ini. Anda dapat mengubahnya lagi kapan saja.</p>
