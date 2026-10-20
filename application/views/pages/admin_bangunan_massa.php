@@ -144,6 +144,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .massa-tabel td.num,.massa-tabel th.num{text-align:right;white-space:nowrap}
 .massa-tabel .aksi{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
 .massa-kosong{margin-top:26px;border:1px dashed var(--line);padding:30px;text-align:center;color:var(--muted);font-size:.9rem}
+[hidden]{display:none!important}
 .massa-foto{width:84px;height:64px;object-fit:cover;border:1px solid var(--line);border-radius:8px;display:block;background:var(--surface-hi)}.massa-foto-kosong{width:84px;height:64px;border:1px dashed var(--line);border-radius:8px;display:grid;place-items:center;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .foto-pratinjau{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.foto-pratinjau img{height:92px;width:auto;max-width:160px;border:1px solid var(--line);border-radius:8px;object-fit:cover}
 .form-card h3{font-family:var(--display);font-weight:400;font-size:1.25rem;margin-bottom:20px}
