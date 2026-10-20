@@ -312,7 +312,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
 <style>
 [hidden]{display:none!important}
-.massa-dlg{margin:auto;border:1px solid var(--line);border-radius:18px;padding:0;width:min(1040px,calc(100% - 28px));max-height:calc(100vh - 40px);background:var(--surface);color:var(--text);box-shadow:0 30px 80px rgba(8,24,38,.4)}
+.massa-dlg{margin:auto;border:1px solid var(--line);border-radius:18px;padding:0;width:min(1320px,calc(100% - 28px));max-height:calc(100vh - 40px);background:var(--surface);color:var(--text);box-shadow:0 30px 80px rgba(8,24,38,.4)}
 .massa-dlg::backdrop{background:rgba(8,24,38,.55);backdrop-filter:blur(2px)}
 .massa-wrap{display:flex;flex-direction:column;max-height:calc(100vh - 40px)}
 .massa-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:24px 28px 14px;border-bottom:1px solid var(--line)}
@@ -355,6 +355,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .massa-mode{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .massa-mode label{display:flex;align-items:center;gap:7px;font-size:.84rem;color:var(--text);letter-spacing:0;text-transform:none;margin:0;cursor:pointer}
 .massa-mode input{width:auto;accent-color:#A57E2C}
+.massa-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px 30px;align-items:start}
+.massa-kanan .massa-peta{height:400px}
+@media(max-width:980px){.massa-cols{grid-template-columns:1fr}.massa-kanan .massa-peta{height:320px}}
 .massa-peta{height:320px;border:1px solid var(--line);border-radius:10px;background:#dfeee2;position:relative;z-index:0}
 .massa-koord{display:grid;grid-template-columns:1fr 1fr auto;gap:10px 12px;align-items:end;margin-top:12px}
 .massa-koord-poli{margin-top:12px}
@@ -389,6 +392,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <form class="massa-form" id="massaForm" enctype="multipart/form-data" hidden>
         <h4 id="massaFormJudul">Tambah Massa</h4>
         <input type="hidden" name="massa_id" id="mfId" value="0">
+        <div class="massa-cols">
+        <div class="massa-kiri">
         <div class="massa-grid">
           <div class="fl"><label class="lb" for="mfNama">Nama Massa <span class="req">*</span></label><input type="text" name="nama_massa" id="mfNama" maxlength="150" required placeholder="mis. Massa A — Ruang Kelas"></div>
           <div class="fl"><label class="lb" for="mfKondisi">Kondisi <span class="req">*</span></label><select name="kondisi" id="mfKondisi" required></select></div>
@@ -396,7 +401,17 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
           <div class="fl"><label class="lb" for="mfLuas">Luas Bangunan (m²)</label><input type="text" inputmode="decimal" name="luas_m2" id="mfLuas" placeholder="mis. 245,5"></div>
           <div class="fl"><label class="lb" for="mfTahun">Tahun Dibangun</label><input type="number" name="tahun_dibangun" id="mfTahun" min="1800" step="1" placeholder="mis. 1998"></div>
           <div class="fl"><label class="lb" for="mfKet">Keterangan</label><input type="text" name="keterangan" id="mfKet" maxlength="255" placeholder="Fungsi atau catatan massa"></div>
-          <div class="fl full" id="mfLokasi">
+          <div class="fl full">
+            <label class="lb" for="mfFoto">Foto Massa</label>
+            <div class="massa-fotoprev" id="mfFotoIni" hidden><img src="" alt="Foto massa saat ini" id="mfFotoIniImg"><label><input type="checkbox" name="hapus_foto" value="1" id="mfHapusFoto"> Hapus foto ini</label></div>
+            <div class="massa-fotoprev" id="mfFotoBaru" hidden><img src="" alt="Pratinjau foto baru" id="mfFotoBaruImg"><span class="massa-hint" style="margin:0">Pratinjau foto yang akan diunggah</span></div>
+            <input type="file" name="foto_file" id="mfFoto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+            <p class="massa-hint" id="mfFotoHint">JPG / PNG / WebP, maksimal 100 MB.</p>
+          </div>
+        </div>
+        </div>
+        <div class="massa-kanan">
+          <div id="mfLokasi">
             <label class="lb">Lokasi pada Peta <span style="text-transform:none;letter-spacing:0">(opsional)</span></label>
             <div class="massa-mode" role="radiogroup" aria-label="Jenis lokasi">
               <label><input type="radio" name="mf_mode" value="marker" checked> Marker (satu titik)</label>
@@ -421,13 +436,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
             </div>
             <input type="hidden" name="geom" id="mfGeom">
           </div>
-          <div class="fl full">
-            <label class="lb" for="mfFoto">Foto Massa</label>
-            <div class="massa-fotoprev" id="mfFotoIni" hidden><img src="" alt="Foto massa saat ini" id="mfFotoIniImg"><label><input type="checkbox" name="hapus_foto" value="1" id="mfHapusFoto"> Hapus foto ini</label></div>
-            <div class="massa-fotoprev" id="mfFotoBaru" hidden><img src="" alt="Pratinjau foto baru" id="mfFotoBaruImg"><span class="massa-hint" style="margin:0">Pratinjau foto yang akan diunggah</span></div>
-            <input type="file" name="foto_file" id="mfFoto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-            <p class="massa-hint" id="mfFotoHint">JPG / PNG / WebP, maksimal 100 MB.</p>
-          </div>
+        </div>
         </div>
         <div class="massa-form-aksi">
           <button type="submit" class="btn btn-gold btn-xs" id="mfSimpan">Tambah Massa</button>
