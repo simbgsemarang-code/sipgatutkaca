@@ -714,6 +714,12 @@ class Admin extends CI_Controller {
 			->limit($per, ($page - 1) * $per)
 			->get('bangunan_gis')->result_array();
 
+		$data['jml_massa'] = array();
+		if (! empty($data['daftar']) && $this->db->table_exists('bangunan_massa'))
+		{
+			foreach ($this->db->select('bangunan_id, COUNT(*) AS n')->where_in('bangunan_id', array_column($data['daftar'], 'id'))->group_by('bangunan_id')->get('bangunan_massa')->result_array() as $m) $data['jml_massa'][(int) $m['bangunan_id']] = (int) $m['n'];
+		}
+
 		$data['total']         = $total;
 		$data['page']          = $page;
 		$data['per']           = $per;
@@ -860,6 +866,134 @@ class Admin extends CI_Controller {
 		redirect('admin/bangunan');
 	}
 
+	/** Buat tabel bangunan_massa bila belum ada (migrasi ringan). TRUE bila tabel tersedia. */
+	private function _pastikan_tabel_massa()
+	{
+		$ada = function () { return $this->db->query("SHOW TABLES LIKE 'bangunan_massa'")->num_rows() > 0; };
+		if ($ada()) return TRUE;
+		$this->db->query("CREATE TABLE IF NOT EXISTS `bangunan_massa` (
+			`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+			`bangunan_id` INT UNSIGNED NOT NULL,
+			`nama_massa` VARCHAR(150) NOT NULL,
+			`jumlah_lantai` SMALLINT UNSIGNED NULL,
+			`luas_m2` DECIMAL(12,2) NULL,
+			`kondisi` ENUM('1','2','3','4') NOT NULL DEFAULT '1',
+			`tahun_dibangun` SMALLINT UNSIGNED NULL,
+			`keterangan` VARCHAR(255) NULL,
+			`created_at` DATETIME NOT NULL,
+			`updated_at` DATETIME NOT NULL,
+			PRIMARY KEY (`id`),
+			KEY `bangunan_id` (`bangunan_id`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+		return $ada();
+	}
+
+	/** Kelola massa/blok sebuah bangunan: daftar + form tambah/ubah. */
+	public function bangunan_massa($id = null)
+	{
+		$row = $this->db->where('id', (int) $id)->get('bangunan_gis')->row_array();
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+		$tabel_ok = $this->_pastikan_tabel_massa();
+		$data['row']           = $row;
+		$data['tabel_ok']      = $tabel_ok;
+		$data['daftar']        = $tabel_ok ? $this->db->where('bangunan_id', (int) $row['id'])->order_by('id', 'ASC')->get('bangunan_massa')->result_array() : array();
+		$data['kondisi_label'] = $this->kondisi_label;
+		$data['sukses']        = $this->session->flashdata('sukses');
+		$data['error']         = $this->session->flashdata('error');
+		$data['old']           = $this->session->flashdata('old');
+		$data['nama_admin']    = $this->session->userdata('nama');
+		$this->load->view('pages/admin_bangunan_massa', $data);
+	}
+
+	/** Simpan massa (POST): massa_id kosong/0 = tambah, selain itu ubah. */
+	public function bangunan_massa_simpan($bangunan_id = null)
+	{
+		$bid = (int) $bangunan_id;
+		$row = $this->db->where('id', $bid)->get('bangunan_gis')->row_array();
+		if ($row === NULL || $this->input->method(TRUE) !== 'POST')
+		{
+			show_404();
+			return;
+		}
+		$tujuan = 'admin/bangunan-massa/' . $bid;
+		if (! $this->_pastikan_tabel_massa())
+		{
+			$this->session->set_flashdata('error', 'Tabel bangunan_massa belum ada. Jalankan database/bangunan_massa.sql di phpMyAdmin.');
+			redirect($tujuan);
+			return;
+		}
+
+		$mid     = (int) $this->input->post('massa_id');
+		$nama    = trim((string) $this->input->post('nama_massa'));
+		$kondisi = (string) $this->input->post('kondisi');
+		$lantai  = trim((string) $this->input->post('jumlah_lantai'));
+		$luas    = str_replace(',', '.', trim((string) $this->input->post('luas_m2')));
+		$tahun   = trim((string) $this->input->post('tahun_dibangun'));
+		$ket     = trim((string) $this->input->post('keterangan'));
+
+		$salah = array();
+		if ($nama === '' || mb_strlen($nama) > 150)                 $salah[] = 'Nama massa (wajib, maks. 150 karakter)';
+		if (! in_array($kondisi, array('1', '2', '3', '4'), TRUE))   $salah[] = 'Kondisi';
+		if ($lantai !== '' && (! ctype_digit($lantai) || (int) $lantai > 200)) $salah[] = 'Jumlah lantai (angka 0–200)';
+		if ($luas !== '' && (! is_numeric($luas) || (float) $luas < 0 || (float) $luas > 9999999)) $salah[] = 'Luas (angka m², tidak negatif)';
+		if ($tahun !== '' && (! ctype_digit($tahun) || (int) $tahun < 1800 || (int) $tahun > ((int) date('Y') + 1))) $salah[] = 'Tahun dibangun (1800–' . ((int) date('Y') + 1) . ')';
+		if (mb_strlen($ket) > 255)                                   $salah[] = 'Keterangan (maks. 255 karakter)';
+		if ($mid > 0 && ! $this->db->where('id', $mid)->where('bangunan_id', $bid)->count_all_results('bangunan_massa')) $salah[] = 'Massa yang diubah tidak ditemukan';
+
+		if (! empty($salah))
+		{
+			$this->session->set_flashdata('error', 'Periksa lagi: ' . implode('; ', $salah) . '.');
+			$this->session->set_flashdata('old', $this->input->post());
+			redirect($tujuan);
+			return;
+		}
+
+		$simpan = array(
+			'nama_massa'     => $nama,
+			'jumlah_lantai'  => $lantai !== '' ? (int) $lantai : NULL,
+			'luas_m2'        => $luas !== '' ? round((float) $luas, 2) : NULL,
+			'kondisi'        => $kondisi,
+			'tahun_dibangun' => $tahun !== '' ? (int) $tahun : NULL,
+			'keterangan'     => $ket !== '' ? $ket : NULL,
+			'updated_at'     => date('Y-m-d H:i:s'),
+		);
+		if ($mid > 0)
+		{
+			$this->db->where('id', $mid)->where('bangunan_id', $bid)->update('bangunan_massa', $simpan);
+			$this->session->set_flashdata('sukses', 'Massa "' . $nama . '" berhasil diperbarui.');
+		}
+		else
+		{
+			$simpan['bangunan_id'] = $bid;
+			$simpan['created_at']  = $simpan['updated_at'];
+			$this->db->insert('bangunan_massa', $simpan);
+			$this->session->set_flashdata('sukses', 'Massa "' . $nama . '" berhasil ditambahkan.');
+		}
+		redirect($tujuan);
+	}
+
+	/** Hapus satu massa (POST). */
+	public function bangunan_massa_hapus($bangunan_id = null, $massa_id = null)
+	{
+		$bid = (int) $bangunan_id;
+		$mid = (int) $massa_id;
+		$tujuan = 'admin/bangunan-massa/' . $bid;
+		if ($this->input->method(TRUE) !== 'POST') show_404();
+		$m = $this->db->table_exists('bangunan_massa') ? $this->db->where('id', $mid)->where('bangunan_id', $bid)->get('bangunan_massa')->row_array() : NULL;
+		if ($m === NULL)
+		{
+			$this->session->set_flashdata('error', 'Data massa tidak ditemukan.');
+			redirect($tujuan);
+			return;
+		}
+		$this->db->where('id', $mid)->delete('bangunan_massa');
+		$this->session->set_flashdata('sukses', 'Massa "' . $m['nama_massa'] . '" berhasil dihapus.');
+		redirect($tujuan);
+	}
 	/** Hapus (POST). */
 	public function bangunan_hapus($id = null)
 	{
@@ -876,6 +1010,7 @@ class Admin extends CI_Controller {
 			@unlink(FCPATH . 'assets/foto-bangunan/' . basename($row['foto']));
 		}
 		$this->db->where('id', $id)->delete('bangunan_gis');
+		if ($this->db->table_exists('bangunan_massa')) $this->db->where('bangunan_id', $id)->delete('bangunan_massa');
 		$this->session->set_flashdata('sukses', 'Bangunan "' . $row['nama_bangunan'] . '" berhasil dihapus dari peta.');
 		redirect('admin/bangunan');
 	}

@@ -267,6 +267,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
               <td class="no-reg"><?php echo htmlspecialchars(round((float) $r['latitude'], 5) . ', ' . round((float) $r['longitude'], 5), ENT_QUOTES, 'UTF-8'); ?></td>
               <td class="aksi-cell">
                 <a href="<?php echo base_url('admin/bangunan-ubah/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs">Ubah</a>
+                <a href="<?php echo base_url('admin/bangunan-massa/' . (int) $r['id']); ?>" class="btn btn-ghost btn-xs" title="Atur massa bangunan">Massa<?php echo !empty($jml_massa[(int) $r['id']]) ? ' (' . (int) $jml_massa[(int) $r['id']] . ')' : ''; ?></a>
                 <form action="<?php echo base_url('admin/bangunan-hapus/' . (int) $r['id']); ?>" method="post" style="margin:0" onsubmit="return confirm('Hapus bangunan &quot;<?php echo htmlspecialchars(addslashes($r['nama_bangunan']), ENT_QUOTES, 'UTF-8'); ?>&quot; dari peta?');">
                   <button type="submit" class="btn btn-xs" style="border:1px solid #E0526B;color:#E0526B;background:transparent;cursor:pointer">Hapus</button>
                 </form>
