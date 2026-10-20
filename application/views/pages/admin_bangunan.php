@@ -352,6 +352,22 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .massa-fotoprev label{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text)}
 .massa-hint{font-size:.72rem;color:var(--muted);margin-top:5px}
 .massa-form-aksi{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.massa-mode{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.massa-mode label{display:flex;align-items:center;gap:7px;font-size:.84rem;color:var(--text);letter-spacing:0;text-transform:none;margin:0;cursor:pointer}
+.massa-mode input{width:auto;accent-color:#A57E2C}
+.massa-peta{height:320px;border:1px solid var(--line);border-radius:10px;background:#dfeee2;position:relative;z-index:0}
+.massa-koord{display:grid;grid-template-columns:1fr 1fr auto;gap:10px 12px;align-items:end;margin-top:12px}
+.massa-koord-poli{margin-top:12px}
+.massa-koord-poli textarea{width:100%;min-height:96px;resize:vertical;background:var(--input);border:1px solid var(--line);color:var(--text);padding:10px 12px;font:400 .84rem/1.5 ui-monospace,Consolas,monospace}
+.massa-koord-poli textarea:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
+.massa-koord-aksi{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.massa-basemap{background:#fff;color:#223;padding:8px 12px;font-size:12.5px;line-height:1.5;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.massa-basemap b{display:block;margin-bottom:3px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8a6a1c}
+.massa-basemap label{display:flex;align-items:center;gap:7px;padding:1px 0;cursor:pointer;margin:0;font-weight:400}
+.massa-basemap input{width:14px;height:14px;margin:0;accent-color:#A57E2C}
+.titik-vertex{width:14px;height:14px;border-radius:50%;background:#C9A24B;border:2px solid #fff;box-shadow:0 0 0 1px #8a6a1c,0 1px 4px rgba(0,0,0,.4)}
+.massa-lok-tag{white-space:nowrap}
+@media(max-width:640px){.massa-koord{grid-template-columns:1fr}}
 @media(max-width:640px){.massa-grid{grid-template-columns:1fr}.massa-top,.massa-body{padding-left:18px;padding-right:18px}}
 </style>
 <dialog class="massa-dlg" id="massaModal" aria-labelledby="massaJudul">
@@ -380,6 +396,31 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
           <div class="fl"><label class="lb" for="mfLuas">Luas Bangunan (m²)</label><input type="text" inputmode="decimal" name="luas_m2" id="mfLuas" placeholder="mis. 245,5"></div>
           <div class="fl"><label class="lb" for="mfTahun">Tahun Dibangun</label><input type="number" name="tahun_dibangun" id="mfTahun" min="1800" step="1" placeholder="mis. 1998"></div>
           <div class="fl"><label class="lb" for="mfKet">Keterangan</label><input type="text" name="keterangan" id="mfKet" maxlength="255" placeholder="Fungsi atau catatan massa"></div>
+          <div class="fl full" id="mfLokasi">
+            <label class="lb">Lokasi pada Peta <span style="text-transform:none;letter-spacing:0">(opsional)</span></label>
+            <div class="massa-mode" role="radiogroup" aria-label="Jenis lokasi">
+              <label><input type="radio" name="mf_mode" value="marker" checked> Marker (satu titik)</label>
+              <label><input type="radio" name="mf_mode" value="polygon"> Poligon (bidang massa)</label>
+              <label><input type="radio" name="mf_mode" value="none"> Tanpa lokasi</label>
+              <button type="button" class="btn btn-ghost btn-xs" id="mfGeomHapus">Hapus gambar</button>
+            </div>
+            <div class="massa-peta" id="mfPeta" role="application" aria-label="Peta lokasi massa"></div>
+            <p class="massa-hint" id="mfPetaHint"></p>
+            <div class="massa-koord" id="mfKoordMarker">
+              <div><label class="lb" for="mfLat">Latitude</label><input type="text" inputmode="decimal" id="mfLat" placeholder="mis. -7.726700"></div>
+              <div><label class="lb" for="mfLng">Longitude</label><input type="text" inputmode="decimal" id="mfLng" placeholder="mis. 109.015400"></div>
+              <button type="button" class="btn btn-ghost btn-xs" id="mfLatLngTetap">Tetapkan ke peta</button>
+            </div>
+            <div class="massa-koord-poli" id="mfKoordPoli" hidden>
+              <label class="lb" for="mfPoliTeks">Titik poligon — satu titik per baris: <i style="text-transform:none;letter-spacing:0">latitude, longitude</i></label>
+              <textarea id="mfPoliTeks" spellcheck="false" placeholder="-7.726700, 109.015400&#10;-7.726900, 109.015800&#10;-7.727200, 109.015300"></textarea>
+              <div class="massa-koord-aksi">
+                <button type="button" class="btn btn-ghost btn-xs" id="mfPoliGambar">Gambar poligon dari koordinat</button>
+                <button type="button" class="btn btn-ghost btn-xs" id="mfPoliUndo">Hapus titik terakhir</button>
+              </div>
+            </div>
+            <input type="hidden" name="geom" id="mfGeom">
+          </div>
           <div class="fl full">
             <label class="lb" for="mfFoto">Foto Massa</label>
             <div class="massa-fotoprev" id="mfFotoIni" hidden><img src="" alt="Foto massa saat ini" id="mfFotoIniImg"><label><input type="checkbox" name="hapus_foto" value="1" id="mfHapusFoto"> Hapus foto ini</label></div>
@@ -396,7 +437,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 
       <div class="massa-tbl-wrap" id="massaTabelWrap">
         <table class="massa-tbl">
-          <thead><tr><th>Foto</th><th>Nama Massa</th><th class="num">Lantai</th><th class="num">Luas (m²)</th><th>Kondisi</th><th class="num">Tahun</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+          <thead><tr><th>Foto</th><th>Nama Massa</th><th class="num">Lantai</th><th class="num">Luas (m²)</th><th>Kondisi</th><th class="num">Tahun</th><th>Keterangan</th><th>Lokasi</th><th>Aksi</th></tr></thead>
           <tbody id="massaBody"></tbody>
         </table>
       </div>
@@ -410,7 +451,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   var WARNA={'1':'#2EA84F','2':'#F2C230','3':'#D9822B','4':'#C0392B'};
   var dlg=document.getElementById('massaModal'); if(!dlg)return;
   var $=function(id){return document.getElementById(id);};
-  var st={bid:0,tombol:null,daftar:[],kondisi:{}};
+  var st={bid:0,tombol:null,daftar:[],kondisi:{},bangunan:null};
   var info=$('massaInfo'), form=$('massaForm'), body=$('massaBody');
   var fotoIni=$('mfFotoIni'), fotoIniImg=$('mfFotoIniImg'), fotoBaru=$('mfFotoBaru'), fotoBaruImg=$('mfFotoBaruImg'), inFoto=$('mfFoto'), hapusFoto=$('mfHapusFoto'), fotoHint=$('mfFotoHint');
   var XHR={'X-Requested-With':'XMLHttpRequest','Accept':'application/json'};
@@ -426,10 +467,134 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     $('massaFormJudul').textContent=data?'Ubah Massa':'Tambah Massa'; $('mfSimpan').textContent=data?'Simpan Perubahan':'Tambah Massa';
     if(data){$('mfNama').value=data.nama_massa;$('mfKondisi').value=data.kondisi;$('mfLantai').value=data.jumlah_lantai===null?'':data.jumlah_lantai;$('mfLuas').value=data.luas_m2===null?'':String(data.luas_m2).replace('.',',');$('mfTahun').value=data.tahun_dibangun===null?'':data.tahun_dibangun;$('mfKet').value=data.keterangan||'';}
     else{$('mfKondisi').value='1';}
-    form.hidden=false; $('massaTambah').hidden=true; form.scrollIntoView({block:'nearest'}); $('mfNama').focus();
+    form.hidden=false; $('massaTambah').hidden=true; lokasiMuat(data); form.scrollIntoView({block:'nearest'}); $('mfNama').focus();
   }
   function formTutup(){form.hidden=true;$('massaTambah').hidden=false;}
 
+  /* ===== Lokasi massa: peta gambar (marker / poligon) + input koordinat ===== */
+  var peta=null, lap=null, refM=null, titik=[], modeLok='marker', osmL=null, esriL=null, leafletMuat=false;
+  var modeRadios=document.querySelectorAll('input[name=mf_mode]');
+  function nilaiMode(){for(var i=0;i<modeRadios.length;i++)if(modeRadios[i].checked)return modeRadios[i].value;return 'marker';}
+  function setRadio(m){for(var i=0;i<modeRadios.length;i++)modeRadios[i].checked=(modeRadios[i].value===m);}
+  function f6(n){return Number(n).toFixed(6);}
+  function muatLeaflet(cb){
+    if(window.L){cb();return;}
+    if(leafletMuat){var t=setInterval(function(){if(window.L){clearInterval(t);cb();}},100);return;}
+    leafletMuat=true;
+    var c=document.createElement('link');c.rel='stylesheet';c.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';document.head.appendChild(c);
+    var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+    s.onload=function(){L.Icon.Default.imagePath='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/';cb();};
+    s.onerror=function(){leafletMuat=false;$('mfPetaHint').textContent='Peta tidak dapat dimuat (periksa koneksi internet). Anda tetap bisa mengisi koordinat manual.';};
+    document.head.appendChild(s);
+  }
+  function petaInisial(){
+    if(peta)return;
+    peta=L.map('mfPeta',{scrollWheelZoom:true}).setView([-7.7267,109.0154],12);
+    osmL=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(peta);
+    esriL=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
+    lap=L.layerGroup().addTo(peta);
+    var ctl=L.control({position:'topright'});
+    ctl.onAdd=function(){
+      var d=L.DomUtil.create('div','massa-basemap');
+      d.innerHTML='<b>Jenis Tampilan</b><label><input type="radio" name="mf_base" value="osm" checked> Peta Jalan</label><label><input type="radio" name="mf_base" value="esri"> Citra Satelit</label>';
+      L.DomEvent.disableClickPropagation(d);
+      d.querySelectorAll('input').forEach(function(r){r.addEventListener('change',function(){if(!this.checked)return;if(this.value==='esri'){peta.removeLayer(osmL);peta.addLayer(esriL);}else{peta.removeLayer(esriL);peta.addLayer(osmL);}});});
+      return d;
+    };
+    ctl.addTo(peta);
+    peta.on('click',function(e){
+      if(modeLok==='marker'){titik=[[e.latlng.lat,e.latlng.lng]];}
+      else if(modeLok==='polygon'){titik.push([e.latlng.lat,e.latlng.lng]);}
+      else{return;}
+      lokGambar();
+    });
+  }
+  function lokSinkron(){
+    var g='';
+    if(modeLok==='marker'&&titik.length){g=JSON.stringify({type:'Point',coordinates:[Number(f6(titik[0][1])),Number(f6(titik[0][0]))]});$('mfLat').value=f6(titik[0][0]);$('mfLng').value=f6(titik[0][1]);}
+    else if(modeLok==='marker'){$('mfLat').value='';$('mfLng').value='';}
+    if(modeLok==='polygon'){
+      $('mfPoliTeks').value=titik.map(function(p){return f6(p[0])+', '+f6(p[1]);}).join('\n');
+      if(titik.length>=3)g=JSON.stringify({type:'Polygon',coordinates:[titik.map(function(p){return [Number(f6(p[1])),Number(f6(p[0]))];})]});
+    }
+    $('mfGeom').value=g;
+    var h=$('mfPetaHint');
+    if(modeLok==='marker')h.textContent=titik.length?'Klik peta atau seret marker untuk memindahkan lokasi.':'Klik peta untuk menaruh marker, atau isi latitude dan longitude lalu tekan "Tetapkan ke peta".';
+    else if(modeLok==='polygon')h.textContent=titik.length+' titik'+(titik.length<3?' — butuh minimal 3 titik. ':'. ')+'Klik peta untuk menambah titik, seret titik untuk menggeser, klik kanan titik untuk menghapusnya.';
+    else h.textContent='Massa ini tidak diberi lokasi pada peta.';
+  }
+  function lokGambar(){
+    if(!peta)return; lap.clearLayers();
+    if(st.bangunan&&st.bangunan.latitude!==null&&st.bangunan.longitude!==null){
+      L.circleMarker([st.bangunan.latitude,st.bangunan.longitude],{radius:6,color:'#fff',weight:2,fillColor:'#4E6070',fillOpacity:1}).bindTooltip('Lokasi bangunan: '+(st.bangunan.nama_bangunan||'')).addTo(lap);
+    }
+    if(modeLok==='marker'&&titik.length){
+      var mk=L.marker(titik[0],{draggable:true}).addTo(lap);
+      mk.on('dragend',function(){var p=mk.getLatLng();titik=[[p.lat,p.lng]];lokSinkron();});
+    }
+    if(modeLok==='polygon'&&titik.length){
+      if(titik.length>=3)L.polygon(titik,{color:'#8a6a1c',weight:2,fillColor:'#C9A24B',fillOpacity:.3}).addTo(lap);
+      else if(titik.length===2)L.polyline(titik,{color:'#8a6a1c',weight:2,dashArray:'5 5'}).addTo(lap);
+      titik.forEach(function(p,i){
+        var v=L.marker(p,{draggable:true,icon:L.divIcon({className:'',html:'<div class="titik-vertex"></div>',iconSize:[14,14],iconAnchor:[7,7]})}).addTo(lap);
+        v.on('drag',function(){var q=v.getLatLng();titik[i]=[q.lat,q.lng];});
+        v.on('dragend',function(){lokGambar();});
+        v.on('contextmenu',function(){titik.splice(i,1);lokGambar();});
+      });
+    }
+    lokSinkron();
+  }
+  function lokFokus(){
+    if(!peta)return;
+    if(titik.length>1)peta.fitBounds(L.latLngBounds(titik),{padding:[30,30],maxZoom:19});
+    else if(titik.length===1)peta.setView(titik[0],18);
+    else if(st.bangunan&&st.bangunan.latitude!==null&&st.bangunan.longitude!==null)peta.setView([st.bangunan.latitude,st.bangunan.longitude],18);
+  }
+  function lokMuat(data){
+    var g=data&&data.geom?data.geom:null; titik=[];
+    if(g&&g.type==='Point'){modeLok='marker';titik=[[g.coordinates[1],g.coordinates[0]]];}
+    else if(g&&g.type==='Polygon'){modeLok='polygon';titik=g.coordinates[0].slice(0,-1).map(function(c){return [c[1],c[0]];});}
+    else{modeLok='marker';}
+    setRadio(modeLok); panelMode();
+    muatLeaflet(function(){petaInisial();setTimeout(function(){peta.invalidateSize();lokGambar();lokFokus();},80);});
+    lokSinkron();
+  }
+  function lokasiMuat(data){lokMuat(data);}
+  function panelMode(){$('mfKoordMarker').hidden=(modeLok!=='marker');$('mfKoordPoli').hidden=(modeLok!=='polygon');}
+  function lokasiSiap(){
+    if(modeLok==='polygon'&&titik.length>0&&titik.length<3){pesan('Poligon butuh minimal 3 titik. Tambah titik di peta, atau pilih "Tanpa lokasi".','err');$('mfLokasi').scrollIntoView({block:'center'});return false;}
+    if(modeLok==='none')$('mfGeom').value='';
+    return true;
+  }
+  function angkaKoord(t){return parseFloat(String(t).trim().replace(',','.'));}
+  function parsePoli(teks){
+    var out=[],baris=teks.split(/\r?\n/);
+    for(var i=0;i<baris.length;i++){
+      var b=baris[i].trim(); if(!b)continue;
+      var p=b.split(/[;\s]+/).filter(Boolean); if(p.length<2)p=b.split(',').filter(Boolean);
+      if(p.length<2)return {galat:'Baris '+(i+1)+': butuh latitude dan longitude.'};
+      var a=angkaKoord(p[0]),c=angkaKoord(p[1]);
+      if(isNaN(a)||isNaN(c))return {galat:'Baris '+(i+1)+': koordinat harus berupa angka (pakai titik sebagai desimal).'};
+      if(Math.abs(a)>90&&Math.abs(c)<=90){var t=a;a=c;c=t;}   // terbalik (longitude, latitude) -> perbaiki otomatis
+      if(Math.abs(a)>90||Math.abs(c)>180)return {galat:'Baris '+(i+1)+': koordinat di luar jangkauan.'};
+      out.push([a,c]);
+    }
+    return {titik:out};
+  }
+  Array.prototype.forEach.call(modeRadios,function(r){r.addEventListener('change',function(){if(!this.checked)return;modeLok=this.value;titik=[];panelMode();lokGambar();lokSinkron();});});
+  $('mfGeomHapus').addEventListener('click',function(){titik=[];lokGambar();lokSinkron();});
+  $('mfLatLngTetap').addEventListener('click',function(){
+    var a=angkaKoord($('mfLat').value),c=angkaKoord($('mfLng').value);
+    if(isNaN(a)||isNaN(c)){pesan('Isi latitude dan longitude dengan angka (pakai titik atau koma sebagai desimal).','err');return;}
+    if(Math.abs(a)>90&&Math.abs(c)<=90){var t=a;a=c;c=t;}
+    if(Math.abs(a)>90||Math.abs(c)>180){pesan('Koordinat di luar jangkauan (latitude −90..90, longitude −180..180).','err');return;}
+    pesan(''); titik=[[a,c]]; lokGambar(); if(peta)peta.setView(titik[0],Math.max(peta.getZoom(),17));
+  });
+  $('mfPoliGambar').addEventListener('click',function(){
+    var h=parsePoli($('mfPoliTeks').value); if(h.galat){pesan(h.galat,'err');return;}
+    pesan(''); titik=h.titik; lokGambar(); lokFokus();
+  });
+  $('mfPoliUndo').addEventListener('click',function(){titik.pop();lokGambar();});
   function gambar(m){
     if(m.foto_src){var a=el('a',{href:m.foto_src,target:'_blank',rel:'noopener',title:'Lihat foto'});a.appendChild(el('img',{class:'massa-foto',src:m.foto_src,alt:'Foto '+m.nama_massa,loading:'lazy'}));return a;}
     return el('span',{class:'massa-foto-kosong'},'Tanpa foto');
@@ -445,6 +610,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       var tk=el('td'); var tag=el('span',{class:'tag'},st.kondisi[m.kondisi]||m.kondisi); tag.style.color=WARNA[m.kondisi]||'';tag.style.borderColor=WARNA[m.kondisi]||''; tk.appendChild(tag); tr.appendChild(tk);
       tr.appendChild(el('td',{class:'num'},m.tahun_dibangun===null?'—':String(m.tahun_dibangun)));
       tr.appendChild(el('td',null,m.keterangan||'—'));
+      var tl=el('td'); if(m.geom&&m.geom.type==='Point'){tl.appendChild(el('span',{class:'tag massa-lok-tag'},'Marker'));}else if(m.geom&&m.geom.type==='Polygon'){tl.appendChild(el('span',{class:'tag massa-lok-tag'},'Poligon · '+Math.max(0,m.geom.coordinates[0].length-1)+' titik'));}else{tl.textContent='—';} tr.appendChild(tl);
       var ak=el('td'); var box=el('div',{class:'aksi'});
       var ub=el('button',{type:'button',class:'btn btn-ghost btn-xs'},'Ubah'); ub.addEventListener('click',function(){pesan('');formTampil(m);});
       var hp=el('button',{type:'button',class:'btn btn-xs'},'Hapus'); hp.style.cssText='border:1px solid #E0526B;color:#E0526B;background:transparent;cursor:pointer';
@@ -462,7 +628,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     pesan(''); body.innerHTML=''; $('massaRingkas').textContent='Memuat…'; $('massaTabelWrap').hidden=true; $('massaKosong').hidden=true;
     fetch(BASE+'admin/bangunan-massa-data/'+bid,{credentials:'same-origin',headers:XHR}).then(bacaJson).then(function(d){
       if(!d.ok){$('massaRingkas').textContent='';pesan(d.pesan||'Data massa gagal dimuat.','err');return;}
-      st.daftar=d.daftar; st.kondisi=d.kondisi; if(d.tahun_maks)$('mfTahun').max=d.tahun_maks; isiKondisi();
+      st.daftar=d.daftar; st.kondisi=d.kondisi; st.bangunan=d.bangunan; if(d.tahun_maks)$('mfTahun').max=d.tahun_maks; isiKondisi();
       $('massaSub').textContent=[d.bangunan.nama_bangunan,d.bangunan.opd].filter(Boolean).join(' · '); render();
     }).catch(function(){$('massaRingkas').textContent='';pesan('Koneksi gagal. Tutup lalu buka lagi modal ini.','err');});
   }
@@ -486,7 +652,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   $('mfBatal').addEventListener('click',formTutup);
   inFoto.addEventListener('change',function(){var fl=inFoto.files&&inFoto.files[0];if(fl&&fl.type.indexOf('image/')===0){fotoBaruImg.src=URL.createObjectURL(fl);fotoBaru.hidden=false;}else{fotoBaru.hidden=true;}});
   form.addEventListener('submit',function(e){
-    e.preventDefault(); if(!form.reportValidity())return;
+    e.preventDefault(); if(!form.reportValidity())return; if(!lokasiSiap())return;
     var tb=$('mfSimpan'),label=tb.textContent; tb.disabled=true; tb.textContent='Menyimpan…'; pesan('');
     fetch(BASE+'admin/bangunan-massa-simpan/'+st.bid,{method:'POST',body:new FormData(form),credentials:'same-origin',headers:XHR}).then(bacaJson).then(function(d){
       if(d.ok){st.daftar=d.daftar;formTutup();render();pesan(d.pesan,'ok');}else{pesan(d.pesan||'Massa gagal disimpan.','err');}

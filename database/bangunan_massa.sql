@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `bangunan_massa` (
   `tahun_dibangun` SMALLINT UNSIGNED NULL,
   `keterangan` VARCHAR(255) NULL,
   `foto` VARCHAR(255) NULL,
+  `geom` MEDIUMTEXT NULL COMMENT 'GeoJSON geometry (Point / Polygon) lokasi massa',
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,
   PRIMARY KEY (`id`),
@@ -20,3 +21,4 @@ CREATE TABLE IF NOT EXISTS `bangunan_massa` (
 
 -- Bila tabel sudah terlanjur dibuat tanpa kolom foto, jalankan:
 -- ALTER TABLE `bangunan_massa` ADD COLUMN `foto` VARCHAR(255) NULL AFTER `keterangan`;
+-- ALTER TABLE `bangunan_massa` ADD COLUMN `geom` MEDIUMTEXT NULL AFTER `foto`;

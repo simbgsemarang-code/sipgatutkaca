@@ -872,12 +872,11 @@ class Admin extends CI_Controller {
 		$ada = function () { return $this->db->query("SHOW TABLES LIKE 'bangunan_massa'")->num_rows() > 0; };
 		if ($ada())
 		{
-			// Tabel dari versi awal belum punya kolom foto: tambahkan.
-			if ($this->db->query("SHOW COLUMNS FROM `bangunan_massa` LIKE 'foto'")->num_rows() === 0)
-			{
-				$this->db->query('ALTER TABLE `bangunan_massa` ADD COLUMN `foto` VARCHAR(255) NULL AFTER `keterangan`');
-			}
-			return $this->db->query("SHOW COLUMNS FROM `bangunan_massa` LIKE 'foto'")->num_rows() > 0;
+			// Tabel dari versi lebih awal belum punya kolom foto / geom: tambahkan.
+			$kolom_ada = function ($k) { return $this->db->query("SHOW COLUMNS FROM `bangunan_massa` LIKE '" . $k . "'")->num_rows() > 0; };
+			if (! $kolom_ada('foto')) $this->db->query('ALTER TABLE `bangunan_massa` ADD COLUMN `foto` VARCHAR(255) NULL AFTER `keterangan`');
+			if (! $kolom_ada('geom')) $this->db->query('ALTER TABLE `bangunan_massa` ADD COLUMN `geom` MEDIUMTEXT NULL AFTER `foto`');
+			return $kolom_ada('foto') && $kolom_ada('geom');
 		}
 		$this->db->query("CREATE TABLE IF NOT EXISTS `bangunan_massa` (
 			`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -889,6 +888,7 @@ class Admin extends CI_Controller {
 			`tahun_dibangun` SMALLINT UNSIGNED NULL,
 			`keterangan` VARCHAR(255) NULL,
 			`foto` VARCHAR(255) NULL,
+			`geom` MEDIUMTEXT NULL,
 			`created_at` DATETIME NOT NULL,
 			`updated_at` DATETIME NOT NULL,
 			PRIMARY KEY (`id`),
@@ -922,11 +922,49 @@ class Admin extends CI_Controller {
 			$r['luas_m2']       = $r['luas_m2'] !== NULL ? (float) $r['luas_m2'] : NULL;
 			$r['tahun_dibangun'] = $r['tahun_dibangun'] !== NULL ? (int) $r['tahun_dibangun'] : NULL;
 			$r['foto_src']      = $this->_massa_foto_src(isset($r['foto']) ? $r['foto'] : '');
+			$r['geom']          = (isset($r['geom']) && $r['geom'] !== NULL && $r['geom'] !== '') ? json_decode($r['geom'], TRUE) : NULL;
 		}
 		unset($r);
 		return $rows;
 	}
 
+	/**
+	 * Validasi & normalisasi geometri massa dari klien (GeoJSON Point / Polygon).
+	 * Mengembalikan array GeoJSON rapi (koordinat [lng,lat], 7 desimal; cincin poligon ditutup),
+	 * atau FALSE bila tidak valid.
+	 */
+	private function _massa_geom($json)
+	{
+		$g = json_decode($json, TRUE);
+		if (! is_array($g) || empty($g['type']) || ! isset($g['coordinates']) || ! is_array($g['coordinates'])) return FALSE;
+		$titik = function ($p) {
+			if (! is_array($p) || count($p) < 2 || ! is_numeric($p[0]) || ! is_numeric($p[1])) return FALSE;
+			$lng = (float) $p[0]; $lat = (float) $p[1];
+			if (abs($lat) > 90 || abs($lng) > 180) return FALSE;
+			return array(round($lng, 7), round($lat, 7));
+		};
+		if ($g['type'] === 'Point')
+		{
+			$p = $titik($g['coordinates']);
+			return $p === FALSE ? FALSE : array('type' => 'Point', 'coordinates' => $p);
+		}
+		if ($g['type'] === 'Polygon' && isset($g['coordinates'][0]) && is_array($g['coordinates'][0]))
+		{
+			$ring = array();
+			foreach ($g['coordinates'][0] as $p)
+			{
+				$t = $titik($p);
+				if ($t === FALSE) return FALSE;
+				$ring[] = $t;
+			}
+			if (count($ring) > 1 && $ring[0] === $ring[count($ring) - 1]) array_pop($ring);   // buang penutup bila ada
+			if (count($ring) < 3 || count($ring) > 500) return FALSE;
+			if (count(array_unique(array_map('json_encode', $ring))) < 3) return FALSE;      // minimal 3 titik berbeda
+			$ring[] = $ring[0];
+			return array('type' => 'Polygon', 'coordinates' => array($ring));
+		}
+		return FALSE;
+	}
 	/** Jawaban simpan/hapus massa: JSON untuk modal (AJAX), atau flash + kembali ke daftar bila bukan AJAX. */
 	private function _massa_balas($bid, $ok, $pesan, $kode = 422)
 	{
@@ -957,7 +995,7 @@ class Admin extends CI_Controller {
 		}
 		$this->output->set_content_type('application/json')->set_output(json_encode(array(
 			'ok'        => TRUE,
-			'bangunan'  => array('id' => (int) $row['id'], 'nama_bangunan' => $row['nama_bangunan'], 'opd' => $row['opd'], 'alamat' => $row['alamat']),
+			'bangunan'  => array('id' => (int) $row['id'], 'nama_bangunan' => $row['nama_bangunan'], 'opd' => $row['opd'], 'alamat' => $row['alamat'], 'latitude' => ($row['latitude'] !== NULL ? (float) $row['latitude'] : NULL), 'longitude' => ($row['longitude'] !== NULL ? (float) $row['longitude'] : NULL)),
 			'daftar'    => $this->_massa_daftar($row['id']),
 			'kondisi'   => $this->kondisi_label,
 			'tahun_maks' => (int) date('Y') + 1,
@@ -994,6 +1032,15 @@ class Admin extends CI_Controller {
 		if ($tahun !== '' && (! ctype_digit($tahun) || (int) $tahun < 1800 || (int) $tahun > ((int) date('Y') + 1))) $salah[] = 'Tahun dibangun (1800–' . ((int) date('Y') + 1) . ')';
 		if (mb_strlen($ket) > 255)                                   $salah[] = 'Keterangan (maks. 255 karakter)';
 		if ($mid > 0 && ! $this->db->where('id', $mid)->where('bangunan_id', $bid)->count_all_results('bangunan_massa')) $salah[] = 'Massa yang diubah tidak ditemukan';
+		// Lokasi pada peta (opsional): marker atau poligon dalam GeoJSON; kosong = tanpa lokasi.
+		$geom_in = trim((string) $this->input->post('geom'));
+		$geom = NULL;
+		if ($geom_in !== '')
+		{
+			$g = $this->_massa_geom($geom_in);
+			if ($g === FALSE) $salah[] = 'Lokasi pada peta (marker atau poligon minimal 3 titik dengan koordinat valid)';
+			else $geom = json_encode($g);
+		}
 
 		if (! empty($salah))
 		{
@@ -1043,6 +1090,7 @@ class Admin extends CI_Controller {
 			'tahun_dibangun' => $tahun !== '' ? (int) $tahun : NULL,
 			'keterangan'     => $ket !== '' ? $ket : NULL,
 			'foto'           => $foto,
+			'geom'           => $geom,
 			'updated_at'     => date('Y-m-d H:i:s'),
 		);
 		if ($mid > 0)
