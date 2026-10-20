@@ -315,12 +315,12 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .massa-dlg{margin:auto;border:1px solid var(--line);border-radius:18px;padding:0;width:min(1320px,calc(100% - 28px));max-height:calc(100vh - 40px);background:var(--surface);color:var(--text);box-shadow:0 30px 80px rgba(8,24,38,.4)}
 .massa-dlg::backdrop{background:rgba(8,24,38,.55);backdrop-filter:blur(2px)}
 .massa-wrap{display:flex;flex-direction:column;max-height:calc(100vh - 40px)}
-.massa-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:24px 28px 14px;border-bottom:1px solid var(--line)}
+.massa-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:16px 28px 10px;border-bottom:1px solid var(--line)}
 .massa-top h3{font-family:var(--display);font-weight:400;font-size:1.5rem;line-height:1.2;margin:0}
 .massa-top p{margin:6px 0 0;color:var(--muted);font-size:.84rem}
 .massa-x{background:none;border:1px solid var(--line);color:var(--muted);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1.1rem;line-height:1;flex:0 0 auto}
 .massa-x:hover{color:var(--text);border-color:var(--gold-500)}
-.massa-body{padding:18px 28px 26px;overflow:auto}
+.massa-body{padding:16px 28px 20px;overflow:auto}
 .massa-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .massa-ringkas{color:var(--muted);font-size:.82rem}
 .massa-ringkas b{color:var(--text);font-weight:600}
@@ -337,12 +337,12 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .massa-foto{width:72px;height:54px;object-fit:cover;border:1px solid var(--line);border-radius:8px;display:block;background:var(--surface-hi)}
 .massa-foto-kosong{width:72px;height:54px;border:1px dashed var(--line);border-radius:8px;display:grid;place-items:center;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .massa-kosong{margin-top:14px;border:1px dashed var(--line);padding:26px;text-align:center;color:var(--muted);font-size:.88rem}
-.massa-form{margin-top:16px;border:1px solid var(--line);background:var(--surface-hi);padding:20px 22px;border-radius:12px}
-.massa-form h4{font-family:var(--display);font-weight:400;font-size:1.1rem;margin:0 0 14px}
-.massa-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
+.massa-form{margin-top:12px;border:1px solid var(--line);background:var(--surface-hi);padding:14px 20px 16px;border-radius:12px}
+.massa-form h4{font-family:var(--display);font-weight:400;font-size:1.1rem;margin:0 0 10px}
+.massa-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 16px}
 .massa-grid .fl{min-width:0}
 .massa-grid .full{grid-column:1/-1}
-.massa-form label.lb{display:block;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.massa-form label.lb{display:block;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .massa-form input[type=text],.massa-form input[type=number],.massa-form select{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:10px 12px;font-family:var(--body);font-size:.9rem}
 .massa-form input[type=file]{width:100%;background:var(--input);border:1px solid var(--line);color:var(--text);padding:8px 10px;font-family:var(--body);font-size:.85rem}
 .massa-form input:focus,.massa-form select:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
@@ -351,20 +351,19 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .massa-fotoprev img{height:84px;width:auto;max-width:150px;border:1px solid var(--line);border-radius:8px;object-fit:cover}
 .massa-fotoprev label{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text)}
 .massa-hint{font-size:.72rem;color:var(--muted);margin-top:5px}
-.massa-form-aksi{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.massa-form-aksi{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 .massa-mode{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .massa-mode label{display:flex;align-items:center;gap:7px;font-size:.84rem;color:var(--text);letter-spacing:0;text-transform:none;margin:0;cursor:pointer}
 .massa-mode input{width:auto;accent-color:#A57E2C}
-.massa-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:22px 30px;align-items:start}
-.massa-kanan .massa-peta{height:340px}
-.massa-kanan .massa-koord{grid-template-columns:1fr 1fr}.massa-kanan .massa-koord .btn{grid-column:1/-1;justify-self:start}
-@media(max-width:980px){.massa-cols{grid-template-columns:1fr}.massa-kanan .massa-peta{height:320px}}
+.massa-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:22px 30px;align-items:stretch}
+.massa-kanan{display:flex;flex-direction:column}#mfLokasi{display:flex;flex-direction:column;flex:1}#mfLokasi .massa-peta{flex:1;height:auto;min-height:260px}
+@media(max-width:980px){.massa-cols{grid-template-columns:1fr}#mfLokasi .massa-peta{flex:none;height:300px}}
 .massa-peta{height:320px;border:1px solid var(--line);border-radius:10px;background:#dfeee2;position:relative;z-index:0}
-.massa-koord{display:grid;grid-template-columns:1fr 1fr auto;gap:10px 12px;align-items:end;margin-top:12px}
-.massa-koord-poli{margin-top:12px}
-.massa-koord-poli textarea{width:100%;min-height:96px;resize:vertical;background:var(--input);border:1px solid var(--line);color:var(--text);padding:10px 12px;font:400 .84rem/1.5 ui-monospace,Consolas,monospace}
+.massa-koord{display:grid;grid-template-columns:1fr 1fr auto;gap:10px 12px;align-items:end;margin-top:4px}
+.massa-koord-poli{margin-top:4px}
+.massa-koord-poli textarea{width:100%;min-height:46px;resize:vertical;background:var(--input);border:1px solid var(--line);color:var(--text);padding:10px 12px;font:400 .84rem/1.5 ui-monospace,Consolas,monospace}
 .massa-koord-poli textarea:focus{outline:1px solid var(--gold-500);border-color:var(--gold-500)}
-.massa-koord-aksi{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.massa-koord-aksi{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .massa-basemap{background:#fff;color:#223;padding:8px 12px;font-size:12.5px;line-height:1.5;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 .massa-basemap b{display:block;margin-bottom:3px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8a6a1c}
 .massa-basemap label{display:flex;align-items:center;gap:7px;padding:1px 0;cursor:pointer;margin:0;font-weight:400}
@@ -384,7 +383,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <button type="button" class="massa-x" id="massaTutup" aria-label="Tutup">&times;</button>
     </div>
     <div class="massa-body">
-      <div class="massa-bar">
+      <div class="massa-bar" id="massaBar">
         <span class="massa-ringkas" id="massaRingkas"></span>
         <button type="button" class="btn btn-gold btn-xs" id="massaTambah">+ Tambah Massa</button>
       </div>
@@ -409,19 +408,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
             <input type="file" name="foto_file" id="mfFoto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
             <p class="massa-hint" id="mfFotoHint">JPG / PNG / WebP, maksimal 100 MB.</p>
           </div>
-        </div>
-        </div>
-        <div class="massa-kanan">
-          <div id="mfLokasi">
-            <label class="lb">Lokasi pada Peta <span style="text-transform:none;letter-spacing:0">(opsional)</span></label>
-            <div class="massa-mode" role="radiogroup" aria-label="Jenis lokasi">
-              <label><input type="radio" name="mf_mode" value="marker" checked> Marker (satu titik)</label>
-              <label><input type="radio" name="mf_mode" value="polygon"> Poligon (bidang massa)</label>
-              <label><input type="radio" name="mf_mode" value="none"> Tanpa lokasi</label>
-              <button type="button" class="btn btn-ghost btn-xs" id="mfGeomHapus">Hapus gambar</button>
-            </div>
-            <div class="massa-peta" id="mfPeta" role="application" aria-label="Peta lokasi massa"></div>
-            <p class="massa-hint" id="mfPetaHint"></p>
+          <div class="fl full" id="mfKoordWrap">
+            <label class="lb">Koordinat Lokasi <span style="text-transform:none;letter-spacing:0">(jika sudah tahu, tidak perlu cari di peta)</span></label>
             <div class="massa-koord" id="mfKoordMarker">
               <div><label class="lb" for="mfLat">Latitude</label><input type="text" inputmode="decimal" id="mfLat" placeholder="mis. -7.726700"></div>
               <div><label class="lb" for="mfLng">Longitude</label><input type="text" inputmode="decimal" id="mfLng" placeholder="mis. 109.015400"></div>
@@ -435,6 +423,20 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
                 <button type="button" class="btn btn-ghost btn-xs" id="mfPoliUndo">Hapus titik terakhir</button>
               </div>
             </div>
+          </div>
+        </div>
+        </div>
+        <div class="massa-kanan">
+          <div id="mfLokasi">
+            <label class="lb">Lokasi pada Peta <span style="text-transform:none;letter-spacing:0">(opsional)</span></label>
+            <div class="massa-mode" role="radiogroup" aria-label="Jenis lokasi">
+              <label><input type="radio" name="mf_mode" value="marker" checked> Marker (satu titik)</label>
+              <label><input type="radio" name="mf_mode" value="polygon"> Poligon (bidang massa)</label>
+              <label><input type="radio" name="mf_mode" value="none"> Tanpa lokasi</label>
+              <button type="button" class="btn btn-ghost btn-xs" id="mfGeomHapus">Hapus gambar</button>
+            </div>
+            <div class="massa-peta" id="mfPeta" role="application" aria-label="Peta lokasi massa"></div>
+            <p class="massa-hint" id="mfPetaHint"></p>
             <input type="hidden" name="geom" id="mfGeom">
           </div>
         </div>
@@ -477,9 +479,9 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     $('massaFormJudul').textContent=data?'Ubah Massa':'Tambah Massa'; $('mfSimpan').textContent=data?'Simpan Perubahan':'Tambah Massa';
     if(data){$('mfNama').value=data.nama_massa;$('mfKondisi').value=data.kondisi;$('mfLantai').value=data.jumlah_lantai===null?'':data.jumlah_lantai;$('mfLuas').value=data.luas_m2===null?'':String(data.luas_m2).replace('.',',');$('mfTahun').value=data.tahun_dibangun===null?'':data.tahun_dibangun;$('mfKet').value=data.keterangan||'';}
     else{$('mfKondisi').value='1';}
-    form.hidden=false; $('massaTambah').hidden=true; lokasiMuat(data); form.scrollIntoView({block:'nearest'}); $('mfNama').focus();
+    form.hidden=false; $('massaBar').hidden=true; $('massaTambah').hidden=true; $('massaTabelWrap').hidden=true; $('massaKosong').hidden=true; lokasiMuat(data); form.scrollIntoView({block:'nearest'}); $('mfNama').focus();
   }
-  function formTutup(){form.hidden=true;$('massaTambah').hidden=false;}
+  function formTutup(){form.hidden=true;$('massaBar').hidden=false;$('massaTambah').hidden=false;var n=st.daftar.length;$('massaTabelWrap').hidden=(n===0);$('massaKosong').hidden=(n!==0);}
 
   /* ===== Lokasi massa: peta gambar (marker / poligon) + input koordinat ===== */
   var peta=null, lap=null, refM=null, titik=[], modeLok='marker', osmL=null, esriL=null, leafletMuat=false;
