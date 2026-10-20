@@ -144,6 +144,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .massa-tabel td.num,.massa-tabel th.num{text-align:right;white-space:nowrap}
 .massa-tabel .aksi{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
 .massa-kosong{margin-top:26px;border:1px dashed var(--line);padding:30px;text-align:center;color:var(--muted);font-size:.9rem}
+.massa-foto{width:84px;height:64px;object-fit:cover;border:1px solid var(--line);border-radius:8px;display:block;background:var(--surface-hi)}.massa-foto-kosong{width:84px;height:64px;border:1px dashed var(--line);border-radius:8px;display:grid;place-items:center;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.foto-pratinjau{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.foto-pratinjau img{height:92px;width:auto;max-width:160px;border:1px solid var(--line);border-radius:8px;object-fit:cover}
 .form-card h3{font-family:var(--display);font-weight:400;font-size:1.25rem;margin-bottom:20px}
 .form-card .fld .hint{font-size:.72rem;color:var(--muted);margin-top:5px}
 </style>
@@ -226,6 +228,7 @@ $f_val = function ($k, $d = '') use ($o) { return isset($o[$k]) ? $o[$k] : $d; }
 $total_luas = 0.0; $total_lantai = 0;
 foreach ($daftar as $m) { $total_luas += (float) $m['luas_m2']; $total_lantai += (int) $m['jumlah_lantai']; }
 $ada_old_edit = ((int) $f_val('massa_id', 0)) > 0;
+$foto_src = function ($nilai) { $nilai = (string) $nilai; if ($nilai === '') return ''; return preg_match('#^https?://#i', $nilai) ? $nilai : base_url('assets/foto-bangunan/' . rawurlencode($nilai)); };
 ?>
 <section style="padding-top:20px">
   <div class="dash-wrap">
@@ -254,10 +257,12 @@ $ada_old_edit = ((int) $f_val('massa_id', 0)) > 0;
       <div class="massa-kosong">Belum ada massa untuk bangunan ini. Tambahkan massa pertama lewat formulir di bawah.</div>
     <?php else: ?>
       <table class="massa-tabel">
-        <thead><tr><th>Nama Massa</th><th class="num">Lantai</th><th class="num">Luas (m²)</th><th>Kondisi</th><th class="num">Tahun</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+        <thead><tr><th>Foto</th><th>Nama Massa</th><th class="num">Lantai</th><th class="num">Luas (m²)</th><th>Kondisi</th><th class="num">Tahun</th><th>Keterangan</th><th>Aksi</th></tr></thead>
         <tbody>
         <?php foreach ($daftar as $m): $wk = $warna_kondisi[$m['kondisi']]; ?>
+          <?php $fs = $foto_src(isset($m['foto']) ? $m['foto'] : ''); ?>
           <tr>
+            <td><?php if ($fs !== ''): ?><a href="<?php echo $e($fs); ?>" target="_blank" rel="noopener" title="Lihat foto"><img class="massa-foto" src="<?php echo $e($fs); ?>" alt="Foto <?php echo $e($m['nama_massa']); ?>" loading="lazy"></a><?php else: ?><span class="massa-foto-kosong">Tanpa foto</span><?php endif; ?></td>
             <td><?php echo $e($m['nama_massa']); ?></td>
             <td class="num"><?php echo $m['jumlah_lantai'] !== null ? (int) $m['jumlah_lantai'] : '—'; ?></td>
             <td class="num"><?php echo $m['luas_m2'] !== null ? $e(number_format((float) $m['luas_m2'], 2, ',', '.')) : '—'; ?></td>
@@ -266,7 +271,7 @@ $ada_old_edit = ((int) $f_val('massa_id', 0)) > 0;
             <td style="font-size:.82rem"><?php echo $m['keterangan'] !== null && $m['keterangan'] !== '' ? $e($m['keterangan']) : '—'; ?></td>
             <td>
               <div class="aksi">
-                <button type="button" class="btn btn-ghost btn-xs" data-ubah="<?php echo $e(json_encode(array('id' => (int) $m['id'], 'nama_massa' => $m['nama_massa'], 'jumlah_lantai' => $m['jumlah_lantai'], 'luas_m2' => $m['luas_m2'], 'kondisi' => $m['kondisi'], 'tahun_dibangun' => $m['tahun_dibangun'], 'keterangan' => $m['keterangan']))); ?>">Ubah</button>
+                <button type="button" class="btn btn-ghost btn-xs" data-ubah="<?php echo $e(json_encode(array('id' => (int) $m['id'], 'nama_massa' => $m['nama_massa'], 'jumlah_lantai' => $m['jumlah_lantai'], 'luas_m2' => $m['luas_m2'], 'kondisi' => $m['kondisi'], 'tahun_dibangun' => $m['tahun_dibangun'], 'keterangan' => $m['keterangan'], 'foto_src' => $fs))); ?>">Ubah</button>
                 <form action="<?php echo base_url('admin/bangunan-massa-hapus/' . (int) $row['id'] . '/' . (int) $m['id']); ?>" method="post" style="margin:0" onsubmit="return confirm('Hapus massa &quot;<?php echo $e(addslashes($m['nama_massa'])); ?>&quot;?');">
                   <button type="submit" class="btn btn-xs" style="border:1px solid #E0526B;color:#E0526B;background:transparent;cursor:pointer">Hapus</button>
                 </form>
@@ -278,7 +283,7 @@ $ada_old_edit = ((int) $f_val('massa_id', 0)) > 0;
       </table>
     <?php endif; ?>
 
-    <form class="form-card" method="post" action="<?php echo base_url('admin/bangunan-massa-simpan/' . (int) $row['id']); ?>" id="fmassa">
+    <form class="form-card" method="post" enctype="multipart/form-data" action="<?php echo base_url('admin/bangunan-massa-simpan/' . (int) $row['id']); ?>" id="fmassa">
       <h3 id="fmassaJudul"><?php echo $ada_old_edit ? 'Ubah Massa' : 'Tambah Massa'; ?></h3>
       <input type="hidden" name="massa_id" id="fMassaId" value="<?php echo (int) $f_val('massa_id', 0); ?>">
       <div class="grid2">
@@ -299,6 +304,16 @@ $ada_old_edit = ((int) $f_val('massa_id', 0)) > 0;
         <div class="fld"><label for="fTahun">Tahun Dibangun</label><input type="number" name="tahun_dibangun" id="fTahun" min="1800" max="<?php echo (int) date('Y') + 1; ?>" step="1" placeholder="mis. 1998" value="<?php echo $e($f_val('tahun_dibangun')); ?>"></div>
         <div class="fld"><label for="fKet">Keterangan</label><input type="text" name="keterangan" id="fKet" maxlength="255" placeholder="Fungsi atau catatan massa" value="<?php echo $e($f_val('keterangan')); ?>"></div>
       </div>
+      <div class="fld">
+        <label for="fFoto">Foto Massa</label>
+        <div class="foto-pratinjau" id="fFotoSaatIni" hidden>
+          <img src="" alt="Foto massa saat ini" id="fFotoImg">
+          <label style="display:flex;align-items:center;gap:8px;font-size:.78rem;letter-spacing:0;text-transform:none;margin:0;color:var(--text)"><input type="checkbox" name="hapus_foto" value="1" id="fHapusFoto" style="width:auto"> Hapus foto ini</label>
+        </div>
+        <div class="foto-pratinjau" id="fFotoBaru" hidden><img src="" alt="Pratinjau foto baru" id="fFotoBaruImg"><span class="hint" style="margin:0">Pratinjau foto yang akan diunggah</span></div>
+        <input type="file" name="foto_file" id="fFoto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+        <p class="hint" id="fFotoHint">JPG / PNG / WebP, maksimal 100 MB.</p>
+      </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
         <button type="submit" class="btn btn-gold btn-sm" id="fmassaSimpan"><?php echo $ada_old_edit ? 'Simpan Perubahan' : 'Tambah Massa'; ?></button>
         <button type="button" class="btn btn-ghost btn-sm" id="fmassaBatal" <?php echo $ada_old_edit ? '' : 'hidden'; ?>>Batal Ubah</button>
@@ -308,6 +323,9 @@ $ada_old_edit = ((int) $f_val('massa_id', 0)) > 0;
     (function(){
       var f=document.getElementById('fmassa'); if(!f)return;
       var judul=document.getElementById('fmassaJudul'), simpan=document.getElementById('fmassaSimpan'), batal=document.getElementById('fmassaBatal');
+      var fotoBox=document.getElementById('fFotoSaatIni'), fotoImg=document.getElementById('fFotoImg'), hapusFoto=document.getElementById('fHapusFoto'), fotoInput=document.getElementById('fFoto'), fotoBaru=document.getElementById('fFotoBaru'), fotoBaruImg=document.getElementById('fFotoBaruImg'), fotoHint=document.getElementById('fFotoHint');
+      function setFoto(src){ hapusFoto.checked=false; fotoInput.value=''; fotoBaru.hidden=true; if(src){ fotoImg.src=src; fotoBox.hidden=false; fotoHint.textContent='JPG / PNG / WebP, maksimal 100 MB. Biarkan kosong kalau tidak ingin mengganti.'; } else { fotoImg.removeAttribute('src'); fotoBox.hidden=true; fotoHint.textContent='JPG / PNG / WebP, maksimal 100 MB.'; } }
+      fotoInput.addEventListener('change',function(){ var fl=fotoInput.files&&fotoInput.files[0]; if(fl&&fl.type.indexOf('image/')===0){ fotoBaruImg.src=URL.createObjectURL(fl); fotoBaru.hidden=false; } else { fotoBaru.hidden=true; } });
       var F={id:document.getElementById('fMassaId'),nama:document.getElementById('fNama'),kondisi:document.getElementById('fKondisi'),lantai:document.getElementById('fLantai'),luas:document.getElementById('fLuas'),tahun:document.getElementById('fTahun'),ket:document.getElementById('fKet')};
       function mode(ubah){ judul.textContent=ubah?'Ubah Massa':'Tambah Massa'; simpan.textContent=ubah?'Simpan Perubahan':'Tambah Massa'; batal.hidden=!ubah; }
       function nol(v){ return v===null||v===undefined?'':v; }
@@ -316,10 +334,10 @@ $ada_old_edit = ((int) $f_val('massa_id', 0)) > 0;
           var d=JSON.parse(b.getAttribute('data-ubah'));
           F.id.value=d.id; F.nama.value=d.nama_massa; F.kondisi.value=d.kondisi; F.lantai.value=nol(d.jumlah_lantai);
           F.luas.value=d.luas_m2===null?'':String(d.luas_m2).replace('.',','); F.tahun.value=nol(d.tahun_dibangun); F.ket.value=nol(d.keterangan);
-          mode(true); f.scrollIntoView({behavior:'smooth',block:'center'}); F.nama.focus();
+          setFoto(d.foto_src||''); mode(true); f.scrollIntoView({behavior:'smooth',block:'center'}); F.nama.focus();
         });
       });
-      batal.addEventListener('click',function(){ f.reset(); F.id.value='0'; F.nama.value=''; F.lantai.value=''; F.luas.value=''; F.tahun.value=''; F.ket.value=''; F.kondisi.value='1'; mode(false); });
+      batal.addEventListener('click',function(){ f.reset(); F.id.value='0'; F.nama.value=''; F.lantai.value=''; F.luas.value=''; F.tahun.value=''; F.ket.value=''; F.kondisi.value='1'; setFoto(''); mode(false); });
     })();
     </script>
     <?php endif; ?>

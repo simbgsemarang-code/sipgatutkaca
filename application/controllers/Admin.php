@@ -870,7 +870,15 @@ class Admin extends CI_Controller {
 	private function _pastikan_tabel_massa()
 	{
 		$ada = function () { return $this->db->query("SHOW TABLES LIKE 'bangunan_massa'")->num_rows() > 0; };
-		if ($ada()) return TRUE;
+		if ($ada())
+		{
+			// Tabel dari versi awal belum punya kolom foto: tambahkan.
+			if ($this->db->query("SHOW COLUMNS FROM `bangunan_massa` LIKE 'foto'")->num_rows() === 0)
+			{
+				$this->db->query('ALTER TABLE `bangunan_massa` ADD COLUMN `foto` VARCHAR(255) NULL AFTER `keterangan`');
+			}
+			return $this->db->query("SHOW COLUMNS FROM `bangunan_massa` LIKE 'foto'")->num_rows() > 0;
+		}
 		$this->db->query("CREATE TABLE IF NOT EXISTS `bangunan_massa` (
 			`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
 			`bangunan_id` INT UNSIGNED NOT NULL,
@@ -880,6 +888,7 @@ class Admin extends CI_Controller {
 			`kondisi` ENUM('1','2','3','4') NOT NULL DEFAULT '1',
 			`tahun_dibangun` SMALLINT UNSIGNED NULL,
 			`keterangan` VARCHAR(255) NULL,
+			`foto` VARCHAR(255) NULL,
 			`created_at` DATETIME NOT NULL,
 			`updated_at` DATETIME NOT NULL,
 			PRIMARY KEY (`id`),
@@ -952,6 +961,44 @@ class Admin extends CI_Controller {
 			return;
 		}
 
+		// ---- Foto massa: unggah ke assets/foto-bangunan/ (sama seperti foto bangunan) ----
+		$dir_foto = FCPATH . 'assets/foto-bangunan/';
+		$foto     = NULL;
+		if ($mid > 0)
+		{
+			$lama = $this->db->select('foto')->where('id', $mid)->get('bangunan_massa')->row_array();
+			$foto = ($lama && ! empty($lama['foto'])) ? $lama['foto'] : NULL;
+		}
+		$foto_hapus = array();
+		if ($this->input->post('hapus_foto') === '1' && $foto !== NULL)
+		{
+			$foto_hapus[] = $foto;
+			$foto = NULL;
+		}
+		if (! empty($_FILES['foto_file']['name']))
+		{
+			if (! is_dir($dir_foto)) @mkdir($dir_foto, 0755, TRUE);
+			$this->load->library('upload');
+			$this->upload->initialize(array(
+				'upload_path'   => $dir_foto,
+				'allowed_types' => 'jpg|jpeg|png|webp',
+				'max_size'      => 102400,
+				'encrypt_name'  => TRUE,
+			));
+			if ($this->upload->do_upload('foto_file'))
+			{
+				if ($foto !== NULL) $foto_hapus[] = $foto;
+				$foto = berkas_simpan($this->upload->data());
+			}
+			else
+			{
+				$this->session->set_flashdata('error', 'Foto gagal diunggah: ' . strip_tags($this->upload->display_errors('', '')));
+				$this->session->set_flashdata('old', $this->input->post());
+				redirect($tujuan);
+				return;
+			}
+		}
+
 		$simpan = array(
 			'nama_massa'     => $nama,
 			'jumlah_lantai'  => $lantai !== '' ? (int) $lantai : NULL,
@@ -959,6 +1006,7 @@ class Admin extends CI_Controller {
 			'kondisi'        => $kondisi,
 			'tahun_dibangun' => $tahun !== '' ? (int) $tahun : NULL,
 			'keterangan'     => $ket !== '' ? $ket : NULL,
+			'foto'           => $foto,
 			'updated_at'     => date('Y-m-d H:i:s'),
 		);
 		if ($mid > 0)
@@ -973,6 +1021,7 @@ class Admin extends CI_Controller {
 			$this->db->insert('bangunan_massa', $simpan);
 			$this->session->set_flashdata('sukses', 'Massa "' . $nama . '" berhasil ditambahkan.');
 		}
+		foreach ($foto_hapus as $fh) { if (stripos($fh, 'http') !== 0) @unlink($dir_foto . basename($fh)); }
 		redirect($tujuan);
 	}
 
@@ -990,6 +1039,7 @@ class Admin extends CI_Controller {
 			redirect($tujuan);
 			return;
 		}
+		if (! empty($m['foto']) && stripos($m['foto'], 'http') !== 0) @unlink(FCPATH . 'assets/foto-bangunan/' . basename($m['foto']));
 		$this->db->where('id', $mid)->delete('bangunan_massa');
 		$this->session->set_flashdata('sukses', 'Massa "' . $m['nama_massa'] . '" berhasil dihapus.');
 		redirect($tujuan);
@@ -1010,7 +1060,14 @@ class Admin extends CI_Controller {
 			@unlink(FCPATH . 'assets/foto-bangunan/' . basename($row['foto']));
 		}
 		$this->db->where('id', $id)->delete('bangunan_gis');
-		if ($this->db->table_exists('bangunan_massa')) $this->db->where('bangunan_id', $id)->delete('bangunan_massa');
+		if ($this->db->table_exists('bangunan_massa'))
+		{
+			foreach ($this->db->select('foto')->where('bangunan_id', $id)->get('bangunan_massa')->result_array() as $mf)
+			{
+				if (! empty($mf['foto']) && stripos($mf['foto'], 'http') !== 0) @unlink(FCPATH . 'assets/foto-bangunan/' . basename($mf['foto']));
+			}
+			$this->db->where('bangunan_id', $id)->delete('bangunan_massa');
+		}
 		$this->session->set_flashdata('sukses', 'Bangunan "' . $row['nama_bangunan'] . '" berhasil dihapus dari peta.');
 		redirect('admin/bangunan');
 	}

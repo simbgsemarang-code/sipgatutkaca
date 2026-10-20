@@ -11,8 +11,12 @@ CREATE TABLE IF NOT EXISTS `bangunan_massa` (
   `kondisi` ENUM('1','2','3','4') NOT NULL DEFAULT '1',
   `tahun_dibangun` SMALLINT UNSIGNED NULL,
   `keterangan` VARCHAR(255) NULL,
+  `foto` VARCHAR(255) NULL,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,
   PRIMARY KEY (`id`),
   KEY `bangunan_id` (`bangunan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Bila tabel sudah terlanjur dibuat tanpa kolom foto, jalankan:
+-- ALTER TABLE `bangunan_massa` ADD COLUMN `foto` VARCHAR(255) NULL AFTER `keterangan`;
