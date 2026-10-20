@@ -30,14 +30,30 @@ class Bangunan extends CI_Controller {
 		);
 		$data['kondisi_warna'] = array('1' => '#2EA84F', '2' => '#F2C230', '3' => '#D9822B', '4' => '#C0392B');
 		$data['foto_url']      = $this->_foto_url($row['foto']);
+		$data['massa']         = $this->_massa($row['id']);
 
 		$this->load->view('pages/bangunan_detail', $data);
+	}
+
+	/** Massa/blok bangunan (admin: Sebaran Bangunan > Massa) beserta foto dan geometrinya; kosong bila belum ada. */
+	private function _massa($bangunan_id)
+	{
+		if (! $this->db->table_exists('bangunan_massa')) return array();
+		$rows = $this->db->where('bangunan_id', (int) $bangunan_id)->order_by('id', 'ASC')->get('bangunan_massa')->result_array();
+		foreach ($rows as &$m)
+		{
+			$m['foto_url'] = $this->_foto_url(isset($m['foto']) ? $m['foto'] : NULL);
+			$g = (isset($m['geom']) && $m['geom'] !== NULL && $m['geom'] !== '') ? json_decode($m['geom'], TRUE) : NULL;
+			$m['geom'] = (is_array($g) && isset($g['type'], $g['coordinates'])) ? $g : NULL;
+		}
+		unset($m);
+		return $rows;
 	}
 
 	private function _foto_url($f)
 	{
 		if ($f === NULL || $f === '') return NULL;
 		if (preg_match('#^https?://#i', $f)) return $f;
-		return base_url('assets/foto-bangunan/' . ltrim($f, '/'));
+		return base_url('assets/foto-bangunan/' . rawurlencode(ltrim($f, '/')));
 	}
 }

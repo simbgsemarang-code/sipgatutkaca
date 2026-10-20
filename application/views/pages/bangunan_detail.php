@@ -6,6 +6,25 @@ $lat       = (float) $b['latitude'];
 $lng       = (float) $b['longitude'];
 $judul     = '(' . (int) $b['id'] . ') ' . $b['nama_bangunan'];
 $e         = function ($v) { return htmlspecialchars(($v === null || $v === '') ? '—' : (string) $v, ENT_QUOTES, 'UTF-8'); };
+$massa      = isset($massa) ? $massa : array();
+$massa_n    = count($massa);
+$massa_luas = 0.0;
+foreach ($massa as $mm) { $massa_luas += (float) $mm['luas_m2']; }
+$massa_js   = array();
+foreach ($massa as $i => $mm)
+{
+	$kk = (string) $mm['kondisi'];
+	$massa_js[] = array(
+		'nama'    => $mm['nama_massa'],
+		'lantai'  => $mm['jumlah_lantai'] !== null ? (int) $mm['jumlah_lantai'] : null,
+		'luas'    => $mm['luas_m2'] !== null ? (float) $mm['luas_m2'] : null,
+		'kondisi' => isset($kondisi_label[$kk]) ? $kondisi_label[$kk] : $kk,
+		'warna'   => isset($kondisi_warna[$kk]) ? $kondisi_warna[$kk] : '#8A94A6',
+		'tahun'   => $mm['tahun_dibangun'] !== null ? (int) $mm['tahun_dibangun'] : null,
+		'ket'     => $mm['keterangan'],
+		'geom'    => $mm['geom'],
+	);
+}
 ?>
 <!DOCTYPE html>
 <html lang="id" data-theme="light">
@@ -92,6 +111,21 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,3vw,2.2rem)
 .foto-box{margin-top:4px}
 .foto-box img{width:100%;max-width:520px;border:1px solid var(--line);border-radius:12px}
 .foto-empty{color:var(--muted);font-size:.9rem}
+.massa-ringkas{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.massa-ringkas .pill{border:1px solid var(--line);background:var(--surface-hi);border-radius:12px;padding:8px 16px;font-size:.78rem;color:var(--muted)}
+.massa-ringkas .pill b{display:block;font-family:var(--display);font-weight:400;font-size:1.25rem;color:var(--text)}
+.massa-list{display:grid;gap:14px}
+.massa-item{display:grid;grid-template-columns:104px 1fr;gap:16px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.massa-item .foto{width:104px;height:78px;border-radius:10px;border:1px solid var(--line);overflow:hidden;background:var(--surface-hi);display:grid;place-items:center;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.massa-item .foto img{width:100%;height:100%;object-fit:cover}
+.massa-item h3{font-family:var(--display);font-weight:400;font-size:1.08rem;line-height:1.3;margin-bottom:6px;color:var(--text)}
+.massa-meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.84rem;color:var(--muted);margin-bottom:6px}
+.massa-meta b{color:var(--text);font-weight:600}
+.massa-item .ket{font-size:.86rem;color:var(--muted);margin-bottom:8px}
+.massa-item .aksi{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.massa-item .badge{padding:4px 12px;font-size:.72rem}
+.massa-lok{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:3px 11px;color:var(--gold-300)}
+@media(max-width:560px){.massa-item{grid-template-columns:1fr}.massa-item .foto{width:100%;height:150px}}
 
 footer{background:var(--foot);color:#F8F4EA;padding:60px 0 30px;border-top:1px solid var(--line);margin-top:20px}
 .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:50px}
@@ -156,6 +190,7 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
         <div class="tabs" role="tablist">
           <button class="tab-btn active" data-tab="data" role="tab">Data</button>
           <button class="tab-btn" data-tab="spesifikasi" role="tab">Spesifikasi</button>
+          <?php if ($massa_n > 0): ?><button class="tab-btn" data-tab="massa" role="tab">Massa (<?php echo (int) $massa_n; ?>)</button><?php endif; ?>
           <button class="tab-btn" data-tab="geospasial" role="tab">Geospasial</button>
           <button class="tab-btn" data-tab="dokumen" role="tab">Dokumen</button>
         </div>
@@ -178,8 +213,43 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
           <div class="row"><dt>Fungsi Bangunan</dt><dd><?php echo $e($b['fungsi']); ?></dd></div>
           <div class="row"><dt>Jumlah Lantai</dt><dd><?php echo ($b['jumlah_lantai'] === null || $b['jumlah_lantai'] === '') ? '—' : ((int) $b['jumlah_lantai'] . ' lantai'); ?></dd></div>
           <div class="row"><dt>Kondisi</dt><dd><span class="badge" style="background:<?php echo $k_warna; ?>"><?php echo htmlspecialchars($k_label, ENT_QUOTES, 'UTF-8'); ?></span></dd></div>
+        <?php if ($massa_n > 0): ?>
+          <div class="row"><dt>Jumlah Massa</dt><dd><?php echo (int) $massa_n; ?> massa<?php echo $massa_luas > 0 ? ' <span class="sub">· total luas ' . $e(number_format($massa_luas, 2, ',', '.')) . ' m²</span>' : ''; ?></dd></div>
+        <?php endif; ?>
         </dl>
 
+        <?php if ($massa_n > 0): ?>
+        <div class="tab-pane" id="tab-massa">
+          <div class="massa-ringkas">
+            <div class="pill"><b><?php echo (int) $massa_n; ?></b>massa bangunan</div>
+            <?php if ($massa_luas > 0): ?><div class="pill"><b><?php echo $e(number_format($massa_luas, 2, ',', '.')); ?> m²</b>total luas</div><?php endif; ?>
+          </div>
+          <div class="massa-list">
+            <?php foreach ($massa as $i => $m):
+              $kk = (string) $m['kondisi'];
+              $kl = isset($kondisi_label[$kk]) ? $kondisi_label[$kk] : $kk;
+              $kw = isset($kondisi_warna[$kk]) ? $kondisi_warna[$kk] : '#8A94A6';
+              $tipe = ($m['geom'] && $m['geom']['type'] === 'Polygon') ? 'Poligon' : (($m['geom'] && $m['geom']['type'] === 'Point') ? 'Marker' : ''); ?>
+            <article class="massa-item">
+              <div class="foto"><?php if (!empty($m['foto_url'])): ?><a href="<?php echo $e($m['foto_url']); ?>" target="_blank" rel="noopener noreferrer" title="Lihat foto"><img src="<?php echo $e($m['foto_url']); ?>" alt="Foto <?php echo $e($m['nama_massa']); ?>" loading="lazy"></a><?php else: ?>Tanpa foto<?php endif; ?></div>
+              <div>
+                <h3><?php echo $e($m['nama_massa']); ?></h3>
+                <div class="massa-meta">
+                  <span>Lantai: <b><?php echo $m['jumlah_lantai'] !== null ? (int) $m['jumlah_lantai'] : '—'; ?></b></span>
+                  <span>Luas: <b><?php echo $m['luas_m2'] !== null ? $e(number_format((float) $m['luas_m2'], 2, ',', '.')) . ' m²' : '—'; ?></b></span>
+                  <span>Tahun: <b><?php echo $m['tahun_dibangun'] !== null ? (int) $m['tahun_dibangun'] : '—'; ?></b></span>
+                </div>
+                <?php if ($m['keterangan'] !== null && $m['keterangan'] !== ''): ?><p class="ket"><?php echo $e($m['keterangan']); ?></p><?php endif; ?>
+                <div class="aksi">
+                  <span class="badge" style="background:<?php echo $e($kw); ?>"><?php echo $e($kl); ?></span>
+                  <?php if ($tipe !== ''): ?><button type="button" class="btn btn-ghost btn-sm massa-lihat" data-i="<?php echo (int) $i; ?>">Lihat di peta</button><span class="massa-lok"><?php echo $tipe; ?></span><?php endif; ?>
+                </div>
+              </div>
+            </article>
+            <?php endforeach; ?>
+          </div>
+        </div>
+        <?php endif; ?>
         <dl class="tab-pane" id="tab-geospasial">
           <div class="row"><dt>Latitude</dt><dd><?php echo $lat; ?></dd></div>
           <div class="row"><dt>Longitude</dt><dd><?php echo $lng; ?></dd></div>
@@ -245,9 +315,46 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
   var titik=L.circleMarker([lat,lng],{radius:8,color:"#fff",weight:2,fillColor:"#2563eb",fillOpacity:1})
     .addTo(map).bindPopup(<?php echo json_encode($judul); ?>);
   L.control.scale({imperial:false}).addTo(map);
+  // ---- Massa bangunan di peta (poligon / marker), warna mengikuti kondisi ----
+  var massaData=<?php echo json_encode($massa_js, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>;
+  var massaGrup=L.featureGroup(), massaLayer=[];
+  function esc(t){return String(t==null?"":t).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  function popupMassa(m){
+    var h="<b>"+esc(m.nama)+"</b><br>"+esc(m.kondisi);
+    if(m.lantai!==null)h+="<br>Lantai: "+m.lantai;
+    if(m.luas!==null)h+="<br>Luas: "+Number(m.luas).toLocaleString("id-ID",{minimumFractionDigits:2,maximumFractionDigits:2})+" m²";
+    if(m.tahun!==null)h+="<br>Tahun: "+m.tahun;
+    if(m.ket)h+="<br><i>"+esc(m.ket)+"</i>";
+    return h;
+  }
+  massaData.forEach(function(m,i){
+    var g=m.geom, ly=null; if(!g)return;
+    if(g.type==="Polygon"&&g.coordinates&&g.coordinates[0]){
+      ly=L.polygon(g.coordinates[0].map(function(c){return [c[1],c[0]];}),{color:m.warna,weight:2,fillColor:m.warna,fillOpacity:.35});
+    }else if(g.type==="Point"&&g.coordinates){
+      ly=L.circleMarker([g.coordinates[1],g.coordinates[0]],{radius:9,color:"#fff",weight:2,fillColor:m.warna,fillOpacity:1});
+    }
+    if(ly){ly.bindPopup(popupMassa(m));ly.bindTooltip(m.nama,{sticky:true});massaGrup.addLayer(ly);massaLayer[i]=ly;}
+  });
+  var overlays={"Titik Bangunan":titik};
+  if(massaGrup.getLayers().length){
+    massaGrup.addTo(map); overlays["Massa Bangunan"]=massaGrup;
+    var bb=massaGrup.getBounds().extend([lat,lng]); map.fitBounds(bb,{padding:[30,30],maxZoom:19});
+  }
+  document.querySelectorAll(".massa-lihat").forEach(function(b){
+    b.addEventListener("click",function(){
+      var ly=massaLayer[parseInt(b.getAttribute("data-i"),10)]; if(!ly)return;
+      document.getElementById("bmap").scrollIntoView({block:"center"});
+      setTimeout(function(){
+        map.invalidateSize();
+        if(ly.getBounds){map.fitBounds(ly.getBounds(),{padding:[40,40],maxZoom:20});}else{map.setView(ly.getLatLng(),19);}
+        ly.openPopup();
+      },120);
+    });
+  });
   L.control.layers(
     {"Google Maps":baseGmap,"OpenStreetMap":baseOsm,"Google Hybrid":baseGhybrid,"Google Satelit":baseGsat,"Google Terrain":baseGterrain},
-    {"Titik Bangunan":titik},
+    overlays,
     {position:"bottomleft",collapsed:true}
   ).addTo(map);
   setTimeout(function(){ map.invalidateSize(); }, 250);
