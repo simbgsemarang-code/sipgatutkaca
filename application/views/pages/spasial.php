@@ -265,16 +265,27 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 <style>
 .map-shell{position:relative;width:94vw;margin-left:calc(50% - 47vw);margin-right:calc(50% - 47vw);border:1px solid var(--line);box-shadow:0 18px 50px var(--shadow);border-radius:22px;overflow:hidden}
 #map{height:620px;width:100%;background:#dfeee2;z-index:1}
-/* Kotak cari alamat/koordinat mengambang di atas peta */
-.map-geo{position:absolute;z-index:500;top:14px;left:50%;transform:translateX(-50%);display:flex;background:#fff;border:1px solid rgba(0,0,0,.15);box-shadow:0 4px 14px rgba(0,0,0,.2);width:min(420px,80%)}
-.map-geo input{border:none;background:#fff;color:#223;padding:11px 14px;flex:1;font-size:.88rem}
-.map-geo input:focus{outline:2px solid #C9A24B;outline-offset:-2px;border:none}
-.map-geo button{border:none;background:#fff;color:#667;padding:0 14px;cursor:pointer;font-size:1rem}
-.map-geo button:hover{color:#C9A24B}
-.map-geo{width:min(720px,80%)}
-.map-geo select{border:none;border-right:1px solid rgba(0,0,0,.12);background:#fff;color:#223;padding:11px 10px;font-size:.84rem;flex:0 1 170px;min-width:0;cursor:pointer}
-.map-geo select:focus{outline:2px solid #C9A24B;outline-offset:-2px}
-@media(max-width:1150px){.map-geo{width:min(420px,80%);flex-wrap:wrap}.map-geo select{flex:1 1 50%;border-bottom:1px solid rgba(0,0,0,.12)}.map-geo select:nth-of-type(2){border-right:none}}
+/* Kotak cari mengambang di atas peta: kaca buram, sudut membulat, tidak menabrak panel lapisan */
+.map-geo{position:absolute;z-index:500;top:12px;left:64px;display:flex;align-items:stretch;width:min(720px,calc(100% - 64px - 306px));background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);border:1px solid rgba(165,126,44,.38);border-radius:16px;box-shadow:0 10px 30px rgba(8,24,38,.22);overflow:hidden;transition:box-shadow .2s,border-color .2s}
+.map-geo:focus-within{border-color:#C9A24B;box-shadow:0 10px 30px rgba(8,24,38,.22),0 0 0 3px rgba(201,162,75,.3)}
+.map-geo select,.map-geo input{border:0;background-color:transparent;color:#172738;padding:13px 14px;font:400 .86rem/1.2 var(--body);letter-spacing:0;text-transform:none;min-width:0}
+.map-geo select{flex:0 1 190px;cursor:pointer;border-right:1px solid rgba(165,126,44,.25);-webkit-appearance:none;appearance:none;padding-right:32px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8l3.5-3.5' stroke='%238a6a1c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center}
+.map-geo input{flex:1 1 220px;padding-left:40px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Ccircle cx='7' cy='7' r='4.6' stroke='%238a6a1c' stroke-width='1.4'/%3E%3Cpath d='M10.6 10.6L14 14' stroke='%238a6a1c' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 14px center}
+.map-geo input::placeholder{color:#6b7a88}
+.map-geo select:focus,.map-geo input:focus{outline:none;background-color:rgba(228,200,123,.18)}
+.map-geo button{border:0;background:transparent;color:#6b7a88;width:44px;flex:0 0 44px;cursor:pointer;font-size:1.2rem;line-height:1;transition:.15s}
+.map-geo button:hover{color:#8a6a1c;background:rgba(201,162,75,.16)}
+/* lebar bilah mengikuti panel lapisan (kelas diatur JS pada .map-shell) */
+.map-shell.lyr-buka .map-geo{width:min(720px,calc(100% - 64px - 300px))}
+.map-shell.lyr-tutup .map-geo{width:min(820px,calc(100% - 64px - 66px))}
+@media(max-width:1100px){.map-geo{flex-wrap:wrap}.map-geo select{flex:1 1 40%;border-bottom:1px solid rgba(165,126,44,.22)}.map-geo select:nth-of-type(2){border-right:0}.map-geo input{flex:1 1 calc(100% - 44px)}}
+@media(max-width:560px){.map-geo,.map-shell.lyr-tutup .map-geo{left:56px;width:calc(100% - 56px - 58px);top:10px;border-radius:14px}.map-geo select{flex:1 1 100%;border-right:0}}
+/* Kontrol Leaflet bawaan (zoom, gambar, pengukur, lokasi) senada */
+.leaflet-bar{border:0!important;border-radius:12px!important;overflow:hidden;box-shadow:0 8px 22px rgba(8,24,38,.24)!important}
+.leaflet-bar a,.leaflet-bar a:hover{width:34px!important;height:34px!important;line-height:34px!important;color:#172738;background-color:rgba(255,255,255,.92);border-bottom:1px solid rgba(165,126,44,.2)!important}
+.leaflet-bar a:hover{background-color:#fff6df;color:#8a6a1c}
+.leaflet-bar a:last-child{border-bottom:0!important}
+.leaflet-control-scale-line{border-radius:0 0 6px 6px;background:rgba(255,255,255,.8)}
 /* Legenda & kontrol */
 .legend{background:#fff;color:#223;padding:12px 14px;font-size:.72rem;line-height:1.45;box-shadow:0 2px 10px rgba(0,0,0,.25);max-height:300px;max-width:280px;overflow-y:auto}
 .legend b{display:block;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.68rem;margin-bottom:4px;color:#8a6a1c}
@@ -297,11 +308,35 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .analysis-table td:last-child,.analysis-table th:last-child{text-align:right;white-space:nowrap}
 .analysis-empty{padding:18px 4px;color:#65717b;font-size:.86rem}
 .leaflet-draw-toolbar a{background-color:#fff}
-.layerctl{background:#fff;color:#223;padding:14px 16px;font-size:.8rem;box-shadow:0 2px 10px rgba(0,0,0,.25);min-width:190px;border-radius:2px}
-.layerctl h6{margin:0 0 8px;font-family:var(--display);font-weight:400;letter-spacing:.14em;text-transform:uppercase;font-size:.7rem;color:#8a6a1c;border-bottom:1px solid #eee;padding-bottom:6px}
-.layerctl h6.sep{margin-top:12px}
-.layerctl .row{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;color:#223}
-.layerctl .row input{accent-color:#A57E2C;width:14px;height:14px;cursor:pointer;margin:0}
+/* Panel lapisan: kartu kaca yang dapat dilipat, sakelar emas, segmen jenis tampilan */
+.layerctl{width:262px;max-width:calc(100vw - 40px);background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);color:#172738;border:1px solid rgba(165,126,44,.38);border-radius:16px;box-shadow:0 12px 34px rgba(8,24,38,.24);overflow:hidden;font-family:var(--body);letter-spacing:0;text-transform:none}
+.layerctl .lyr-head{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;background:linear-gradient(135deg,rgba(201,162,75,.2),rgba(228,200,123,.08));border:0;border-bottom:1px solid rgba(165,126,44,.25);cursor:pointer;color:#8a6a1c;font:600 .72rem/1.2 var(--body);letter-spacing:.16em;text-transform:uppercase;text-align:left}
+.layerctl .lyr-head:hover{background:linear-gradient(135deg,rgba(201,162,75,.3),rgba(228,200,123,.14))}
+.layerctl .lyr-head:focus-visible{outline:2px solid #A57E2C;outline-offset:-2px}
+.layerctl .lyr-ikon{flex:0 0 auto}
+.layerctl .lyr-chev{margin-left:auto;transition:transform .2s;flex:0 0 auto}
+.layerctl.tutup{width:auto;border-radius:14px}
+.layerctl.tutup .lyr-head{border-bottom:0;padding:11px;background:rgba(255,255,255,.92)}
+.layerctl.tutup .lyr-head span,.layerctl.tutup .lyr-chev,.layerctl.tutup .lyr-body{display:none}
+.layerctl .lyr-body{padding:4px 14px 14px;max-height:min(62vh,470px);overflow-y:auto;scrollbar-width:thin}
+.layerctl .lyr-grup{margin:0}
+.layerctl .lyr-judul{margin:14px 0 4px;font:400 .66rem/1.2 var(--display);letter-spacing:.2em;text-transform:uppercase;color:#8a6a1c}
+.layerctl .lyr-judul:first-child{margin-top:10px}
+.layerctl .lyr-row{display:flex;align-items:center;gap:11px;margin:0;padding:6px 2px;cursor:pointer;font:400 .84rem/1.3 var(--body);letter-spacing:0;text-transform:none;color:#172738;position:relative}
+.layerctl .lyr-row input{position:absolute;opacity:0;width:0;height:0;margin:0}
+.layerctl .lyr-row .sw{flex:0 0 34px;width:34px;height:20px;border-radius:999px;background:#ccd4da;position:relative;transition:background .2s}
+.layerctl .lyr-row .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.32);transition:transform .2s}
+.layerctl .lyr-row input:checked+.sw{background:linear-gradient(135deg,#A57E2C,#E4C87B)}
+.layerctl .lyr-row input:checked+.sw::after{transform:translateX(14px)}
+.layerctl .lyr-row input:focus-visible+.sw{outline:2px solid #A57E2C;outline-offset:2px}
+.layerctl .lyr-row:hover .t{color:#8a6a1c}
+.layerctl .lyr-seg{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:6px;padding:3px;background:rgba(21,42,59,.08);border-radius:11px}
+.layerctl .lyr-seg label{margin:0;cursor:pointer;position:relative}
+.layerctl .lyr-seg input{position:absolute;opacity:0;width:0;height:0;margin:0}
+.layerctl .lyr-seg span{display:block;text-align:center;padding:8px 6px;border-radius:9px;font:500 .78rem/1.2 var(--body);letter-spacing:0;text-transform:none;color:#4e6070;transition:.15s}
+.layerctl .lyr-seg input:checked+span{background:#fff;color:#8a6a1c;font-weight:600;box-shadow:0 1px 5px rgba(8,24,38,.2)}
+.layerctl .lyr-seg input:focus-visible+span{outline:2px solid #A57E2C}
+@media(max-width:1100px){.layerctl{width:238px}}
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:-1px;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 .dot-g{background:#2EA84F}.dot-y{background:#F2C230}
 /* Popup */
@@ -332,7 +367,7 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
       <div class="map-geo">
         <select id="zoomKec" aria-label="Zoom ke kecamatan"><option value="">Semua Kecamatan</option></select>
         <select id="zoomDesa" aria-label="Zoom ke desa atau kelurahan"><option value="">Semua Desa/Kelurahan</option></select>
-        <input id="geoInput" type="text" placeholder="Masukkan koordinat (mis. -7.7267, 109.0154)" autocomplete="off">
+        <input id="geoInput" type="text" placeholder="Cari koordinat, mis. -7.7267, 109.0154" autocomplete="off">
         <button id="geoClear" title="Bersihkan" aria-label="Bersihkan pencarian">&times;</button>
       </div>
       <div id="map" role="application" aria-label="Peta pola ruang Kabupaten Cilacap"></div>
@@ -482,38 +517,56 @@ function bootPetaSpasial(){
   kabLayer.addTo(map);
   kecLayer.addTo(map);
 
-  /* Panel kontrol layer (kartu custom) */
+  /* Panel kontrol lapisan: kartu kaca yang dapat dilipat */
+  function barisLapisan(id,teks,aktif){
+    return "<label class='lyr-row'><input type='checkbox' id='"+id+"'"+(aktif?" checked":"")+"><span class='sw'></span><span class='t'>"+teks+"</span></label>";
+  }
   var layerCtl=L.control({position:"topright"});
   layerCtl.onAdd=function(){
     var d=L.DomUtil.create("div","layerctl");
     d.innerHTML=
-      "<h6>Peta</h6>"+
-      "<label class='row'><input type='checkbox' id='lc-pola' checked> Pola Ruang</label>"+
-      "<label class='row'><input type='checkbox' id='lc-lp2b'> LP2B</label>"+
-      "<h6 class='sep'>RDTR Perkotaan</h6>"+
-      "<label class='row'><input type='checkbox' id='lc-rdtr-cilacap'> RDTR Cilacap</label>"+
-      "<label class='row'><input type='checkbox' id='lc-rdtr-kroya'> RDTR Kroya</label>"+
-      "<label class='row'><input type='checkbox' id='lc-rdtr-sidareja'> RDTR Sidareja</label>"+
-      "<h6 class='sep'>Batas &amp; Jaringan</h6>"+
-      "<label class='row'><input type='checkbox' id='lc-kab' checked> Batas Kabupaten</label>"+
-      "<label class='row'><input type='checkbox' id='lc-kec' checked> Batas Kecamatan</label>"+
-      "<label class='row'><input type='checkbox' id='lc-desa'> Batas Desa/Kelurahan</label>"+
-      "<label class='row'><input type='checkbox' id='lc-jalan' checked> Jaringan Jalan</label>"+
-      "<h6 class='sep'>Jenis Tampilan</h6>"+
-      "<label class='row'><input type='radio' name='lc-base' id='lc-osm' checked> Peta Jalan</label>"+
-      "<label class='row'><input type='radio' name='lc-base' id='lc-esri'> Citra Satelit</label>";
+      "<button type='button' class='lyr-head' id='lyrHead' aria-expanded='true' aria-controls='lyrBody' title='Sembunyikan / tampilkan panel lapisan'>"+
+        "<svg class='lyr-ikon' width='18' height='18' viewBox='0 0 18 18' fill='none' aria-hidden='true'><path d='M9 2L2 5.8l7 3.8 7-3.8L9 2z' stroke='currentColor' stroke-width='1.4' stroke-linejoin='round'/><path d='M2 9l7 3.8L16 9M2 12.2L9 16l7-3.8' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>"+
+        "<span>Lapisan Peta</span>"+
+        "<svg class='lyr-chev' width='12' height='12' viewBox='0 0 12 12' fill='none' aria-hidden='true'><path d='M2.5 4.5L6 8l3.5-3.5' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>"+
+      "</button>"+
+      "<div class='lyr-body' id='lyrBody'>"+
+        "<div class='lyr-grup'><p class='lyr-judul'>Peta</p>"+
+          barisLapisan("lc-pola","Pola Ruang",true)+barisLapisan("lc-lp2b","LP2B",false)+"</div>"+
+        "<div class='lyr-grup'><p class='lyr-judul'>RDTR Perkotaan</p>"+
+          barisLapisan("lc-rdtr-cilacap","RDTR Cilacap",false)+barisLapisan("lc-rdtr-kroya","RDTR Kroya",false)+barisLapisan("lc-rdtr-sidareja","RDTR Sidareja",false)+"</div>"+
+        "<div class='lyr-grup'><p class='lyr-judul'>Batas &amp; Jaringan</p>"+
+          barisLapisan("lc-kab","Batas Kabupaten",true)+barisLapisan("lc-kec","Batas Kecamatan",true)+barisLapisan("lc-desa","Batas Desa/Kelurahan",false)+barisLapisan("lc-jalan","Jaringan Jalan",true)+"</div>"+
+        "<div class='lyr-grup'><p class='lyr-judul'>Jenis Tampilan</p>"+
+          "<div class='lyr-seg'><label><input type='radio' name='lc-base' id='lc-osm' checked><span>Peta Jalan</span></label><label><input type='radio' name='lc-base' id='lc-esri'><span>Citra Satelit</span></label></div></div>"+
+      "</div>";
     L.DomEvent.disableClickPropagation(d);
+    L.DomEvent.disableScrollPropagation(d);
     return d;
   };
   layerCtl.addTo(map);
 
-  /* Kontrol lokasi Anda — tampil di bawah panel layer */
+  /* Buka/tutup panel; pilihan diingat, awalnya terbuka di layar lebar dan tertutup di layar sempit */
+  (function(){
+    var box=document.querySelector(".layerctl"),head=document.getElementById("lyrHead");
+    function atur(tutup,ingat){
+      box.classList.toggle("tutup",tutup);
+      var shell=document.querySelector(".map-shell");shell.classList.toggle("lyr-tutup",tutup);shell.classList.toggle("lyr-buka",!tutup);
+      head.setAttribute("aria-expanded",tutup?"false":"true");
+      if(ingat){try{localStorage.setItem("lapisan:spasial",tutup?"tutup":"buka");}catch(e){}}
+      setTimeout(function(){map.invalidateSize();},50);
+    }
+    var simpanan=null;try{simpanan=localStorage.getItem("lapisan:spasial");}catch(e){}
+    atur(simpanan!==null?simpanan==="tutup":window.matchMedia("(max-width:1100px)").matches,false);
+    head.addEventListener("click",function(){atur(!box.classList.contains("tutup"),true);});
+  })();
+
+  /* Kontrol lokasi Anda — di bawah tombol zoom (kiri atas) supaya tidak tertutup panel lapisan */
   if(L.control.locate)L.control.locate({
-    position:"topright",
+    position:"topleft",
     strings:{title:"Tampilkan lokasi Anda"},
     locateOptions:{enableHighAccuracy:true}
   }).addTo(map);
-
   function toggleLayer(id,layer){
     document.getElementById(id).addEventListener("change",function(e){
       if(e.target.checked)layer.addTo(map);else map.removeLayer(layer);
