@@ -368,6 +368,7 @@ $KAT_WARNA  = array(
 </section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="<?php echo base_url('assets/js/legend-toggle.js'); ?>?v=<?php echo @filemtime(FCPATH.'assets/js/legend-toggle.js'); ?>"></script>
 <script src="<?php echo base_url('assets/js/Leaflet.VectorGrid.bundled.js'); ?>?v=<?php echo @filemtime(FCPATH.'assets/js/Leaflet.VectorGrid.bundled.js'); ?>"></script>
 <script src="<?php echo base_url('gis-data.js'); ?>?v=<?php echo @filemtime(FCPATH.'gis-data.js'); ?>"></script>
 <script>
@@ -482,13 +483,13 @@ $KAT_WARNA  = array(
   /* ---- Legenda ---- */
   var legend=L.control({position:"bottomright"});
   legend.onAdd=function(){
-    var el=L.DomUtil.create("div","legend");
+    var lg=legendToggle({kunci:"cagar-budaya"});
     var html="<b>Kategori Cagar Budaya</b>";
     Object.keys(KAT_WARNA).forEach(function(k){
       html+="<span class='dot' style='background:"+KAT_WARNA[k]+"'></span>"+k+"<br>";
     });
-    el.innerHTML=html;
-    return el;
+    lg.body.innerHTML=html;
+    return lg.el;
   };
   legend.addTo(map);
 

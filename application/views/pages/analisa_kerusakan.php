@@ -304,6 +304,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 </section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="<?php echo base_url('assets/js/legend-toggle.js'); ?>?v=<?php echo @filemtime(FCPATH.'assets/js/legend-toggle.js'); ?>"></script>
 <script src="<?php echo base_url('assets/js/Leaflet.VectorGrid.bundled.js'); ?>?v=<?php echo @filemtime(FCPATH.'assets/js/Leaflet.VectorGrid.bundled.js'); ?>"></script>
 <script src="<?php echo base_url('gis-data.js'); ?>?v=<?php echo @filemtime(FCPATH.'gis-data.js'); ?>"></script>
 <script>
@@ -480,13 +481,13 @@ function bootPetaAnalisa(){
 
   var legend=L.control({position:"bottomright"});
   legend.onAdd=function(){
-    var d=L.DomUtil.create("div","legend");
+    var lg=legendToggle({kunci:"analisa-kerusakan"});
     var html="<b>Kondisi Bangunan</b>";
     Object.keys(KONDISI).forEach(function(k){
       html+="<span class='dot' style='background:"+KONDISI[k].color+"'></span>"+KONDISI[k].label+"<br>";
     });
-    d.innerHTML=html;
-    return d;
+    lg.body.innerHTML=html;
+    return lg.el;
   };
   legend.addTo(map);
 

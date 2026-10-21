@@ -367,6 +367,7 @@ html[data-theme="dark"] .leaflet-tile{filter:brightness(.82) contrast(1.06) satu
 </section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="<?php echo base_url('assets/js/legend-toggle.js'); ?>?v=<?php echo @filemtime(FCPATH.'assets/js/legend-toggle.js'); ?>"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-locatecontrol/0.85.1/L.Control.Locate.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
@@ -531,11 +532,10 @@ function bootPetaSpasial(){
   var legendNode=null;
   var legend=L.control({position:"bottomleft"});
   legend.onAdd=function(){
-    var d=L.DomUtil.create("div","legend");
-    d.innerHTML="<b>Legenda Pola Ruang</b><span>Memuat kategori…</span>";
-    legendNode=d;
-    L.DomEvent.disableClickPropagation(d);
-    return d;
+    var lg=legendToggle({kunci:"spasial"});
+    lg.body.innerHTML="<b>Legenda Pola Ruang</b><span>Memuat kategori…</span>";
+    legendNode=lg.body;
+    return lg.el;
   };
   legend.addTo(map);
   function renderLegendaPolaRuang(data){
