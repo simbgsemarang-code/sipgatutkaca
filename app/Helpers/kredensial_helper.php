@@ -29,7 +29,7 @@ if (! function_exists('kredensial_pesan_teks'))
 	function kredensial_pesan_teks($nama, $email, $password)
 	{
 		return "Yth. {$nama},\n\n"
-			. "Berikut akun untuk masuk ke SIP Gatutkaca (Sistem Informasi Penataan Ruang) DPUPR Kabupaten Cilacap:\n\n"
+			. "Berikut akun untuk masuk ke SIP Gatutkaca (Sistem Informasi Pengelolaan Gedung ANDAL dan TERPERCAYA Untuk Kabupaten Cilacap):\n\n"
 			. "Email: {$email}\n"
 			. "Kata Sandi: {$password}\n"
 			. "Login: " . base_url('login') . "\n\n"

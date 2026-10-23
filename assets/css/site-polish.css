@@ -227,3 +227,9 @@ footer .brand .brand-sub  { color: #C6D2DC; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* Tagline brand ("Sistem Informasi Pengelolaan Gedung ANDAL dan TERPERCAYA Untuk Kabupaten Cilacap")
+   lebih panjang daripada uraian lama: boleh turun baris dan tanpa jarak huruf lebar. */
+.brand-sub { letter-spacing: .05em !important; line-height: 1.3; white-space: normal; max-width: 330px; font-size: .58rem; }
+.brand-sub strong { font-weight: 700; color: var(--gold-300, #E4C87B); }
+@media (max-width: 560px) { .brand-sub { max-width: 210px; font-size: .52rem; } }
