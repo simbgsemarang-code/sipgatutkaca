@@ -24,6 +24,7 @@ $ikon = array(
     'cagar'     => $svg('<path d="M9 1.4l2.1 4.4 4.8.7-3.5 3.4.8 4.8L9 12.4l-4.2 2.3.8-4.8L2.1 6.5l4.8-.7L9 1.4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>'),
     'aturan'    => $svg('<path d="M3 3.2A1.7 1.7 0 014.7 1.5H14v11H4.7A1.7 1.7 0 003 14.2V3.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3 14.2a1.7 1.7 0 001.7 1.8H14v-3.5M6.5 5h4.5M6.5 7.5h4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>'),
     'saran'     => $svg('<path d="M2.5 3.5h13a1 1 0 011 1v7a1 1 0 01-1 1H7l-3.5 3v-3H2.5a1 1 0 01-1-1v-7a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5 6.5h8M5 9h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'),
+    'kunci'     => $svg('<rect x="3" y="8" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 8V5.5a3.5 3.5 0 017 0V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="9" cy="12" r="1.2" fill="currentColor"/>'),
     'logout'    => $svg('<path d="M7 2H3a1 1 0 00-1 1v12a1 1 0 001 1h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 12.5L15 9l-4-3.5M15 9H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>'),
 );
 
@@ -38,6 +39,7 @@ $menu = array(
         'cagar'     => array('Kelola Cagar Budaya', 'admin/cagar-budaya', 'cagar'),
         'aturan'    => array('Kelola Aturan', 'admin/aturan', 'aturan'),
         'saran'     => array('Saran & FAQ', 'admin/saran', 'saran'),
+        'login'     => array('Pengaturan Login', 'admin/pengaturan-login', 'kunci'),
     ),
     'pu' => array(
         'dashboard' => array('Dashboard', 'pu', 'dashboard'),

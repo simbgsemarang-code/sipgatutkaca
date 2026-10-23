@@ -75,7 +75,7 @@ class Admin extends LegacyController {
 		);
 
 		$login_set = $this->db->table_exists('pengaturan_login') ? $this->db->where('id', 1)->get('pengaturan_login')->row_array() : NULL;
-		$data['tampilkan_menu_login']   = ENVIRONMENT === 'development';
+		$data['tampilkan_menu_login']   = TRUE;
 		$data['panel_login_ditampilkan'] = $login_set === NULL || $login_set['tampilkan_akun_uji'];
 
 		$data['nama_admin'] = $this->session->userdata('nama');
@@ -1466,8 +1466,7 @@ class Admin extends LegacyController {
 		if ($this->input->method() !== 'post') { show_404(); return; }
 		if (! $this->db->table_exists('pengaturan_login'))
 		{
-			show_error('Tabel pengaturan_login belum ada. Jalankan migrasi database/pengaturan_login.sql lebih dulu.', 503);
-			return;
+			$this->db->query('CREATE TABLE IF NOT EXISTS `pengaturan_login` (`id` TINYINT UNSIGNED NOT NULL DEFAULT 1, `tampilkan_akun_uji` TINYINT(1) UNSIGNED NOT NULL DEFAULT 1, `updated_at` DATETIME NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 		}
 		$this->db->replace('pengaturan_login', array(
 			'id'                 => 1,

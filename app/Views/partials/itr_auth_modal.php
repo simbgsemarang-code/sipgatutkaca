@@ -4,7 +4,7 @@
     <div class="itr-auth-heading"><div><p class="eyebrow">Portal Pemohon ITR</p><h2 id="itrAuthTitle">Masuk ke Akun</h2></div><button type="button" class="itr-auth-close" data-itr-close aria-label="Tutup modal">×</button></div>
     <nav class="itr-auth-tabs" aria-label="Pilihan akun"><button type="button" data-itr-mode="login">Masuk</button><button type="button" data-itr-mode="daftar">Mendaftar</button><button type="button" data-itr-mode="lupa">Lupa / Ganti Password</button></nav>
     <iframe id="itrAuthFrame" title="Formulir akun pemohon ITR" src="about:blank"></iframe>
-    <?php if (ENVIRONMENT === 'development'): ?>
+    <?php if (login_panel_uji_aktif()): ?>
     <div class="itr-demo" id="itrDemoAccounts"><p class="note">Akun dummy pemohon ITR — hanya untuk uji coba:</p>
       <?php foreach (array(array('Budi Santoso','budi.santoso.itr@sipgatutkaca.local','ItrDemo#2026A'),array('Dewi Anggraini','dewi.anggraini.itr@sipgatutkaca.local','ItrDemo#2026B')) as $demo): ?>
       <div class="itr-demo-account"><div><strong><?= htmlspecialchars($demo[0]) ?></strong><small><?= htmlspecialchars($demo[1]) ?> / <?= htmlspecialchars($demo[2]) ?></small></div><button type="button" data-itr-email="<?= htmlspecialchars($demo[1],ENT_QUOTES,'UTF-8') ?>" data-itr-password="<?= htmlspecialchars($demo[2],ENT_QUOTES,'UTF-8') ?>">Gunakan Akun</button></div>

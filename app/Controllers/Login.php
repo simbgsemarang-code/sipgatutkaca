@@ -266,14 +266,7 @@ class Login extends LegacyController {
 	 */
 	private function _akun_uji_untuk($from)
 	{
-		if (ENVIRONMENT !== 'development')
-		{
-			return array();
-		}
-
-		$this->load->database();
-		$baris = $this->db->table_exists('pengaturan_login') ? $this->db->where('id', 1)->get('pengaturan_login')->row_array() : NULL;
-		if ($baris !== NULL && ! $baris['tampilkan_akun_uji'])
+		if (! login_panel_uji_aktif())
 		{
 			return array();
 		}

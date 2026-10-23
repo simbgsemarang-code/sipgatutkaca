@@ -140,13 +140,13 @@ html[data-theme="dark"] .badge-off{color:#F3AEB9}
 </header>
 
 <div class="dash-layout">
-  <?php $this->load->view('partials/sidebar', array('role'=>'admin','aktif'=>'')); ?>
+  <?php $this->load->view('partials/sidebar', array('role'=>'admin','aktif'=>'login')); ?>
   <div class="dash-main">
 <section style="padding-top:20px">
   <div class="dash-wrap">
     <p class="eyebrow"><a href="<?= base_url('admin') ?>" style="color:var(--gold-500);text-decoration:underline">&larr; Kembali ke Dashboard</a></p>
     <h2>Pengaturan Panel Login</h2>
-    <p style="color:var(--muted);max-width:64ch;margin-top:14px">Atur apakah panel kredensial akun uji coba (email + kata sandi demo) ikut ditampilkan di halaman login publik. Panel ini hanya pernah muncul selama server berjalan di lingkungan development - saklar ini menambah kendali supaya admin bisa mematikannya kapan pun tanpa harus mengubah kode.</p>
+    <p style="color:var(--muted);max-width:64ch;margin-top:14px">Atur apakah panel kredensial akun uji coba (email + kata sandi demo) ikut ditampilkan di halaman login publik. Saklar ini berlaku di semua lingkungan (termasuk server publik) dan bisa dimatikan kapan pun tanpa mengubah kode. Matikan panel ini setelah uji coba selesai, karena isinya adalah kata sandi akun staf.</p>
 
     <?php if($this->session->flashdata('sukses')): ?><div class="alert alert-ok"><?= htmlspecialchars($this->session->flashdata('sukses')) ?></div><?php endif; ?>
 
