@@ -1,0 +1,38 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * INI FILE CONTOH - disalin SEKALI ke application/config/gdrive.php
+ * (nama file itu, tanpa ".example") lalu diedit isinya di sana. File
+ * gdrive.php TIDAK dilacak Git (sama seperti config/database.php) -
+ * supaya nilai gdrive_enabled/folder_id yang kamu set di server TIDAK
+ * ikut tertimpa balik ke default tiap kali deploy commit baru.
+ *
+ * Penyimpanan berkas di Google Drive (bukan disk server) - antisipasi
+ * kalau nanti domain/hosting berpindah, berkas lama tidak ikut hilang.
+ *
+ * PENTING soal jenis akun Drive:
+ * - Akun Gmail BIASA (@gmail.com) -> pakai gdrive_auth_mode = 'oauth'.
+ *   Google TIDAK MENGIZINKAN service account menulis berkas ke folder
+ *   milik akun Gmail biasa sejak 2020 (error storageQuotaExceeded),
+ *   jadi harus lewat OAuth memakai identitas akun Gmail itu sendiri.
+ * - Akun Google Workspace instansi (dengan fitur Shared Drive) -> boleh
+ *   pakai gdrive_auth_mode = 'service_account', lebih sederhana setupnya.
+ *
+ * Lihat docs/google-drive-setup.md untuk langkah lengkap kedua cara ini.
+ * Semua nilai di bawah bisa diganti kapan pun (mis. ganti akun Google)
+ * TANPA mengubah kode sama sekali.
+ */
+$config['gdrive_enabled']   = false;
+$config['gdrive_auth_mode'] = 'oauth'; // 'oauth' atau 'service_account'
+$config['gdrive_folder_id'] = '';
+
+// --- Mode 'service_account' ---
+$config['gdrive_credentials_path'] = LEGACY_STORAGE . 'gdrive/credentials.json';
+
+// --- Mode 'oauth' ---
+// oauth-client.json: {"client_id":"...","client_secret":"...","redirect_uri":"..."}
+// oauth-token.json: dibuat OTOMATIS oleh admin/gdrive-oauth-callback setelah
+// login Google sekali - jangan diisi manual.
+$config['gdrive_oauth_client_path'] = LEGACY_STORAGE . 'gdrive/oauth-client.json';
+$config['gdrive_oauth_token_path']  = LEGACY_STORAGE . 'gdrive/oauth-token.json';

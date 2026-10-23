@@ -3,9 +3,15 @@
 Target: `https://sipgatutkaca.sigaru.my.id` (subdomain baru, sejajar dengan
 `cacah.sigaru.my.id` yang sudah ada di akun cPanel yang sama).
 
-Aplikasi ini adalah **CodeIgniter 3.1.13 (PHP)**. Kebutuhan server:
-PHP 7.4–8.x dengan ekstensi `mysqli`, MySQL/MariaDB, Apache/LiteSpeed
-dengan `mod_rewrite` (default aktif di hampir semua cPanel).
+Aplikasi ini adalah **CodeIgniter 4.6 (PHP)** — dimigrasikan dari CodeIgniter 3.1.13;
+lihat **[docs/migrasi-ci4.md](docs/migrasi-ci4.md)** untuk langkah cutover, `.env`, dan perbedaan
+perilaku. Kebutuhan server: **PHP 8.1+ (disarankan 8.3)** dengan ekstensi `intl`, `mbstring`,
+`mysqli`, `curl`, `openssl`, `fileinfo`, `gd`, `zip`; MySQL/MariaDB; Apache/LiteSpeed dengan
+`mod_rewrite` (default aktif di hampir semua cPanel).
+
+> Catatan: bagian-bagian di bawah yang menyebut `application/config/database.php` berlaku untuk
+> versi CodeIgniter 3. Pada CI4 kredensial database ada di `.env` (buat dengan
+> `php spark migrasi:konfigurasi` atau salin `.env.example`).
 
 ## 1. Buat subdomain di cPanel
 

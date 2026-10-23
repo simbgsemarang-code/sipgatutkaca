@@ -1,0 +1,70 @@
+<?php
+
+namespace App\Controllers;
+
+class Tpa extends LegacyController {
+
+	/** Status yang sah untuk saran & masukan. */
+	private $status_valid = array('baru', 'ditinjau', 'selesai');
+
+	public function __legacy_construct()
+	{
+		
+		$this->load->library('session');
+		$this->_wajib_tpa();
+	}
+
+	/** 'tpa' generik dipertahankan di sini untuk akun lama; anggota baru memakai salah satu spesialisasi. */
+	private $peran_tpa = array('tpa', 'tpa_arsitek', 'tpa_struktur', 'tpa_mep');
+
+	private function _wajib_tpa()
+	{
+		if (! $this->session->userdata('logged_in'))
+		{
+			ci_redirect('login');
+			exit;
+		}
+		if (! in_array($this->session->userdata('role'), $this->peran_tpa, TRUE))
+		{
+			show_error('Halaman ini khusus untuk TPA.', 403, 'Akses Ditolak');
+		}
+	}
+
+	public function index()
+	{
+		$data['daftar_masukan'] = $this->db->order_by('created_at', 'DESC')->get('saran_masukan')->result_array();
+		$data['sukses']         = $this->session->flashdata('sukses');
+		$data['error']          = $this->session->flashdata('error');
+		$data['nama_pengguna']  = $this->session->userdata('nama');
+
+		/* ---- Distribusi status + aktivitas peninjauan TPA ----
+		 * Akun spesialisasi hanya lihat keputusan bidangnya sendiri;
+		 * akun 'tpa' generik lihat semua bidang. */
+		$role   = (string) $this->session->userdata('role');
+		$bidang = in_array($role, array('tpa_arsitek', 'tpa_struktur', 'tpa_mep'), TRUE) ? $role : NULL;
+
+		$data['status_label']   = dashboard_status_label();
+		$data['distribusi']     = dashboard_distribusi();
+		$data['aktivitas']      = dashboard_aktivitas_tpa($bidang, 6);
+		$data['perlu_ditinjau'] = (int) $data['distribusi']['verifikasi_dokumen'];
+
+		$this->load->view('pages/tpa_dashboard', $data);
+	}
+
+	public function tandai_status($id = null)
+	{
+		$id     = (int) $id;
+		$status = (string) $this->input->post('status');
+
+		if (! in_array($status, $this->status_valid, TRUE))
+		{
+			$this->session->set_flashdata('error', 'Status tidak valid.');
+			ci_redirect('tpa');
+			return;
+		}
+
+		$this->db->where('id', $id)->update('saran_masukan', array('status' => $status));
+		$this->session->set_flashdata('sukses', 'Status berhasil diperbarui.');
+		ci_redirect('tpa');
+	}
+}

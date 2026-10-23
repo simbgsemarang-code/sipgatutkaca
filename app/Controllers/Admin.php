@@ -1,0 +1,1699 @@
+<?php
+
+namespace App\Controllers;
+
+class Admin extends LegacyController {
+
+	/**
+	 * Peran yang sah untuk dipilih saat menambahkan pengguna lewat
+	 * halaman ini. 'tpa' generik dan 'pemohon' sengaja tidak ada di
+	 * sini (meski keduanya masih nilai ENUM yang sah di database,
+	 * untuk akun lama) - TPA sekarang harus salah satu dari 3
+	 * spesialisasi, dan pemohon cuma bisa daftar sendiri lewat /daftar.
+	 */
+	private $peran_valid = array('admin', 'pu', 'tpa_arsitek', 'tpa_struktur', 'tpa_mep');
+
+	/** Jumlah baris per halaman di daftar Kelola Pengguna (lihat pengguna()). */
+	private $per_page_pengguna = 10;
+
+	public function __legacy_construct()
+	{
+		
+		$this->load->library('session');
+		$this->load->helper(array('pbg_alur','berkas','kredensial'));
+		$this->_wajib_admin();
+	}
+
+	/**
+	 * Semua method di controller ini hanya boleh diakses pengguna yang
+	 * sudah login DAN berperan admin. Selain itu ditolak/diarahkan ke
+	 * halaman login.
+	 */
+	private function _wajib_admin()
+	{
+		if (! $this->session->userdata('logged_in'))
+		{
+			ci_redirect('login');
+			exit;
+		}
+		if ($this->session->userdata('role') !== 'admin')
+		{
+			show_error('Halaman ini khusus untuk admin.', 403, 'Akses Ditolak');
+		}
+	}
+
+	/** Dashboard ringkas panel admin. */
+	public function index()
+	{
+		$hitung = function ($tabel) {
+			return $this->db->table_exists($tabel) ? (int) $this->db->count_all_results($tabel) : 0;
+		};
+
+		$data['stat'] = array(
+			'pengguna'      => $hitung('users'),
+			'pengajuan_pbg' => $hitung('pengajuan_pbg'),
+			'bangunan'      => $hitung('bangunan_gis'),
+			'cagar_budaya'  => $hitung('cagar_budaya'),
+			'regulasi'       => $hitung('regulasi'),
+			'saran'         => $hitung('saran_masukan'),
+		);
+		$data['saran_baru'] = $this->db->table_exists('saran_masukan')
+			? (int) $this->db->where('status', 'baru')->count_all_results('saran_masukan')
+			: 0;
+		$data['saran_terbaru'] = $this->db->table_exists('saran_masukan')
+			? $this->db->order_by('id', 'DESC')->limit(5)->get('saran_masukan')->result_array()
+			: array();
+
+		/* ---- Distribusi status + aktivitas terkini (lihat dashboard_helper) ---- */
+		$data['status_label'] = dashboard_status_label();
+		$data['distribusi']   = dashboard_distribusi();
+		$data['aktivitas']    = dashboard_aktivitas(6);
+
+		$drive = $this->db->table_exists('pengaturan_gdrive') ? $this->db->where('id', 1)->get('pengaturan_gdrive')->row_array() : NULL;
+		$data['drive_aktif'] = ! empty($drive['enabled']) && (
+			$drive['auth_mode'] === 'oauth' ? ! empty($drive['oauth_refresh_token']) : ! empty($drive['service_account_json'])
+		);
+
+		$login_set = $this->db->table_exists('pengaturan_login') ? $this->db->where('id', 1)->get('pengaturan_login')->row_array() : NULL;
+		$data['tampilkan_menu_login']   = ENVIRONMENT === 'development';
+		$data['panel_login_ditampilkan'] = $login_set === NULL || $login_set['tampilkan_akun_uji'];
+
+		$data['nama_admin'] = $this->session->userdata('nama');
+		$this->load->view('pages/admin_dashboard', $data);
+	}
+
+	/* =====================================================================
+	 *  KELOLA PUSTAKA REGULASI + DOKUMEN PDF
+	 * ===================================================================== */
+
+	public function aturan()
+	{
+		$data['daftar'] = $this->db->table_exists('regulasi')
+			? $this->db->order_by('id', 'ASC')->get('regulasi')->result_array()
+			: array();
+		$data['sukses'] = $this->session->flashdata('sukses');
+		$data['error'] = $this->session->flashdata('error');
+		$data['nama_admin'] = $this->session->userdata('nama');
+		$this->load->view('pages/admin_aturan', $data);
+	}
+
+	public function aturan_tambah()
+	{
+		$this->_aturan_form(NULL);
+	}
+
+	public function aturan_ubah($id = null)
+	{
+		$row = $this->db->where('id', (int) $id)->get('regulasi')->row_array();
+		if ($row === NULL) { show_404(); return; }
+		$this->_aturan_form($row);
+	}
+
+	private function _aturan_form($row)
+	{
+		$data['row'] = $row;
+		$data['old'] = $this->session->flashdata('old');
+		$data['error'] = $this->session->flashdata('error');
+		$data['nama_admin'] = $this->session->userdata('nama');
+		$this->load->view('pages/admin_aturan_form', $data);
+	}
+
+	public function aturan_simpan($id = null)
+	{
+		$id = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('regulasi')->row_array() : NULL;
+		if ($id > 0 && $row === NULL) { show_404(); return; }
+		$judul = trim((string) $this->input->post('judul'));
+		$tujuan = $id > 0 ? 'admin/aturan-ubah/' . $id : 'admin/aturan-tambah';
+		if ($judul === '')
+		{
+			$this->session->set_flashdata('error', 'Judul aturan wajib diisi.');
+			$this->session->set_flashdata('old', $this->input->post());
+			ci_redirect($tujuan); return;
+		}
+
+		$dir = FCPATH . 'assets/dokumen-regulasi/';
+		$file = $row && ! empty($row['file_pdf']) ? $row['file_pdf'] : NULL;
+		if ($this->input->post('hapus_pdf') === '1' && $file)
+		{
+			@unlink($dir . basename($file));
+			$file = NULL;
+		}
+		if (! empty($_FILES['file_pdf']['name']))
+		{
+			if (! is_dir($dir)) @mkdir($dir, 0755, TRUE);
+			$this->load->library('upload');
+			$this->upload->initialize(array('upload_path'=>$dir, 'allowed_types'=>'pdf', 'max_size'=>102400, 'encrypt_name'=>TRUE));
+			if (! $this->upload->do_upload('file_pdf'))
+			{
+				$this->session->set_flashdata('error', 'PDF gagal diunggah: ' . strip_tags($this->upload->display_errors('', '')));
+				$this->session->set_flashdata('old', $this->input->post());
+				ci_redirect($tujuan); return;
+			}
+			if ($file && stripos($file, 'http') !== 0) @unlink($dir . basename($file));
+			$file = berkas_simpan($this->upload->data());
+		}
+
+		$simpan = array('judul'=>$judul, 'aktif'=>$this->input->post('aktif') === '1' ? 1 : 0, 'file_pdf'=>$file);
+		if ($id > 0) $this->db->where('id', $id)->update('regulasi', $simpan);
+		else $this->db->insert('regulasi', $simpan);
+		$this->session->set_flashdata('sukses', 'Aturan berhasil ' . ($id > 0 ? 'diperbarui.' : 'ditambahkan.'));
+		ci_redirect('admin/aturan');
+	}
+
+	public function aturan_hapus($id = null)
+	{
+		$row = $this->db->where('id', (int) $id)->get('regulasi')->row_array();
+		if ($row === NULL) { show_404(); return; }
+		if (! empty($row['file_pdf']) && stripos($row['file_pdf'], 'http') !== 0) @unlink(FCPATH . 'assets/dokumen-regulasi/' . basename($row['file_pdf']));
+		$this->db->where('id', (int) $id)->delete('regulasi');
+		$this->session->set_flashdata('sukses', 'Aturan berhasil dihapus.');
+		ci_redirect('admin/aturan');
+	}
+
+	/**
+	 * Daftar pengguna - full width, dengan pencarian (?q=) dan
+	 * paginasi (?halaman=) per $per_page_pengguna baris. Tombol
+	 * tambah/edit mengarah ke pengguna_form() (halaman terpisah - lihat
+	 * catatan di sana), bukan form inline di halaman ini lagi.
+	 */
+	public function pengguna()
+	{
+		$this->load->helper('form');
+		$keyword = trim((string) $this->input->get('q'));
+
+		if ($keyword !== '')
+		{
+			$this->db->group_start()->like('nama', $keyword)->or_like('email', $keyword)->or_like('nik', $keyword)->or_like('no_hp', $keyword)->group_end();
+		}
+		$total = $this->db->count_all_results('users');
+
+		$page = max(1, (int) $this->input->get('halaman'));
+		$offset = ($page - 1) * $this->per_page_pengguna;
+
+		$this->load->library('pagination');
+		$config = array(
+			'base_url'             => base_url('admin/pengguna'),
+			'total_rows'           => $total,
+			'per_page'             => $this->per_page_pengguna,
+			'use_page_numbers'     => TRUE,
+			'page_query_string'    => TRUE,
+			'query_string_segment' => 'halaman',
+			'reuse_query_string'   => TRUE,
+			'full_tag_open'        => '<div class="pagination">',
+			'full_tag_close'       => '</div>',
+			'first_link'           => '&laquo;&laquo;',
+			'last_link'            => '&raquo;&raquo;',
+			'next_link'            => '&raquo;',
+			'prev_link'            => '&laquo;',
+			'cur_tag_open'         => '<span class="current">',
+			'cur_tag_close'        => '</span>',
+			'num_tag_open'         => '<span>',
+			'num_tag_close'        => '</span>',
+		);
+		$this->pagination->initialize($config);
+
+		if ($keyword !== '')
+		{
+			$this->db->group_start()->like('nama', $keyword)->or_like('email', $keyword)->or_like('nik', $keyword)->or_like('no_hp', $keyword)->group_end();
+		}
+		$data['daftar_user'] = $this->db->order_by('created_at', 'DESC')->limit($this->per_page_pengguna, $offset)->get('users')->result_array();
+
+		$data['total']            = $total;
+		$data['keyword']          = $keyword;
+		$data['pagination_links'] = $this->pagination->create_links();
+		$data['sukses']           = $this->session->flashdata('sukses');
+		$data['error']            = $this->session->flashdata('error');
+		$data['kredensial']       = $this->session->flashdata('kredensial');
+		$data['nama_admin']       = $this->session->userdata('nama');
+		$this->load->view('pages/admin_pengguna', $data);
+	}
+
+	/**
+	 * Form Tambah/Edit Pengguna - halaman TERSENDIRI (terpisah dari
+	 * daftar di pengguna()), supaya daftarnya bisa tampil full width
+	 * dan tombol Edit/+ Tambah Pengguna mengarah ke sini ($id null =
+	 * tambah, $id diisi = edit).
+	 */
+	public function pengguna_form($id = null)
+	{
+		$this->load->helper('form');
+		$id = $id ? (int) $id : null;
+		$editing = $id ? $this->db->where('id', $id)->get('users')->row_array() : NULL;
+		if ($id && $editing === NULL) { show_404(); return; }
+
+		if ($this->input->method(TRUE) === 'POST')
+		{
+			$save_id  = (int) $this->input->post('record_id');
+			$nama     = trim((string) $this->input->post('nama'));
+			$email    = trim((string) $this->input->post('email'));
+			$nik      = trim((string) $this->input->post('nik'));
+			$no_hp    = trim((string) $this->input->post('no_hp'));
+			$password = (string) $this->input->post('password');
+			$role     = (string) $this->input->post('role');
+
+			// Admin tidak boleh menurunkan peran akunnya sendiri lewat form
+			// ini (senada dengan hapus_pengguna() yang mencegah admin
+			// menghapus akunnya sendiri) - supaya tidak pernah terjadi 0
+			// admin yang bisa login.
+			if ($save_id && $save_id === (int) $this->session->userdata('user_id')) { $role = 'admin'; }
+
+			$old = compact('nama', 'email', 'nik', 'no_hp', 'role');
+
+			$tujuan = $save_id ? 'admin/pengguna-form/' . $save_id : 'admin/pengguna-form';
+
+			if ($nama === '' || $email === '' || ! in_array($role, $this->peran_valid, TRUE))
+			{
+				$this->session->set_flashdata('error', 'Nama, surel, dan jenis pengguna wajib diisi dengan benar.');
+				$this->session->set_flashdata('old', $old);
+				ci_redirect($tujuan); return;
+			}
+			if (! filter_var($email, FILTER_VALIDATE_EMAIL))
+			{
+				$this->session->set_flashdata('error', 'Format surel tidak valid.');
+				$this->session->set_flashdata('old', $old);
+				ci_redirect($tujuan); return;
+			}
+			if (! $save_id && strlen($password) < 8)
+			{
+				$this->session->set_flashdata('error', 'Kata sandi awal minimal 8 karakter.');
+				$this->session->set_flashdata('old', $old);
+				ci_redirect($tujuan); return;
+			}
+			if ($password !== '' && strlen($password) < 8)
+			{
+				$this->session->set_flashdata('error', 'Kata sandi minimal 8 karakter.');
+				$this->session->set_flashdata('old', $old);
+				ci_redirect($tujuan); return;
+			}
+			$this->db->where('email', $email);
+			if ($save_id) { $this->db->where('id !=', $save_id); }
+			if ($this->db->get('users')->num_rows() > 0)
+			{
+				$this->session->set_flashdata('error', 'Surel tersebut sudah terdaftar.');
+				$this->session->set_flashdata('old', $old);
+				ci_redirect($tujuan); return;
+			}
+
+			$simpan = array(
+				'nik'   => $nik !== '' ? $nik : NULL,
+				'no_hp' => $no_hp !== '' ? $no_hp : NULL,
+				'nama'  => $nama,
+				'email' => $email,
+				'role'  => $role,
+			);
+			if ($password !== '') { $simpan['password'] = password_hash($password, PASSWORD_DEFAULT); }
+
+			if ($save_id) { $this->db->where('id', $save_id)->update('users', $simpan); }
+			else { $this->db->insert('users', $simpan); }
+
+			// Kata sandi (plaintext) cuma diketahui server persis di sini -
+			// kalau baru dibuat atau sengaja diganti, simpan sebentar di
+			// flashdata supaya admin bisa langsung kirim kredensialnya ke
+			// pengguna lewat WA/Email di halaman daftar berikutnya.
+			if ($password !== '')
+			{
+				$this->session->set_flashdata('kredensial', array('nama' => $nama, 'email' => $email, 'no_hp' => $no_hp, 'password' => $password));
+			}
+			else
+			{
+				$this->session->set_flashdata('sukses', 'Data pengguna "' . $nama . '" berhasil diperbarui.');
+			}
+			ci_redirect('admin/pengguna');
+			return;
+		}
+
+		$data['editing']     = $editing;
+		$data['old']         = $this->session->flashdata('old');
+		$data['error']       = $this->session->flashdata('error');
+		$data['nama_admin']  = $this->session->userdata('nama');
+		$this->load->view('pages/admin_pengguna_form', $data);
+	}
+
+	/**
+	 * Reset kata sandi 1 akun ke kata sandi acak baru, lalu simpan
+	 * sebentar di flashdata supaya halaman Kelola Pengguna bisa
+	 * menampilkan tombol kirim kredensial (WA/Email) memakai kata
+	 * sandi baru tsb - pola yang sama dengan pengguna_form().
+	 */
+	public function reset_password_pengguna($id = null)
+	{
+		$id = (int) $id;
+		$user = $this->db->where('id', $id)->get('users')->row_array();
+		if ($user === NULL) { show_404(); return; }
+		if ($this->input->method(TRUE) !== 'POST') { ci_redirect('admin/pengguna'); return; }
+
+		$password_baru = $this->_buat_kata_sandi_acak();
+		$this->db->where('id', $id)->update('users', array('password' => password_hash($password_baru, PASSWORD_DEFAULT)));
+
+		$this->session->set_flashdata('kredensial', array(
+			'nama' => $user['nama'], 'email' => $user['email'], 'no_hp' => $user['no_hp'], 'password' => $password_baru,
+		));
+		ci_redirect('admin/pengguna');
+	}
+
+	/** Kata sandi acak 8 karakter (huruf besar/kecil + angka, tanpa karakter ambigu). */
+	private function _buat_kata_sandi_acak($panjang = 8)
+	{
+		$karakter = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+		$password = '';
+		for ($i = 0; $i < $panjang; $i++)
+		{
+			$password .= $karakter[random_int(0, strlen($karakter) - 1)];
+		}
+		return $password;
+	}
+
+	/**
+	 * Daftar SEMUA permohonan PBG (semua staf PU), read-only untuk
+	 * admin. Sengaja tidak ada tombol tambah/edit/hapus di sini -
+	 * pengelolaan permohonan tetap wewenang PU (lihat Pengajuan_pbg,
+	 * yang dijaga _wajib_pu()). Peta persetujuan TPA per bidang
+	 * dikumpulkan sekali di sini, pola sama seperti
+	 * Pengajuan_pbg::index().
+	 */
+	public function pengajuan()
+	{
+		$persetujuan_per_id = array();
+		foreach ($this->db->get('pengajuan_pbg_persetujuan_tpa')->result_array() as $p)
+		{
+			$persetujuan_per_id[$p['id_pengajuan']][$p['bidang']] = $p['status'];
+		}
+
+		$data['daftar'] = $this->db
+			->select('pengajuan_pbg.*, pembuat.nama AS nama_pembuat')
+			->from('pengajuan_pbg')
+			->join('users AS pembuat', 'pembuat.id = pengajuan_pbg.dibuat_oleh', 'left')
+			->order_by('pengajuan_pbg.created_at', 'DESC')
+			->get()->result_array();
+		$data['persetujuan_per_id'] = $persetujuan_per_id;
+		$data['nama_admin']         = $this->session->userdata('nama');
+
+		$this->load->view('pages/admin_pengajuan', $data);
+	}
+
+	/**
+	 * Detail satu permohonan PBG, read-only. Query-nya sengaja
+	 * menyalin Pengajuan_pbg::lihat() (join reviewer + peninjau) tapi
+	 * TANPA cek _milik_saya() - admin boleh lihat permohonan siapa
+	 * pun. View 'pages/pengajuan_pbg_detail' dipakai bersama; flag
+	 * admin_mode di sana menyembunyikan tombol aksi PU dan mengganti
+	 * sidebar + tautan berkas.
+	 */
+	public function pengajuan_lihat($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0
+			? $this->db->select('pengajuan_pbg.*, peninjau.nama AS nama_peninjau, ra.nama AS nama_reviewer_arsitek, rs.nama AS nama_reviewer_struktur, rm.nama AS nama_reviewer_mep, pembuat.nama AS nama_pembuat')
+				->from('pengajuan_pbg')
+				->join('users AS peninjau', 'peninjau.id = pengajuan_pbg.ditinjau_oleh', 'left')
+				->join('users AS ra', 'ra.id = pengajuan_pbg.reviewer_arsitek_id', 'left')
+				->join('users AS rs', 'rs.id = pengajuan_pbg.reviewer_struktur_id', 'left')
+				->join('users AS rm', 'rm.id = pengajuan_pbg.reviewer_mep_id', 'left')
+				->join('users AS pembuat', 'pembuat.id = pengajuan_pbg.dibuat_oleh', 'left')
+				->where('pengajuan_pbg.id', $id)
+				->get()->row_array()
+			: NULL;
+
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$persetujuan = array();
+		foreach ($this->db->select('pengajuan_pbg_persetujuan_tpa.*, peninjau.nama AS nama_peninjau')
+			->from('pengajuan_pbg_persetujuan_tpa')
+			->join('users AS peninjau', 'peninjau.id = pengajuan_pbg_persetujuan_tpa.ditinjau_oleh', 'left')
+			->where('id_pengajuan', $id)->get()->result_array() as $p)
+		{
+			$persetujuan[$p['bidang']] = $p;
+		}
+
+		$data['row']              = $row;
+		$data['dokumen']          = $this->db->where('id_pengajuan', $id)->get('pengajuan_pbg_dokumen')->result_array();
+		$data['persetujuan']      = $persetujuan;
+		$data['opsi_kepemilikan'] = array(
+			'perorangan'        => 'Perorangan',
+			'badan_hukum_usaha' => 'Badan Hukum / Badan Usaha',
+			'pemerintah'        => 'Pemerintah',
+		);
+		$data['opsi_kondisi'] = array(
+			'sudah_ada'        => 'Sudah Ada (Eksisting)',
+			'belum_berdiri'    => 'Belum Berdiri',
+			'sedang_dibangun'  => 'Sedang Dibangun',
+			'renovasi'         => 'Renovasi (Perubahan Bangunan Gedung)',
+			'perpanjangan_slf' => 'Sudah Ada (Perpanjangan SLF)',
+		);
+		$data['sukses']        = NULL;
+		$data['error']         = NULL;
+		$data['nama_pengguna'] = $this->session->userdata('nama');
+		$data['admin_mode']    = TRUE;
+		$data['riwayat']       = $this->db->table_exists('pengajuan_pbg_riwayat')
+			? $this->db->select('pengajuan_pbg_riwayat.*, users.nama AS nama_pengubah')->from('pengajuan_pbg_riwayat')->join('users', 'users.id = pengajuan_pbg_riwayat.diubah_oleh', 'left')->where('id_pengajuan', $id)->order_by('diubah_pada', 'DESC')->get()->result_array()
+			: array();
+
+		$this->load->view('pages/pengajuan_pbg_detail', $data);
+	}
+
+	/**
+	 * Sajikan satu berkas terunggah milik permohonan PBG mana pun.
+	 * Path SELALU ditentukan lewat lookup database (tidak pernah dari
+	 * input), sama seperti Pengajuan_pbg::berkas() - bedanya di sini
+	 * tanpa cek _milik_saya() karena admin memang boleh melihat
+	 * semua permohonan.
+	 */
+	public function berkas($tipe = null, $id = null)
+	{
+		$id          = (int) $id;
+		$kolom_valid = array('prototipe_peta', 'bangunan_peta', 'tanah_lampiran');
+
+		if ($tipe === 'dokumen')
+		{
+			$dok = $this->db->where('id', $id)->get('pengajuan_pbg_dokumen')->row_array();
+			if ($dok === NULL)
+			{
+				show_404();
+				return;
+			}
+			$path       = LEGACY_STORAGE . 'uploads/pengajuan_pbg/' . $dok['path_file'];
+			$nama_unduh = $dok['nama_file_asli'];
+		}
+		elseif (in_array($tipe, $kolom_valid, TRUE))
+		{
+			$row = $this->db->where('id', $id)->get('pengajuan_pbg')->row_array();
+			if ($row === NULL || empty($row[$tipe]))
+			{
+				show_404();
+				return;
+			}
+			$path       = LEGACY_STORAGE . 'uploads/pengajuan_pbg/' . $row[$tipe];
+			$nama_unduh = basename($path);
+		}
+		else
+		{
+			show_404();
+			return;
+		}
+
+		if (! is_file($path))
+		{
+			show_404();
+			return;
+		}
+
+		$this->load->helper('file');
+		$mime = function_exists('mime_content_type') ? mime_content_type($path) : 'application/octet-stream';
+		$this->output->set_header('Content-Type: ' . $mime);
+		$this->output->set_header('Content-Disposition: inline; filename="' . str_replace('"', '', $nama_unduh) . '"');
+		$this->output->set_header('Content-Length: ' . filesize($path));
+		echo read_file($path);
+	}
+
+	/**
+	 * Daftar SEMUA permohonan SLF, read-only untuk admin - pola sama
+	 * persis dengan pengajuan() versi PBG di atas, cuma ganti tabel
+	 * pengajuan_slf* dan view admin_pengajuan_slf.
+	 */
+	public function pengajuan_slf()
+	{
+		show_404();
+		return;
+
+		$persetujuan_per_id = array();
+		foreach ($this->db->get('pengajuan_slf_persetujuan_tpa')->result_array() as $p)
+		{
+			$persetujuan_per_id[$p['id_pengajuan']][$p['bidang']] = $p['status'];
+		}
+
+		$data['daftar'] = $this->db
+			->select('pengajuan_slf.*, pembuat.nama AS nama_pembuat')
+			->from('pengajuan_slf')
+			->join('users AS pembuat', 'pembuat.id = pengajuan_slf.dibuat_oleh', 'left')
+			->order_by('pengajuan_slf.created_at', 'DESC')
+			->get()->result_array();
+		$data['persetujuan_per_id'] = $persetujuan_per_id;
+		$data['nama_admin']         = $this->session->userdata('nama');
+
+		$this->load->view('pages/admin_pengajuan_slf', $data);
+	}
+
+	/**
+	 * Detail satu permohonan SLF, read-only - menyalin
+	 * pengajuan_lihat() versi PBG, ganti tabel pengajuan_slf* dan
+	 * view pengajuan_slf_detail (flag admin_mode di sana yang
+	 * menyembunyikan aksi PU + mengarahkan sidebar/berkas ke rute admin).
+	 */
+	public function pengajuan_slf_lihat($id = null)
+	{
+		show_404();
+		return;
+
+		$id  = (int) $id;
+		$row = $id > 0
+			? $this->db->select('pengajuan_slf.*, peninjau.nama AS nama_peninjau, ra.nama AS nama_reviewer_arsitek, rs.nama AS nama_reviewer_struktur, rm.nama AS nama_reviewer_mep, pembuat.nama AS nama_pembuat')
+				->from('pengajuan_slf')
+				->join('users AS peninjau', 'peninjau.id = pengajuan_slf.ditinjau_oleh', 'left')
+				->join('users AS ra', 'ra.id = pengajuan_slf.reviewer_arsitek_id', 'left')
+				->join('users AS rs', 'rs.id = pengajuan_slf.reviewer_struktur_id', 'left')
+				->join('users AS rm', 'rm.id = pengajuan_slf.reviewer_mep_id', 'left')
+				->join('users AS pembuat', 'pembuat.id = pengajuan_slf.dibuat_oleh', 'left')
+				->where('pengajuan_slf.id', $id)
+				->get()->row_array()
+			: NULL;
+
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$persetujuan = array();
+		foreach ($this->db->select('pengajuan_slf_persetujuan_tpa.*, peninjau.nama AS nama_peninjau')
+			->from('pengajuan_slf_persetujuan_tpa')
+			->join('users AS peninjau', 'peninjau.id = pengajuan_slf_persetujuan_tpa.ditinjau_oleh', 'left')
+			->where('id_pengajuan', $id)->get()->result_array() as $p)
+		{
+			$persetujuan[$p['bidang']] = $p;
+		}
+
+		$data['row']              = $row;
+		$data['dokumen']          = $this->db->where('id_pengajuan', $id)->get('pengajuan_slf_dokumen')->result_array();
+		$data['persetujuan']      = $persetujuan;
+		$data['opsi_kepemilikan'] = array(
+			'perorangan'        => 'Perorangan',
+			'badan_hukum_usaha' => 'Badan Hukum / Badan Usaha',
+			'pemerintah'        => 'Pemerintah',
+		);
+		$data['opsi_kondisi'] = array(
+			'sudah_ada'        => 'Sudah Ada (Eksisting)',
+			'belum_berdiri'    => 'Belum Berdiri',
+			'sedang_dibangun'  => 'Sedang Dibangun',
+			'renovasi'         => 'Renovasi (Perubahan Bangunan Gedung)',
+			'perpanjangan_slf' => 'Sudah Ada (Perpanjangan SLF)',
+		);
+		$data['sukses']        = NULL;
+		$data['error']         = NULL;
+		$data['nama_pengguna'] = $this->session->userdata('nama');
+		$data['admin_mode']    = TRUE;
+
+		$this->load->view('pages/pengajuan_slf_detail', $data);
+	}
+
+	/** Sajikan berkas permohonan SLF mana pun - salinan berkas() versi PBG dengan tabel/direktori pengajuan_slf. */
+	public function berkas_slf($tipe = null, $id = null)
+	{
+		show_404();
+		return;
+
+		$id          = (int) $id;
+		$kolom_valid = array('prototipe_peta', 'bangunan_peta', 'tanah_lampiran');
+
+		if ($tipe === 'dokumen')
+		{
+			$dok = $this->db->where('id', $id)->get('pengajuan_slf_dokumen')->row_array();
+			if ($dok === NULL)
+			{
+				show_404();
+				return;
+			}
+			$path       = LEGACY_STORAGE . 'uploads/pengajuan_slf/' . $dok['path_file'];
+			$nama_unduh = $dok['nama_file_asli'];
+		}
+		elseif (in_array($tipe, $kolom_valid, TRUE))
+		{
+			$row = $this->db->where('id', $id)->get('pengajuan_slf')->row_array();
+			if ($row === NULL || empty($row[$tipe]))
+			{
+				show_404();
+				return;
+			}
+			$path       = LEGACY_STORAGE . 'uploads/pengajuan_slf/' . $row[$tipe];
+			$nama_unduh = basename($path);
+		}
+		else
+		{
+			show_404();
+			return;
+		}
+
+		if (! is_file($path))
+		{
+			show_404();
+			return;
+		}
+
+		$this->load->helper('file');
+		$mime = function_exists('mime_content_type') ? mime_content_type($path) : 'application/octet-stream';
+		$this->output->set_header('Content-Type: ' . $mime);
+		$this->output->set_header('Content-Disposition: inline; filename="' . str_replace('"', '', $nama_unduh) . '"');
+		$this->output->set_header('Content-Length: ' . filesize($path));
+		echo read_file($path);
+	}
+
+	public function hapus_pengguna($id = null)
+	{
+		$id = (int) $id;
+
+		if ($id === (int) $this->session->userdata('user_id'))
+		{
+			$this->session->set_flashdata('error', 'Tidak bisa menghapus akun yang sedang Anda gunakan sendiri.');
+			ci_redirect('admin/pengguna');
+			return;
+		}
+
+		$this->db->where('id', $id)->delete('users');
+		$this->session->set_flashdata('sukses', 'Pengguna berhasil dihapus.');
+		ci_redirect('admin/pengguna');
+	}
+
+	/* ================= KELOLA SEBARAN BANGUNAN (tabel bangunan_gis) =================
+	 * Data titik bangunan yang tampil di peta Analisa Kerusakan & Spasial.
+	 * Sumbernya sekarang tabel (bukan gis-data.js), disajikan ke peta lewat
+	 * Gis::bangunan(). Kolom `kondisi` ENUM '1'..'4' = Baik/Rusak Ringan/
+	 * Rusak Sedang/Rusak Berat. */
+
+	private $kondisi_label = array(
+		'1' => 'Baik',
+		'2' => 'Rusak Ringan',
+		'3' => 'Rusak Sedang',
+		'4' => 'Rusak Berat',
+	);
+
+	/** Daftar bangunan — dengan pencarian + saring kecamatan/kondisi + halaman. */
+	public function bangunan()
+	{
+		$q    = trim((string) $this->input->get('q'));
+		$kec  = trim((string) $this->input->get('kec'));
+		$kon  = trim((string) $this->input->get('kondisi'));
+		// Param halaman sengaja 'hal', BUKAN 'page' - WAF/mod_security di
+		// host live memblokir (403) request apa pun yang punya query
+		// parameter bernama 'page' (pola scan LFI ?page=...).
+		$page = max(1, (int) $this->input->get('hal'));
+		$per  = 25;
+
+		$filter = function () use ($q, $kec, $kon) {
+			if ($q !== '')
+			{
+				$this->db->group_start()
+					->like('nama_bangunan', $q)
+					->or_like('opd', $q)
+					->or_like('alamat', $q)
+					->or_like('kelurahan', $q)
+					->group_end();
+			}
+			if ($kec !== '') $this->db->where('kecamatan', $kec);
+			if (in_array($kon, array('1', '2', '3', '4'), TRUE)) $this->db->where('kondisi', $kon);
+		};
+
+		$filter();
+		$total = $this->db->count_all_results('bangunan_gis');
+
+		$filter();
+		$data['daftar'] = $this->db
+			->order_by('id', 'DESC')
+			->limit($per, ($page - 1) * $per)
+			->get('bangunan_gis')->result_array();
+
+		$data['jml_massa'] = array();
+		if (! empty($data['daftar']) && $this->db->table_exists('bangunan_massa'))
+		{
+			foreach ($this->db->select('bangunan_id, COUNT(*) AS n')->where_in('bangunan_id', array_column($data['daftar'], 'id'))->group_by('bangunan_id')->get('bangunan_massa')->result_array() as $m) $data['jml_massa'][(int) $m['bangunan_id']] = (int) $m['n'];
+		}
+
+		$data['total']         = $total;
+		$data['page']          = $page;
+		$data['per']           = $per;
+		$data['total_page']    = max(1, (int) ceil($total / $per));
+		$data['q']             = $q;
+		$data['kec']           = $kec;
+		$data['kondisi']       = $kon;
+		$data['daftar_kec']    = $this->db->distinct()->select('kecamatan')->where('kecamatan !=', '')->order_by('kecamatan', 'ASC')->get('bangunan_gis')->result_array();
+		$data['kondisi_label'] = $this->kondisi_label;
+		$data['sukses']        = $this->session->flashdata('sukses');
+		$data['error']         = $this->session->flashdata('error');
+		$data['nama_admin']    = $this->session->userdata('nama');
+
+		$this->load->view('pages/admin_bangunan', $data);
+	}
+
+	/** Form tambah bangunan baru. */
+	public function bangunan_tambah()
+	{
+		$this->_bangunan_form(NULL);
+	}
+
+	/** Form ubah bangunan. */
+	public function bangunan_ubah($id = null)
+	{
+		$row = $this->db->where('id', (int) $id)->get('bangunan_gis')->row_array();
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+		$this->_bangunan_form($row);
+	}
+
+	private function _bangunan_form($row)
+	{
+		$data['row']           = $row;
+		$data['kondisi_label'] = $this->kondisi_label;
+		$data['error']         = $this->session->flashdata('error');
+		$data['old']           = $this->session->flashdata('old');
+		$data['nama_admin']    = $this->session->userdata('nama');
+		$this->load->view('pages/admin_bangunan_form', $data);
+	}
+
+	/** Simpan (POST) tambah maupun ubah. $id NULL = tambah. */
+	public function bangunan_simpan($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('bangunan_gis')->row_array() : NULL;
+		if ($id > 0 && $row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$p = function ($nama) {
+			$v = trim((string) $this->input->post($nama));
+			return $v !== '' ? $v : NULL;
+		};
+
+		$nama    = trim((string) $this->input->post('nama_bangunan'));
+		$lat_in  = trim((string) $this->input->post('latitude'));
+		$lng_in  = trim((string) $this->input->post('longitude'));
+		$kondisi = (string) $this->input->post('kondisi');
+		$lantai  = trim((string) $this->input->post('jumlah_lantai'));
+
+		$tujuan = $id > 0 ? 'admin/bangunan-ubah/' . $id : 'admin/bangunan-tambah';
+
+		$kosong = array();
+		if ($nama === '')                                    $kosong[] = 'Nama bangunan';
+		if (! is_numeric($lat_in) || abs((float) $lat_in) > 90)  $kosong[] = 'Latitude (angka -90..90)';
+		if (! is_numeric($lng_in) || abs((float) $lng_in) > 180) $kosong[] = 'Longitude (angka -180..180)';
+		if (! in_array($kondisi, array('1', '2', '3', '4'), TRUE)) $kosong[] = 'Kondisi';
+
+		if (! empty($kosong))
+		{
+			$this->session->set_flashdata('error', 'Periksa lagi: ' . implode(', ', $kosong) . '.');
+			$this->session->set_flashdata('old', $this->input->post());
+			ci_redirect($tujuan);
+			return;
+		}
+
+		// ---- Foto: unggah file ke assets/foto-bangunan/ (web-accessible,
+		// beda dari application/uploads/ yang ditutup .htaccess) ----
+		$dir_foto = FCPATH . 'assets/foto-bangunan/';
+		$foto     = ($id > 0 && ! empty($row['foto'])) ? $row['foto'] : NULL; // pertahankan yang lama
+
+		if ($this->input->post('hapus_foto') === '1' && $foto !== NULL)
+		{
+			if (stripos($foto, 'http') !== 0) @unlink($dir_foto . basename($foto));
+			$foto = NULL;
+		}
+
+		if (! empty($_FILES['foto_file']['name']))
+		{
+			if (! is_dir($dir_foto)) @mkdir($dir_foto, 0755, TRUE);
+			$this->load->library('upload');
+			$this->upload->initialize(array(
+				'upload_path'   => $dir_foto,
+				'allowed_types' => 'jpg|jpeg|png|webp',
+				'max_size'      => 102400,
+				'encrypt_name'  => TRUE,
+			));
+			if ($this->upload->do_upload('foto_file'))
+			{
+				if ($foto !== NULL && stripos($foto, 'http') !== 0) @unlink($dir_foto . basename($foto));
+				$foto = berkas_simpan($this->upload->data());
+			}
+			else
+			{
+				$this->session->set_flashdata('error', 'Foto gagal diunggah: ' . strip_tags($this->upload->display_errors('', '')));
+				$this->session->set_flashdata('old', $this->input->post());
+				ci_redirect($tujuan);
+				return;
+			}
+		}
+
+		$simpan = array(
+			'opd'           => $p('opd'),
+			'unit'          => $p('unit'),
+			'institusi'     => $p('institusi'),
+			'nama_bangunan' => $nama,
+			'fungsi'        => $p('fungsi'),
+			'jumlah_lantai' => ($lantai !== '' && is_numeric($lantai)) ? (int) $lantai : NULL,
+			'kecamatan'     => $p('kecamatan'),
+			'kelurahan'     => $p('kelurahan'),
+			'alamat'        => $p('alamat'),
+			'kondisi'       => $kondisi,
+			'latitude'      => round((float) $lat_in, 8),
+			'longitude'     => round((float) $lng_in, 8),
+			'foto'          => $foto,
+		);
+
+		if ($id > 0)
+		{
+			$this->db->where('id', $id)->update('bangunan_gis', $simpan);
+			$this->session->set_flashdata('sukses', 'Data bangunan "' . $nama . '" berhasil diperbarui.');
+		}
+		else
+		{
+			$this->db->insert('bangunan_gis', $simpan);
+			$this->session->set_flashdata('sukses', 'Bangunan "' . $nama . '" berhasil ditambahkan ke peta.');
+		}
+		ci_redirect('admin/bangunan');
+	}
+
+	/** Buat tabel bangunan_massa bila belum ada (migrasi ringan). TRUE bila tabel tersedia. */
+	private function _pastikan_tabel_massa()
+	{
+		$ada = function () { return $this->db->query("SHOW TABLES LIKE 'bangunan_massa'")->num_rows() > 0; };
+		if ($ada())
+		{
+			// Tabel dari versi lebih awal belum punya kolom foto / geom: tambahkan.
+			$kolom_ada = function ($k) { return $this->db->query("SHOW COLUMNS FROM `bangunan_massa` LIKE '" . $k . "'")->num_rows() > 0; };
+			if (! $kolom_ada('foto')) $this->db->query('ALTER TABLE `bangunan_massa` ADD COLUMN `foto` VARCHAR(255) NULL AFTER `keterangan`');
+			if (! $kolom_ada('geom')) $this->db->query('ALTER TABLE `bangunan_massa` ADD COLUMN `geom` MEDIUMTEXT NULL AFTER `foto`');
+			return $kolom_ada('foto') && $kolom_ada('geom');
+		}
+		$this->db->query("CREATE TABLE IF NOT EXISTS `bangunan_massa` (
+			`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+			`bangunan_id` INT UNSIGNED NOT NULL,
+			`nama_massa` VARCHAR(150) NOT NULL,
+			`jumlah_lantai` SMALLINT UNSIGNED NULL,
+			`luas_m2` DECIMAL(12,2) NULL,
+			`kondisi` ENUM('1','2','3','4') NOT NULL DEFAULT '1',
+			`tahun_dibangun` SMALLINT UNSIGNED NULL,
+			`keterangan` VARCHAR(255) NULL,
+			`foto` VARCHAR(255) NULL,
+			`geom` MEDIUMTEXT NULL,
+			`created_at` DATETIME NOT NULL,
+			`updated_at` DATETIME NOT NULL,
+			PRIMARY KEY (`id`),
+			KEY `bangunan_id` (`bangunan_id`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+		return $ada();
+	}
+
+	/** Massa bangunan kini dikelola lewat modal di daftar Sebaran Bangunan; URL lama membuka modalnya. */
+	public function bangunan_massa($id = null)
+	{
+		ci_redirect('admin/bangunan?massa=' . (int) $id);
+	}
+
+	private function _massa_foto_src($nilai)
+	{
+		$nilai = (string) $nilai;
+		if ($nilai === '') return '';
+		return preg_match('#^https?://#i', $nilai) ? $nilai : base_url('assets/foto-bangunan/' . rawurlencode($nilai));
+	}
+
+	/** Daftar massa satu bangunan (urut id), lengkap dengan URL foto. */
+	private function _massa_daftar($bid)
+	{
+		if (! $this->_pastikan_tabel_massa()) return array();
+		$rows = $this->db->where('bangunan_id', (int) $bid)->order_by('id', 'ASC')->get('bangunan_massa')->result_array();
+		foreach ($rows as &$r)
+		{
+			$r['id']            = (int) $r['id'];
+			$r['jumlah_lantai'] = $r['jumlah_lantai'] !== NULL ? (int) $r['jumlah_lantai'] : NULL;
+			$r['luas_m2']       = $r['luas_m2'] !== NULL ? (float) $r['luas_m2'] : NULL;
+			$r['tahun_dibangun'] = $r['tahun_dibangun'] !== NULL ? (int) $r['tahun_dibangun'] : NULL;
+			$r['foto_src']      = $this->_massa_foto_src(isset($r['foto']) ? $r['foto'] : '');
+			$r['geom']          = (isset($r['geom']) && $r['geom'] !== NULL && $r['geom'] !== '') ? json_decode($r['geom'], TRUE) : NULL;
+		}
+		unset($r);
+		return $rows;
+	}
+
+	/**
+	 * Validasi & normalisasi geometri massa dari klien (GeoJSON Point / Polygon).
+	 * Mengembalikan array GeoJSON rapi (koordinat [lng,lat], 7 desimal; cincin poligon ditutup),
+	 * atau FALSE bila tidak valid.
+	 */
+	private function _massa_geom($json)
+	{
+		$g = json_decode($json, TRUE);
+		if (! is_array($g) || empty($g['type']) || ! isset($g['coordinates']) || ! is_array($g['coordinates'])) return FALSE;
+		$titik = function ($p) {
+			if (! is_array($p) || count($p) < 2 || ! is_numeric($p[0]) || ! is_numeric($p[1])) return FALSE;
+			$lng = (float) $p[0]; $lat = (float) $p[1];
+			if (abs($lat) > 90 || abs($lng) > 180) return FALSE;
+			return array(round($lng, 7), round($lat, 7));
+		};
+		if ($g['type'] === 'Point')
+		{
+			$p = $titik($g['coordinates']);
+			return $p === FALSE ? FALSE : array('type' => 'Point', 'coordinates' => $p);
+		}
+		if ($g['type'] === 'Polygon' && isset($g['coordinates'][0]) && is_array($g['coordinates'][0]))
+		{
+			$ring = array();
+			foreach ($g['coordinates'][0] as $p)
+			{
+				$t = $titik($p);
+				if ($t === FALSE) return FALSE;
+				$ring[] = $t;
+			}
+			if (count($ring) > 1 && $ring[0] === $ring[count($ring) - 1]) array_pop($ring);   // buang penutup bila ada
+			if (count($ring) < 3 || count($ring) > 500) return FALSE;
+			if (count(array_unique(array_map('json_encode', $ring))) < 3) return FALSE;      // minimal 3 titik berbeda
+			$ring[] = $ring[0];
+			return array('type' => 'Polygon', 'coordinates' => array($ring));
+		}
+		return FALSE;
+	}
+	/** Jawaban simpan/hapus massa: JSON untuk modal (AJAX), atau flash + kembali ke daftar bila bukan AJAX. */
+	private function _massa_balas($bid, $ok, $pesan, $kode = 422)
+	{
+		if ($this->input->is_ajax_request())
+		{
+			$out = array('ok' => (bool) $ok, 'pesan' => $pesan);
+			if ($ok) $out['daftar'] = $this->_massa_daftar($bid);
+			$this->output->set_status_header($ok ? 200 : $kode)->set_content_type('application/json')->set_output(json_encode($out));
+			return;
+		}
+		$this->session->set_flashdata($ok ? 'sukses' : 'error', $pesan);
+		ci_redirect('admin/bangunan?massa=' . (int) $bid);
+	}
+
+	/** Data modal Massa Bangunan (JSON): bangunan + daftar massa + label kondisi. */
+	public function bangunan_massa_data($id = null)
+	{
+		$row = $this->db->where('id', (int) $id)->get('bangunan_gis')->row_array();
+		if ($row === NULL)
+		{
+			$this->output->set_status_header(404)->set_content_type('application/json')->set_output(json_encode(array('ok' => FALSE, 'pesan' => 'Bangunan tidak ditemukan.')));
+			return;
+		}
+		if (! $this->_pastikan_tabel_massa())
+		{
+			$this->output->set_status_header(503)->set_content_type('application/json')->set_output(json_encode(array('ok' => FALSE, 'pesan' => 'Tabel bangunan_massa belum ada dan tidak dapat dibuat otomatis. Jalankan database/bangunan_massa.sql di phpMyAdmin.')));
+			return;
+		}
+		$this->output->set_content_type('application/json')->set_output(json_encode(array(
+			'ok'        => TRUE,
+			'bangunan'  => array('id' => (int) $row['id'], 'nama_bangunan' => $row['nama_bangunan'], 'opd' => $row['opd'], 'alamat' => $row['alamat'], 'latitude' => ($row['latitude'] !== NULL ? (float) $row['latitude'] : NULL), 'longitude' => ($row['longitude'] !== NULL ? (float) $row['longitude'] : NULL)),
+			'daftar'    => $this->_massa_daftar($row['id']),
+			'kondisi'   => $this->kondisi_label,
+			'tahun_maks' => (int) date('Y') + 1,
+		)));
+	}
+	/** Simpan massa (POST): massa_id kosong/0 = tambah, selain itu ubah. */
+	public function bangunan_massa_simpan($bangunan_id = null)
+	{
+		$bid = (int) $bangunan_id;
+		$row = $this->db->where('id', $bid)->get('bangunan_gis')->row_array();
+		if ($row === NULL || $this->input->method(TRUE) !== 'POST')
+		{
+			show_404();
+			return;
+		}
+		if (! $this->_pastikan_tabel_massa())
+		{
+			return $this->_massa_balas($bid, FALSE, 'Tabel bangunan_massa belum ada. Jalankan database/bangunan_massa.sql di phpMyAdmin.', 503);
+		}
+
+		$mid     = (int) $this->input->post('massa_id');
+		$nama    = trim((string) $this->input->post('nama_massa'));
+		$kondisi = (string) $this->input->post('kondisi');
+		$lantai  = trim((string) $this->input->post('jumlah_lantai'));
+		$luas    = str_replace(',', '.', trim((string) $this->input->post('luas_m2')));
+		$tahun   = trim((string) $this->input->post('tahun_dibangun'));
+		$ket     = trim((string) $this->input->post('keterangan'));
+
+		$salah = array();
+		if ($nama === '' || mb_strlen($nama) > 150)                 $salah[] = 'Nama massa (wajib, maks. 150 karakter)';
+		if (! in_array($kondisi, array('1', '2', '3', '4'), TRUE))   $salah[] = 'Kondisi';
+		if ($lantai !== '' && (! ctype_digit($lantai) || (int) $lantai > 200)) $salah[] = 'Jumlah lantai (angka 0–200)';
+		if ($luas !== '' && (! is_numeric($luas) || (float) $luas < 0 || (float) $luas > 9999999)) $salah[] = 'Luas (angka m², tidak negatif)';
+		if ($tahun !== '' && (! ctype_digit($tahun) || (int) $tahun < 1800 || (int) $tahun > ((int) date('Y') + 1))) $salah[] = 'Tahun dibangun (1800–' . ((int) date('Y') + 1) . ')';
+		if (mb_strlen($ket) > 255)                                   $salah[] = 'Keterangan (maks. 255 karakter)';
+		if ($mid > 0 && ! $this->db->where('id', $mid)->where('bangunan_id', $bid)->count_all_results('bangunan_massa')) $salah[] = 'Massa yang diubah tidak ditemukan';
+		// Lokasi pada peta (opsional): marker atau poligon dalam GeoJSON; kosong = tanpa lokasi.
+		$geom_in = trim((string) $this->input->post('geom'));
+		$geom = NULL;
+		if ($geom_in !== '')
+		{
+			$g = $this->_massa_geom($geom_in);
+			if ($g === FALSE) $salah[] = 'Lokasi pada peta (marker atau poligon minimal 3 titik dengan koordinat valid)';
+			else $geom = json_encode($g);
+		}
+
+		if (! empty($salah))
+		{
+			return $this->_massa_balas($bid, FALSE, 'Periksa lagi: ' . implode('; ', $salah) . '.');
+		}
+
+		// ---- Foto massa: unggah ke assets/foto-bangunan/ (sama seperti foto bangunan) ----
+		$dir_foto = FCPATH . 'assets/foto-bangunan/';
+		$foto     = NULL;
+		if ($mid > 0)
+		{
+			$lama = $this->db->select('foto')->where('id', $mid)->get('bangunan_massa')->row_array();
+			$foto = ($lama && ! empty($lama['foto'])) ? $lama['foto'] : NULL;
+		}
+		$foto_hapus = array();
+		if ($this->input->post('hapus_foto') === '1' && $foto !== NULL)
+		{
+			$foto_hapus[] = $foto;
+			$foto = NULL;
+		}
+		if (! empty($_FILES['foto_file']['name']))
+		{
+			if (! is_dir($dir_foto)) @mkdir($dir_foto, 0755, TRUE);
+			$this->load->library('upload');
+			$this->upload->initialize(array(
+				'upload_path'   => $dir_foto,
+				'allowed_types' => 'jpg|jpeg|png|webp',
+				'max_size'      => 102400,
+				'encrypt_name'  => TRUE,
+			));
+			if ($this->upload->do_upload('foto_file'))
+			{
+				if ($foto !== NULL) $foto_hapus[] = $foto;
+				$foto = berkas_simpan($this->upload->data());
+			}
+			else
+			{
+				return $this->_massa_balas($bid, FALSE, 'Foto gagal diunggah: ' . strip_tags($this->upload->display_errors('', '')));
+			}
+		}
+
+		$simpan = array(
+			'nama_massa'     => $nama,
+			'jumlah_lantai'  => $lantai !== '' ? (int) $lantai : NULL,
+			'luas_m2'        => $luas !== '' ? round((float) $luas, 2) : NULL,
+			'kondisi'        => $kondisi,
+			'tahun_dibangun' => $tahun !== '' ? (int) $tahun : NULL,
+			'keterangan'     => $ket !== '' ? $ket : NULL,
+			'foto'           => $foto,
+			'geom'           => $geom,
+			'updated_at'     => date('Y-m-d H:i:s'),
+		);
+		if ($mid > 0)
+		{
+			$this->db->where('id', $mid)->where('bangunan_id', $bid)->update('bangunan_massa', $simpan);
+			$pesan = 'Massa "' . $nama . '" berhasil diperbarui.';
+		}
+		else
+		{
+			$simpan['bangunan_id'] = $bid;
+			$simpan['created_at']  = $simpan['updated_at'];
+			$this->db->insert('bangunan_massa', $simpan);
+			$pesan = 'Massa "' . $nama . '" berhasil ditambahkan.';
+		}
+		foreach ($foto_hapus as $fh) { if (stripos($fh, 'http') !== 0) @unlink($dir_foto . basename($fh)); }
+		$this->_massa_balas($bid, TRUE, $pesan);
+	}
+
+	/** Hapus satu massa (POST). */
+	public function bangunan_massa_hapus($bangunan_id = null, $massa_id = null)
+	{
+		$bid = (int) $bangunan_id;
+		$mid = (int) $massa_id;
+		if ($this->input->method(TRUE) !== 'POST') show_404();
+		$m = $this->db->table_exists('bangunan_massa') ? $this->db->where('id', $mid)->where('bangunan_id', $bid)->get('bangunan_massa')->row_array() : NULL;
+		if ($m === NULL)
+		{
+			return $this->_massa_balas($bid, FALSE, 'Data massa tidak ditemukan.', 404);
+		}
+		if (! empty($m['foto']) && stripos($m['foto'], 'http') !== 0) @unlink(FCPATH . 'assets/foto-bangunan/' . basename($m['foto']));
+		$this->db->where('id', $mid)->delete('bangunan_massa');
+		$this->_massa_balas($bid, TRUE, 'Massa "' . $m['nama_massa'] . '" berhasil dihapus.');
+	}
+	/** Hapus (POST). */
+	public function bangunan_hapus($id = null)
+	{
+		$id  = (int) $id;
+		$row = $this->db->where('id', $id)->get('bangunan_gis')->row_array();
+		if ($row === NULL)
+		{
+			$this->session->set_flashdata('error', 'Data bangunan tidak ditemukan.');
+			ci_redirect('admin/bangunan');
+			return;
+		}
+		if (! empty($row['foto']) && stripos($row['foto'], 'http') !== 0)
+		{
+			@unlink(FCPATH . 'assets/foto-bangunan/' . basename($row['foto']));
+		}
+		$this->db->where('id', $id)->delete('bangunan_gis');
+		if ($this->db->table_exists('bangunan_massa'))
+		{
+			foreach ($this->db->select('foto')->where('bangunan_id', $id)->get('bangunan_massa')->result_array() as $mf)
+			{
+				if (! empty($mf['foto']) && stripos($mf['foto'], 'http') !== 0) @unlink(FCPATH . 'assets/foto-bangunan/' . basename($mf['foto']));
+			}
+			$this->db->where('bangunan_id', $id)->delete('bangunan_massa');
+		}
+		$this->session->set_flashdata('sukses', 'Bangunan "' . $row['nama_bangunan'] . '" berhasil dihapus dari peta.');
+		ci_redirect('admin/bangunan');
+	}
+
+	/* =====================================================================
+	 *  KELOLA CAGAR BUDAYA (tabel `cagar_budaya`, tampil di /cagar-budaya)
+	 * ===================================================================== */
+
+	private $cb_kategori = array('Benda', 'Bangunan', 'Struktur', 'Situs', 'Kawasan');
+	private $cb_status   = array('Ditetapkan', 'Terdaftar Register Nasional', 'Dalam Kajian', 'Diusulkan', 'Objek Diduga Cagar Budaya');
+
+	/** Daftar cagar budaya — cari + saring kategori/status + halaman. */
+	public function cagar_budaya()
+	{
+		$q   = trim((string) $this->input->get('q'));
+		$kat = trim((string) $this->input->get('kategori'));
+		$st  = trim((string) $this->input->get('status'));
+		// Param halaman 'hal', BUKAN 'page' (WAF host memblokir ?page=...).
+		$page = max(1, (int) $this->input->get('hal'));
+		$per  = 25;
+
+		$filter = function () use ($q, $kat, $st) {
+			if ($q !== '')
+			{
+				$this->db->group_start()
+					->like('nama', $q)
+					->or_like('kecamatan', $q)
+					->or_like('kelurahan', $q)
+					->or_like('alamat', $q)
+					->group_end();
+			}
+			if (in_array($kat, $this->cb_kategori, TRUE)) $this->db->where('kategori', $kat);
+			if (in_array($st, $this->cb_status, TRUE))     $this->db->where('status', $st);
+		};
+
+		$filter();
+		$total = $this->db->count_all_results('cagar_budaya');
+
+		$filter();
+		$data['daftar'] = $this->db
+			->order_by('id', 'DESC')
+			->limit($per, ($page - 1) * $per)
+			->get('cagar_budaya')->result_array();
+
+		$data['total']      = $total;
+		$data['page']       = $page;
+		$data['per']        = $per;
+		$data['total_page'] = max(1, (int) ceil($total / $per));
+		$data['q']          = $q;
+		$data['kategori']   = $kat;
+		$data['status']     = $st;
+		$data['cb_kategori'] = $this->cb_kategori;
+		$data['cb_status']   = $this->cb_status;
+		$data['sukses']     = $this->session->flashdata('sukses');
+		$data['error']      = $this->session->flashdata('error');
+		$data['nama_admin'] = $this->session->userdata('nama');
+
+		$this->load->view('pages/admin_cagar_budaya', $data);
+	}
+
+	public function cagar_budaya_tambah()
+	{
+		$this->_cagar_budaya_form(NULL);
+	}
+
+	public function cagar_budaya_ubah($id = null)
+	{
+		$row = $this->db->where('id', (int) $id)->get('cagar_budaya')->row_array();
+		if ($row === NULL)
+		{
+			show_404();
+			return;
+		}
+		$this->_cagar_budaya_form($row);
+	}
+
+	private function _cagar_budaya_form($row)
+	{
+		$data['row']        = $row;
+		$data['cb_kategori'] = $this->cb_kategori;
+		$data['cb_status']   = $this->cb_status;
+		$data['error']      = $this->session->flashdata('error');
+		$data['old']        = $this->session->flashdata('old');
+		$data['nama_admin'] = $this->session->userdata('nama');
+		$this->load->view('pages/admin_cagar_budaya_form', $data);
+	}
+
+	/** Simpan (POST). $id NULL = tambah. */
+	public function cagar_budaya_simpan($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('cagar_budaya')->row_array() : NULL;
+		if ($id > 0 && $row === NULL)
+		{
+			show_404();
+			return;
+		}
+
+		$p = function ($nama) {
+			$v = trim((string) $this->input->post($nama));
+			return $v !== '' ? $v : NULL;
+		};
+
+		$nama    = trim((string) $this->input->post('nama'));
+		$kat     = (string) $this->input->post('kategori');
+		$st      = (string) $this->input->post('status');
+		$lat_in  = trim((string) $this->input->post('latitude'));
+		$lng_in  = trim((string) $this->input->post('longitude'));
+
+		$tujuan = $id > 0 ? 'admin/cagar-budaya-ubah/' . $id : 'admin/cagar-budaya-tambah';
+
+		$kosong = array();
+		if ($nama === '')                              $kosong[] = 'Nama objek';
+		if (! in_array($kat, $this->cb_kategori, TRUE)) $kosong[] = 'Kategori';
+		if (! in_array($st, $this->cb_status, TRUE))    $kosong[] = 'Status';
+		// Koordinat opsional; jika diisi harus valid (dan keduanya terisi).
+		$isi_lat = ($lat_in !== ''); $isi_lng = ($lng_in !== '');
+		if ($isi_lat xor $isi_lng)                                      $kosong[] = 'Latitude & Longitude (isi keduanya atau kosongkan keduanya)';
+		if ($isi_lat && (! is_numeric($lat_in) || abs((float) $lat_in) > 90))  $kosong[] = 'Latitude (angka -90..90)';
+		if ($isi_lng && (! is_numeric($lng_in) || abs((float) $lng_in) > 180)) $kosong[] = 'Longitude (angka -180..180)';
+
+		if (! empty($kosong))
+		{
+			$this->session->set_flashdata('error', 'Periksa lagi: ' . implode(', ', $kosong) . '.');
+			$this->session->set_flashdata('old', $this->input->post());
+			ci_redirect($tujuan);
+			return;
+		}
+
+		// ---- Foto: unggah ke assets/foto-cagar-budaya/ ----
+		$dir_foto = FCPATH . 'assets/foto-cagar-budaya/';
+		$foto     = ($id > 0 && ! empty($row['foto'])) ? $row['foto'] : NULL;
+
+		if ($this->input->post('hapus_foto') === '1' && $foto !== NULL)
+		{
+			if (stripos($foto, 'http') !== 0) @unlink($dir_foto . basename($foto));
+			$foto = NULL;
+		}
+
+		if (! empty($_FILES['foto_file']['name']))
+		{
+			if (! is_dir($dir_foto)) @mkdir($dir_foto, 0755, TRUE);
+			$this->load->library('upload');
+			$this->upload->initialize(array(
+				'upload_path'   => $dir_foto,
+				'allowed_types' => 'jpg|jpeg|png|webp',
+				'max_size'      => 102400,
+				'encrypt_name'  => TRUE,
+			));
+			if ($this->upload->do_upload('foto_file'))
+			{
+				if ($foto !== NULL && stripos($foto, 'http') !== 0) @unlink($dir_foto . basename($foto));
+				$foto = berkas_simpan($this->upload->data());
+			}
+			else
+			{
+				$this->session->set_flashdata('error', 'Foto gagal diunggah: ' . strip_tags($this->upload->display_errors('', '')));
+				$this->session->set_flashdata('old', $this->input->post());
+				ci_redirect($tujuan);
+				return;
+			}
+		}
+
+		$simpan = array(
+			'nama'      => $nama,
+			'kategori'  => $kat,
+			'kecamatan' => $p('kecamatan'),
+			'kelurahan' => $p('kelurahan'),
+			'alamat'    => $p('alamat'),
+			'tahun'     => $p('tahun'),
+			'status'    => $st,
+			'no_sk'     => $p('no_sk'),
+			'latitude'  => $isi_lat ? round((float) $lat_in, 8) : NULL,
+			'longitude' => $isi_lng ? round((float) $lng_in, 8) : NULL,
+			'deskripsi' => $p('deskripsi'),
+			'sumber'    => $p('sumber'),
+			'foto'      => $foto,
+		);
+
+		if ($id > 0)
+		{
+			$this->db->where('id', $id)->update('cagar_budaya', $simpan);
+			$this->session->set_flashdata('sukses', 'Data cagar budaya "' . $nama . '" berhasil diperbarui.');
+		}
+		else
+		{
+			$this->db->insert('cagar_budaya', $simpan);
+			$this->session->set_flashdata('sukses', 'Cagar budaya "' . $nama . '" berhasil ditambahkan.');
+		}
+		ci_redirect('admin/cagar-budaya');
+	}
+
+	public function cagar_budaya_hapus($id = null)
+	{
+		$id  = (int) $id;
+		$row = $this->db->where('id', $id)->get('cagar_budaya')->row_array();
+		if ($row === NULL)
+		{
+			$this->session->set_flashdata('error', 'Data cagar budaya tidak ditemukan.');
+			ci_redirect('admin/cagar-budaya');
+			return;
+		}
+		if (! empty($row['foto']) && stripos($row['foto'], 'http') !== 0)
+		{
+			@unlink(FCPATH . 'assets/foto-cagar-budaya/' . basename($row['foto']));
+		}
+		$this->db->where('id', $id)->delete('cagar_budaya');
+		$this->session->set_flashdata('sukses', 'Cagar budaya "' . $row['nama'] . '" berhasil dihapus.');
+		ci_redirect('admin/cagar-budaya');
+	}
+
+	/* =====================================================================
+	 *  PENGATURAN GOOGLE DRIVE - UI admin (application/config/gdrive.php +
+	 *  file JSON di application/gdrive/ tetap didukung sebagai fallback
+	 *  untuk server lama, tapi begitu baris pengaturan_gdrive terisi lewat
+	 *  halaman ini, dia yang jadi sumber kebenaran - lihat Gdrive::__construct().
+	 * ===================================================================== */
+
+	private function pengaturan_drive_client()
+	{
+		$baris = $this->db->table_exists('pengaturan_gdrive') ? $this->db->where('id', 1)->get('pengaturan_gdrive')->row_array() : NULL;
+		if (! empty($baris['oauth_client_id']))
+		{
+			return array((string) $baris['oauth_client_id'], (string) $baris['oauth_client_secret']);
+		}
+		$this->config->load('gdrive', TRUE);
+		$client_path = $this->config->item('gdrive_oauth_client_path', 'gdrive');
+		$client = is_readable($client_path) ? json_decode(file_get_contents($client_path), TRUE) : NULL;
+		return array((string) ($client['client_id'] ?? ''), (string) ($client['client_secret'] ?? ''));
+	}
+
+	public function pengaturan_drive()
+	{
+		$this->load->helper('form');
+		$kosong = array('enabled' => 0, 'auth_mode' => 'oauth', 'folder_id' => '', 'oauth_client_id' => '', 'oauth_client_secret' => '', 'oauth_refresh_token' => '', 'service_account_json' => '');
+		$baris = $this->db->table_exists('pengaturan_gdrive') ? $this->db->where('id', 1)->get('pengaturan_gdrive')->row_array() : NULL;
+		$data['pengaturan']   = $baris ?: $kosong;
+		$data['nama_admin']   = $this->session->userdata('nama');
+		$data['redirect_uri'] = base_url('admin/gdrive-oauth-callback');
+		$p = $data['pengaturan'];
+		$data['terhubung'] = $p['auth_mode'] === 'oauth' ? ! empty($p['oauth_refresh_token']) : ! empty($p['service_account_json']);
+		$this->load->view('pages/admin_pengaturan_drive', $data);
+	}
+
+	public function simpan_pengaturan_drive()
+	{
+		if ($this->input->method() !== 'post') { show_404(); return; }
+		if (! $this->db->table_exists('pengaturan_gdrive'))
+		{
+			show_error('Tabel pengaturan_gdrive belum ada. Jalankan migrasi database/pengaturan_gdrive.sql lebih dulu.', 503);
+			return;
+		}
+
+		$lama = $this->db->where('id', 1)->get('pengaturan_gdrive')->row_array();
+
+		$auth_mode = in_array($this->input->post('auth_mode'), array('oauth', 'service_account'), TRUE) ? $this->input->post('auth_mode') : 'oauth';
+		$client_secret = trim((string) $this->input->post('oauth_client_secret'));
+		if ($client_secret === '' && ! empty($lama['oauth_client_secret'])) $client_secret = $lama['oauth_client_secret'];
+
+		$service_json = $lama['service_account_json'] ?? NULL;
+		if (! empty($_FILES['service_account_file']['tmp_name']))
+		{
+			$isi = file_get_contents($_FILES['service_account_file']['tmp_name']);
+			$cek = json_decode($isi, TRUE);
+			if (! is_array($cek) || empty($cek['client_email']) || empty($cek['private_key']))
+			{
+				$this->session->set_flashdata('error', 'File JSON Service Account tidak valid (harus berisi client_email dan private_key).');
+				ci_redirect('admin/pengaturan-drive'); return;
+			}
+			$service_json = $isi;
+		}
+
+		$this->db->replace('pengaturan_gdrive', array(
+			'id'                    => 1,
+			'enabled'               => $this->input->post('enabled') ? 1 : 0,
+			'auth_mode'             => $auth_mode,
+			'folder_id'             => trim((string) $this->input->post('folder_id')),
+			'oauth_client_id'       => trim((string) $this->input->post('oauth_client_id')),
+			'oauth_client_secret'   => $client_secret,
+			'oauth_refresh_token'   => $lama['oauth_refresh_token'] ?? NULL, // hanya diisi lewat alur admin/gdrive-oauth
+			'service_account_json'  => $service_json,
+			'updated_at'            => date('Y-m-d H:i:s'),
+		));
+
+		$this->session->set_flashdata('sukses', 'Pengaturan Google Drive tersimpan.');
+		ci_redirect('admin/pengaturan-drive');
+	}
+
+	public function putus_drive()
+	{
+		if ($this->db->table_exists('pengaturan_gdrive'))
+		{
+			$this->db->where('id', 1)->update('pengaturan_gdrive', array('oauth_refresh_token' => NULL, 'service_account_json' => NULL, 'updated_at' => date('Y-m-d H:i:s')));
+		}
+		$this->session->set_flashdata('sukses', 'Koneksi Google Drive diputuskan. Hubungkan ulang untuk memakai akun yang baru.');
+		ci_redirect('admin/pengaturan-drive');
+	}
+
+	/**
+	 * Saklar tampil/sembunyikan panel kredensial akun uji coba di
+	 * halaman login publik. Daftar akunnya sendiri tetap di
+	 * Login::$akun_uji - halaman ini cuma mengatur boolean di tabel
+	 * pengaturan_login (lihat Login::_akun_uji_untuk()).
+	 */
+	public function pengaturan_login()
+	{
+		$baris = $this->db->table_exists('pengaturan_login') ? $this->db->where('id', 1)->get('pengaturan_login')->row_array() : NULL;
+		$data['tampilkan']  = $baris === NULL || $baris['tampilkan_akun_uji'];
+		$data['nama_admin'] = $this->session->userdata('nama');
+		$this->load->view('pages/admin_pengaturan_login', $data);
+	}
+
+	public function simpan_pengaturan_login()
+	{
+		if ($this->input->method() !== 'post') { show_404(); return; }
+		if (! $this->db->table_exists('pengaturan_login'))
+		{
+			show_error('Tabel pengaturan_login belum ada. Jalankan migrasi database/pengaturan_login.sql lebih dulu.', 503);
+			return;
+		}
+		$this->db->replace('pengaturan_login', array(
+			'id'                 => 1,
+			'tampilkan_akun_uji' => $this->input->post('tampilkan_akun_uji') ? 1 : 0,
+			'updated_at'         => date('Y-m-d H:i:s'),
+		));
+		$this->session->set_flashdata('sukses', 'Pengaturan panel login tersimpan.');
+		ci_redirect('admin/pengaturan-login');
+	}
+
+	public function gdrive_oauth()
+	{
+		list($client_id, ) = $this->pengaturan_drive_client();
+		if ($client_id === '')
+		{
+			show_error('Client ID Google belum diisi. Buka menu Pengaturan Google Drive dan lengkapi Client ID &amp; Client Secret terlebih dahulu.', 500);
+			return;
+		}
+		$this->load->library('gdrive');
+		ci_redirect($this->gdrive->oauth_url($client_id, base_url('admin/gdrive-oauth-callback')));
+	}
+
+	public function gdrive_oauth_callback()
+	{
+		$code = (string) $this->input->get('code');
+		if ($code === '')
+		{
+			show_error('Tidak ada kode otorisasi dari Google (mungkin akses ditolak). Ulangi dari menu Pengaturan Google Drive.', 400);
+			return;
+		}
+		list($client_id, $client_secret) = $this->pengaturan_drive_client();
+		if ($client_id === '' || $client_secret === '')
+		{
+			show_error('Client ID/Secret Google belum lengkap.', 500);
+			return;
+		}
+		$this->load->library('gdrive');
+		$refresh_token = $this->gdrive->oauth_tukar_kode($client_id, $client_secret, base_url('admin/gdrive-oauth-callback'), $code);
+		if (! $refresh_token)
+		{
+			show_error('Gagal menukar kode otorisasi dengan Google. Cek application/logs untuk detail errornya.', 500);
+			return;
+		}
+
+		$pakai_db = $this->db->table_exists('pengaturan_gdrive');
+		if ($pakai_db && $this->db->where('id', 1)->get('pengaturan_gdrive')->row_array())
+		{
+			$this->db->where('id', 1)->update('pengaturan_gdrive', array('oauth_refresh_token' => $refresh_token, 'updated_at' => date('Y-m-d H:i:s')));
+			$this->session->set_flashdata('sukses', 'Berhasil terhubung ke Google Drive. Token tersimpan otomatis.');
+			ci_redirect('admin/pengaturan-drive');
+			return;
+		}
+
+		// Server lama yang belum pernah membuka Pengaturan Google Drive - simpan cara lama.
+		$this->config->load('gdrive', TRUE);
+		$token_path = $this->config->item('gdrive_oauth_token_path', 'gdrive');
+		file_put_contents($token_path, json_encode(array('refresh_token' => $refresh_token)));
+		$this->session->set_flashdata('sukses', 'Berhasil terhubung ke Google Drive. Token tersimpan otomatis. Pastikan gdrive_enabled=true di application/config/gdrive.php, lalu coba unggah berkas baru.');
+		ci_redirect('admin');
+	}
+
+	/**
+	 * Sementara: cek nilai php.ini yang BENAR-BENAR aktif di server saat
+	 * ini (bukan yang tertulis di panel cPanel, yang bisa belum berlaku).
+	 * Hapus method ini setelah selesai diagnosis batas ukuran upload.
+	 */
+	public function php_info_check()
+	{
+		$this->output->set_header('Content-Type: text/plain; charset=utf-8');
+		echo "post_max_size       : " . ini_get('post_max_size') . "\n";
+		echo "upload_max_filesize : " . ini_get('upload_max_filesize') . "\n";
+		echo "memory_limit        : " . ini_get('memory_limit') . "\n";
+		echo "max_execution_time  : " . ini_get('max_execution_time') . "\n";
+		echo "max_input_time      : " . ini_get('max_input_time') . "\n";
+		echo "PHP version         : " . phpversion() . "\n";
+		echo "SAPI                : " . php_sapi_name() . "\n";
+		echo "Loaded php.ini      : " . (php_ini_loaded_file() ?: '(tidak ada)') . "\n";
+		echo "Scanned .ini dirs   : " . (php_ini_scanned_files() ?: '(tidak ada)') . "\n";
+		exit;
+	}
+
+	/* =====================================================================
+	 *  SARAN & MASUKAN (kotak masuk) + FAQ publik (tabel `faq`)
+	 * ===================================================================== */
+
+	private $saran_status = array('baru', 'ditinjau', 'selesai');
+
+	/** Kotak masuk saran + pengelolaan FAQ dalam satu halaman. */
+	public function saran()
+	{
+		$st   = trim((string) $this->input->get('status'));
+		$page = max(1, (int) $this->input->get('hal'));
+		$per  = 20;
+
+		if (in_array($st, $this->saran_status, TRUE)) $this->db->where('status', $st);
+		$total = $this->db->count_all_results('saran_masukan');
+
+		if (in_array($st, $this->saran_status, TRUE)) $this->db->where('status', $st);
+		$data['daftar'] = $this->db
+			->order_by('id', 'DESC')
+			->limit($per, ($page - 1) * $per)
+			->get('saran_masukan')->result_array();
+
+		$data['total']       = $total;
+		$data['page']        = $page;
+		$data['per']         = $per;
+		$data['total_page']  = max(1, (int) ceil($total / $per));
+		$data['status']      = $st;
+		$data['jml_status']  = array(
+			'baru'     => (int) $this->db->where('status', 'baru')->count_all_results('saran_masukan'),
+			'ditinjau' => (int) $this->db->where('status', 'ditinjau')->count_all_results('saran_masukan'),
+			'selesai'  => (int) $this->db->where('status', 'selesai')->count_all_results('saran_masukan'),
+		);
+		$data['faq'] = $this->db->order_by('urutan', 'ASC')->order_by('id', 'ASC')->get('faq')->result_array();
+		$data['sukses']      = $this->session->flashdata('sukses');
+		$data['error']       = $this->session->flashdata('error');
+		$data['nama_admin']  = $this->session->userdata('nama');
+
+		$this->load->view('pages/admin_saran', $data);
+	}
+
+	/** Ubah status + catatan internal sebuah saran. */
+	public function saran_simpan($id = null)
+	{
+		$id  = (int) $id;
+		$row = $this->db->where('id', $id)->get('saran_masukan')->row_array();
+		if ($row === NULL) { show_404(); return; }
+
+		$st      = (string) $this->input->post('status');
+		$catatan = trim((string) $this->input->post('catatan'));
+
+		$this->db->where('id', $id)->update('saran_masukan', array(
+			'status'  => in_array($st, $this->saran_status, TRUE) ? $st : $row['status'],
+			'catatan' => $catatan !== '' ? $catatan : NULL,
+		));
+		$this->session->set_flashdata('sukses', 'Saran #' . $id . ' diperbarui.');
+		ci_redirect('admin/saran');
+	}
+
+	public function saran_hapus($id = null)
+	{
+		$id = (int) $id;
+		if ($this->db->where('id', $id)->get('saran_masukan')->num_rows() === 0)
+		{
+			$this->session->set_flashdata('error', 'Saran tidak ditemukan.');
+			ci_redirect('admin/saran');
+			return;
+		}
+		$this->db->where('id', $id)->delete('saran_masukan');
+		$this->session->set_flashdata('sukses', 'Saran #' . $id . ' dihapus.');
+		ci_redirect('admin/saran');
+	}
+
+	/** Buat draf FAQ dari sebuah saran (disembunyikan dulu, admin rapikan). */
+	public function saran_ke_faq($id = null)
+	{
+		$id  = (int) $id;
+		$row = $this->db->where('id', $id)->get('saran_masukan')->row_array();
+		if ($row === NULL) { show_404(); return; }
+
+		$pertanyaan = ($row['topik'] !== NULL && $row['topik'] !== '')
+			? $row['topik']
+			: 'Pertanyaan dari ' . $row['nama'];
+		$maks = (int) $this->db->select_max('urutan')->get('faq')->row()->urutan;
+
+		$this->db->insert('faq', array(
+			'pertanyaan'      => mb_substr($pertanyaan, 0, 255),
+			'jawaban'         => $row['pesan'],
+			'urutan'          => $maks + 1,
+			'tampil'          => 0,
+			'sumber_saran_id' => $id,
+		));
+		$this->session->set_flashdata('sukses', 'Draf FAQ dibuat dari saran #' . $id . '. Rapikan pertanyaan/jawabannya lalu centang "Tampil".');
+		ci_redirect('admin/saran#faq');
+	}
+
+	/** Simpan (tambah/ubah) satu entri FAQ. $id NULL = tambah. */
+	public function faq_simpan($id = null)
+	{
+		$id  = (int) $id;
+		$row = $id > 0 ? $this->db->where('id', $id)->get('faq')->row_array() : NULL;
+		if ($id > 0 && $row === NULL) { show_404(); return; }
+
+		$pertanyaan = trim((string) $this->input->post('pertanyaan'));
+		$jawaban    = trim((string) $this->input->post('jawaban'));
+		$urutan     = (int) $this->input->post('urutan');
+		$tampil     = $this->input->post('tampil') === '1' ? 1 : 0;
+
+		if ($pertanyaan === '' || $jawaban === '')
+		{
+			$this->session->set_flashdata('error', 'Pertanyaan dan jawaban FAQ wajib diisi.');
+			ci_redirect('admin/saran#faq');
+			return;
+		}
+
+		$simpan = array(
+			'pertanyaan' => mb_substr($pertanyaan, 0, 255),
+			'jawaban'    => $jawaban,
+			'urutan'     => $urutan,
+			'tampil'     => $tampil,
+		);
+
+		if ($id > 0)
+		{
+			$this->db->where('id', $id)->update('faq', $simpan);
+			$this->session->set_flashdata('sukses', 'FAQ diperbarui.');
+		}
+		else
+		{
+			$this->db->insert('faq', $simpan);
+			$this->session->set_flashdata('sukses', 'FAQ ditambahkan.');
+		}
+		ci_redirect('admin/saran#faq');
+	}
+
+	public function faq_hapus($id = null)
+	{
+		$id = (int) $id;
+		if ($this->db->where('id', $id)->get('faq')->num_rows() === 0)
+		{
+			$this->session->set_flashdata('error', 'FAQ tidak ditemukan.');
+			ci_redirect('admin/saran#faq');
+			return;
+		}
+		$this->db->where('id', $id)->delete('faq');
+		$this->session->set_flashdata('sukses', 'FAQ dihapus.');
+		ci_redirect('admin/saran#faq');
+	}
+}

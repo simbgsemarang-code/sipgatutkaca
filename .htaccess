@@ -12,6 +12,12 @@ Options -Indexes
 # 404 duluan sebelum sempat masuk ke index.php. LiteSpeed maupun
 # Apache sama-sama memahami directive di bawah ini langsung.
 RewriteEngine On
+
+# Folder & berkas internal CodeIgniter 4 tidak boleh diakses langsung dari web.
+# (application/ dan system/ = sisa CodeIgniter 3 + data unggahan lama; database/ = skrip SQL.)
+RewriteRule ^(app|vendor|writable|tests|application|system|database|docs|_legacy_html_backup)(/|$) - [F,L,NC]
+RewriteRule ^(\.env|\.env\.example|\.git|composer\.(json|lock)|spark|preload\.php|phpunit\.xml\.dist|DEPLOY\.md)$ - [F,L,NC]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php/$1 [L]

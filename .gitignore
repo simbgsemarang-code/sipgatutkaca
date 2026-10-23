@@ -56,3 +56,20 @@ download petunjuk simbg untuk pemohon.pdf
 # OS/editor cruft
 Thumbs.db
 .DS_Store
+
+# ---- CodeIgniter 4 ----
+# Rahasia & konfigurasi per-server: salin dari .env.example, jangan di-commit.
+.env
+# Konfigurasi Drive per-server (templatenya: app/Config/legacy/gdrive.php.example)
+app/Config/legacy/gdrive.php
+# Berkas runtime CI4 (log, cache, sesi, unggahan) - folder dijaga lewat index.html
+writable/cache/*
+!writable/cache/index.html
+writable/logs/*
+!writable/logs/index.html
+writable/session/*
+!writable/session/index.html
+writable/debugbar/*
+!writable/debugbar/.gitkeep
+writable/uploads/*
+!writable/uploads/index.html
