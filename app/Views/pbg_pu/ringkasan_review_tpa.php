@@ -19,28 +19,19 @@
           <?php endif; ?>
         </div>
       <?php endforeach; endif; ?>
-      <?php
-        $ba_bidang = array();
-        foreach ((array) ($konsultasi_riwayat ?? array()) as $k) { if ($k['bidang'] === $kode && $k['status'] !== 'ditugaskan') $ba_bidang[] = $k; }
-      ?>
-      <?php if (!empty($ba_bidang)): ?>
-        <div class="tpa-review-ba">
-          <small>Berita Acara bidang ini:</small>
-          <?php foreach ($ba_bidang as $k): ?>
-            <button type="button" class="btn" data-ba-modal data-konsultasi="<?= (int) $k['id'] ?>" data-tanggal="<?= htmlspecialchars(isset($ba_tanggal[(int) $k['id']]) ? $ba_tanggal[(int) $k['id']] : substr((string) $k['reviewed_at'], 0, 10), ENT_QUOTES, 'UTF-8') ?>">Unduh BA Putaran <?= (int) $k['putaran'] ?></button>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
     </article>
     <?php endforeach; ?>
   </div>
 </section>
+<?php $ba_putaran=array(); foreach((array)($konsultasi_riwayat??array()) as $k){if($k['status']!=='ditugaskan')$ba_putaran[(int)$k['putaran']]=$k;} if($ba_putaran):?>
+<div class="tpa-review-ba"><small>Berita Acara permohonan:</small><?php foreach($ba_putaran as $putaran=>$k):?><button type="button" class="btn" data-ba-modal data-konsultasi="<?= (int)$k['id'] ?>" data-tanggal="<?= htmlspecialchars(isset($ba_tanggal[(int)$k['id']])?$ba_tanggal[(int)$k['id']]:substr((string)$k['reviewed_at'],0,10),ENT_QUOTES,'UTF-8') ?>">Unduh BA Putaran <?= (int)$putaran ?></button><?php endforeach;?></div>
+<?php endif;?>
 <?php endif; ?>
 <?php if (!empty($permohonan_id)): ?>
 <dialog id="baTanggalModal" style="margin:auto;border:1px solid #d9dee6;border-radius:16px;padding:26px 28px;max-width:420px;width:calc(100% - 32px);box-shadow:0 24px 60px rgba(15,30,50,.28)">
   <form method="post" target="_blank" id="baTanggalForm" action="<?= base_url('pengajuan-pbg/berita-acara-tanggal/'.(int) $permohonan_id) ?>">
     <h3 style="margin:0 0 6px">Tanggal Berita Acara</h3>
-    <p style="margin:0 0 16px;font-size:.9rem;opacity:.8">Tanggal ini dipakai untuk <b>seluruh berita acara</b> permohonan ini. Anda dapat mengubahnya lagi kapan saja.</p>
+    <p style="margin:0 0 16px;font-size:.9rem;opacity:.8">Tanggal ini dipakai untuk berita acara pada <b>putaran yang dipilih</b>.</p>
     <input type="hidden" name="konsultasi_id" id="baKonsultasi">
     <label for="baTanggal" style="display:block;margin-bottom:6px;font-weight:600">Tanggal</label>
     <input type="date" name="tanggal_ba" id="baTanggal" required style="width:100%;box-sizing:border-box">

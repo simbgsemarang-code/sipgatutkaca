@@ -41,28 +41,28 @@ function konsultasi_label_status($status)
 }
 
 /**
- * Sinkronkan tahap permohonan untuk penugasan PUTARAN 1: selama masih ada TPA
- * berstatus "ditugaskan" permohonan berada di Tahap 1; setelah semua TPA
- * mengirim hasil review otomatis pindah ke Tahap 2. Putaran lanjutan (Tahap 3
- * dan seterusnya) tidak disentuh. TRUE bila tahap diubah.
+ * Sinkronkan tahap dan status permohonan dari hasil review terbaru.
  */
 function pbg_sinkron_tahap($permohonan_id)
 {
     $ci =& get_instance();
     $permohonan_id = (int) $permohonan_id;
     $row = $ci->db->select('id,tahap,status')->where('id', $permohonan_id)->get('permohonan_pbg')->row_array();
-    if (!$row || !in_array((int) $row['tahap'], array(1, 2), TRUE) || in_array($row['status'], array('disetujui', 'ditolak'), TRUE)) return FALSE;
-    $maks = $ci->db->select_max('putaran', 'maks')->where('permohonan_id', $permohonan_id)->get('konsultasi_pbg')->row_array();
-    if ((int) $maks['maks'] !== 1) return FALSE;
-    $menunggu = $ci->db->where('permohonan_id', $permohonan_id)->where('status', 'ditugaskan')->count_all_results('konsultasi_pbg');
-    $tujuan = $menunggu > 0 ? 1 : 2;
-    if ($tujuan === (int) $row['tahap']) return FALSE;
-    $ci->db->where('id', $permohonan_id)->update('permohonan_pbg', array('tahap' => $tujuan, 'updated_at' => date('Y-m-d H:i:s')));
+    if (!$row || $row['status'] === 'ditolak') return FALSE;
+    $rows=$ci->db->select('k.*,u.nama AS nama_tpa')->from('konsultasi_pbg k')->join('users u','u.id=k.tpa_user_id','left')->where('k.permohonan_id',$permohonan_id)->order_by('k.putaran','DESC')->order_by('k.id','DESC')->get()->result_array();
+    if(!$rows)return FALSE;
+    $ringkas=pbg_ringkasan_konsultasi($rows); $menunggu=FALSE; $perbaikan=FALSE; $semua_sesuai=!empty($ringkas); $putaran=1;
+    foreach($ringkas as $x){$putaran=max($putaran,(int)$x['putaran']);if($x['status']==='ditugaskan')$menunggu=TRUE;if($x['status']==='perlu_perbaikan')$perbaikan=TRUE;if($x['status']!=='direkomendasikan')$semua_sesuai=FALSE;}
+    if($semua_sesuai){$tujuan=4;$status='disetujui';}
+    elseif($menunggu){$tujuan=$putaran>1?3:1;$status='diverifikasi';}
+    else{$tujuan=$perbaikan?2:(int)$row['tahap'];$status='diverifikasi';}
+    if ($tujuan === (int)$row['tahap'] && $status===$row['status']) return FALSE;
+    $ci->db->where('id', $permohonan_id)->update('permohonan_pbg', array('tahap'=>$tujuan,'status'=>$status,'updated_at'=>date('Y-m-d H:i:s')));
     return TRUE;
 }
 
 /** Terbitkan BA distribusi untuk satu putaran (satu per putaran). TRUE kalau baru terbit. */
-function pbg_buat_ba_distribusi($permohonan_id, $putaran, $tanggal, $oleh)
+function pbg_buat_ba_distribusi($permohonan_id, $putaran, $tanggal, $oleh, $nomor = null)
 {
     $ci =& get_instance();
     if (!$ci->db->table_exists('berita_acara_distribusi')) return FALSE;
@@ -70,7 +70,8 @@ function pbg_buat_ba_distribusi($permohonan_id, $putaran, $tanggal, $oleh)
     $romawi = array('I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII');
     $tahun = date('Y', strtotime($tanggal)); $bulan = (int) date('n', strtotime($tanggal));
     $urut = $ci->db->where('YEAR(tanggal_ba)', $tahun)->count_all_results('berita_acara_distribusi') + 1;
-    $ci->db->insert('berita_acara_distribusi', array('permohonan_id' => $permohonan_id, 'putaran' => $putaran, 'nomor' => '600.1.15.2/'.$urut.'/BA-DTPA/'.$romawi[$bulan - 1].'/'.$tahun, 'tanggal_ba' => $tanggal, 'dibuat_oleh' => $oleh, 'created_at' => date('Y-m-d H:i:s')));
+    $nomor=trim((string)$nomor); if($nomor==='')$nomor='600.1.15.2/'.$urut.'/BA-DTPA/'.$romawi[$bulan - 1].'/'.$tahun;
+    $ci->db->insert('berita_acara_distribusi', array('permohonan_id' => $permohonan_id, 'putaran' => $putaran, 'nomor' => $nomor, 'tanggal_ba' => $tanggal, 'dibuat_oleh' => $oleh, 'created_at' => date('Y-m-d H:i:s')));
     return TRUE;
 }
 

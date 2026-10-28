@@ -85,11 +85,11 @@ class Berita_acara extends LegacyController
 		if (! $this->kolom_tanggal_ada()) $this->db->query('ALTER TABLE `berita_acara_pbg` ADD COLUMN `tanggal_ba` DATE NULL AFTER `diterbitkan_at`');
 		if (! $this->kolom_tanggal_ada()) show_error('Kolom tanggal_ba belum ada. Jalankan database/berita_acara_tanggal.sql lebih dulu.', 503);
 
-		$semua = $this->db->where('permohonan_id', $pid)->where('status !=', 'ditugaskan')->where('reviewed_at IS NOT NULL', NULL, FALSE)
+		$semua = $this->db->where('permohonan_id', $pid)->where('putaran',(int)$pemicu['putaran'])->where('status !=', 'ditugaskan')->where('reviewed_at IS NOT NULL', NULL, FALSE)
 			->order_by('reviewed_at', 'ASC')->order_by('id', 'ASC')->get('konsultasi_pbg')->result_array();
 		$this->db->trans_start();
 		foreach ($semua as $k) $this->ba_pastikan($k);
-		$this->db->where('permohonan_id', $pid)->update('berita_acara_pbg', array('tanggal_ba' => $tgl));
+		$ids=array_column($semua,'id'); if($ids)$this->db->where('permohonan_id',$pid)->where_in('konsultasi_id',$ids)->update('berita_acara_pbg',array('tanggal_ba'=>$tgl));
 		$this->db->trans_complete();
 		ci_redirect('pengajuan-pbg/berita-acara/' . (int) $pemicu['id']);
 	}
@@ -141,23 +141,22 @@ class Berita_acara extends LegacyController
 			'nomor'        => $ba['nomor'],
 			'tanggal_ba'   => ! empty($ba['tanggal_ba']) ? $ba['tanggal_ba'] : $ba['diterbitkan_at'],
 			'snapshot'     => json_decode($ba['snapshot'], true),
-			'riwayat'      => $this->riwayat_review($trigger['permohonan_id'], $ba['diterbitkan_at']),
+			'riwayat'      => $this->riwayat_review($trigger['permohonan_id'], (int)$trigger['putaran']),
 			'bidang_label' => $this->bidang_label,
 		);
 		$this->load->view('pbg_pu/berita_acara', $data);
 	}
 
 	/**
-	 * Seluruh review TPA (semua putaran, semua TPA) per bidang yang sudah masuk sampai
-	 * saat BA terbit, urut waktu. Review tidak bisa diubah setelah dikirim, jadi hasilnya
-	 * tetap sama kapan pun BA dibuka (BA lama ikut memuat riwayat lengkap).
+	 * Review TPA pada putaran BA yang sedang dibuka. Catatan putaran sebelumnya
+	 * tidak dicampurkan ke berita acara revisi berikutnya.
 	 */
-	private function riwayat_review($permohonan_id, $sampai)
+	private function riwayat_review($permohonan_id, $putaran)
 	{
 		$hasil = array('arsitektur' => array(), 'struktur' => array(), 'mep' => array());
 		$rows = $this->db->select('k.bidang,k.putaran,k.status,k.rekomendasi_tpa,k.reviewed_at,u.nama AS nama_tpa')->from('konsultasi_pbg k')
 			->join('users u', 'u.id = k.tpa_user_id', 'left')
-			->where('k.permohonan_id', (int) $permohonan_id)->where('k.reviewed_at IS NOT NULL')->where('k.reviewed_at <=', $sampai)
+			->where('k.permohonan_id', (int) $permohonan_id)->where('k.putaran',(int)$putaran)->where('k.reviewed_at IS NOT NULL')
 			->order_by('k.reviewed_at', 'ASC')->order_by('k.id', 'ASC')->get()->result_array();
 		foreach ($rows as $r) { if (isset($hasil[$r['bidang']])) $hasil[$r['bidang']][] = $r; }
 		return $hasil;

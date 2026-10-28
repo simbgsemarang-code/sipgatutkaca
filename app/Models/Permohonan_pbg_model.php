@@ -59,6 +59,11 @@ class Permohonan_pbg_model extends LegacyModel
 
 	public function delete_owned($id, $pu_id)
 	{
-		return $this->db->where('id', (int) $id)->where('user_id', (int) $pu_id)->where('status', 'diajukan')->delete($this->table);
+		if(!$this->owned($id,$pu_id))return FALSE;
+		$this->db->trans_start();
+		foreach(array('berita_acara_pbg','berita_acara_distribusi','link_perbaikan_pbg','pbg_penilaian_dokumen','aktivitas_pbg') as $t){if($this->db->table_exists($t))$this->db->where('permohonan_id',(int)$id)->delete($t);}
+		if($this->db->table_exists('konsultasi_pbg'))$this->db->where('permohonan_id',(int)$id)->delete('konsultasi_pbg');
+		$this->db->where('id',(int)$id)->where('user_id',(int)$pu_id)->delete($this->table);
+		$this->db->trans_complete(); return $this->db->trans_status();
 	}
 }

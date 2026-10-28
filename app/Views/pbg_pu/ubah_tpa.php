@@ -25,13 +25,11 @@ foreach ($nama_bidang as $kode => $nama)
 	}
 	if ($awal) $bisa_diubah[$kode] = $akhir;
 }
-$ada_ba = !empty($ba_aktif) && $putaran_menunggu > 0;
-$tanggal_ba = ($ada_ba && isset($ba_distribusi[$putaran_menunggu])) ? $ba_distribusi[$putaran_menunggu]['tanggal_ba'] : date('Y-m-d');
 ?>
-<?php if (empty($bisa_diubah) && !$ada_ba): ?>
+<?php if (empty($bisa_diubah)): ?>
 <div class="notice"><b>Menunggu hasil review.</b> TPA yang ditugaskan belum mengirim seluruh hasil review.</div>
 <?php else: ?>
-<h2 class="section-title"><?= !empty($bisa_diubah) ? 'Ubah TPA yang Ditugaskan' : 'Tanggal Berita Acara' ?></h2>
+<h2 class="section-title">Ubah TPA yang Ditugaskan <small style="font-size:.55em;color:var(--muted)">(opsional)</small></h2>
 <?php if (!empty($bisa_diubah)): ?><p>TPA yang belum mengirim hasil review masih dapat diganti, ditambah, atau dibatalkan. TPA yang sudah mengirim hasil tidak dapat diubah.</p><?php endif; ?>
 <?= form_open('pengajuan-pbg/ubah-tpa/'.$row['id']) ?>
 <?php if (!empty($bisa_diubah)): ?>
@@ -65,14 +63,6 @@ $tanggal_ba = ($ada_ba && isset($ba_distribusi[$putaran_menunggu])) ? $ba_distri
 <?php endforeach; ?>
 </div>
 <?php endif; ?>
-<?php if ($ada_ba): ?>
-<div class="consultation-fields"><div class="full">
-	<label>Tanggal Berita Acara (Putaran <?= (int) $putaran_menunggu ?>)</label>
-	<input type="hidden" name="putaran_ba" value="<?= (int) $putaran_menunggu ?>">
-	<input type="date" name="tanggal_ba" value="<?= htmlspecialchars($tanggal_ba, ENT_QUOTES, 'UTF-8') ?>" required style="max-width:240px">
-	<small class="multi-hint"><?= isset($ba_distribusi[$putaran_menunggu]) ? 'Nomor '.htmlspecialchars($ba_distribusi[$putaran_menunggu]['nomor'], ENT_QUOTES, 'UTF-8').'. ' : 'Berita acara putaran ini belum terbit dan akan diterbitkan saat disimpan. ' ?>Tanggal dapat diubah selama TPA belum mengirim hasil review.</small>
-</div></div>
-<?php endif; ?>
-<button class="btn btn-primary" type="submit"><?= !empty($bisa_diubah) ? 'Simpan Perubahan TPA' : 'Simpan Tanggal Berita Acara' ?></button>
+<button class="btn btn-primary" type="submit">Simpan Perubahan TPA</button>
 <?= form_close() ?>
 <?php endif; ?>

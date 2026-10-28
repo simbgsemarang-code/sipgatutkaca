@@ -11,14 +11,7 @@ if (! function_exists('dashboard_status_label'))
 {
 	function dashboard_status_label()
 	{
-		return array(
-			'draf'                         => 'Draf',
-			'verifikasi_dokumen'           => 'Verifikasi Dokumen',
-			'perbaikan_dokumen'            => 'Perbaikan Dokumen',
-			'perbaikan_dokumen_konsultasi' => 'Perbaikan Dok. Konsultasi',
-			'menunggu_jadwal_konsultasi'   => 'Menunggu Jadwal Konsultasi',
-			'disetujui_tpa'                => 'Disetujui Semua TPA',
-		);
+		return array('permohonan_baru'=>'Permohonan Baru','review_tpa'=>'Review TPA','perlu_perbaikan'=>'Perlu Perbaikan','review_ulang'=>'Review Ulang','selesai'=>'Sudah Sesuai');
 	}
 }
 
@@ -30,14 +23,7 @@ if (! function_exists('dashboard_distribusi'))
 		$ci   =& get_instance();
 		$dist = array_fill_keys(array_keys(dashboard_status_label()), 0);
 
-		foreach (array('pengajuan_pbg') as $t)
-		{
-			if (! $ci->db->table_exists($t)) continue;
-			foreach ($ci->db->select('status, COUNT(*) AS n')->group_by('status')->get($t)->result_array() as $r)
-			{
-				if (isset($dist[$r['status']])) $dist[$r['status']] += (int) $r['n'];
-			}
-		}
+		if($ci->db->table_exists('permohonan_pbg'))foreach($ci->db->select('status,tahap')->get('permohonan_pbg')->result_array() as $r){$k=$r['status']==='disetujui'||(int)$r['tahap']>=4?'selesai':((int)$r['tahap']===3?'review_ulang':((int)$r['tahap']===2?'perlu_perbaikan':($r['status']==='diajukan'?'permohonan_baru':'review_tpa')));$dist[$k]++;}
 		return $dist;
 	}
 }
@@ -63,10 +49,10 @@ if (! function_exists('dashboard_aktivitas'))
 		$label  = dashboard_status_label();
 		$mentah = array();
 
-		foreach (array(array('pengajuan_pbg', 'PBG')) as $t)
+		foreach (array(array('permohonan_pbg', 'PBG')) as $t)
 		{
 			if (! $ci->db->table_exists($t[0])) continue;
-			foreach ($ci->db->select('no_registrasi, status, nama_pemohon, updated_at, created_at')
+			foreach ($ci->db->select('no_permohonan AS no_registrasi, status, tahap, nama_pemohon, updated_at, created_at')
 				->order_by('updated_at', 'DESC')->limit($limit)->get($t[0])->result_array() as $r)
 			{
 				$r['jenis'] = $t[1];
@@ -78,12 +64,13 @@ if (! function_exists('dashboard_aktivitas'))
 		$out = array();
 		foreach (array_slice($mentah, 0, $limit) as $r)
 		{
+			$k=$r['status']==='disetujui'||(int)$r['tahap']>=4?'selesai':((int)$r['tahap']===3?'review_ulang':((int)$r['tahap']===2?'perlu_perbaikan':($r['status']==='diajukan'?'permohonan_baru':'review_tpa')));
 			$out[] = array(
 				'ikon'  => _dashboard_inisial($r['nama_pemohon']),
 				'judul' => $r['nama_pemohon'],
 				'reg'   => $r['no_registrasi'] ?: ($r['jenis'] . ' (draf)'),
 				'baris' => ($r['updated_at'] !== $r['created_at']) ? 'Status permohonan:' : 'Permohonan baru diajukan —',
-				'badge' => isset($label[$r['status']]) ? $label[$r['status']] : $r['status'],
+				'badge' => $label[$k],
 				'meta'  => dashboard_lalu($r['updated_at']) . ' · Permohonan ' . $r['jenis'],
 			);
 		}

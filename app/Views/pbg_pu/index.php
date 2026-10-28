@@ -8,15 +8,14 @@
 <?php if($this->session->flashdata('sukses')):?><div class="notice"><?= htmlspecialchars($this->session->flashdata('sukses')) ?></div><?php endif;?>
 <div class="card pbg-list-card"><div class="pbg-list-toolbar"><p class="eyebrow">Daftar Permohonan</p><input class="search" id="q" placeholder="Cari nama atau nomor registrasi..."></div><div class="table-wrap"><table id="table" class="pbg-list-table"><thead><tr><th>No. Permohonan</th><th>Pemohon</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
 <?php if(empty($daftar)):?><tr><td class="pbg-list-empty" colspan="4">Belum ada pengajuan. Klik <b>+ Tambah Pengajuan</b> untuk mulai.</td></tr><?php endif;?>
-<?php foreach($daftar as $r):?><tr><td data-label="No. Permohonan"><div><span class="pl-no"><?= htmlspecialchars($r['no_permohonan']) ?></span><small class="pl-sub"><?= date('d/m/Y',strtotime($r['created_at'])) ?></small></div></td><td data-label="Pemohon"><div><span class="pl-nama"><?= htmlspecialchars($r['nama_pemohon']) ?></span><small class="pl-sub">Reg. <?= htmlspecialchars($r['nik']?:'—') ?></small></div></td><td data-label="Status"><span class="badge <?= $r['status'] ?>"><?= pbg_status_label($r['status'], $r['tahap']) ?></span></td><td data-label="Aksi"><select class="aksi-select" onchange="pbgAksi(this)">
+<?php foreach($daftar as $r):?><tr><td data-label="No. Permohonan"><div><span class="pl-no"><?= htmlspecialchars($r['no_permohonan']) ?></span><small class="pl-sub"><?= date('d/m/Y',strtotime($r['created_at'])) ?></small></div></td><td data-label="Pemohon"><div><span class="pl-nama"><?= htmlspecialchars($r['nama_pemohon']) ?></span><small class="pl-sub">Reg. <?= htmlspecialchars($r['nik']?:'—') ?></small></div></td><td data-label="Status"><span class="badge <?= $r['status'] ?>"><?= htmlspecialchars($r['status_rinci'] ?? pbg_status_label($r['status'], $r['tahap'])) ?></span></td><td data-label="Aksi"><select class="aksi-select" onchange="pbgAksi(this)">
   <option value="">Pilih Aksi</option>
   <?php if(!($r['status']==='disetujui'||($r['status']==='diverifikasi'&&(int)$r['tahap']>=4))):?><option value="<?= base_url('pengajuan-pbg/tahap/'.$r['id']) ?>">Proses Pengajuan</option><?php endif;?>
   <?php if(!empty($ba_terbaru[$r['id']])):?><option value="<?= base_url('pengajuan-pbg/berita-acara/'.$ba_terbaru[$r['id']]) ?>" data-blank="1">Unduh BA Terbaru</option><?php endif;?>
-  <?php if(!in_array($r['status'],array('disetujui','ditolak'),TRUE)):?><option value="<?= base_url('pengajuan-pbg/upload-berkas/'.$r['id']) ?>">Upload Berkas</option><?php endif;?>
   <?php if($r['status']==='diajukan'):?>
   <option value="<?= base_url('pengajuan-pbg/edit/'.$r['id']) ?>">Edit</option>
-  <option value="<?= base_url('pengajuan-pbg/hapus/'.$r['id']) ?>" data-confirm="Hapus pengajuan ini?">Hapus</option>
   <?php endif;?>
+  <option value="<?= base_url('pengajuan-pbg/hapus/'.$r['id']) ?>" data-confirm="Hapus pengajuan beserta seluruh riwayatnya?">Hapus</option>
 </select><?php if($r['status']!=='diajukan'):?><span class="locked">Terkunci</span><?php endif;?></td></tr><?php endforeach;?></tbody></table></div></div>
 <script>
 q.oninput=()=>{let x=q.value.toLowerCase();document.querySelectorAll('#table tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(x)?'':'none')}

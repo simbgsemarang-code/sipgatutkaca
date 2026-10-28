@@ -42,6 +42,16 @@ class Pbg_pu extends LegacyController
 	public function index()
 	{
 		$data=$this->common(); $data['daftar']=$this->pbg->by_pu($this->pu_id());
+		foreach($data['daftar'] as &$p){
+			pbg_sinkron_tahap($p['id']); $p=$this->pbg->owned($p['id'],$this->pu_id());
+			$ringkas=$this->konsultasi_terakhir_per_bidang($p['id']); $putaran=0;$menunggu=0;$perbaikan=0;$selesai=0;
+			foreach($ringkas as $x){$putaran=max($putaran,(int)$x['putaran']);foreach($x['anggota'] as $m){if($m['status']==='ditugaskan')$menunggu++;elseif($m['status']==='perlu_perbaikan')$perbaikan++;else$selesai++;}}
+			if($p['status']==='disetujui'||(int)$p['tahap']>=4)$p['status_rinci']='Sudah Sesuai';
+			elseif(!$ringkas)$p['status_rinci']='Permohonan Baru';
+			elseif($menunggu)$p['status_rinci']=($putaran>1?'Review Ulang / Revisi '.($putaran-1):'Review TPA').' · '.$selesai.' selesai, '.$menunggu.' menunggu';
+			elseif($perbaikan)$p['status_rinci']='Perlu Perbaikan · Revisi '.$putaran.' ('.$perbaikan.' catatan)';
+			else $p['status_rinci']=pbg_status_label($p['status'],$p['tahap']);
+		} unset($p);
 		$data['ba_terbaru']=array();
 		foreach($this->db->select('permohonan_id, MAX(id) AS id')->where('status !=','ditugaskan')->group_by('permohonan_id')->get('konsultasi_pbg')->result_array() as $r){
 			$data['ba_terbaru'][$r['permohonan_id']]=$r['id'];
@@ -67,14 +77,13 @@ class Pbg_pu extends LegacyController
 					'nik'=>trim($this->input->post('nik'))?:null,
 					'nama_bangunan'=>trim($this->input->post('nama_bangunan')),
 					'alamat_bangunan'=>trim($this->input->post('alamat_bangunan')),
-					'keterangan'=>trim($this->input->post('keterangan'))?:null,
 					'updated_at'=>date('Y-m-d H:i:s')
 				);
 				if(!$row) $payload+=array('no_hp'=>'','email'=>null,'jenis_bangunan'=>'','kategori_bangunan'=>'sederhana','luas_bangunan'=>null);
 				if(empty($data['errors'])){
 					if($row){ $this->pbg->update_owned($row['id'],$this->pu_id(),$payload); }
 					else { $payload+=array('no_permohonan'=>$this->pbg->generate_no(),'status'=>'diajukan','tahap'=>1,'created_at'=>date('Y-m-d H:i:s')); $this->pbg->insert($payload); }
-					$this->session->set_flashdata('sukses','Data pengajuan PBG berhasil disimpan. Gunakan tombol Upload Berkas untuk melengkapi dokumen.'); ci_redirect('pengajuan-pbg'); return;
+					$this->session->set_flashdata('sukses','Data pengajuan PBG berhasil disimpan. Lanjutkan melalui tombol Proses Pengajuan.'); ci_redirect('pengajuan-pbg'); return;
 				}
 			}
 		}
@@ -131,7 +140,7 @@ class Pbg_pu extends LegacyController
 			$data['tpa_per_bidang'][$bidang]=$this->db->where('role',$role)->order_by('nama','ASC')->get('users')->result_array();
 		}
 		$data['konsultasi']=$this->db->select('k.*,u.nama AS nama_tpa,u.email AS email_tpa')->from('konsultasi_pbg k')->join('users u','u.id=k.tpa_user_id','left')->where('k.permohonan_id',$id)->order_by('k.putaran','DESC')->order_by('k.bidang','ASC')->get()->result_array();
-		$data['konsultasi_terakhir']=$this->konsultasi_terakhir_per_bidang($id); $data['konsultasi_selesai']=count($data['konsultasi_terakhir'])===3; foreach($data['konsultasi_terakhir'] as $k){if($k['status']!=='direkomendasikan')$data['konsultasi_selesai']=false;}
+		$data['konsultasi_terakhir']=$this->konsultasi_terakhir_per_bidang($id); $data['konsultasi_selesai']=!empty($data['konsultasi_terakhir']); foreach($data['konsultasi_terakhir'] as $k){if($k['status']!=='direkomendasikan')$data['konsultasi_selesai']=false;}
 		$data['link_aktif']=$this->db->table_exists('link_perbaikan_pbg'); $data['link_perbaikan']=array();
 		if($data['link_aktif']){$data['link_perbaikan']=$this->daftar_link($id);}
 		$data['ba_tanggal']=array(); if($this->db->table_exists('berita_acara_pbg')){foreach($this->db->where('permohonan_id',$id)->get('berita_acara_pbg')->result_array() as $b){$data['ba_tanggal'][(int)$b['konsultasi_id']]=!empty($b['tanggal_ba'])?$b['tanggal_ba']:substr($b['diterbitkan_at'],0,10);}}
@@ -185,38 +194,16 @@ class Pbg_pu extends LegacyController
 		if($this->input->method(TRUE)!=='POST')show_404();
 		if(in_array($row['status'],array('disetujui','ditolak'),TRUE))show_error('Permohonan telah selesai.',422);
 		$pilihan=array(); $terakhir=$this->konsultasi_terakhir_per_bidang($id);
-		$roles=array('arsitektur'=>'tpa_arsitek','struktur'=>'tpa_struktur','mep'=>'tpa_mep');
+		$roles=array('tpa_arsitek'=>'arsitektur','tpa_struktur'=>'struktur','tpa_mep'=>'mep');
 		foreach($terakhir as $k){if($k['status']==='ditugaskan')show_error('Tunggu seluruh TPA menyelesaikan review.',422);}
-		foreach($roles as $bidang=>$role){
-			$akhir=$terakhir[$bidang]??null;
-			if($akhir&&$akhir['status']==='direkomendasikan')continue;
-			if($akhir&&empty($akhir['perbaikan_dikirim_at']))show_error('Perbaikan bidang '.$bidang.' belum dikirim.',422);
-			$raw=$this->input->post('tpa_'.$bidang); $uids=is_array($raw)?array_values(array_unique(array_map('intval',$raw))):array();
-			if(empty($uids))show_error('Pilih minimal satu TPA untuk bidang '.$bidang.'.',422);
-			foreach($uids as $uid){
-				if($akhir){
-					$anggota_sebelumnya=false;
-					foreach($akhir['anggota'] as $member){if((int)$member['tpa_user_id']===$uid&&$member['status']==='perlu_perbaikan')$anggota_sebelumnya=true;}
-					if(!$anggota_sebelumnya)show_error('Hasil perbaikan hanya dapat dikirim kepada TPA yang meminta perbaikan pada bidang '.$bidang.'.',422);
-				}
-				foreach($akhir['anggota']??array() as $member){if((int)$member['tpa_user_id']===$uid&&$member['status']==='direkomendasikan')show_error('TPA yang telah menyatakan sudah sesuai tidak dapat dipilih lagi.',422);}
-				if(!$uid||!$this->db->where('id',$uid)->where('role',$role)->count_all_results('users'))show_error('Pilihan TPA '.$bidang.' tidak valid.',422);
-			}
-			$pilihan[$bidang]=$uids;
-		}
-		if(empty($pilihan))show_error('Seluruh bidang sudah berstatus sesuai.',422);
+		if($terakhir)show_error('Konsultasi ulang dikirim otomatis melalui link perbaikan.',422);
+		$uid=(int)$this->input->post('tpa_awal'); $user=$this->db->select('id,role')->where('id',$uid)->where_in('role',array_keys($roles))->get('users')->row_array();
+		if(!$user)show_error('Pilih satu TPA yang valid.',422); $pilihan[$roles[$user['role']]]=array($uid);
 		$max=$this->db->select_max('putaran','maks')->where('permohonan_id',$id)->get('konsultasi_pbg')->row_array(); $putaran=((int)$max['maks'])+1;
 		// Putaran 1 = distribusi tugas ke TPA, tetap di Tahap 1 (berkas ditinjau TPA dari SIMBG) sampai semua TPA mengirim hasil
 		// (lalu Tahap 2 otomatis - lihat pbg_sinkron_tahap); putaran berikutnya (hasil perbaikan) di Tahap 3.
 		$tahap_tujuan=$putaran===1?1:3;
-		$file=null;
-		if(!empty($_FILES['file_konsultasi']['name'])){
-			$dir=FCPATH.'assets/uploads/konsultasi_pbg/'; if(!is_dir($dir)) mkdir($dir,0755,true);
-			$this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf|doc|docx|jpg|jpeg|png','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
-			if(!$this->upload->do_upload('file_konsultasi')){ $this->session->set_flashdata('error',strip_tags($this->upload->display_errors('',''))); ci_redirect('pengajuan-pbg/tahap/'.$id.'/'.$tahap_tujuan); return; }
-			$file=berkas_simpan($this->upload->data());
-		}
-		$this->db->trans_start(); foreach($pilihan as $bidang=>$uids){foreach($uids as $uid){$this->db->insert('konsultasi_pbg',array('permohonan_id'=>$id,'tpa_user_id'=>$uid,'bidang'=>$bidang,'putaran'=>$putaran,'status'=>'ditugaskan','komentar_pu'=>trim($this->input->post('komentar_pu'))?:null,'pernyataan_pu'=>trim($this->input->post('pernyataan_pu'))?:null,'file_pu'=>$file,'assigned_by'=>$this->pu_id(),'assigned_at'=>date('Y-m-d H:i:s')));}} $this->pbg->update_owned($id,$this->pu_id(),array('tahap'=>$tahap_tujuan,'status'=>'diverifikasi','updated_at'=>date('Y-m-d H:i:s'))); $ba_terbit=$this->buat_ba_distribusi($id,$putaran,$this->tanggal_ba(),$this->pu_id()); $this->db->trans_complete();
+		$this->db->trans_start(); foreach($pilihan as $bidang=>$uids){foreach($uids as $uid){$this->db->insert('konsultasi_pbg',array('permohonan_id'=>$id,'tpa_user_id'=>$uid,'bidang'=>$bidang,'putaran'=>$putaran,'status'=>'ditugaskan','komentar_pu'=>trim($this->input->post('komentar_pu'))?:null,'assigned_by'=>$this->pu_id(),'assigned_at'=>date('Y-m-d H:i:s')));}} $this->pbg->update_owned($id,$this->pu_id(),array('tahap'=>$tahap_tujuan,'status'=>'diverifikasi','updated_at'=>date('Y-m-d H:i:s'))); $ba_terbit=$this->buat_ba_distribusi($id,$putaran,$this->tanggal_ba(),$this->pu_id(),trim((string)$this->input->post('nomor_ba'))); $this->db->trans_complete();
 		$this->session->set_flashdata('sukses',($putaran===1?'Tugas review berhasil didistribusikan kepada TPA yang dipilih (putaran 1).':'Konsultasi putaran '.$putaran.' berhasil ditugaskan kepada seluruh TPA yang dipilih.').($ba_terbit?' Berita acara distribusi telah terbit.':'')); ci_redirect('pengajuan-pbg/tahap/'.$id.'/'.$tahap_tujuan);
 	}
 
@@ -229,7 +216,7 @@ class Pbg_pu extends LegacyController
 	private function tanggal_valid($n){ return (bool)(preg_match('/^(\d{4})-(\d{2})-(\d{2})$/',(string)$n,$m)&&checkdate((int)$m[2],(int)$m[3],(int)$m[1])); }
 
 	/** Terbitkan BA distribusi untuk satu putaran (satu per putaran). TRUE kalau baru terbit. */
-	private function buat_ba_distribusi($permohonan_id,$putaran,$tanggal,$oleh){ return pbg_buat_ba_distribusi($permohonan_id,$putaran,$tanggal,$oleh); }
+	private function buat_ba_distribusi($permohonan_id,$putaran,$tanggal,$oleh,$nomor=null){ return pbg_buat_ba_distribusi($permohonan_id,$putaran,$tanggal,$oleh,$nomor); }
 
 	/** Link Google Drive valid: https, host drive.google.com / docs.google.com. */
 	private function link_drive_valid($url)
@@ -353,7 +340,7 @@ class Pbg_pu extends LegacyController
 			ci_redirect('pengajuan-pbg/tahap/'.$id.'/2'); return;
 		}
 		if($t===4&&$status==='disetujui'){
-			$akhir=$this->konsultasi_terakhir_per_bidang($id);$selesai=count($akhir)===3;foreach($akhir as $k){if($k['status']!=='direkomendasikan')$selesai=false;}if(!$selesai)show_error('Proses belum dapat diselesaikan sebelum ketiga bidang TPA menyatakan sudah sesuai.',422);
+			$akhir=$this->konsultasi_terakhir_per_bidang($id);$selesai=!empty($akhir);foreach($akhir as $k){if($k['status']!=='direkomendasikan')$selesai=false;}if(!$selesai)show_error('Proses belum dapat diselesaikan sebelum seluruh TPA yang ditugaskan menyatakan sudah sesuai.',422);
 		}
 		$catatan=trim($this->input->post('catatan')); if($status==='ditolak'&&$catatan==='') show_error('Catatan penolakan wajib diisi.',422);
 		$this->pbg->update_owned($id,$this->pu_id(),array('tahap'=>$t,'status'=>$status,'catatan_admin'=>$catatan?:null,'catatan_admin_at'=>date('Y-m-d H:i:s'),'updated_at'=>date('Y-m-d H:i:s')));

@@ -71,7 +71,7 @@ table.ttd td.garis{width:260px}
   <div class="field-row"><div class="label">Lokasi Bangunan</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['alamat_bangunan']) ?></div></div>
   <div class="field-row"><div class="label">Nomor Registrasi</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['nik'] ?: '—') ?></div></div>
 
-  <p class="saran-heading">Saran dan Masukan dari Tim Profesi Ahli <small style="font-weight:400">(seluruh review tiap bidang hingga BA ini terbit)</small></p>
+  <p class="saran-heading">Saran dan Masukan dari Tim Profesi Ahli <small style="font-weight:400">(khusus hasil review putaran ini)</small></p>
     <?php foreach (array('arsitektur','struktur','mep') as $kode): $daftar = isset($riwayat[$kode]) ? $riwayat[$kode] : array(); ?>
     <p class="bidang-heading">TPA <?= $bidang_label[$kode] ?> :</p>
     <?php
