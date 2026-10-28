@@ -118,11 +118,9 @@ class Berita_acara extends LegacyController
 		}
 		elseif (isset($this->bidang_role[$role]))
 		{
-			$ikut = $this->db->where('permohonan_id', $trigger['permohonan_id'])
-				->where('tpa_user_id', (int) $this->session->userdata('user_id'))->count_all_results('konsultasi_pbg');
-			if ($ikut === 0)
+			if ((int)$trigger['tpa_user_id'] !== (int)$this->session->userdata('user_id'))
 			{
-				show_error('Anda tidak pernah ditugaskan pada permohonan ini.', 403);
+				show_error('Berita acara ini milik TPA lain.', 403);
 				return;
 			}
 		}

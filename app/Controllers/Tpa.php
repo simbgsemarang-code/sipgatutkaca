@@ -32,7 +32,7 @@ class Tpa extends LegacyController {
 
 	public function index()
 	{
-		$data['daftar_masukan'] = $this->db->order_by('created_at', 'DESC')->get('saran_masukan')->result_array();
+		$data['daftar_masukan'] = $this->db->group_start()->where('topik','PBG')->or_like('topik','PBG')->group_end()->order_by('created_at', 'DESC')->get('saran_masukan')->result_array();
 		$data['sukses']         = $this->session->flashdata('sukses');
 		$data['error']          = $this->session->flashdata('error');
 		$data['nama_pengguna']  = $this->session->userdata('nama');
@@ -44,9 +44,9 @@ class Tpa extends LegacyController {
 		$bidang = in_array($role, array('tpa_arsitek', 'tpa_struktur', 'tpa_mep'), TRUE) ? $role : NULL;
 
 		$data['status_label']   = dashboard_status_label();
-		$data['distribusi']     = dashboard_distribusi();
-		$data['aktivitas']      = dashboard_aktivitas_tpa($bidang, 6);
-		$data['perlu_ditinjau'] = (int) $data['distribusi']['verifikasi_dokumen'];
+		$data['distribusi']     = dashboard_distribusi_tpa((int)$this->session->userdata('user_id'));
+		$data['aktivitas']      = dashboard_aktivitas_tpa((int)$this->session->userdata('user_id'), 6);
+		$data['perlu_ditinjau'] = (int) $data['distribusi']['review_tpa'] + (int)$data['distribusi']['review_ulang'];
 
 		$this->load->view('pages/tpa_dashboard', $data);
 	}

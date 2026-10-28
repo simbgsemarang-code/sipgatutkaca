@@ -85,55 +85,34 @@ if (! function_exists('dashboard_aktivitas_tpa'))
 	 * $bidang: NULL = semua bidang (akun 'tpa' generik), atau salah satu
 	 * dari 'tpa_arsitek' / 'tpa_struktur' / 'tpa_mep'.
 	 */
-	function dashboard_aktivitas_tpa($bidang = NULL, $limit = 6)
+	function dashboard_aktivitas_tpa($user_id, $limit = 6)
 	{
-		$ci  =& get_instance();
-		$out = array();
-
-		$peta = array(
-			array('pengajuan_pbg_persetujuan_tpa', 'pengajuan_pbg', 'PBG'),
-		);
-		$bidang_label = array('tpa_arsitek' => 'Arsitektur', 'tpa_struktur' => 'Struktur', 'tpa_mep' => 'MEP');
-
-		foreach ($peta as $p)
+		$ci=&get_instance(); $norm=array();
+		$rows=$ci->db->select('k.*,p.no_permohonan,p.nama_pemohon')->from('konsultasi_pbg k')->join('permohonan_pbg p','p.id=k.permohonan_id')->where('k.tpa_user_id',(int)$user_id)->order_by('k.assigned_at','DESC')->limit((int)$limit)->get()->result_array();
+		foreach($rows as $r)
 		{
-			if (! $ci->db->table_exists($p[0])) continue;
-
-			$ci->db->select('t.bidang, t.status, t.ditinjau_pada, p.no_registrasi, p.nama_pemohon')
-				->from($p[0] . ' t')
-				->join($p[1] . ' p', 'p.id = t.id_pengajuan', 'left')
-				->where('t.ditinjau_pada IS NOT NULL')
-				->order_by('t.ditinjau_pada', 'DESC')
-				->limit($limit);
-			if ($bidang !== NULL) $ci->db->where('t.bidang', $bidang);
-
-			foreach ($ci->db->get()->result_array() as $r)
-			{
-				$r['jenis']        = $p[2];
-				$r['bidang_label'] = isset($bidang_label[$r['bidang']]) ? $bidang_label[$r['bidang']] : $r['bidang'];
-				$out[] = $r;
-			}
-		}
-		usort($out, function ($a, $b) { return strcmp($b['ditinjau_pada'], $a['ditinjau_pada']); });
-
-		$kep = array(
-			'disetujui'                    => 'Disetujui',
-			'perbaikan_dokumen'            => 'Minta Perbaikan Dokumen',
-			'perbaikan_dokumen_konsultasi' => 'Perbaikan via Konsultasi',
-		);
-		$norm = array();
-		foreach (array_slice($out, 0, $limit) as $r)
-		{
+			$badge=$r['status']==='direkomendasikan'?'Sudah Sesuai':($r['status']==='perlu_perbaikan'?'Perlu Perbaikan':((int)$r['putaran']>1?'Review Ulang':'Ditugaskan'));
 			$norm[] = array(
 				'ikon'  => _dashboard_inisial($r['nama_pemohon']),
 				'judul' => $r['nama_pemohon'] ?: '(pemohon)',
-				'reg'   => $r['no_registrasi'] ?: ($r['jenis'] . ' —'),
-				'baris' => 'Peninjauan ' . $r['bidang_label'] . ' —',
-				'badge' => isset($kep[$r['status']]) ? $kep[$r['status']] : $r['status'],
-				'meta'  => dashboard_lalu($r['ditinjau_pada']) . ' · Permohonan ' . $r['jenis'],
+				'reg'   => $r['no_permohonan'],
+				'baris' => 'Putaran '.(int)$r['putaran'].' · '.ucfirst($r['bidang']).' —',
+				'badge' => $badge,
+				'meta'  => dashboard_lalu($r['reviewed_at']?:$r['assigned_at']).' · Permohonan PBG',
 			);
 		}
 		return $norm;
+	}
+}
+
+if(!function_exists('dashboard_distribusi_tpa'))
+{
+	function dashboard_distribusi_tpa($user_id)
+	{
+		$ci=&get_instance();$dist=array_fill_keys(array_keys(dashboard_status_label()),0);
+		$rows=$ci->db->select('status,putaran')->where('tpa_user_id',(int)$user_id)->get('konsultasi_pbg')->result_array();
+		foreach($rows as $r){$k=$r['status']==='direkomendasikan'?'selesai':($r['status']==='perlu_perbaikan'?'perlu_perbaikan':((int)$r['putaran']>1?'review_ulang':'review_tpa'));$dist[$k]++;}
+		return $dist;
 	}
 }
 
