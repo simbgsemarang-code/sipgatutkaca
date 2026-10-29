@@ -237,7 +237,8 @@ class Pemohon extends LegacyController {
 		$row=$this->db->where('id',(int)$id)->where('user_id',(int)$this->session->userdata('user_id'))->get('pengajuan_itr')->row_array();
 		if (!$row || empty($row['file_hasil_itr'])) { show_404(); return; }
 		if (stripos($row['file_hasil_itr'],'http')===0) { ci_redirect($row['file_hasil_itr']); return; }
-		$file=LEGACY_STORAGE.'uploads/itr/'.basename($row['file_hasil_itr']); if(!is_file($file)){show_404();return;}
+		$this->load->helper('itr');
+		$file=itr_path_hasil($row['file_hasil_itr']); if($file===''){show_404();return;}
 		$this->load->helper('download'); force_download(basename($file),file_get_contents($file),TRUE);
 	}
 }

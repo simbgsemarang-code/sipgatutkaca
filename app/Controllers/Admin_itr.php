@@ -252,19 +252,29 @@ class Admin_itr extends LegacyController {
    if($is_ajax){$this->output->set_content_type('application/json')->set_output(json_encode(array('ok'=>FALSE,'message'=>$pesan)));return;}
    $this->session->set_flashdata('error',$pesan);ci_redirect('admin_itr/detail/'.$id);return;
   }
-  $this->load->library('upload'); $dir=LEGACY_STORAGE.'uploads/itr/';
-  if(!is_dir($dir)&&!mkdir($dir,0750,TRUE)){show_error('Penyimpanan berkas tidak tersedia.',503);return;}
-  $this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf','max_size'=>102400,'encrypt_name'=>TRUE),TRUE);
+  // Hasil ITR disimpan di itr/<nama_pemohon>/<nama_pemohon>.pdf (lihat itr_hasil_lokasi()).
+  $this->load->library('upload'); $dasar=LEGACY_STORAGE.'uploads/itr/';
+  list($folder,$nama_berkas,$nilai_lokal)=itr_hasil_lokasi($row);
+  $dir=$dasar.$folder.'/';
+  if((!is_dir($dasar)&&!mkdir($dasar,0750,TRUE))||(!is_dir($dir)&&!mkdir($dir,0750,TRUE))){show_error('Penyimpanan berkas tidak tersedia.',503);return;}
+  $this->upload->initialize(array('upload_path'=>$dir,'allowed_types'=>'pdf','max_size'=>102400,'file_name'=>$nama_berkas,'overwrite'=>TRUE),TRUE);
   if(!$this->upload->do_upload('file_hasil_itr')){
    $pesan=strip_tags($this->upload->display_errors('',''));
+   @rmdir($dir); // hapus folder kosong bila unggahan gagal
    if($is_ajax){$this->output->set_content_type('application/json')->set_output(json_encode(array('ok'=>FALSE,'message'=>$pesan)));return;}
    $this->session->set_flashdata('error',$pesan);ci_redirect('admin_itr/detail/'.$id);return;
   }
   $lama=$row['file_hasil_itr'];
   $nilai=berkas_simpan($this->upload->data());
+  if($nilai===$nama_berkas)$nilai=$nilai_lokal; // tersimpan lokal: catat jalur relatif "folder/berkas.pdf"
+  else @rmdir($dir); // dipindah ke Google Drive: berkas lokal sudah dihapus, buang folder kosongnya
   $diunggah_pada=date('Y-m-d H:i:s');
   $this->db->where('id',$id)->update('pengajuan_itr',array('file_hasil_itr'=>$nilai,'hasil_diunggah_pada'=>$diunggah_pada,'status'=>'disetujui'));
-  if($lama&&stripos($lama,'http')!==0) @unlink($dir.$lama);
+  // buang berkas hasil lama bila jalurnya berbeda dari yang baru (jalur sama sudah tertimpa)
+  if($lama&&stripos($lama,'http')!==0&&$lama!==$nilai){
+   $file_lama=itr_path_hasil($lama);
+   if($file_lama!==''){@unlink($file_lama);$folder_lama=dirname($file_lama);if(rtrim(str_replace('\\','/',$folder_lama),'/')!==rtrim(str_replace('\\','/',$dasar),'/'))@rmdir($folder_lama);}
+  }
   $this->db->insert('aktivitas_itr',array('user_id'=>$row['user_id'],'pengajuan_id'=>$id,'keterangan'=>'Dokumen hasil ITR resmi telah diterbitkan dan dapat diunduh.','created_at'=>$diunggah_pada));
   $pesan_sukses='Dokumen hasil ITR berhasil diunggah dan dapat diunduh pemohon.';
   if($is_ajax){
@@ -305,6 +315,6 @@ class Admin_itr extends LegacyController {
  public function hasil($id=0){
   $row=$this->db->where('id',(int)$id)->get('pengajuan_itr')->row_array();if(!$row||empty($row['file_hasil_itr'])){show_404();return;}
   if(stripos($row['file_hasil_itr'],'http')===0){ci_redirect($row['file_hasil_itr']);return;}
-  $file=LEGACY_STORAGE.'uploads/itr/'.basename($row['file_hasil_itr']);if(!is_file($file)){show_404();return;}$this->load->helper('download');force_download(basename($file),file_get_contents($file),TRUE);
+  $file=itr_path_hasil($row['file_hasil_itr']);if($file===''){show_404();return;}$this->load->helper('download');force_download(basename($file),file_get_contents($file),TRUE);
  }
 }
