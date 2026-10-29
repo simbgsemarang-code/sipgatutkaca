@@ -90,6 +90,7 @@ th{font-family:var(--display);font-weight:400;letter-spacing:.1em;text-transform
 td{padding:14px;border-bottom:1px solid var(--line);color:var(--muted);vertical-align:top}
 td:first-child{color:var(--text);font-weight:500}
 td small{display:block;margin-top:2px;color:var(--muted)}
+th small{display:block;margin-top:2px;font-weight:400;font-size:.62rem;letter-spacing:0;text-transform:none;opacity:.75}
 .tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300)}
 .tag-diajukan{color:#F0A048;border-color:#B4573B}
 .tag-sedang_diverifikasi{color:#5FC2E0;border-color:#1E86A3}
@@ -169,13 +170,14 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <p style="margin-top:26px;color:var(--muted)">Belum ada pengajuan ITR.</p>
     <?php else: ?>
     <table>
-      <thead><tr><th>No. Permohonan</th><th>Nama Pemilik</th><th>Alamat</th><th>Fungsi Bangunan</th><th>Status</th><th>Aksi</th></tr></thead>
+      <thead><tr><th>No. Permohonan</th><th>Nama Pemilik</th><th>Alamat Pemohon<small>tempat tinggal / kantor pemohon</small></th><th>Lokasi Kegiatan<small>persil yang dimohonkan ITR</small></th><th>Fungsi Bangunan</th><th>Status</th><th>Aksi</th></tr></thead>
       <tbody>
       <?php foreach($daftar as $r): $perusahaan=($r['jenis_pemohon']??'perorangan')==='perusahaan'; ?>
         <tr>
           <td><?= htmlspecialchars($r['no_permohonan']) ?><small><?= date('d/m/Y',strtotime($r['created_at'])) ?></small></td>
           <td><?= htmlspecialchars($r['nama_pemohon']) ?><small><?= $perusahaan?'Perusahaan':'Perorangan' ?></small></td>
           <td><?= htmlspecialchars($r['alamat_pemohon']?:'—') ?></td>
+          <td><?= htmlspecialchars(($r['alamat_lokasi']??'')?:'—') ?><?php if(!empty($r['jenis_kegiatan'])): ?><small>Kegiatan/usaha: <?= htmlspecialchars($r['jenis_kegiatan']) ?></small><?php endif; ?></td>
           <td><?= htmlspecialchars($r['fungsi_bangunan']?:'—') ?></td>
           <td><span class="tag tag-<?= htmlspecialchars($r['status'],ENT_QUOTES,'UTF-8') ?>"><?= ucwords(str_replace('_',' ',$r['status'])) ?></span></td>
           <td><a class="btn btn-ghost btn-xs" href="<?= base_url('admin_itr/detail/'.$r['id']) ?>">Proses</a></td>

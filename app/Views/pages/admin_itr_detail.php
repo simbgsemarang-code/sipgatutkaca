@@ -213,7 +213,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="kv-grid">
         <div class="kv"><span>Jenis Kegiatan/Usaha</span><b><?= htmlspecialchars($r['jenis_kegiatan']?:'—') ?></b></div>
         <div class="kv"><span>Fungsi Bangunan</span><b><?= htmlspecialchars($r['fungsi_bangunan']?:'—') ?></b></div>
-        <div class="kv full"><span>Lokasi Kegiatan</span><b><?= htmlspecialchars(trim(($r['lokasi_jalan']?:'').', RT/RW '.($r['lokasi_rt_rw']?:'-').', '.($r['lokasi_desa_kel']?:'').', Kec. '.($r['lokasi_kecamatan']?:''),' ,')) ?></b></div>
+        <div class="kv full"><span>Lokasi Kegiatan / Persil yang Dimohonkan (bukan alamat pemohon)</span><b><?= htmlspecialchars(trim(($r['lokasi_jalan']?:'').', RT/RW '.($r['lokasi_rt_rw']?:'-').', '.($r['lokasi_desa_kel']?:'').', Kec. '.($r['lokasi_kecamatan']?:''),' ,')) ?></b></div>
         <div class="kv"><span>Luas Lahan</span><b><?= number_format($r['luas_lahan'],2,',','.') ?> m²</b></div>
         <div class="kv"><span>Luas Bangunan</span><b><?= $r['luas_bangunan']!==null?number_format($r['luas_bangunan'],2,',','.').' m²':'—' ?></b></div>
         <div class="kv"><span>Lantai Bangunan</span><b><?= htmlspecialchars($r['lantai_bangunan']?:'—') ?></b></div>
