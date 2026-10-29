@@ -91,6 +91,19 @@ td{padding:14px;border-bottom:1px solid var(--line);color:var(--muted);vertical-
 td:first-child{color:var(--text);font-weight:500}
 td small{display:block;margin-top:2px;color:var(--muted)}
 th small{display:block;margin-top:2px;font-weight:400;font-size:.62rem;letter-spacing:0;text-transform:none;opacity:.75}
+.btn-gold{background:linear-gradient(135deg,#C9A24B,#E4C87B);color:#081826;font-weight:600}
+.itr-filter{display:flex;flex-wrap:wrap;gap:14px 16px;align-items:flex-end;margin-top:26px;padding:18px 20px;border:1px solid var(--line);background:var(--surface)}
+.itr-filter label{display:flex;flex-direction:column;gap:6px;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.itr-filter select,.itr-filter input[type=date]{font:inherit;font-size:.84rem;letter-spacing:0;text-transform:none;padding:10px 12px;min-width:150px;background:var(--input,var(--surface));color:var(--text);border:1px solid var(--line)}
+.itr-filter-cari{position:relative;flex:1 1 320px;min-width:240px}
+.itr-filter-cari svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.itr-filter-cari input{width:100%;font:inherit;font-size:.9rem;padding:12px 14px 12px 38px;background:var(--input,var(--surface));color:var(--text);border:1px solid var(--line)}
+.itr-filter-cari input:focus,.itr-filter select:focus,.itr-filter input[type=date]:focus{outline:2px solid var(--gold-500);outline-offset:1px}
+.itr-filter-aksi{display:flex;gap:10px}
+.itr-bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-top:18px}
+.itr-hitung{font-size:.86rem;color:var(--muted)}
+.itr-hitung b{color:var(--text)}
+.itr-ekspor{display:flex;flex-wrap:wrap;gap:10px}
 .tag{display:inline-block;border:1px solid var(--line);padding:3px 12px;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300)}
 .tag-diajukan{color:#F0A048;border-color:#B4573B}
 .tag-sedang_diverifikasi{color:#5FC2E0;border-color:#1E86A3}
@@ -166,8 +179,48 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
     <?php if($this->session->flashdata('sukses')): ?><div class="alert alert-ok"><?= htmlspecialchars($this->session->flashdata('sukses')) ?></div><?php endif; ?>
     <?php if($this->session->flashdata('error')): ?><div class="alert alert-err"><?= htmlspecialchars($this->session->flashdata('error')) ?></div><?php endif; ?>
 
-    <?php if(!$daftar): ?>
+    <?php if($total_semua>0): ?>
+    <form class="itr-filter" method="get" action="<?= base_url('admin_itr') ?>" role="search">
+      <div class="itr-filter-cari">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="search" name="q" value="<?= htmlspecialchars($filter['q'],ENT_QUOTES,'UTF-8') ?>" placeholder="Cari no. permohonan, nama, NIK/NIB, alamat, lokasi, kegiatan…" aria-label="Cari pengajuan ITR" maxlength="100">
+      </div>
+      <label>Status
+        <select name="status"><option value="">Semua status</option>
+        <?php foreach($status_itr as $kode=>$label): ?><option value="<?= $kode ?>" <?= $filter['status']===$kode?'selected':'' ?>><?= htmlspecialchars($label) ?></option><?php endforeach; ?></select>
+      </label>
+      <label>Jenis Pemohon
+        <select name="jenis"><option value="">Semua</option><option value="perorangan" <?= $filter['jenis']==='perorangan'?'selected':'' ?>>Perorangan</option><option value="perusahaan" <?= $filter['jenis']==='perusahaan'?'selected':'' ?>>Perusahaan</option></select>
+      </label>
+      <label>Kecamatan Lokasi
+        <select name="kec"><option value="">Semua kecamatan</option>
+        <?php foreach($daftar_kecamatan as $kc): ?><option value="<?= htmlspecialchars($kc,ENT_QUOTES,'UTF-8') ?>" <?= $filter['kec']===$kc?'selected':'' ?>><?= htmlspecialchars($kc) ?></option><?php endforeach; ?></select>
+      </label>
+      <label>Diajukan dari<input type="date" name="dari" value="<?= htmlspecialchars($filter['dari']) ?>"></label>
+      <label>Sampai<input type="date" name="sampai" value="<?= htmlspecialchars($filter['sampai']) ?>"></label>
+      <div class="itr-filter-aksi">
+        <button type="submit" class="btn btn-gold btn-xs">Cari</button>
+        <?php if($filter_aktif): ?><a class="btn btn-ghost btn-xs" href="<?= base_url('admin_itr') ?>">Reset</a><?php endif; ?>
+      </div>
+    </form>
+
+    <div class="itr-bar">
+      <p class="itr-hitung">
+        <?php if($filter_aktif): ?>Menampilkan <b><?= count($daftar) ?></b> dari <?= (int)$total_semua ?> pengajuan (hasil pencarian/filter).<?php else: ?>Total <b><?= (int)$total_semua ?></b> pengajuan.<?php endif; ?>
+      </p>
+      <div class="itr-ekspor">
+        <?php if($filter_aktif): ?>
+        <a class="btn btn-gold btn-xs" href="<?= base_url('admin_itr/ekspor?'.$query_ekspor) ?>" title="Unduh .xlsx berisi hanya hasil pencarian/filter di atas">⬇ Ekspor Excel (hasil filter · <?= count($daftar) ?>)</a>
+        <?php endif; ?>
+        <a class="btn <?= $filter_aktif?'btn-ghost':'btn-gold' ?> btn-xs" href="<?= base_url('admin_itr/ekspor') ?>" title="Unduh .xlsx berisi SELURUH pengajuan ITR, semua kolom">⬇ Ekspor Excel (semua data · <?= (int)$total_semua ?>)</a>
+      </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if($total_semua<1): ?>
       <p style="margin-top:26px;color:var(--muted)">Belum ada pengajuan ITR.</p>
+    <?php elseif(!$daftar): ?>
+      <p style="margin-top:26px;color:var(--muted)">Tidak ada pengajuan yang cocok dengan pencarian/filter. <a href="<?= base_url('admin_itr') ?>" style="color:var(--gold-300);text-decoration:underline">Reset filter</a></p>
     <?php else: ?>
     <table>
       <thead><tr><th>No. Permohonan</th><th>Nama Pemilik</th><th>Alamat Pemohon<small>tempat tinggal / kantor pemohon</small></th><th>Lokasi Kegiatan<small>persil yang dimohonkan ITR</small></th><th>Fungsi Bangunan</th><th>Status</th><th>Aksi</th></tr></thead>
