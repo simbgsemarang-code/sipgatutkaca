@@ -48,6 +48,13 @@ class PolishCss implements FilterInterface
             $output = preg_replace('/<\/head>/i', $link . '</head>', $output, 1);
         }
 
+        // Pilihan tema (terang/gelap) disimpan di browser dan diterapkan di SEMUA halaman,
+        // karena tiap halaman hanya membaca ?theme= dari URL (tautan sidebar tidak membawanya).
+        if (strpos($output, 'sipTheme') === false) {
+            $skrip  = self::skripTema();
+            $output = preg_replace_callback('/<head[^>]*>/i', static fn ($m) => $m[0] . $skrip, $output, 1);
+        }
+
         if (stripos($output, '<title>Beranda') === false) {
             $output = preg_replace('/<body(\s*)>/i', '<body$1 class="is-inner-page">', $output, 1);
         }
@@ -55,5 +62,31 @@ class PolishCss implements FilterInterface
         $response->setBody($output);
 
         return $response;
+    }
+
+    /**
+     * Skrip kecil di awal <head>: membaca pilihan tema dari localStorage (kunci sipTheme),
+     * menerapkannya sebelum halaman digambar, mengembalikannya bila skrip halaman menimpanya
+     * (mis. ke "light" karena tidak ada ?theme=), menyimpan pilihan saat tombol tema diklik,
+     * dan menyamakan parameter ?theme= pada tautan internal. Tanpa localStorage (mode privat)
+     * perilaku lama (?theme= di URL) tetap berjalan.
+     */
+    private static function skripTema(): string
+    {
+        return <<<'HTML'
+<script>(function(){var K='sipTheme',d=document.documentElement,pref=null;
+function ok(v){return v==='dark'||v==='light'?v:null}
+try{pref=ok(localStorage.getItem(K))}catch(e){}
+function put(v){pref=v;try{localStorage.setItem(K,v)}catch(e){}}
+if(pref){d.setAttribute('data-theme',pref)}
+try{new MutationObserver(function(){if(pref&&d.getAttribute('data-theme')!==pref)d.setAttribute('data-theme',pref)}).observe(d,{attributes:true,attributeFilter:['data-theme']})}catch(e){}
+document.addEventListener('click',function(ev){var s=ev.target&&ev.target.closest&&ev.target.closest('.swatch[data-theme]');if(s&&ok(s.dataset.theme))put(s.dataset.theme)},true);
+function sync(){if(!pref)return;d.setAttribute('data-theme',pref);
+document.querySelectorAll('.swatch[data-theme]').forEach(function(s){s.classList.toggle('sel',s.dataset.theme===pref)});
+document.querySelectorAll('a[href]').forEach(function(a){var h=a.getAttribute('href');if(!h||/^(https?:|mailto:|tel:|javascript:|#)/i.test(h)||h.indexOf('theme=')<0)return;
+a.setAttribute('href',h.replace(/([?&]theme=)[a-z]*/i,'$1'+pref))})}
+document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);
+window.sipTheme=function(){return pref}})();</script>
+HTML;
     }
 }
