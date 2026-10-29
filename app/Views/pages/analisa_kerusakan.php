@@ -90,6 +90,25 @@ input:focus,select:focus,textarea:focus{outline:1px solid var(--gold-500);border
 .stat:nth-child(4){border-left-color:#C0392B}
 .stat b{display:block;font-family:var(--display);font-weight:400;font-size:2.2rem;margin-bottom:6px;color:var(--gold-500)}
 .stat span{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.rekap{margin-top:44px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 18px var(--shadow);padding:26px 28px}
+.rekap-head{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-start;justify-content:space-between}
+.rekap-head h3{font-family:var(--display);font-weight:400;font-size:1.35rem;line-height:1.3}
+.rekap-info{display:block;margin-top:6px;font-family:var(--body);font-size:.8rem;color:var(--muted)}
+.rekap-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 14px}
+.rekap-tabs button{font:inherit;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;cursor:pointer;transition:.2s}
+.rekap-tabs button:hover{border-color:var(--gold-500);color:var(--text)}
+.rekap-tabs button[aria-selected=true]{background:var(--gold-500);border-color:var(--gold-500);color:#081826;font-weight:600}
+.rekap-wrap{overflow:auto;max-height:440px;border:1px solid var(--line);border-radius:10px}
+.rekap table{width:100%;border-collapse:collapse;font-size:.86rem}
+.rekap th{position:sticky;top:0;background:var(--surface-hi);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-300);text-align:right;padding:11px 14px;border-bottom:1px solid var(--gold-500);white-space:nowrap}
+.rekap th:first-child,.rekap td:first-child{text-align:left}
+.rekap td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.rekap td:first-child{color:var(--text)}
+.rekap td.nol{opacity:.4}
+.rekap tfoot td{font-weight:700;color:var(--text);background:var(--surface-hi);position:sticky;bottom:0;border-top:1px solid var(--gold-500)}
+.rekap-note{margin-top:12px;font-size:.78rem;color:var(--muted);line-height:1.6}
+.rekap .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+@media(max-width:560px){.rekap{padding:20px 16px}}
 
 /* ===== PETA ===== */
 .map-filter{position:absolute;top:16px;left:16px;right:16px;z-index:20;display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:16px;align-items:end;
@@ -283,6 +302,25 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <div class="stat"><b id="stRingan">0</b><span>Rusak Ringan</span></div>
       <div class="stat"><b id="stSedang">0</b><span>Rusak Sedang</span></div>
       <div class="stat"><b id="stBerat">0</b><span>Rusak Berat</span></div>
+    </div>
+
+    <div class="rekap reveal" id="rekapBox">
+      <div class="rekap-head">
+        <div>
+          <p class="eyebrow" style="margin-bottom:8px">Rekapitulasi</p>
+          <h3>Rekap Hasil Analisis Kerusakan<span class="rekap-info" id="rekapInfo"></span></h3>
+        </div>
+        <a class="btn btn-gold" id="btnUnduh" href="<?php echo base_url('analisa-kerusakan/ekspor'); ?>" download>&#11015; Unduh Excel</a>
+      </div>
+      <div class="rekap-tabs" role="tablist" aria-label="Kelompok rekap">
+        <button type="button" role="tab" data-dim="kec" aria-selected="true">Per Kecamatan</button>
+        <button type="button" role="tab" data-dim="fungsi" aria-selected="false">Per Fungsi</button>
+        <button type="button" role="tab" data-dim="opd" aria-selected="false">Per OPD</button>
+      </div>
+      <div class="rekap-wrap">
+        <table id="rekapTabel"><thead></thead><tbody></tbody><tfoot></tfoot></table>
+      </div>
+      <p class="rekap-note">Rekap mengikuti pencarian dan saringan di atas peta. Tombol <b>Unduh Excel</b> menghasilkan satu berkas berisi data bangunan (sesuai saringan) beserta rekap per kondisi, kecamatan, fungsi, dan OPD.</p>
     </div>
   </div>
 </section>
@@ -562,11 +600,14 @@ function bootPetaAnalisa(){
 
   var PAGE_SIZE=12,curPage=1,curFiltered=[];
 
+  // samakan huruf besar/kecil & spasi (mis. "cilacap selatan" dianggap sama dengan "Cilacap Selatan")
+  function norm(s){return String(s||"").replace(/\s+/g," ").trim().toLowerCase();}
+
   function applyFilter(){
     var q=elCari.value.trim().toLowerCase(),kec=elKec.value,fun=elFungsi.value,kon=elKondisi.value;
     return DATA.filter(function(d){
-      if(kec&&d.kec!==kec)return false;
-      if(fun&&d.fungsi!==fun)return false;
+      if(kec&&norm(d.kec)!==norm(kec))return false;
+      if(fun&&norm(d.fungsi)!==norm(fun))return false;
       if(kon&&d.kondisi!==kon)return false;
       if(q&&(d.nama+" "+d.opd+" "+d.alamat).toLowerCase().indexOf(q)<0)return false;
       return true;
@@ -636,11 +677,91 @@ function bootPetaAnalisa(){
     });
   }
 
+  /* ============ REKAPITULASI + UNDUH EXCEL (mengikuti saringan) ============ */
+  var REKAP_DIM="kec",KOSONG="(Tidak diisi)";
+  var elRekapHead=document.querySelector("#rekapTabel thead"),
+      elRekapBody=document.querySelector("#rekapTabel tbody"),
+      elRekapFoot=document.querySelector("#rekapTabel tfoot"),
+      elRekapInfo=document.getElementById("rekapInfo"),
+      elUnduh=document.getElementById("btnUnduh"),
+      UNDUH_BASE=elUnduh.getAttribute("href"),
+      DIM_LABEL={kec:"Kecamatan",fungsi:"Fungsi Bangunan",opd:"OPD"};
+
+  function sel(tag,teks,cls){var e=document.createElement(tag);e.textContent=teks;if(cls)e.className=cls;return e;}
+
+  function renderRekap(){
+    var grup={},urut=[],ejaan={};
+    curFiltered.forEach(function(d){
+      var asli=String(d[REKAP_DIM]||"").replace(/\s+/g," ").trim();
+      var key=(!asli||asli==="-")?KOSONG:norm(asli);
+      if(key!==KOSONG){ejaan[key]=ejaan[key]||{};ejaan[key][asli]=(ejaan[key][asli]||0)+1;}
+      if(!grup[key]){grup[key]={"1":0,"2":0,"3":0,"4":0,x:0,t:0};urut.push(key);}
+      grup[key][KONDISI[d.kondisi]?d.kondisi:"x"]++;grup[key].t++;
+    });
+    // tampilkan ejaan yang paling sering dipakai pada data
+    var label={};
+    urut.forEach(function(k){
+      if(k===KOSONG){label[k]=KOSONG;return;}
+      var best="",n=-1;for(var v in ejaan[k]){if(ejaan[k][v]>n){n=ejaan[k][v];best=v;}}
+      label[k]=best;
+    });
+    urut.sort(function(a,b){if(a===KOSONG)return 1;if(b===KOSONG)return -1;return a<b?-1:(a>b?1:0);});
+    var jml={"1":0,"2":0,"3":0,"4":0,x:0,t:0};
+    urut.forEach(function(k){for(var p in jml)jml[p]+=grup[k][p];});
+    var adaX=jml.x>0,kol=["1","2","3","4"].concat(adaX?["x"]:[]);
+
+    elRekapHead.textContent="";elRekapBody.textContent="";elRekapFoot.textContent="";
+    var hr=document.createElement("tr");hr.appendChild(sel("th",DIM_LABEL[REKAP_DIM]));
+    kol.forEach(function(k){
+      var th=document.createElement("th"),info=k==="x"?KONDISI_LAIN:KONDISI[k];
+      var dot=document.createElement("span");dot.className="dot";dot.style.background=info.color;
+      th.appendChild(dot);th.appendChild(document.createTextNode(info.label));hr.appendChild(th);
+    });
+    hr.appendChild(sel("th","Jumlah"));elRekapHead.appendChild(hr);
+
+    if(!urut.length){
+      var tr0=document.createElement("tr"),td0=sel("td","Tidak ada bangunan yang cocok dengan saringan.");
+      td0.colSpan=kol.length+2;td0.style.textAlign="center";tr0.appendChild(td0);elRekapBody.appendChild(tr0);
+      return;
+    }
+    urut.forEach(function(nama){
+      var tr=document.createElement("tr");tr.appendChild(sel("td",label[nama]));
+      kol.forEach(function(k){var v=grup[nama][k];tr.appendChild(sel("td",v,v===0?"nol":""));});
+      tr.appendChild(sel("td",grup[nama].t));elRekapBody.appendChild(tr);
+    });
+    var tf=document.createElement("tr");tf.appendChild(sel("td","JUMLAH"));
+    kol.forEach(function(k){tf.appendChild(sel("td",jml[k]));});
+    tf.appendChild(sel("td",jml.t));elRekapFoot.appendChild(tf);
+  }
+
+  function updateUnduh(){
+    var p=new URLSearchParams(),aktif=[];
+    var q=elCari.value.trim();
+    if(q){p.set("q",q);aktif.push("pencarian \u201C"+q+"\u201D");}
+    if(elKec.value){p.set("kec",elKec.value);aktif.push("kecamatan "+elKec.value);}
+    if(elFungsi.value){p.set("fungsi",elFungsi.value);aktif.push("fungsi "+elFungsi.value);}
+    if(elKondisi.value){p.set("kondisi",elKondisi.value);aktif.push("kondisi "+infoKondisi(elKondisi.value).label);}
+    var qs=p.toString();
+    elUnduh.setAttribute("href",UNDUH_BASE+(qs?"?"+qs:""));
+    elUnduh.textContent="\u2B07 Unduh Excel ("+curFiltered.length+" bangunan"+(aktif.length?" sesuai saringan":"")+")";
+    elRekapInfo.textContent=aktif.length?"Sesuai saringan: "+aktif.join(", ")+" \u2014 "+curFiltered.length+" dari "+DATA.length+" bangunan":"Seluruh bangunan ("+DATA.length+")";
+  }
+
+  document.querySelectorAll(".rekap-tabs button").forEach(function(b){
+    b.addEventListener("click",function(){
+      REKAP_DIM=b.getAttribute("data-dim");
+      document.querySelectorAll(".rekap-tabs button").forEach(function(x){x.setAttribute("aria-selected",x===b?"true":"false");});
+      renderRekap();
+    });
+  });
+
   function render(fit){
     curFiltered=applyFilter();
     curPage=1;
     renderMap(fit);
     renderGallery();
+    renderRekap();
+    updateUnduh();
   }
 
   elCari.addEventListener("input",function(){render(false)});
