@@ -209,10 +209,7 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
         <?php if($filter_aktif): ?>Menampilkan <b><?= count($daftar) ?></b> dari <?= (int)$total_semua ?> pengajuan (hasil pencarian/filter).<?php else: ?>Total <b><?= (int)$total_semua ?></b> pengajuan.<?php endif; ?>
       </p>
       <div class="itr-ekspor">
-        <?php if($filter_aktif): ?>
-        <a class="btn btn-gold btn-xs" href="<?= base_url('admin_itr/ekspor?'.$query_ekspor) ?>" title="Unduh .xlsx berisi hanya hasil pencarian/filter di atas">⬇ Ekspor Excel (hasil filter · <?= count($daftar) ?>)</a>
-        <?php endif; ?>
-        <a class="btn <?= $filter_aktif?'btn-ghost':'btn-gold' ?> btn-xs" href="<?= base_url('admin_itr/ekspor') ?>" title="Unduh .xlsx berisi SELURUH pengajuan ITR, semua kolom">⬇ Ekspor Excel (semua data · <?= (int)$total_semua ?>)</a>
+        <a class="btn btn-gold btn-xs" href="<?= base_url('admin_itr/ekspor'.($query_ekspor!==''?'?'.$query_ekspor:'')) ?>" title="<?= $filter_aktif?'Unduh .xlsx berisi hanya data hasil pencarian/filter yang sedang tampil':'Unduh .xlsx berisi seluruh pengajuan ITR' ?>">⬇ Ekspor Excel (<?= count($daftar) ?> data<?= $filter_aktif?' sesuai filter':'' ?>)</a>
       </div>
     </div>
     <?php endif; ?>
