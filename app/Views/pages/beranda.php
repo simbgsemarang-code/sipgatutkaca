@@ -750,25 +750,27 @@
       }
 
       .hero.full {
-        min-height: auto;
+        min-height: 100vh;
         padding-top: 68px;
-        background: #f3f6fb;
+        background: #071d38;
       }
 
       .hero-bg {
-        opacity: .12;
-        filter: grayscale(.2) saturate(.65);
+        opacity: 1;
+        filter: saturate(.82) contrast(1.06);
         animation: none;
         transform: none;
       }
 
       .hero::after {
-        background: linear-gradient(180deg, rgba(243, 246, 251, .93), rgba(243, 246, 251, .97)) !important;
+        background:
+          radial-gradient(circle at 50% 26%, rgba(28, 102, 206, .15), transparent 35%),
+          linear-gradient(180deg, rgba(4, 22, 46, .70), rgba(5, 25, 49, .82) 55%, rgba(4, 19, 37, .94)) !important;
       }
 
       .hero>.wrap {
-        padding-top: 62px;
-        padding-bottom: 68px;
+        padding-top: 52px;
+        padding-bottom: 58px;
       }
 
       .emblem-diamond-wrap {
@@ -778,15 +780,17 @@
 
       .emblem-diamond {
         height: 136px;
-        background: linear-gradient(135deg, #e8f1ff, #d9e8ff);
-        border-color: #b9d1f7;
+        background: linear-gradient(135deg, rgba(255,255,255,.15), rgba(80,153,255,.18));
+        border-color: rgba(255,255,255,.32);
+        box-shadow:0 18px 48px rgba(0,0,0,.22);
+        backdrop-filter:blur(8px);
         animation: none;
       }
 
       .emblem-mascot {
         width: 188px;
         animation: none;
-        filter: drop-shadow(0 10px 18px rgba(18, 50, 73, .16));
+        filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .34));
       }
 
       .emblem-sub {
@@ -794,10 +798,11 @@
         margin-top: 6px;
         padding: 14px 24px;
         color: #fff;
-        background: #0738a8;
-        border: 0;
-        border-radius: 12px;
-        box-shadow: 0 8px 22px rgba(7, 56, 168, .18);
+        background: linear-gradient(135deg,rgba(7,56,168,.88),rgba(12,104,204,.78));
+        border: 1px solid rgba(255,255,255,.25);
+        border-radius: 14px;
+        box-shadow: 0 14px 34px rgba(0, 18, 48, .32);
+        backdrop-filter:blur(12px);
         font-size: .88rem;
         font-weight: 600;
         line-height: 1.6;
@@ -806,12 +811,12 @@
       .tagline {
         max-width: 760px;
         margin: 32px auto 34px;
-        color: #102a43 !important;
+        color: #fff !important;
         font-size: clamp(1.4rem, 2.7vw, 2rem);
         font-style: normal !important;
         font-weight: 700;
         line-height: 1.4;
-        text-shadow: none;
+        text-shadow: 0 4px 18px rgba(0,0,0,.38);
       }
 
       .menu-grid {
@@ -822,25 +827,26 @@
       .menu-card {
         min-width: 0;
         overflow: hidden;
-        border: 1px solid #dbe5f2;
-        border-radius: 12px;
-        background: #fff;
-        box-shadow: 0 5px 16px rgba(31, 64, 104, .08);
+        border: 1px solid rgba(255,255,255,.28);
+        border-radius: 16px;
+        background: rgba(255,255,255,.90);
+        box-shadow: 0 14px 32px rgba(0, 16, 38, .24);
+        backdrop-filter:blur(12px);
       }
 
       .menu-card:hover {
         transform: translateY(-3px);
-        border-color: #8ab5f5;
-        box-shadow: 0 10px 24px rgba(7, 56, 168, .14);
+        border-color: rgba(255,255,255,.75);
+        box-shadow: 0 18px 38px rgba(0, 20, 52, .34);
       }
 
       .menu-icon-box {
-        background: #eaf3ff !important;
+        background: linear-gradient(145deg,#eef6ff,#dcecff) !important;
         border: 0 !important;
       }
 
       .menu-label-box {
-        background: #fff !important;
+        background: rgba(255,255,255,.72) !important;
         border: 0 !important;
       }
 
