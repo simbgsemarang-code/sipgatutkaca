@@ -136,6 +136,76 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
   .foot-grid{grid-template-columns:1fr}
   table{display:block;overflow-x:auto}
 }
+
+/* Tampilan panel admin modern, mengikuti gaya SIMBG */
+:root{
+  --panel-blue:#0738a8;
+  --panel-blue-bright:#0797dc;
+  --panel-bg:#f3f6fb;
+  --panel-line:#dce4ef;
+  --panel-text:#172b44;
+  --panel-muted:#66788d;
+}
+body{background:var(--panel-bg);color:var(--panel-text);font-weight:400;font-size:15px}
+body,button,input,select,textarea,.brand-name,.brand-sub,h2,th,.theme-panel h5{
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+}
+header,header.scrolled{
+  height:64px;background:var(--panel-blue)!important;border:0;box-shadow:0 2px 12px rgba(13,42,98,.18);backdrop-filter:none
+}
+.nav{height:64px;max-width:none;padding:0 30px}
+.brand{gap:10px}.brand img{height:42px}.brand-name{color:#fff;font-size:1rem;font-weight:700;letter-spacing:.06em}
+.brand-sub{color:rgba(255,255,255,.72);font-size:.58rem;letter-spacing:.13em}
+.auth-actions .btn-ghost{color:#fff;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.48);border-radius:5px}
+.auth-actions .btn-ghost:hover{color:var(--panel-blue);background:#fff;border-color:#fff}
+.user-menu-btn{color:#fff;font-weight:600}
+.dash-layout{padding-top:64px;min-height:100vh}
+.dash-sidebar{
+  top:64px;height:calc(100vh - 64px);width:224px;flex-basis:224px;padding:24px 12px;
+  background:#fff;border-right:1px solid var(--panel-line);box-shadow:2px 0 10px rgba(31,61,101,.04)
+}
+.dash-sidebar nav{gap:5px}
+.dash-sidebar a{
+  padding:12px 15px;border:0!important;border-radius:6px;color:#617287;font-size:.76rem;font-weight:600;
+  letter-spacing:.035em;text-transform:none
+}
+.dash-sidebar a:hover{color:var(--panel-blue);background:#edf5ff}
+.dash-sidebar a.active{color:#fff;background:var(--panel-blue-bright);box-shadow:0 4px 11px rgba(7,151,220,.2)}
+.dash-sidebar a.logout:hover{color:#d74444;background:#fff0f0}
+.dash-main{background:var(--panel-bg)}
+.dash-wrap{max-width:none;padding:0 30px}
+section{padding-bottom:52px!important}
+.eyebrow{margin:8px 0 6px;color:var(--panel-blue-bright);font-size:.69rem;font-weight:700;letter-spacing:.12em}
+h2{max-width:none;color:var(--panel-text);font-size:1.65rem;font-weight:700;letter-spacing:-.025em}
+h2+p{font-size:.9rem!important;color:var(--panel-muted)!important;margin-top:6px!important}
+.itr-filter{
+  gap:12px;margin-top:22px;padding:16px;background:#fff;border:1px solid var(--panel-line);border-radius:8px;
+  box-shadow:0 3px 12px rgba(26,58,99,.05)
+}
+.itr-filter label{color:#50657e;font-size:.67rem;font-weight:700;letter-spacing:.06em}
+.itr-filter select,.itr-filter input[type=date],.itr-filter-cari input{
+  min-height:42px;background:#fff;border:1px solid #cfd9e6;border-radius:5px;color:var(--panel-text)
+}
+.itr-filter-cari input:focus,.itr-filter select:focus,.itr-filter input[type=date]:focus{
+  outline:2px solid rgba(7,151,220,.24);border-color:var(--panel-blue-bright)
+}
+.btn{border-radius:5px;font-weight:700;letter-spacing:.06em}
+.btn-gold{background:var(--panel-blue-bright);color:#fff;box-shadow:none}
+.btn-gold:hover{background:#067fbc}
+.btn-ghost{background:#fff;border-color:#b9c8d9;color:#27415d}
+.btn-ghost:hover{color:#fff;background:var(--panel-blue-bright);border-color:var(--panel-blue-bright)}
+.itr-bar{margin:16px 0 4px}.itr-hitung{color:var(--panel-muted)}
+table{margin-top:14px;background:#fff;border:1px solid var(--panel-line);border-collapse:separate;border-spacing:0;border-radius:8px;overflow:hidden;box-shadow:0 3px 12px rgba(26,58,99,.05)}
+th{padding:13px 12px;background:#edf2f8;border:0;border-bottom:1px solid #d7e0eb;color:#334a64;font-size:.68rem;font-weight:700;letter-spacing:.025em}
+td{padding:13px 12px;border-color:#e3e9f0;color:#526a82;font-size:.82rem}
+td:first-child{color:#20384f;font-weight:700}
+.tag{border-radius:999px;padding:4px 10px;font-weight:700;letter-spacing:.04em;background:#fff}
+.theme-fab{width:48px;height:48px;border-color:#cfd9e6;color:var(--panel-blue);box-shadow:0 5px 18px rgba(26,58,99,.15)}
+@media(max-width:860px){
+  .dash-sidebar{top:64px;width:100%;height:auto;padding:8px;background:#fff}
+  .dash-sidebar a{padding:10px 14px}
+  .dash-wrap{padding:0 18px}
+}
 </style>
 </head>
 <body>

@@ -684,6 +684,195 @@
           letter-spacing: .12em
         }
       }
+
+      /* ===== TAMPILAN BERANDA MODERN ===== */
+      body,
+      button,
+      input,
+      select,
+      textarea,
+      .brand-name,
+      .brand-sub,
+      .tagline,
+      .emblem-sub,
+      .menu-label-box span,
+      .theme-panel h5 {
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+      }
+
+      header,
+      header.scrolled {
+        position: fixed;
+        background: #0738a8 !important;
+        border-bottom: 0;
+        box-shadow: 0 4px 18px rgba(7, 35, 105, .22);
+        backdrop-filter: none;
+      }
+
+      .nav {
+        min-height: 68px;
+        height: 68px;
+      }
+
+      .brand img {
+        width: 42px;
+        height: 48px;
+      }
+
+      .brand-name {
+        color: #fff !important;
+        font-size: 1.02rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+      }
+
+      .brand-sub {
+        color: rgba(255, 255, 255, .76) !important;
+        font-size: .64rem;
+        font-weight: 500;
+        letter-spacing: .15em;
+      }
+
+      .auth-actions .btn-ghost {
+        color: #fff !important;
+        background: rgba(255, 255, 255, .12) !important;
+        border-color: rgba(255, 255, 255, .64) !important;
+        font-weight: 700;
+      }
+
+      .auth-actions .btn-ghost:hover {
+        color: #0738a8 !important;
+        background: #fff !important;
+      }
+
+      .user-menu-btn {
+        color: #fff !important;
+      }
+
+      .hero.full {
+        min-height: auto;
+        padding-top: 68px;
+        background: #f3f6fb;
+      }
+
+      .hero-bg {
+        opacity: .12;
+        filter: grayscale(.2) saturate(.65);
+        animation: none;
+        transform: none;
+      }
+
+      .hero::after {
+        background: linear-gradient(180deg, rgba(243, 246, 251, .93), rgba(243, 246, 251, .97)) !important;
+      }
+
+      .hero>.wrap {
+        padding-top: 62px;
+        padding-bottom: 68px;
+      }
+
+      .emblem-diamond-wrap {
+        width: 240px;
+        filter: none;
+      }
+
+      .emblem-diamond {
+        height: 136px;
+        background: linear-gradient(135deg, #e8f1ff, #d9e8ff);
+        border-color: #b9d1f7;
+        animation: none;
+      }
+
+      .emblem-mascot {
+        width: 188px;
+        animation: none;
+        filter: drop-shadow(0 10px 18px rgba(18, 50, 73, .16));
+      }
+
+      .emblem-sub {
+        max-width: 510px;
+        margin-top: 6px;
+        padding: 14px 24px;
+        color: #fff;
+        background: #0738a8;
+        border: 0;
+        border-radius: 12px;
+        box-shadow: 0 8px 22px rgba(7, 56, 168, .18);
+        font-size: .88rem;
+        font-weight: 600;
+        line-height: 1.6;
+      }
+
+      .tagline {
+        max-width: 760px;
+        margin: 32px auto 34px;
+        color: #102a43 !important;
+        font-size: clamp(1.4rem, 2.7vw, 2rem);
+        font-style: normal !important;
+        font-weight: 700;
+        line-height: 1.4;
+        text-shadow: none;
+      }
+
+      .menu-grid {
+        gap: 14px;
+        max-width: 1120px;
+      }
+
+      .menu-card {
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid #dbe5f2;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 5px 16px rgba(31, 64, 104, .08);
+      }
+
+      .menu-card:hover {
+        transform: translateY(-3px);
+        border-color: #8ab5f5;
+        box-shadow: 0 10px 24px rgba(7, 56, 168, .14);
+      }
+
+      .menu-icon-box {
+        background: #eaf3ff !important;
+        border: 0 !important;
+      }
+
+      .menu-label-box {
+        background: #fff !important;
+        border: 0 !important;
+      }
+
+      .menu-label-box span {
+        color: #18324d !important;
+        font-weight: 700;
+        letter-spacing: .02em;
+      }
+
+      .footer-simple {
+        background: #0738a8;
+        color: rgba(255, 255, 255, .82);
+        border-top: 0;
+      }
+
+      @media(max-width:760px) {
+        .hero>.wrap {
+          padding-top: 42px;
+        }
+
+        .emblem-diamond-wrap {
+          width: 210px;
+        }
+
+        .emblem-diamond {
+          height: 120px;
+        }
+
+        .emblem-mascot {
+          width: 164px;
+        }
+      }
     </style>
   </head>
 
