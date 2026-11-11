@@ -70,7 +70,7 @@ function pbg_buat_ba_distribusi($permohonan_id, $putaran, $tanggal, $oleh, $nomo
     $romawi = array('I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII');
     $tahun = date('Y', strtotime($tanggal)); $bulan = (int) date('n', strtotime($tanggal));
     $urut = $ci->db->where('YEAR(tanggal_ba)', $tahun)->count_all_results('berita_acara_distribusi') + 1;
-    $nomor=trim((string)$nomor); if($nomor==='')$nomor='600.1.15.2/'.$urut.'/BA-DTPA/'.$romawi[$bulan - 1].'/'.$tahun;
+    $nomor=trim((string)$nomor); if($nomor==='')$nomor='600.1.15.2/'.$urut.'/BA-PBG/'.$romawi[$bulan - 1].'/'.$tahun;
     $ci->db->insert('berita_acara_distribusi', array('permohonan_id' => $permohonan_id, 'putaran' => $putaran, 'nomor' => $nomor, 'tanggal_ba' => $tanggal, 'dibuat_oleh' => $oleh, 'created_at' => date('Y-m-d H:i:s')));
     return TRUE;
 }

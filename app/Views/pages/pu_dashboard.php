@@ -204,8 +204,8 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
       <h2 style="font-size:1.3rem">Pengajuan PBG</h2>
       <div class="stat-row">
         <div class="stat-card"><b><?php echo (int) $total_pbg; ?></b><span>Total Permohonan</span></div>
-        <div class="stat-card"><b><?php echo (int) $draf_pbg; ?></b><span>Draf</span></div>
-        <div class="stat-card"><b><?php echo (int) $terkirim_pbg; ?></b><span>Verifikasi Kelengkapan Dokumen</span></div>
+        <div class="stat-card"><b><?php echo (int) $draf_pbg; ?></b><span>Permohonan Baru</span></div>
+        <div class="stat-card"><b><?php echo (int) $terkirim_pbg; ?></b><span>Dalam Proses / Selesai</span></div>
       </div>
       <a href="<?php echo base_url('pengajuan-pbg'); ?>" style="display:inline-block;margin-top:16px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-300);text-decoration:underline">Lihat Daftar Permohonan →</a>
     </div>

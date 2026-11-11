@@ -18,12 +18,12 @@ if (! function_exists('dashboard_status_label'))
 if (! function_exists('dashboard_distribusi'))
 {
 	/** Jumlah permohonan PBG + SLF per status (kunci = status enum). */
-	function dashboard_distribusi()
+	function dashboard_distribusi($user_id = null)
 	{
 		$ci   =& get_instance();
 		$dist = array_fill_keys(array_keys(dashboard_status_label()), 0);
 
-		if($ci->db->table_exists('permohonan_pbg'))foreach($ci->db->select('status,tahap')->get('permohonan_pbg')->result_array() as $r){$k=$r['status']==='disetujui'||(int)$r['tahap']>=4?'selesai':((int)$r['tahap']===3?'review_ulang':((int)$r['tahap']===2?'perlu_perbaikan':($r['status']==='diajukan'?'permohonan_baru':'review_tpa')));$dist[$k]++;}
+		if($ci->db->table_exists('permohonan_pbg')){$ci->db->select('status,tahap')->from('permohonan_pbg');if($user_id!==null)$ci->db->where('user_id',(int)$user_id);foreach($ci->db->get()->result_array() as $r){$k=$r['status']==='disetujui'||(int)$r['tahap']>=4?'selesai':((int)$r['tahap']===3?'review_ulang':((int)$r['tahap']===2?'perlu_perbaikan':($r['status']==='diajukan'?'permohonan_baru':'review_tpa')));$dist[$k]++;}}
 		return $dist;
 	}
 }
@@ -43,7 +43,7 @@ if (! function_exists('dashboard_aktivitas'))
 	 * Permohonan PBG/SLF terbaru menurut updated_at (untuk Admin & PU).
 	 * Mengembalikan baris ternormalisasi: ikon, judul, reg, baris, badge, meta.
 	 */
-	function dashboard_aktivitas($limit = 6)
+	function dashboard_aktivitas($limit = 6, $user_id = null)
 	{
 		$ci     =& get_instance();
 		$label  = dashboard_status_label();
@@ -52,8 +52,8 @@ if (! function_exists('dashboard_aktivitas'))
 		foreach (array(array('permohonan_pbg', 'PBG')) as $t)
 		{
 			if (! $ci->db->table_exists($t[0])) continue;
-			foreach ($ci->db->select('no_permohonan AS no_registrasi, status, tahap, nama_pemohon, updated_at, created_at')
-				->order_by('updated_at', 'DESC')->limit($limit)->get($t[0])->result_array() as $r)
+			$ci->db->select('no_permohonan AS no_registrasi, status, tahap, nama_pemohon, updated_at, created_at')->from($t[0]);if($user_id!==null)$ci->db->where('user_id',(int)$user_id);
+			foreach ($ci->db->order_by('updated_at', 'DESC')->limit($limit)->get()->result_array() as $r)
 			{
 				$r['jenis'] = $t[1];
 				$mentah[] = $r;

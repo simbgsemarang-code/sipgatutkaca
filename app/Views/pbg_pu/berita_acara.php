@@ -4,6 +4,7 @@ $bulan_id = array(1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','A
 $ts       = strtotime($tanggal_ba);
 $ba_hari  = $hari_id[date('l', $ts)];
 $ba_tgl   = date('j', $ts) . ' ' . $bulan_id[(int) date('n', $ts)] . ' ' . date('Y', $ts);
+$bidang_aktif=array(); foreach(array('arsitektur','struktur','mep') as $kode){if(!empty($riwayat[$kode]))$bidang_aktif[]=$kode;}
 ?>
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Berita Acara Konsultasi TPA · <?= htmlspecialchars($row['no_permohonan']) ?></title>
@@ -64,7 +65,7 @@ table.ttd td.garis{width:260px}
   <p class="nomor">NOMOR : <?= htmlspecialchars($nomor) ?></p>
 
   <p class="pembuka">Konsultasi TPA Kabupaten Cilacap yang memeriksa dokumen rencana teknis pada hari <?= htmlspecialchars($ba_hari) ?>,
-  tanggal <?= htmlspecialchars($ba_tgl) ?>, Konsultasi ke-<?= (int) $putaran ?> untuk bidang: Arsitektur, Struktur dan MEP atas :</p>
+  tanggal <?= htmlspecialchars($ba_tgl) ?>, Konsultasi ke-<?= (int) $putaran ?> untuk bidang: <?= htmlspecialchars(implode(', ',array_map(function($kode)use($bidang_label){return $bidang_label[$kode];},$bidang_aktif))) ?> atas :</p>
 
   <div class="field-row"><div class="label">Nama Pemilik</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['nama_pemohon']) ?></div></div>
   <div class="field-row"><div class="label">Nama Bangunan Gedung</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['nama_bangunan'] ?: '—') ?></div></div>
@@ -72,15 +73,15 @@ table.ttd td.garis{width:260px}
   <div class="field-row"><div class="label">Nomor Registrasi</div><div class="sep">:</div><div class="val"><?= htmlspecialchars($row['nik'] ?: '—') ?></div></div>
 
   <p class="saran-heading">Saran dan Masukan dari Tim Profesi Ahli <small style="font-weight:400">(khusus hasil review putaran ini)</small></p>
-    <?php foreach (array('arsitektur','struktur','mep') as $kode): $daftar = isset($riwayat[$kode]) ? $riwayat[$kode] : array(); ?>
+    <?php foreach ($bidang_aktif as $kode): $daftar = $riwayat[$kode]; ?>
     <p class="bidang-heading">TPA <?= $bidang_label[$kode] ?> :</p>
     <?php
-      // Semua catatan bidang ini berurutan waktu (semua putaran), satu nomor berlanjut; review "Sudah Sesuai" ditulis sebagai butir tersendiri.
       $poin = array();
       foreach ($daftar as $r) {
         foreach (preg_split('/\r\n|\r|\n/', trim((string) $r['rekomendasi_tpa'])) as $baris) { $baris = trim($baris); if ($baris !== '') $poin[] = $baris; }
-        if ($r['status'] === 'direkomendasikan') $poin[] = 'Sudah Sesuai';
+        if ($r['status'] === 'direkomendasikan' && !$poin) $poin[] = 'Sudah Sesuai';
       }
+	  $poin=array_values(array_unique($poin));
     ?>
     <?php if (empty($daftar)): ?>
       <p class="kosong">Belum ada review dari bidang ini.</p>
@@ -95,7 +96,7 @@ table.ttd td.garis{width:260px}
   <div class="ttd-wrap">
     <p class="ttd-tempat">Cilacap, <?= htmlspecialchars($ba_tgl) ?></p>
     <table class="ttd"><tbody>
-    <?php $no = 1; foreach (array('arsitektur','struktur','mep') as $kode): $nama_ttd = array(); foreach ((isset($riwayat[$kode]) ? $riwayat[$kode] : array()) as $r) { $nama_ttd[$r['nama_tpa'] ?: 'TPA'] = TRUE; } ?>
+    <?php $no = 1; foreach ($bidang_aktif as $kode): $nama_ttd = array(); foreach ($riwayat[$kode] as $r) { $nama_ttd[$r['nama_tpa'] ?: 'TPA'] = TRUE; } ?>
       <tr>
         <td class="no"><?= $no++ ?></td>
         <td>TPA <?= $bidang_label[$kode] ?><?php foreach (array_keys($nama_ttd) as $n): ?><br><small><?= htmlspecialchars($n) ?></small><?php endforeach; ?></td>

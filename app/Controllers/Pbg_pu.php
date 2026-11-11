@@ -52,10 +52,8 @@ class Pbg_pu extends LegacyController
 			elseif($perbaikan)$p['status_rinci']='Perlu Perbaikan · Revisi '.$putaran.' ('.$perbaikan.' catatan)';
 			else $p['status_rinci']=pbg_status_label($p['status'],$p['tahap']);
 		} unset($p);
-		$data['ba_terbaru']=array();
-		foreach($this->db->select('permohonan_id, MAX(id) AS id')->where('status !=','ditugaskan')->group_by('permohonan_id')->get('konsultasi_pbg')->result_array() as $r){
-			$data['ba_terbaru'][$r['permohonan_id']]=$r['id'];
-		}
+		$data['ba_terbaru']=array(); $data['ba_per_putaran']=array();
+		foreach($this->db->select('permohonan_id,putaran,MAX(id) AS id')->where('status !=','ditugaskan')->group_by(array('permohonan_id','putaran'))->order_by('putaran','ASC')->get('konsultasi_pbg')->result_array() as $r){$data['ba_per_putaran'][$r['permohonan_id']][(int)$r['putaran']]=$r['id'];$data['ba_terbaru'][$r['permohonan_id']]=$r['id'];}
 		$this->load->view('pbg_pu/index',$data);
 	}
 
@@ -194,11 +192,11 @@ class Pbg_pu extends LegacyController
 		if($this->input->method(TRUE)!=='POST')show_404();
 		if(in_array($row['status'],array('disetujui','ditolak'),TRUE))show_error('Permohonan telah selesai.',422);
 		$pilihan=array(); $terakhir=$this->konsultasi_terakhir_per_bidang($id);
-		$roles=array('tpa_arsitek'=>'arsitektur','tpa_struktur'=>'struktur','tpa_mep'=>'mep');
+		$roles=array('arsitektur'=>'tpa_arsitek','struktur'=>'tpa_struktur','mep'=>'tpa_mep');
 		foreach($terakhir as $k){if($k['status']==='ditugaskan')show_error('Tunggu seluruh TPA menyelesaikan review.',422);}
 		if($terakhir)show_error('Konsultasi ulang dikirim otomatis melalui link perbaikan.',422);
-		$uid=(int)$this->input->post('tpa_awal'); $user=$this->db->select('id,role')->where('id',$uid)->where_in('role',array_keys($roles))->get('users')->row_array();
-		if(!$user)show_error('Pilih satu TPA yang valid.',422); $pilihan[$roles[$user['role']]]=array($uid);
+		foreach($roles as $bidang=>$role){$uid=(int)$this->input->post('tpa_'.$bidang);if(!$uid)continue;if(!$this->db->where('id',$uid)->where('role',$role)->count_all_results('users'))show_error('Pilihan TPA '.$bidang.' tidak valid.',422);$pilihan[$bidang]=array($uid);}
+		if(!$pilihan)show_error('Pilih minimal satu TPA dari salah satu bidang.',422);
 		$max=$this->db->select_max('putaran','maks')->where('permohonan_id',$id)->get('konsultasi_pbg')->row_array(); $putaran=((int)$max['maks'])+1;
 		// Putaran 1 = distribusi tugas ke TPA, tetap di Tahap 1 (berkas ditinjau TPA dari SIMBG) sampai semua TPA mengirim hasil
 		// (lalu Tahap 2 otomatis - lihat pbg_sinkron_tahap); putaran berikutnya (hasil perbaikan) di Tahap 3.

@@ -21,6 +21,9 @@ class Berita_acara extends LegacyController
 	{
 		$id = (int) $trigger['id'];
 		$ba = $this->db->where('konsultasi_id', $id)->get('berita_acara_pbg')->row_array();
+		$ba_putaran=$this->db->select('b.*')->from('berita_acara_pbg b')->join('konsultasi_pbg k','k.id=b.konsultasi_id')->where('b.permohonan_id',(int)$trigger['permohonan_id'])->where('k.putaran',(int)$trigger['putaran'])->order_by('b.id','ASC')->get()->row_array();
+		$ba_distribusi=$this->db->table_exists('berita_acara_distribusi')?$this->db->where('permohonan_id',(int)$trigger['permohonan_id'])->where('putaran',(int)$trigger['putaran'])->get('berita_acara_distribusi')->row_array():null;
+		$nomor_putaran=$ba_distribusi?$ba_distribusi['nomor']:($ba_putaran?$ba_putaran['nomor']:null);
 		if ($ba === NULL)
 		{
 			$snapshot = array();
@@ -28,8 +31,8 @@ class Berita_acara extends LegacyController
 			{
 				$r = $this->db->select('k.*, u.nama AS nama_tpa')->from('konsultasi_pbg k')
 					->join('users u', 'u.id = k.tpa_user_id', 'left')
-					->where('k.permohonan_id', $trigger['permohonan_id'])->where('k.bidang', $bidang)
-					->where('k.reviewed_at IS NOT NULL')->where('k.reviewed_at <=', $trigger['reviewed_at'])
+					->where('k.permohonan_id', $trigger['permohonan_id'])->where('k.bidang', $bidang)->where('k.putaran',(int)$trigger['putaran'])
+					->where('k.reviewed_at IS NOT NULL')
 					->order_by('k.reviewed_at', 'DESC')->limit(1)->get()->row_array();
 				$snapshot[$bidang] = $r ? array(
 					'nama_tpa'    => $r['nama_tpa'],
@@ -41,8 +44,9 @@ class Berita_acara extends LegacyController
 
 			$tahun = date('Y', strtotime($trigger['reviewed_at']));
 			$bulan = (int) date('n', strtotime($trigger['reviewed_at']));
-			$urut  = $this->db->where('YEAR(created_at)', $tahun)->count_all_results('berita_acara_pbg') + 1;
-			$nomor = '600.1.15.2/' . $urut . '/BA-PBG/' . $this->bulan_romawi[$bulan - 1] . '/' . $tahun;
+			$urut_row=$this->db->query("SELECT COUNT(DISTINCT CONCAT(b.permohonan_id,'-',k.putaran)) AS jumlah FROM berita_acara_pbg b JOIN konsultasi_pbg k ON k.id=b.konsultasi_id WHERE YEAR(b.created_at)=?",array($tahun))->row_array();
+			$urut  = (int)($urut_row['jumlah']??0) + 1;
+			$nomor = $nomor_putaran?:'600.1.15.2/' . $urut . '/BA-PBG/' . $this->bulan_romawi[$bulan - 1] . '/' . $tahun;
 
 			$this->db->insert('berita_acara_pbg', array(
 				'konsultasi_id'  => $id,
@@ -54,6 +58,7 @@ class Berita_acara extends LegacyController
 			));
 			$ba = $this->db->where('konsultasi_id', $id)->get('berita_acara_pbg')->row_array();
 		}
+		elseif($nomor_putaran&&$ba['nomor']!==$nomor_putaran){$this->db->where('id',(int)$ba['id'])->update('berita_acara_pbg',array('nomor'=>$nomor_putaran));$ba['nomor']=$nomor_putaran;}
 		return $ba;
 	}
 

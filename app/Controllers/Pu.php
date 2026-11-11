@@ -34,19 +34,17 @@ class Pu extends LegacyController {
 		$data['error']          = $this->session->flashdata('error');
 		$data['nama_pengguna']  = $this->session->userdata('nama');
 
-		// Ringkasan Pengajuan PBG - dibungkus table_exists() supaya
-		// dashboard tetap tampil normal walau migrasi
-		// database/pengajuan_pbg.sql belum sempat dijalankan.
+		// Ringkasan menggunakan tabel permohonan_pbg yang dipakai alur PU/TPA aktif.
 		$data['total_pbg']    = 0;
 		$data['draf_pbg']     = 0;
 		$data['terkirim_pbg'] = 0;
-		if ($this->db->table_exists('pengajuan_pbg'))
+		if ($this->db->table_exists('permohonan_pbg'))
 		{
-			$status_pbg = $this->db->select('status')->get('pengajuan_pbg')->result_array();
+			$status_pbg = $this->db->select('status,tahap')->where('user_id',(int)$this->session->userdata('user_id'))->get('permohonan_pbg')->result_array();
 			$data['total_pbg'] = count($status_pbg);
 			foreach ($status_pbg as $p)
 			{
-				if ($p['status'] === 'draf')
+				if ($p['status'] === 'diajukan' && (int)$p['tahap'] === 1)
 				{
 					$data['draf_pbg']++;
 				}
@@ -56,8 +54,8 @@ class Pu extends LegacyController {
 
 		/* ---- Distribusi status + aktivitas terkini (lihat dashboard_helper) ---- */
 		$data['status_label'] = dashboard_status_label();
-		$data['distribusi']   = dashboard_distribusi();
-		$data['aktivitas']    = dashboard_aktivitas(6);
+		$data['distribusi']   = dashboard_distribusi((int)$this->session->userdata('user_id'));
+		$data['aktivitas']    = dashboard_aktivitas(6,(int)$this->session->userdata('user_id'));
 
 		/* ---- Berita Acara terbaru milik PU ini (lihat Berita_acara::pbg) ---- */
 		$data['ba_terbaru'] = array();
