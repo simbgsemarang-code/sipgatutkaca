@@ -84,7 +84,9 @@ class Berita_acara extends LegacyController
 			return;
 		}
 		$tgl = trim((string) $this->input->post('tanggal_ba'));
+		$nomor_ba = trim((string) $this->input->post('nomor_ba'));
 		if (! preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $tgl, $mm) || ! checkdate((int) $mm[2], (int) $mm[3], (int) $mm[1])) show_error('Tanggal berita acara tidak valid.', 422);
+		if ($nomor_ba === '' || mb_strlen($nomor_ba) > 120) show_error('Nomor berita acara wajib diisi dan maksimal 120 karakter.', 422);
 		$pemicu = $this->db->where('id', (int) $this->input->post('konsultasi_id'))->where('permohonan_id', $pid)->get('konsultasi_pbg')->row_array();
 		if ($pemicu === NULL || $pemicu['status'] === 'ditugaskan') show_404();
 		if (! $this->kolom_tanggal_ada()) $this->db->query('ALTER TABLE `berita_acara_pbg` ADD COLUMN `tanggal_ba` DATE NULL AFTER `diterbitkan_at`');
@@ -94,7 +96,8 @@ class Berita_acara extends LegacyController
 			->order_by('reviewed_at', 'ASC')->order_by('id', 'ASC')->get('konsultasi_pbg')->result_array();
 		$this->db->trans_start();
 		foreach ($semua as $k) $this->ba_pastikan($k);
-		$ids=array_column($semua,'id'); if($ids)$this->db->where('permohonan_id',$pid)->where_in('konsultasi_id',$ids)->update('berita_acara_pbg',array('tanggal_ba'=>$tgl));
+		$ids=array_column($semua,'id'); if($ids)$this->db->where('permohonan_id',$pid)->where_in('konsultasi_id',$ids)->update('berita_acara_pbg',array('nomor'=>$nomor_ba,'tanggal_ba'=>$tgl));
+		if($this->db->table_exists('berita_acara_distribusi'))$this->db->where('permohonan_id',$pid)->where('putaran',(int)$pemicu['putaran'])->update('berita_acara_distribusi',array('nomor'=>$nomor_ba,'tanggal_ba'=>$tgl,'updated_at'=>date('Y-m-d H:i:s')));
 		$this->db->trans_complete();
 		ci_redirect('pengajuan-pbg/berita-acara/' . (int) $pemicu['id']);
 	}
