@@ -154,6 +154,26 @@ footer{background:var(--foot);color:#F8F4EA;padding:66px 0 32px;border-top:1px s
 .swatch .sw-light{background:linear-gradient(135deg,#F8F4EA,#EFE7D6)}
 .swatch span{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 @media(max-width:980px){.foot-grid{grid-template-columns:1fr}}
+/* Tampilan admin ITR konsisten dengan panel modern */
+body,button,input,select,textarea,.brand-name,.brand-sub,h2,h3,h4,th{
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important
+}
+html body #topbar,html body #topbar.scrolled{
+  inset:0 0 auto 0!important;height:64px!important;min-height:64px!important;
+  background:#0738a8!important;background-image:none!important;border:0!important;
+  box-shadow:0 2px 12px rgba(13,42,98,.18)!important;backdrop-filter:none!important
+}
+html body #topbar .nav{height:64px!important;min-height:64px!important;max-width:none!important;padding:0 30px!important}
+html body #topbar .brand img{height:42px!important}
+html body #topbar .brand-name,html body #topbar .brand-sub,html body #topbar .user-menu-btn{color:#fff!important}
+html body #topbar .brand-name{font-size:1rem!important;font-weight:700!important;letter-spacing:.06em!important}
+html body #topbar .brand-sub{color:rgba(255,255,255,.72)!important;letter-spacing:.13em!important}
+.dash-layout{padding-top:64px!important;min-height:100vh!important}
+.dash-sidebar{top:64px!important;height:calc(100vh - 64px)!important;background:#fff!important}
+.dash-main{background:#f3f6fb!important}
+.dash-main>section{margin:0!important;padding:18px 0 42px!important;min-height:0!important}
+.dash-main>section>.dash-wrap{margin:0!important;padding-top:0!important}
+.dash-main .eyebrow{margin-top:0!important;margin-bottom:4px!important}
 </style>
 </head>
 <body>

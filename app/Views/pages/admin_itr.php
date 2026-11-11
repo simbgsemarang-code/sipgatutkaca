@@ -206,6 +206,28 @@ td:first-child{color:#20384f;font-weight:700}
   .dash-sidebar a{padding:10px 14px}
   .dash-wrap{padding:0 18px}
 }
+
+/* Pengunci layout: mencegah aturan tema lama mengembalikan header putih dan ruang kosong */
+html body #topbar,
+html body #topbar.scrolled{
+  inset:0 0 auto 0!important;
+  height:64px!important;
+  min-height:64px!important;
+  background:#0738a8!important;
+  background-image:none!important;
+}
+html body #topbar .nav{height:64px!important;min-height:64px!important}
+html body #topbar .brand-name,
+html body #topbar .brand-sub,
+html body #topbar .user-menu-btn{color:#fff!important}
+.dash-main>section{
+  margin:0!important;
+  padding:18px 0 42px!important;
+  min-height:0!important;
+}
+.dash-main>section>.dash-wrap{margin:0!important;padding-top:0!important}
+.dash-main .eyebrow{margin-top:0!important;margin-bottom:4px!important}
+.dash-main h2{margin:0!important}
 </style>
 </head>
 <body>

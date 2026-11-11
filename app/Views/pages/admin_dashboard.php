@@ -127,6 +127,12 @@ h2{color:var(--panel-text);font-size:1.65rem;font-weight:700;letter-spacing:-.02
 .panel .more,.panel-head .more{color:var(--panel-sky);font-weight:700;letter-spacing:.04em}.mini,.dist-row,.act-row{border-color:#e5ebf2!important}
 .mini .tag,.act-badge{border-radius:999px}.dist-bar{background:#e9eef5}.dist-bar i{background:var(--panel-sky)}
 @media(max-width:860px){.dash-sidebar{top:64px;width:100%;height:auto;padding:8px}.dash-sidebar a{padding:10px 14px}.dash-wrap{padding:0 18px}}
+html body #topbar,html body #topbar.scrolled{inset:0 0 auto 0!important;height:64px!important;min-height:64px!important;background:#0738a8!important;background-image:none!important}
+html body #topbar .nav{height:64px!important;min-height:64px!important}
+html body #topbar .brand-name,html body #topbar .brand-sub,html body #topbar .user-menu-btn{color:#fff!important}
+.dash-main>section{margin:0!important;padding:18px 0 42px!important;min-height:0!important}
+.dash-main>section>.dash-wrap{margin:0!important;padding-top:0!important}
+.dash-main .eyebrow{margin-top:0!important;margin-bottom:4px!important}
 </style>
 </head>
 <body>
